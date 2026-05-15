@@ -313,7 +313,12 @@ The phase that makes Millipede usable for "real" scraping projects.
 - **`docs/guide/extras.md`** (ChatGPT Pro review #6). Policy doc for the community `millipede-extras` crate: scope (utility helpers like `infinite_scroll`, `save_snapshot`, `enqueue_links_by_click_elements`), semver bar (looser than core, separate cadence), governance, and the contribution path for moving a helper from extras into core. The extras crate itself ships after 1.0; the policy doc ships at 1.0 so contributors know where to send PRs.
 - Migrate `INTERFACE.md` "Open Questions" to resolved decisions or filed issues.
 - Run `cargo semver-checks` baseline.
-- Examples directory: at least four (basic, http, html-with-routing, browser).
+- Examples directory: at least five core reference examples inspired by [gocolly](https://github.com/gocolly/colly/tree/master/_examples):
+  - `basic.rs`: basic link scraping and domain filtering.
+  - `error_handling.rs`: handling network and session errors, and typed crawler errors.
+  - `rate_limit.rs`: delay/random delay rules per domain and max concurrency.
+  - `proxy_switcher.rs`: round-robin proxy rotation (`ProxyConfiguration`).
+  - `hackernews.rs`: a real-world multi-route scraper showcasing `HtmlCrawler` routing, pagination, and comment parsing.
 - Benchmark suite (`criterion`) for queue ops, link extraction, and per-request overhead. Establish baseline numbers.
 - Publish to crates.io as `0.1.0`.
 - Publish a `cargo-generate` template repo (`millipede-template`) — one starter per crawler kind. ChatGPT Pro review #4: lowers adoption friction without committing to a `millipede-cli` surface in 0.1.0.
