@@ -832,7 +832,7 @@ impl SessionPool {
 }
 ```
 
-The cookie jar is `reqwest_cookie_store`-compatible; we expose it via `Arc<CookieJar>` so the same jar can be threaded into both `reqwest` and `chromiumoxide` calls.
+The cookie jar is exposed as a single `CookieJar` newtype owned by the `Session` and threaded into both `reqwest` (via `reqwest::cookie::CookieStore`) and `chromiumoxide` (via the provider's `set_cookies` / `get_cookies` adapter). Users never touch the underlying store. This unified adapter is a hard requirement, not an optimization (ChatGPT Pro review #1): mixing two cookie representations across the HTTP and browser crawler paths is the single biggest source of state-divergence bugs in projects like Crawlee. The concrete inner type (`reqwest_cookie_store::CookieStoreMutex` vs. a custom `Arc<RwLock<…>>`) is the only variable, and it is resolved at Phase 3 close — see Open Question 1 in §22.
 
 ---
 
@@ -991,6 +991,12 @@ Each `BrowserProvider` impl is responsible for adapting its native page type to 
 pub struct AutoscaledPool { /* … */ }
 
 pub struct AutoscaledPoolOptions {
+    /// `Some(n)` disables autoscaling entirely and pins concurrency at `n`.
+    /// Equivalent to `min == max == n` but makes intent explicit in builder code
+    /// and skips the snapshotter/system-status overhead. Useful for users who
+    /// want predictable throughput or who run inside a container with a fixed
+    /// resource budget.
+    pub fixed_concurrency: Option<usize>,
     pub min_concurrency: usize,           // default 1
     pub max_concurrency: usize,           // default 200
     pub desired_concurrency: Option<usize>,
@@ -1433,10 +1439,22 @@ These map directly onto Crawlee's options and are wired into the engine, not sur
 
 **Still open:**
 
-1. **Cookie jar concretion.** `reqwest_cookie_store::CookieStoreMutex` or a custom `Arc<RwLock<CookieJar>>`? The latter avoids a Tokio-incompatible mutex; verify before committing.
-2. **`scraper` ergonomics.** `HtmlContext::html: Arc<scraper::Html>` chosen for spawn-friendliness, but `Selector::parse` is fallible and cheap to repeat — should we cache a `OnceLock<Selector>` registry on the context? Defer to Phase 4 with real usage patterns.
-3. **Dynamic configuration reload (Gemini #3.2).** Currently a built crawler's `Configuration` is immutable. Allow `set_log_level` / `set_proxy_strategy` post-build via an `Arc<RwLock<RuntimeConfig>>` for the small subset that's safe to mutate live? Decision: defer to post-1.0 unless a use case appears.
-4. **Single executable vs library-first.** Crawlee ships a CLI scaffolder. We can defer that to a separate `millipede-cli` crate.
-5. **Distributed crawl support.** `RequestQueue` lease semantics open the door; a Redis-backed impl is the obvious post-1.0 add. Apify platform integration is a longer arc.
+1. **Cookie jar concretion (ChatGPT Pro #1).** The *abstraction* is locked in §10: one `CookieJar` newtype, threaded into `reqwest` and `chromiumoxide` via an internal adapter. The *inner* concrete is the open question: `reqwest_cookie_store::CookieStoreMutex` (uses a sync `parking_lot` mutex — never held across `.await`, but adds a non-tokio dependency to the lock surface) or a custom `Arc<tokio::sync::RwLock<cookie_store::CookieStore>>` (tokio-native, but we re-implement the `reqwest::cookie::CookieStore` impl by hand). Resolution target: **end of Phase 3**, recorded as an ADR. Decision criteria, in order: (a) round-trips cookies correctly through a `wiremock` redirect chain; (b) survives the chromiumoxide `set_cookies` → handler → `get_cookies` cycle without lost state; (c) does not require holding a lock across any `.await`.
+2. **`scraper` ergonomics (ChatGPT Pro #2).** `HtmlContext::html: Arc<scraper::Html>` is fixed for spawn-friendliness, but `Selector::parse` is fallible and cheap-to-repeat — three candidate ergonomics layers, evaluated in **Phase 5** under a Criterion benchmark before any of them lands:
+   - A `selectors!("a.detail", "h1 > span", …)` macro that expands to `static` items behind `OnceLock<Selector>`. Compile-time validation, zero runtime parsing cost.
+   - A `Selectors` registry on `HtmlContext` (`ctx.selectors.parse_or_get("a.detail")`) for handlers that compute selector strings dynamically.
+   - Status quo: users call `Selector::parse(…).unwrap()` inline.
+   We will not pick one in the abstract — we'll measure on a 100k-page crawl whether selector-parse dominates handler time. If it doesn't, we ship the macro only (zero-cost when used, no runtime API surface to support forever).
+3. **Dynamic configuration reload (Gemini #3.2, ChatGPT Pro #7).** Currently a built crawler's `Configuration` is immutable. Allow `set_log_level` / `set_proxy_strategy` post-build via an `Arc<RwLock<RuntimeConfig>>` for the small subset that's safe to mutate live? Decision: defer to **post-1.0** unless a use case appears. The candidate mutable surface — log level, proxy strategy choice (not the proxy URLs themselves), autoscaler ceiling — is documented here so we don't have to re-derive it later.
+4. **Scaffolding (ChatGPT Pro #4).** Crawlee ships a CLI scaffolder. Two-stage plan:
+   - **Pre-0.2:** publish a `cargo-generate` template (`millipede-template`) under the same org. Cheap to maintain — it's just a starter `Cargo.toml` + `main.rs` for each crawler kind. Lowers the adoption barrier without committing to a CLI surface we'd have to support.
+   - **Post-1.0:** the full `millipede-cli` crate (`millipede new`, `millipede run`, future `millipede serve` for the inspector UI). Tracked as an issue, not a phase.
+5. **Distributed crawl support.** `RequestQueue` lease semantics open the door; a Redis-backed impl is the obvious post-1.0 add. Apify platform integration is a longer arc — see also the Crawlee parity & migration notes below.
 6. **`CrawlError` source granularity (Gemini #1.3).** Variants currently wrap `anyhow::Error`. Consider replacing with typed `source` chains (`NetworkError { source: reqwest::Error }`, `ParseError { source: scraper::Error }`) before 1.0 to give users structured matching power. Open until we collect feedback on what failure-handling patterns users actually want.
 7. **`UserData` typing (Gemini #1.2).** `serde_json::Map`-backed is the practical choice. Worth exploring a derive macro (`#[derive(UserData)]`) that generates typed accessors against an underlying map. Post-1.0.
+
+**Ecosystem & migration (ChatGPT Pro #5, #6):**
+
+- **`millipede-extras` (community crate).** Crawlee's `infinite_scroll`, `save_snapshot`, `enqueue_links_by_click_elements`, login helpers, etc. are deliberately out of `millipede-core` (see §21). Rather than absorb that surface, we will publish an opt-in `millipede-extras` crate as a venue for these — same org, looser API stability bar than core, semver-independent of `millipede` itself. Helpers ship there until they earn a place in core. Tracked as a post-1.0 effort; the policy doc is what we want in place by 0.1.0 so contributors know where to send PRs.
+- **Crawlee → Millipede migration guide.** Phase 8 (the release candidate) must include a side-by-side guide covering: error-handling semantics (typed `CrawlError` vs. string sniffing), router semantics (label + method matching, no `this`-binding), `enqueue_links` API differences (typed builder vs. options object), storage layout (FS layer is wire-compatible — see §8.2), and the `useState` ⇒ `kvs.auto_saved` mapping. This is a hard exit criterion for 0.1.0, not a stretch goal.
+- **Apify platform deployment.** Out of scope until the `millipede-storage-apify` crate exists (post-1.0). When it lands, we ship: a `Dockerfile.example` per crawler kind, the `APIFY_*` environment variable mapping, and a "running on Apify" section in the guide. Tracked so we don't lose context, but no work in 0.1.0.

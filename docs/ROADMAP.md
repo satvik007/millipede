@@ -154,10 +154,12 @@ A complete `HttpCrawler`: real HTTP fetches via `reqwest`, session pool, proxy r
   - `reqwest::Error::is_connect` / `is_timeout` ⇒ `Retry`.
   - HTTP 408/429/5xx (configurable list) ⇒ `Retry`. 401/403 ⇒ `Session`.
 - `EnqueueLinker` for `HttpContext` (URLs-only mode; no DOM).
+- **Resolve the cookie-jar concretion (`docs/INTERFACE.md` §22 Q1, ChatGPT Pro review #1).** Inner type: `reqwest_cookie_store::CookieStoreMutex` vs. `Arc<tokio::sync::RwLock<cookie_store::CookieStore>>`. Decided here, not deferred — once `Session` is on disk the choice is hard to reverse.
 
 ### Tests
 - `wiremock`-backed HTTP server fixtures.
 - Cookie roundtrip across requests in the same session.
+- Cookie store passes both criteria: `Set-Cookie` from a redirect chain is visible on the next session-pinned request; lock is never held across `.await` (enforced via `cargo clippy::await_holding_lock` and a custom `tokio-console`-assisted test).
 - 429 triggers retry, 404 does not, 403 triggers session rotation.
 - Proxy round-robin: 3 proxies, 10 requests ⇒ even distribution within tolerance.
 - Tiered proxy: domain blocks at tier 0 ⇒ engine probes tier 1 ⇒ recovery probe at lower tier.
@@ -165,6 +167,7 @@ A complete `HttpCrawler`: real HTTP fetches via `reqwest`, session pool, proxy r
 ### Exit Criteria
 - `examples/http_crawl.rs` crawls a mock 100-page site against `wiremock`.
 - Each public type has a rustdoc example that compiles.
+- **`docs/decisions/ADR-0002-cookie-jar.md`** lands with the chosen inner type and the rejected alternative. INTERFACE.md §22 Q1 is moved from "Still open" to "Resolved".
 
 ---
 
@@ -176,7 +179,9 @@ With Phase 3 producing real HTTP-shaped request timings, the autoscaler now has 
 - `millipede-core::autoscale::AutoscaledPool` + `LoadSignal` trait + `Snapshotter` + `SystemStatus`.
 - Implementations: `CpuLoadSignal`, `MemoryLoadSignal`, `TokioRuntimeLoadSignal`, `ClientLoadSignal`.
 - Replace the fixed-concurrency dispatch from Phase 2 with the dynamic dispatch scheduler. Keep the `FuturesUnordered + Notify + CancellationToken` shape — a *single* scheduler actor owning all scheduling state (Codex review #6: don't scatter scheduling across atomics).
+- Preserve the Phase 2 fixed-concurrency dispatcher as a first-class opt-out, surfaced as `AutoscaledPoolOptions::fixed_concurrency: Option<usize>` (INTERFACE.md §13). When `Some(n)`, the snapshotter and system-status loops never spawn — same code path as Phase 2. ChatGPT Pro review #3: users who want predictable throughput (containerised deployments, paid-per-minute proxy budgets) should never be forced through the autoscaler.
 - Rate limiting: `max_tasks_per_minute`, `same_domain_delay`.
+- Tuning guide stub in `docs/guide/autoscaler.md`: what each ratio does, how to read `millipede.concurrency.*` metrics, when to switch to `fixed_concurrency`. Not the full book chapter (that's Phase 8) — just enough that a user can debug a runaway crawl without reading the source.
 
 ### Tests
 - Engine respects autoscaled concurrency under deterministic fake `LoadSignal`s; `tokio::time::pause` controls clock.
@@ -212,6 +217,7 @@ The phase that makes Millipede usable for "real" scraping projects.
   - Layout: `./storage/datasets/<id>/<seq>.json`, `./storage/key_value_stores/<id>/<key>.<ext>`, `./storage/request_queues/<id>/{requests/, state.json}`.
   - Wire-compatible enough with Crawlee's MemoryStorage on-disk format to inspect a crawl in either.
   - `purge_on_start` honored.
+- **Selector ergonomics decision (INTERFACE.md §22 Q2, ChatGPT Pro review #2).** Criterion benchmark of three approaches over a 10k-page corpus: (a) inline `Selector::parse(…).unwrap()`, (b) `OnceLock`-backed `selectors!` macro, (c) `ctx.selectors` registry. We ship whichever lands closest to (a)-time while removing the `.unwrap()` boilerplate. If parse cost is <1% of handler time we ship only the macro and document the registry as "not needed".
 
 ### Tests
 - Realistic `wiremock` server with sitemap.xml + nested category pages + product pages.
@@ -281,15 +287,19 @@ The phase that makes Millipede usable for "real" scraping projects.
 - Run `cargo public-api` and lock the surface; document everything.
 - README per crate, with examples.
 - One canonical book-style guide in `docs/guide/`.
+- **`docs/guide/migrating-from-crawlee.md`** (ChatGPT Pro review #5). Side-by-side mapping covering: typed `CrawlError` vs. Crawlee's string-based dispatch, router label+method semantics, `enqueue_links` builder API, `kvs.auto_saved` ⇒ `useState` mapping, and the FS storage layer's on-disk compatibility (a Crawlee project's `./storage/` is openable by `FsStorageClient`). Hard requirement, not stretch.
+- **`docs/guide/extras.md`** (ChatGPT Pro review #6). Policy doc for the community `millipede-extras` crate: scope (utility helpers like `infinite_scroll`, `save_snapshot`, `enqueue_links_by_click_elements`), semver bar (looser than core, separate cadence), governance, and the contribution path for moving a helper from extras into core. The extras crate itself ships after 1.0; the policy doc ships at 1.0 so contributors know where to send PRs.
 - Migrate `INTERFACE.md` "Open Questions" to resolved decisions or filed issues.
 - Run `cargo semver-checks` baseline.
 - Examples directory: at least four (basic, http, html-with-routing, browser).
 - Benchmark suite (`criterion`) for queue ops, link extraction, and per-request overhead. Establish baseline numbers.
 - Publish to crates.io as `0.1.0`.
+- Publish a `cargo-generate` template repo (`millipede-template`) — one starter per crawler kind. ChatGPT Pro review #4: lowers adoption friction without committing to a `millipede-cli` surface in 0.1.0.
 
 ### Exit Criteria
 - All crates publish.
 - Example projects' `cargo run` works against published versions.
+- `cargo generate --git millipede-template basic-http` produces a runnable project against the published `0.1.0`.
 - README badges green.
 - A 1-paragraph announcement post is drafted.
 
@@ -298,10 +308,12 @@ The phase that makes Millipede usable for "real" scraping projects.
 ## Post-1.0 / Future Work (Tracked as Issues, Not Roadmap)
 
 - Redis-backed `RequestQueue` for distributed crawls.
-- `millipede-storage-apify`: Apify platform client.
+- `millipede-storage-apify`: Apify platform client. Pairs with a `Dockerfile.example` per crawler kind and an "Apify deployment" section in the guide (ChatGPT Pro review #5).
+- `millipede-extras` crate: community-maintained utility helpers (`infinite_scroll`, `save_snapshot`, login flows, click-to-enqueue), governed by the policy doc landed in Phase 8. ChatGPT Pro review #6.
 - Playwright provider (`millipede-browser-playwright`).
 - TLS-level fingerprinting (`impit`-style) once a stable Rust dependency exists.
-- `millipede-cli`: project scaffolder.
+- `millipede-cli`: project scaffolder (`millipede new`, `millipede run`, future `millipede serve`). The 0.1.0-era `cargo-generate` template is the bridge until this lands.
+- Runtime-mutable configuration subset (`Arc<RwLock<RuntimeConfig>>`) for log level, proxy strategy choice, and autoscaler ceiling. Gemini #3.2 / ChatGPT Pro #7. Defer until a concrete user reports a long-running crawl that can't tolerate a restart.
 - WASM crawlers (long-tail; needs runtime work).
 - Stealth/anti-detection plugin system.
 - Per-request rate limiting (domain-aware).
