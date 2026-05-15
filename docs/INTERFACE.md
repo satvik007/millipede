@@ -17,6 +17,16 @@ The Rust port is not a one-to-one transliteration of Crawlee. The TypeScript des
 5. **Lifetimes are minimal in user-facing APIs.** Handler signatures use `'static` futures with owned context; sharing is via `Arc`. Internal modules may use borrowed lifetimes where it's safe.
 6. **Tokio-only for v1.** A `runtime` feature flag may later allow `async-std` or `smol`, but the v1 API is `tokio::spawn`-shaped (`Send + 'static` futures).
 7. **`enqueue_links`, routing, and link filtering are first-class** — these are the daily-driver ergonomics that make Crawlee pleasant. Anything that compromises them is wrong.
+8. **Streaming results are first-class.** A crawler that only writes through handlers is awkward for pipelines. Users must be able to subscribe to completed-request snapshots as they arrive, without blocking the crawl on a slow consumer.
+9. **Operational policies are explicit types.** Depth limits, robots, budgets, frontier ordering, domain throttling, retry strategy, and proxy routing are not hidden in callbacks or globals. They are builder-owned policies with testable behavior.
+
+### 1.1 Adjacent Rust crawler lessons (`spider-rs/spider`)
+
+Spider validates several Millipede choices by contrast: a single all-purpose crawler struct grows quickly, synthetic HTTP status codes are a poor substitute for typed errors, and broad default features make dependency control hard. Millipede keeps the multi-crate split, explicit configuration, typed `CrawlError`, and minimal defaults.
+
+The useful patterns to lift are operational, not architectural: real-time result streaming, a small happy-path builder, all-atomic AIMD concurrency as the first autoscaling mode, borrowed retry/proxy strategy contexts, domain-round-robin frontier policy, in-flight request coalescing, streaming link extraction for the engine hot path, and RAII browser page cleanup.
+
+The anti-patterns to avoid are equally important: global env-driven semaphores, shared tuple task contexts accessed by numeric index, unsafe client-build shortcuts, and a large feature matrix in the user-facing crate.
 
 ---
 
@@ -282,6 +292,7 @@ impl CrawlerHandle {
     pub fn stats(&self) -> Option<StatisticsSnapshot>;
     pub async fn stop(&self) -> Result<()>;
     pub fn events(&self) -> Option<EventStream>;
+    pub fn results(&self) -> Option<ResultStream>;
 }
 ```
 
@@ -311,13 +322,34 @@ println!("{} requests handled", stats.requests_finished);
 ```rust
 impl<K: CrawlerKind> Crawler<K> {
     pub async fn run(&self, start: impl IntoStartRequests) -> Result<FinalStatistics, CrawlError>;
+    pub fn results(&self) -> ResultStream;         // completed-request snapshots
     pub async fn add_requests(&self, reqs: impl IntoIterator<Item = Request>) -> Result<()>;
     pub async fn stop(&self) -> Result<()>;       // graceful drain
     pub async fn abort(&self) -> Result<()>;      // immediate shutdown
     pub fn stats(&self) -> StatisticsHandle;      // live snapshot
     pub fn events(&self) -> EventStream;          // tokio broadcast subscriber
 }
+
+pub type ResultStream = tokio::sync::broadcast::Receiver<HandledRequest>;
+
+/// Lightweight snapshot emitted after handler + cleanup. This intentionally
+/// does not expose the full `Context`: browser pages may already be closed,
+/// and handlers consume their owned context.
+#[derive(Debug, Clone)]
+pub struct HandledRequest {
+    pub request: Arc<Request>,
+    pub loaded_url: Option<Url>,
+    pub outcome: RequestFinalState,
+    pub response_status: Option<StatusCode>,
+    pub retry_count: u32,
+    pub duration: Duration,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RequestFinalState { Succeeded, Failed, Skipped }
 ```
+
+`results()` is the Rust replacement for Spider's `subscribe()` ergonomics without making `run()` itself a dual-protocol API. Handlers remain the primary place to extract data; `ResultStream` is for pipelines, progress UIs, queues, metrics sidecars, and tests that need to observe completed work as it lands.
 
 ---
 
@@ -564,6 +596,8 @@ Inside `EnqueueLinker::send()` (in order, short-circuiting on first reject):
 
 For `HttpContext` (no DOM), only `EnqueueLinker::urls(...)` is available; selector-based extraction returns a compile-time error because the extractor is `None`.
 
+Implementation note: `HtmlContext` exposes `Arc<scraper::Html>` for ergonomic handler queries, but the engine is not required to use `scraper` for its own link-discovery pass. Phase 5 benchmarks `scraper` against a streaming `lol_html` extractor with precompiled selectors; if streaming extraction materially reduces memory or latency, `EnqueueLinker` uses it internally while preserving the public `scraper::Html` handler API.
+
 ---
 
 ## 8. Storage
@@ -706,6 +740,8 @@ impl BatchAddHandle {
 
 For the in-memory backend, lease expiry is a no-op (single process, no networking — leases never time out in practice). The contract still holds: `mark_handled` consumes the lease, `reclaim` increments retry count and re-queues, `abandon` re-queues without incrementing. FS, Redis, and Apify backends can enforce real expiry without an API break.
 
+Queue ordering is also policy, not a storage accident. The v1 in-memory queue supports FIFO plus `forefront`; the trait leaves room for priority frontier ordering, domain round-robin fairness, and per-path budgets without changing `fetch_next()`. A distributed backend may implement the same policy with a sorted set or shard-aware frontier.
+
 ### 8.2 Provided implementations
 
 - `millipede-storage-memory::MemoryStorageClient` — in-process, no I/O. Default. Used in tests.
@@ -762,9 +798,11 @@ pub struct HttpResponse {
 }
 ```
 
-The default impl, `ReqwestClient`, wraps `reqwest` and integrates with `millipede-fingerprint` for header generation. A future `ImpitClient` (binding to Apify's `impit` crate, written in Rust) handles TLS-level browser impersonation.
+The default impl, `ReqwestClient`, wraps `reqwest` and integrates with `millipede-fingerprint` for header generation. True TLS fingerprint impersonation is not promised by a custom `rustls` verifier. The extension point is the `HttpClient` trait: a future `WreqClient`/`ImpitClient`-style backend can provide JA3/JA4-level behavior without breaking crawler APIs. Until that exists, `millipede-fingerprint` means header and browser-context consistency, not full TLS impersonation.
 
 The `HttpClient` trait is stable across crawler kinds: `HttpCrawler` uses it as its primary fetcher; `BrowserCrawler` uses it for `ctx.send_request` (out-of-band requests during browser flows).
+
+In-flight request coalescing sits above `HttpClient`: if two active tasks attempt the same `Request::unique_key`, the second task may await the first task's fetch result rather than duplicate the network request. This is distinct from queue deduplication, which prevents future duplicate work but cannot see races already in flight.
 
 ---
 
@@ -880,6 +918,24 @@ impl ProxyConfiguration {
 
 Tiered proxy state tracks per-domain blocking and probes lower tiers periodically — replicating Crawlee's `tieredProxyUrls` semantics. The `null` slot in a tier means "direct, no proxy" (this matches Crawlee).
 
+Advanced routing uses a cheap, object-safe hook:
+
+```rust
+pub trait ProxyStrategy: Send + Sync + 'static {
+    fn route(&self, ctx: &ProxyRouteContext<'_>) -> ProxyKind;
+}
+
+pub struct ProxyRouteContext<'a> {
+    pub request: &'a Request,
+    pub attempt: u32,
+    pub previous_profile_key: Option<&'a str>,
+}
+
+pub enum ProxyKind { Default, MediaAsset, Custom(String) }
+```
+
+`ProxyStrategy` decides *which* proxy bucket to use for one request; `RetryStrategy` decides *when* to retry and may replace the available proxy configuration between attempts. Both receive borrowed context so hot-path dispatch is allocation-light.
+
 ---
 
 ## 12. Browser Pool & Provider Abstraction
@@ -979,7 +1035,28 @@ struct PageReturnGuard { /* … */ }
 impl Drop for PageReturnGuard { /* enqueue close on pool's worker task */ }
 ```
 
-Each `BrowserProvider` impl is responsible for adapting its native page type to `BrowserPage`. `chromiumoxide::Page` is `Send + Sync` and stable across `await` points (verified in Phase 5 spike), so the adapter is a thin wrapper.
+Each `BrowserProvider` impl is responsible for adapting its native page type to `BrowserPage`. `chromiumoxide::Page` `Send + Sync` behavior across `await` points is validated in the Phase 6 spike before the adapter API is locked.
+
+### 12.3 Smart HTTP-first promotion
+
+Browser crawling is expensive enough that Millipede should not pay the browser tax unless a page needs it. A smart crawler mode first attempts the request through the HTTP/HTML path, runs a cheap detector over status, headers, and body patterns, and promotes to `BrowserCrawler` only when JavaScript rendering or anti-bot challenge handling is likely required.
+
+The detector is intentionally pluggable:
+
+```rust
+pub trait BrowserPromotionDetector: Send + Sync + 'static {
+    fn should_promote(&self, attempt: &HttpAttemptSnapshot<'_>) -> Option<PromotionReason>;
+}
+
+pub enum PromotionReason {
+    EmptyBodyLikelyJs,
+    KnownAntiBot(AntiBotTech),
+    SelectorMissing { selector: String },
+    Custom(String),
+}
+```
+
+The default implementation uses a static pattern set plus response metadata. It must be conservative: false negatives mean a page stays in HTTP mode and can be retried/promoted by user policy; false positives waste browser capacity.
 
 ---
 
@@ -1007,8 +1084,20 @@ pub struct AutoscaledPoolOptions {
     pub max_tasks_per_minute: Option<u32>,
     pub maybe_run_interval: Duration,     // 500ms
     pub autoscale_interval: Duration,     // 10s
+    pub mode: AutoscaleMode,
     pub snapshotter: SnapshotterOptions,
     pub system_status: SystemStatusOptions,
+}
+
+pub enum AutoscaleMode {
+    /// Deterministic baseline: additive increase after sustained success,
+    /// multiplicative decrease on retry/failure signals.
+    Aimd {
+        increase_after_successes: usize,
+        decrease_factor: f32,
+    },
+    /// Crawlee-style load-signal pool using CPU/memory/runtime/client signals.
+    LoadSignals,
 }
 
 #[async_trait]
@@ -1040,6 +1129,8 @@ Built-in load signals:
 Scaling decisions: every `autoscale_interval`, compute weighted overload across signals over a sliding window; if all signals are under threshold for `desired_utilization_ratio` of the window, scale up by `scale_up_step_ratio * desired`; if any signal exceeds threshold, scale down.
 
 Implementation note for `AutoscaledPool`: tokio's `Semaphore` doesn't support shrinking, so we don't use it as the throttle. Instead a `dispatch_loop` maintains `current_tasks: AtomicUsize` and only spawns when `current_tasks < desired_concurrency`. Active tasks decrement on completion.
+
+Domain politeness is handled by a cooperative token bucket keyed by host. `same_domain_delay` is the simple builder-facing knob; internally it maps to a per-domain limiter that can also be throttled by `Retry-After`, robots `Crawl-delay`, or repeated 429s.
 
 ---
 
@@ -1083,6 +1174,8 @@ Defaults read from env vars (matching Crawlee for ease of migration):
 #[derive(Debug, Clone)]
 pub enum CrawlerEvent {
     PersistState { is_migrating: bool },
+    RequestFinished(HandledRequest),
+    RequestFailed { request: Arc<Request>, error: String },
     SystemInfo(SystemSnapshot),
     Aborting,
     Exiting,
@@ -1097,7 +1190,7 @@ impl EventBus {
 pub type EventStream = tokio::sync::broadcast::Receiver<CrawlerEvent>;
 ```
 
-Internally the crawler fires `PersistState` every `persist_state_interval` and on SIGINT/SIGTERM (via tokio `signal`). User code subscribes:
+Internally the crawler fires `PersistState` every `persist_state_interval` and on SIGINT/SIGTERM (via tokio `signal`). `RequestFinished` is also mirrored to `ResultStream`; `EventStream` is for control-plane observers, while `ResultStream` is the stable data-plane feed. User code subscribes:
 
 ```rust
 let mut events = crawler.events();
@@ -1137,6 +1230,22 @@ pub enum CrawlError {
     /// Specifically: no route matches the request's label.
     #[error("missing route for label {0:?}")]
     MissingRoute(Option<String>),
+
+    /// A known anti-bot or WAF page was detected.
+    #[error("anti-bot detected: {tech:?}")]
+    AntiBotDetected { tech: AntiBotTech, source: anyhow::Error },
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum AntiBotTech {
+    Cloudflare,
+    DataDome,
+    PerimeterX,
+    Kasada,
+    Imperva,
+    Akamai,
+    Custom(String),
+    Unknown,
 }
 
 impl CrawlError {
@@ -1151,6 +1260,38 @@ impl From<std::io::Error> for CrawlError { /* default → Retry */ }
 ```
 
 Handlers return `Result<(), CrawlError>` and use `?` freely. Common errors (`reqwest::Error`, parsing errors) get a sensible default classification but can be remapped with `.map_err(CrawlError::session)` when context tells the handler the error is session-related.
+
+Advanced retries are an opt-in strategy hook layered on top of this taxonomy:
+
+```rust
+pub struct AttemptOutcome<'a> {
+    pub request: &'a Request,
+    pub attempt: u32,
+    pub status: Option<StatusCode>,
+    pub error: Option<&'a CrawlError>,
+    pub anti_bot: Option<AntiBotTech>,
+    pub proxy_info: Option<&'a ProxyInfo>,
+    pub session_id: Option<&'a SessionId>,
+    pub response_bytes: Option<usize>,
+}
+
+pub struct RetryDirective {
+    pub should_retry: bool,
+    pub backoff: Option<Duration>,
+    pub proxy_kind: Option<ProxyKind>,
+    pub user_agent_profile: Option<String>,
+    pub session_action: SessionRetryAction,
+}
+
+pub enum SessionRetryAction { Keep, Rotate, Retire }
+
+pub trait RetryStrategy: Send + Sync + 'static {
+    fn max_retries(&self) -> u32;
+    fn on_retry(&self, outcome: &AttemptOutcome<'_>) -> RetryDirective;
+}
+```
+
+The strategy receives borrowed context and returns an owned directive. It never mutates crawler internals directly.
 
 ---
 
@@ -1416,7 +1557,7 @@ These map directly onto Crawlee's options and are wired into the engine, not sur
 - **`AsyncLocalStorage` access checks.** Storage access is gated by *which `StorageHandle` was passed in*, not by ambient runtime state. There's no equivalent "you accessed a dataset outside a crawler" error — passing the handle around is the contract.
 - **JS-style `RouterHandler` callable object.** We use a normal `Router` struct that implements `RequestHandler`. Builders set the handler on the crawler; the duality is gone.
 - **`useState` magic.** Crawlee's `useState()` returns an auto-persisted reactive value bound to context identity. We expose `kvs.auto_saved("key", default)` explicitly. Users opt in.
-- **`got-scraping` directly.** Header generation is reimplemented in `millipede-fingerprint`; we don't shell out to a Node library. TLS fingerprinting is handled at the `HttpClient` impl level (e.g., via a `rustls` config or by exposing `impit-rs` if/when it's open-sourced).
+- **`got-scraping` directly.** Header generation is reimplemented in `millipede-fingerprint`; we don't shell out to a Node library. True TLS fingerprinting is handled only by swapping the `HttpClient` backend (for example a future `wreq`/`impit`-style client), not by pretending a custom verifier is enough.
 - **`PseudoUrl` legacy patterns.** Crawlee's `[regex]` bracketed pseudo-URLs are deprecated even there; we accept only globs and regexes.
 - **A 1:1 port of `BrowserCrawler`'s 80+ context utility methods** (`infinite_scroll`, `save_snapshot`, `enqueue_links_by_click_elements`, …). We ship the obvious ones (`enqueue_links` works with CSS selectors on `BrowserContext`); the rest are user-space helper crates.
 
@@ -1436,15 +1577,17 @@ These map directly onto Crawlee's options and are wired into the engine, not sur
 - ✅ **Session atomics + lock-guard footguns.** Resolved in §10: scaled-integer error score under a `Mutex`, closure-based user-data access.
 - ✅ **Browser provider generics in user code.** Resolved in §12.2: `PageHandle` is provider-erased; provider generics stay inside `BrowserPool<P>`.
 - ✅ **Async-trait policy.** Object-safe traits (`StorageClient`, `Dataset`, `KeyValueStore`, `RequestQueue`, `HttpClient`, `ProxyResolver`, `BrowserPage`, `SkippedHandler`) use `#[async_trait]`. Internal generic traits and `RequestHandler<C>` use native async fn or boxed-future returns. Decision documented per-crate in an ADR.
+- ✅ **Result streaming shape.** Resolved in §4.3 and §15: `run()` returns final stats, `results()` exposes completed-request snapshots, and `events()` remains the control-plane feed. We do not make `run()` return a stream because the owned handler context is consumed and browser resources may already be cleaned up.
 
 **Still open:**
 
 1. **Cookie jar concretion (ChatGPT Pro #1).** The *abstraction* is locked in §10: one `CookieJar` newtype, threaded into `reqwest` and `chromiumoxide` via an internal adapter. The *inner* concrete is the open question: `reqwest_cookie_store::CookieStoreMutex` (uses a sync `parking_lot` mutex — never held across `.await`, but adds a non-tokio dependency to the lock surface) or a custom `Arc<tokio::sync::RwLock<cookie_store::CookieStore>>` (tokio-native, but we re-implement the `reqwest::cookie::CookieStore` impl by hand). Resolution target: **end of Phase 3**, recorded as an ADR. Decision criteria, in order: (a) round-trips cookies correctly through a `wiremock` redirect chain; (b) survives the chromiumoxide `set_cookies` → handler → `get_cookies` cycle without lost state; (c) does not require holding a lock across any `.await`.
-2. **`scraper` ergonomics (ChatGPT Pro #2).** `HtmlContext::html: Arc<scraper::Html>` is fixed for spawn-friendliness, but `Selector::parse` is fallible and cheap-to-repeat — three candidate ergonomics layers, evaluated in **Phase 5** under a Criterion benchmark before any of them lands:
+2. **`scraper` ergonomics and engine extraction path (ChatGPT Pro #2 + Spider review).** `HtmlContext::html: Arc<scraper::Html>` is fixed for handler ergonomics and spawn-friendliness, but `Selector::parse` is fallible and cheap-to-repeat, and engine-owned link discovery may need streaming extraction. Four candidate layers/paths are evaluated in **Phase 5** under Criterion before any of them lands:
    - A `selectors!("a.detail", "h1 > span", …)` macro that expands to `static` items behind `OnceLock<Selector>`. Compile-time validation, zero runtime parsing cost.
    - A `Selectors` registry on `HtmlContext` (`ctx.selectors.parse_or_get("a.detail")`) for handlers that compute selector strings dynamically.
    - Status quo: users call `Selector::parse(…).unwrap()` inline.
-   We will not pick one in the abstract — we'll measure on a 100k-page crawl whether selector-parse dominates handler time. If it doesn't, we ship the macro only (zero-cost when used, no runtime API surface to support forever).
+   - A streaming `lol_html` extractor used only by `EnqueueLinker` for the engine hot path, while handlers still see `scraper::Html`.
+   We will not pick one in the abstract — we'll measure on a 100k-page crawl whether selector-parse or full-body parsing dominates handler time. If it doesn't, we ship the macro only (zero-cost when used, no runtime API surface to support forever).
 3. **Dynamic configuration reload (Gemini #3.2, ChatGPT Pro #7).** Currently a built crawler's `Configuration` is immutable. Allow `set_log_level` / `set_proxy_strategy` post-build via an `Arc<RwLock<RuntimeConfig>>` for the small subset that's safe to mutate live? Decision: defer to **post-1.0** unless a use case appears. The candidate mutable surface — log level, proxy strategy choice (not the proxy URLs themselves), autoscaler ceiling — is documented here so we don't have to re-derive it later.
 4. **Scaffolding (ChatGPT Pro #4).** Crawlee ships a CLI scaffolder. Two-stage plan:
    - **Pre-0.2:** publish a `cargo-generate` template (`millipede-template`) under the same org. Cheap to maintain — it's just a starter `Cargo.toml` + `main.rs` for each crawler kind. Lowers the adoption barrier without committing to a CLI surface we'd have to support.
