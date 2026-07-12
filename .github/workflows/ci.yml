@@ -58,6 +58,7 @@ jobs:
       - run: cargo test -p millipede --no-default-features
       - run: cargo run -p millipede --example phase0_hello
       - run: cargo run -p millipede --example phase1_queue_demo
+      - run: cargo run -p millipede --example basic_engine
 
   doc:
     name: rustdoc (${{ matrix.os }})
