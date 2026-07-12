@@ -20,7 +20,7 @@ url = { workspace = true }
 time = { workspace = true }
 http = { workspace = true }
 bytes = { workspace = true }
+tokio = { workspace = true }
 
 [dev-dependencies]
 proptest = { workspace = true }
-tokio = { workspace = true }
