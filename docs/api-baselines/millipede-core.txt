@@ -743,6 +743,38 @@ impl core::marker::Unpin for millipede_core::handler::FailedRequestContext
 impl core::marker::UnsafeUnpin for millipede_core::handler::FailedRequestContext
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::handler::FailedRequestContext
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::handler::FailedRequestContext
+pub struct millipede_core::prelude::FinalStatistics
+pub millipede_core::prelude::FinalStatistics::crawler_runtime: core::time::Duration
+pub millipede_core::prelude::FinalStatistics::errors: alloc::collections::btree::map::BTreeMap<alloc::string::String, u64>
+pub millipede_core::prelude::FinalStatistics::request_avg_duration: core::time::Duration
+pub millipede_core::prelude::FinalStatistics::request_max_duration: core::time::Duration
+pub millipede_core::prelude::FinalStatistics::request_min_duration: core::time::Duration
+pub millipede_core::prelude::FinalStatistics::requests_failed: u64
+pub millipede_core::prelude::FinalStatistics::requests_failed_per_minute: f64
+pub millipede_core::prelude::FinalStatistics::requests_finished: u64
+pub millipede_core::prelude::FinalStatistics::requests_finished_per_minute: f64
+pub millipede_core::prelude::FinalStatistics::requests_retries: u64
+pub millipede_core::prelude::FinalStatistics::retry_errors: alloc::collections::btree::map::BTreeMap<alloc::string::String, u64>
+pub millipede_core::prelude::FinalStatistics::retry_histogram: alloc::vec::Vec<u64>
+pub millipede_core::prelude::FinalStatistics::status_codes: alloc::collections::btree::map::BTreeMap<u16, u64>
+impl core::clone::Clone for millipede_core::statistics::FinalStatistics
+pub fn millipede_core::statistics::FinalStatistics::clone(&self) -> millipede_core::statistics::FinalStatistics
+impl core::cmp::PartialEq for millipede_core::statistics::FinalStatistics
+pub fn millipede_core::statistics::FinalStatistics::eq(&self, &millipede_core::statistics::FinalStatistics) -> bool
+impl core::convert::From<millipede_core::statistics::StatisticsSnapshot> for millipede_core::statistics::FinalStatistics
+pub fn millipede_core::statistics::FinalStatistics::from(millipede_core::statistics::StatisticsSnapshot) -> Self
+impl core::fmt::Debug for millipede_core::statistics::FinalStatistics
+pub fn millipede_core::statistics::FinalStatistics::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_core::statistics::FinalStatistics
+impl serde_core::ser::Serialize for millipede_core::statistics::FinalStatistics
+pub fn millipede_core::statistics::FinalStatistics::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl core::marker::Freeze for millipede_core::statistics::FinalStatistics
+impl core::marker::Send for millipede_core::statistics::FinalStatistics
+impl core::marker::Sync for millipede_core::statistics::FinalStatistics
+impl core::marker::Unpin for millipede_core::statistics::FinalStatistics
+impl core::marker::UnsafeUnpin for millipede_core::statistics::FinalStatistics
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::statistics::FinalStatistics
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::statistics::FinalStatistics
 pub struct millipede_core::prelude::HandledRequest
 pub millipede_core::prelude::HandledRequest::duration: core::time::Duration
 pub millipede_core::prelude::HandledRequest::loaded_url: core::option::Option<url::Url>
@@ -1042,6 +1074,62 @@ impl<C> core::marker::Unpin for millipede_core::router::Router<C>
 impl<C> core::marker::UnsafeUnpin for millipede_core::router::Router<C>
 impl<C> !core::panic::unwind_safe::RefUnwindSafe for millipede_core::router::Router<C>
 impl<C> !core::panic::unwind_safe::UnwindSafe for millipede_core::router::Router<C>
+pub struct millipede_core::prelude::StatisticsHandle
+impl millipede_core::statistics::StatisticsHandle
+pub fn millipede_core::statistics::StatisticsHandle::finalize(&self) -> millipede_core::statistics::FinalStatistics
+pub fn millipede_core::statistics::StatisticsHandle::mark_run_started(&self)
+pub fn millipede_core::statistics::StatisticsHandle::mark_run_stopped(&self)
+pub fn millipede_core::statistics::StatisticsHandle::new() -> Self
+pub async fn millipede_core::statistics::StatisticsHandle::persist(&self, &dyn millipede_core::storage::KeyValueStore) -> millipede_core::storage::StorageResult<()>
+pub fn millipede_core::statistics::StatisticsHandle::record_failed(&self, core::time::Duration, &str, u32)
+pub fn millipede_core::statistics::StatisticsHandle::record_finished(&self, core::time::Duration, core::option::Option<u16>, u32)
+pub fn millipede_core::statistics::StatisticsHandle::record_retry(&self, &str)
+pub async fn millipede_core::statistics::StatisticsHandle::restore(&self, &dyn millipede_core::storage::KeyValueStore) -> millipede_core::storage::StorageResult<bool>
+pub fn millipede_core::statistics::StatisticsHandle::snapshot(&self) -> millipede_core::statistics::StatisticsSnapshot
+pub fn millipede_core::statistics::StatisticsHandle::subscribe(&self) -> tokio::sync::mpsc::bounded::Receiver<millipede_core::statistics::StatisticsSnapshot>
+impl core::clone::Clone for millipede_core::statistics::StatisticsHandle
+pub fn millipede_core::statistics::StatisticsHandle::clone(&self) -> millipede_core::statistics::StatisticsHandle
+impl core::default::Default for millipede_core::statistics::StatisticsHandle
+pub fn millipede_core::statistics::StatisticsHandle::default() -> Self
+impl core::marker::Freeze for millipede_core::statistics::StatisticsHandle
+impl core::marker::Send for millipede_core::statistics::StatisticsHandle
+impl core::marker::Sync for millipede_core::statistics::StatisticsHandle
+impl core::marker::Unpin for millipede_core::statistics::StatisticsHandle
+impl core::marker::UnsafeUnpin for millipede_core::statistics::StatisticsHandle
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::statistics::StatisticsHandle
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::statistics::StatisticsHandle
+pub struct millipede_core::prelude::StatisticsSnapshot
+pub millipede_core::prelude::StatisticsSnapshot::crawler_runtime: core::time::Duration
+pub millipede_core::prelude::StatisticsSnapshot::errors: alloc::collections::btree::map::BTreeMap<alloc::string::String, u64>
+pub millipede_core::prelude::StatisticsSnapshot::request_avg_duration: core::time::Duration
+pub millipede_core::prelude::StatisticsSnapshot::request_max_duration: core::time::Duration
+pub millipede_core::prelude::StatisticsSnapshot::request_min_duration: core::time::Duration
+pub millipede_core::prelude::StatisticsSnapshot::requests_failed: u64
+pub millipede_core::prelude::StatisticsSnapshot::requests_failed_per_minute: f64
+pub millipede_core::prelude::StatisticsSnapshot::requests_finished: u64
+pub millipede_core::prelude::StatisticsSnapshot::requests_finished_per_minute: f64
+pub millipede_core::prelude::StatisticsSnapshot::requests_retries: u64
+pub millipede_core::prelude::StatisticsSnapshot::retry_errors: alloc::collections::btree::map::BTreeMap<alloc::string::String, u64>
+pub millipede_core::prelude::StatisticsSnapshot::retry_histogram: alloc::vec::Vec<u64>
+pub millipede_core::prelude::StatisticsSnapshot::status_codes: alloc::collections::btree::map::BTreeMap<u16, u64>
+impl core::clone::Clone for millipede_core::statistics::StatisticsSnapshot
+pub fn millipede_core::statistics::StatisticsSnapshot::clone(&self) -> millipede_core::statistics::StatisticsSnapshot
+impl core::cmp::PartialEq for millipede_core::statistics::StatisticsSnapshot
+pub fn millipede_core::statistics::StatisticsSnapshot::eq(&self, &millipede_core::statistics::StatisticsSnapshot) -> bool
+impl core::convert::From<millipede_core::statistics::StatisticsSnapshot> for millipede_core::statistics::FinalStatistics
+pub fn millipede_core::statistics::FinalStatistics::from(millipede_core::statistics::StatisticsSnapshot) -> Self
+impl core::fmt::Debug for millipede_core::statistics::StatisticsSnapshot
+pub fn millipede_core::statistics::StatisticsSnapshot::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_core::statistics::StatisticsSnapshot
+impl serde_core::ser::Serialize for millipede_core::statistics::StatisticsSnapshot
+pub fn millipede_core::statistics::StatisticsSnapshot::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl core::marker::Freeze for millipede_core::statistics::StatisticsSnapshot
+impl core::marker::Send for millipede_core::statistics::StatisticsSnapshot
+impl core::marker::Sync for millipede_core::statistics::StatisticsSnapshot
+impl core::marker::Unpin for millipede_core::statistics::StatisticsSnapshot
+impl core::marker::UnsafeUnpin for millipede_core::statistics::StatisticsSnapshot
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::statistics::StatisticsSnapshot
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::statistics::StatisticsSnapshot
 pub struct millipede_core::prelude::UserData(pub serde_json::map::Map<alloc::string::String, serde_json::value::Value>)
 impl millipede_core::request::UserData
 pub fn millipede_core::request::UserData::get(&self, &str) -> core::option::Option<&serde_json::value::Value>
@@ -1068,6 +1156,7 @@ impl core::marker::Unpin for millipede_core::request::UserData
 impl core::marker::UnsafeUnpin for millipede_core::request::UserData
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::request::UserData
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::request::UserData
+pub const millipede_core::prelude::STATISTICS_PERSIST_KEY: &str
 pub trait millipede_core::prelude::Dataset: core::marker::Send + core::marker::Sync
 pub fn millipede_core::prelude::Dataset::export_csv<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 std::path::Path) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
 pub fn millipede_core::prelude::Dataset::export_json<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 std::path::Path) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
@@ -1402,6 +1491,96 @@ impl<C> !core::panic::unwind_safe::RefUnwindSafe for millipede_core::router::Rou
 impl<C> !core::panic::unwind_safe::UnwindSafe for millipede_core::router::Router<C>
 pub trait millipede_core::router::HasRequest
 pub fn millipede_core::router::HasRequest::request(&self) -> &millipede_core::request::Request
+pub mod millipede_core::statistics
+pub struct millipede_core::statistics::FinalStatistics
+pub millipede_core::statistics::FinalStatistics::crawler_runtime: core::time::Duration
+pub millipede_core::statistics::FinalStatistics::errors: alloc::collections::btree::map::BTreeMap<alloc::string::String, u64>
+pub millipede_core::statistics::FinalStatistics::request_avg_duration: core::time::Duration
+pub millipede_core::statistics::FinalStatistics::request_max_duration: core::time::Duration
+pub millipede_core::statistics::FinalStatistics::request_min_duration: core::time::Duration
+pub millipede_core::statistics::FinalStatistics::requests_failed: u64
+pub millipede_core::statistics::FinalStatistics::requests_failed_per_minute: f64
+pub millipede_core::statistics::FinalStatistics::requests_finished: u64
+pub millipede_core::statistics::FinalStatistics::requests_finished_per_minute: f64
+pub millipede_core::statistics::FinalStatistics::requests_retries: u64
+pub millipede_core::statistics::FinalStatistics::retry_errors: alloc::collections::btree::map::BTreeMap<alloc::string::String, u64>
+pub millipede_core::statistics::FinalStatistics::retry_histogram: alloc::vec::Vec<u64>
+pub millipede_core::statistics::FinalStatistics::status_codes: alloc::collections::btree::map::BTreeMap<u16, u64>
+impl core::clone::Clone for millipede_core::statistics::FinalStatistics
+pub fn millipede_core::statistics::FinalStatistics::clone(&self) -> millipede_core::statistics::FinalStatistics
+impl core::cmp::PartialEq for millipede_core::statistics::FinalStatistics
+pub fn millipede_core::statistics::FinalStatistics::eq(&self, &millipede_core::statistics::FinalStatistics) -> bool
+impl core::convert::From<millipede_core::statistics::StatisticsSnapshot> for millipede_core::statistics::FinalStatistics
+pub fn millipede_core::statistics::FinalStatistics::from(millipede_core::statistics::StatisticsSnapshot) -> Self
+impl core::fmt::Debug for millipede_core::statistics::FinalStatistics
+pub fn millipede_core::statistics::FinalStatistics::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_core::statistics::FinalStatistics
+impl serde_core::ser::Serialize for millipede_core::statistics::FinalStatistics
+pub fn millipede_core::statistics::FinalStatistics::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl core::marker::Freeze for millipede_core::statistics::FinalStatistics
+impl core::marker::Send for millipede_core::statistics::FinalStatistics
+impl core::marker::Sync for millipede_core::statistics::FinalStatistics
+impl core::marker::Unpin for millipede_core::statistics::FinalStatistics
+impl core::marker::UnsafeUnpin for millipede_core::statistics::FinalStatistics
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::statistics::FinalStatistics
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::statistics::FinalStatistics
+pub struct millipede_core::statistics::StatisticsHandle
+impl millipede_core::statistics::StatisticsHandle
+pub fn millipede_core::statistics::StatisticsHandle::finalize(&self) -> millipede_core::statistics::FinalStatistics
+pub fn millipede_core::statistics::StatisticsHandle::mark_run_started(&self)
+pub fn millipede_core::statistics::StatisticsHandle::mark_run_stopped(&self)
+pub fn millipede_core::statistics::StatisticsHandle::new() -> Self
+pub async fn millipede_core::statistics::StatisticsHandle::persist(&self, &dyn millipede_core::storage::KeyValueStore) -> millipede_core::storage::StorageResult<()>
+pub fn millipede_core::statistics::StatisticsHandle::record_failed(&self, core::time::Duration, &str, u32)
+pub fn millipede_core::statistics::StatisticsHandle::record_finished(&self, core::time::Duration, core::option::Option<u16>, u32)
+pub fn millipede_core::statistics::StatisticsHandle::record_retry(&self, &str)
+pub async fn millipede_core::statistics::StatisticsHandle::restore(&self, &dyn millipede_core::storage::KeyValueStore) -> millipede_core::storage::StorageResult<bool>
+pub fn millipede_core::statistics::StatisticsHandle::snapshot(&self) -> millipede_core::statistics::StatisticsSnapshot
+pub fn millipede_core::statistics::StatisticsHandle::subscribe(&self) -> tokio::sync::mpsc::bounded::Receiver<millipede_core::statistics::StatisticsSnapshot>
+impl core::clone::Clone for millipede_core::statistics::StatisticsHandle
+pub fn millipede_core::statistics::StatisticsHandle::clone(&self) -> millipede_core::statistics::StatisticsHandle
+impl core::default::Default for millipede_core::statistics::StatisticsHandle
+pub fn millipede_core::statistics::StatisticsHandle::default() -> Self
+impl core::marker::Freeze for millipede_core::statistics::StatisticsHandle
+impl core::marker::Send for millipede_core::statistics::StatisticsHandle
+impl core::marker::Sync for millipede_core::statistics::StatisticsHandle
+impl core::marker::Unpin for millipede_core::statistics::StatisticsHandle
+impl core::marker::UnsafeUnpin for millipede_core::statistics::StatisticsHandle
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::statistics::StatisticsHandle
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::statistics::StatisticsHandle
+pub struct millipede_core::statistics::StatisticsSnapshot
+pub millipede_core::statistics::StatisticsSnapshot::crawler_runtime: core::time::Duration
+pub millipede_core::statistics::StatisticsSnapshot::errors: alloc::collections::btree::map::BTreeMap<alloc::string::String, u64>
+pub millipede_core::statistics::StatisticsSnapshot::request_avg_duration: core::time::Duration
+pub millipede_core::statistics::StatisticsSnapshot::request_max_duration: core::time::Duration
+pub millipede_core::statistics::StatisticsSnapshot::request_min_duration: core::time::Duration
+pub millipede_core::statistics::StatisticsSnapshot::requests_failed: u64
+pub millipede_core::statistics::StatisticsSnapshot::requests_failed_per_minute: f64
+pub millipede_core::statistics::StatisticsSnapshot::requests_finished: u64
+pub millipede_core::statistics::StatisticsSnapshot::requests_finished_per_minute: f64
+pub millipede_core::statistics::StatisticsSnapshot::requests_retries: u64
+pub millipede_core::statistics::StatisticsSnapshot::retry_errors: alloc::collections::btree::map::BTreeMap<alloc::string::String, u64>
+pub millipede_core::statistics::StatisticsSnapshot::retry_histogram: alloc::vec::Vec<u64>
+pub millipede_core::statistics::StatisticsSnapshot::status_codes: alloc::collections::btree::map::BTreeMap<u16, u64>
+impl core::clone::Clone for millipede_core::statistics::StatisticsSnapshot
+pub fn millipede_core::statistics::StatisticsSnapshot::clone(&self) -> millipede_core::statistics::StatisticsSnapshot
+impl core::cmp::PartialEq for millipede_core::statistics::StatisticsSnapshot
+pub fn millipede_core::statistics::StatisticsSnapshot::eq(&self, &millipede_core::statistics::StatisticsSnapshot) -> bool
+impl core::convert::From<millipede_core::statistics::StatisticsSnapshot> for millipede_core::statistics::FinalStatistics
+pub fn millipede_core::statistics::FinalStatistics::from(millipede_core::statistics::StatisticsSnapshot) -> Self
+impl core::fmt::Debug for millipede_core::statistics::StatisticsSnapshot
+pub fn millipede_core::statistics::StatisticsSnapshot::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_core::statistics::StatisticsSnapshot
+impl serde_core::ser::Serialize for millipede_core::statistics::StatisticsSnapshot
+pub fn millipede_core::statistics::StatisticsSnapshot::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl core::marker::Freeze for millipede_core::statistics::StatisticsSnapshot
+impl core::marker::Send for millipede_core::statistics::StatisticsSnapshot
+impl core::marker::Sync for millipede_core::statistics::StatisticsSnapshot
+impl core::marker::Unpin for millipede_core::statistics::StatisticsSnapshot
+impl core::marker::UnsafeUnpin for millipede_core::statistics::StatisticsSnapshot
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::statistics::StatisticsSnapshot
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::statistics::StatisticsSnapshot
+pub const millipede_core::statistics::STATISTICS_PERSIST_KEY: &str
 pub mod millipede_core::storage
 #[non_exhaustive] pub enum millipede_core::storage::RequestSource
 pub millipede_core::storage::RequestSource::Request(millipede_core::request::Request)

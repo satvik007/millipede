@@ -12,6 +12,7 @@ pub use millipede::EventBus
 pub use millipede::EventStream
 pub use millipede::FailedRequestContext
 pub use millipede::FailedRequestHandler
+pub use millipede::FinalStatistics
 pub use millipede::HandledRequest
 pub use millipede::HasRequest
 pub use millipede::HeaderMap
@@ -41,6 +42,9 @@ pub use millipede::RequestQueue
 pub use millipede::RequestSource
 pub use millipede::RequestState
 pub use millipede::Router
+pub use millipede::STATISTICS_PERSIST_KEY
+pub use millipede::StatisticsHandle
+pub use millipede::StatisticsSnapshot
 pub use millipede::StorageClient
 pub use millipede::StorageError
 pub use millipede::StorageResult

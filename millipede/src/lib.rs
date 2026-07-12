@@ -41,6 +41,9 @@ pub use millipede_core::router::HasRequest;
 pub use millipede_core::router::MethodFilter;
 /// Routes request contexts by label and HTTP method.
 pub use millipede_core::router::Router;
+pub use millipede_core::statistics::{
+    FinalStatistics, STATISTICS_PERSIST_KEY, StatisticsHandle, StatisticsSnapshot,
+};
 pub use millipede_core::storage::{
     AddOptions, AutoSaved, Dataset, DatasetExt, KeyValueStore, KeyValueStoreExt, Lease, LeaseId,
     ListOptions, ProcessedRequest, QueueOpInfo, ReclaimOptions, RequestQueue, RequestSource,

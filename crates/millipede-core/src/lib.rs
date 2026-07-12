@@ -12,6 +12,8 @@ pub mod handler;
 pub mod request;
 /// Label- and method-based request routing.
 pub mod router;
+/// Crawl statistics, rates, and persistence.
+pub mod statistics;
 /// Object-safe storage abstractions and typed convenience wrappers.
 pub mod storage;
 
@@ -30,6 +32,9 @@ pub mod prelude {
         RequestId, RequestState, UserData,
     };
     pub use crate::router::{HasRequest, MethodFilter, Router};
+    pub use crate::statistics::{
+        FinalStatistics, STATISTICS_PERSIST_KEY, StatisticsHandle, StatisticsSnapshot,
+    };
     pub use crate::storage::{
         AddOptions, AddRequestsBatchedResult, AutoSaved, BatchAddHandle, Dataset, DatasetExt,
         DatasetInfo, KeyInfo, KeyList, KeyValueStore, KeyValueStoreExt, KvEntry, Lease, LeaseId,
