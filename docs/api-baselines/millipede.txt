@@ -10,7 +10,10 @@ pub use millipede::Dataset
 pub use millipede::DatasetExt
 pub use millipede::EventBus
 pub use millipede::EventStream
+pub use millipede::FailedRequestContext
+pub use millipede::FailedRequestHandler
 pub use millipede::HandledRequest
+pub use millipede::HasRequest
 pub use millipede::HeaderMap
 pub use millipede::IntoUrl
 pub use millipede::KeyValueStore
@@ -23,6 +26,8 @@ pub use millipede::MemoryQueuePolicy
 pub use millipede::MemoryRequestQueue
 pub use millipede::MemoryStorageClient
 pub use millipede::Method
+pub use millipede::MethodFilter
+pub use millipede::Middleware
 pub use millipede::ProcessedRequest
 pub use millipede::QueueOpInfo
 pub use millipede::ReclaimOptions
@@ -30,10 +35,12 @@ pub use millipede::Request
 pub use millipede::RequestBody
 pub use millipede::RequestBuilder
 pub use millipede::RequestFinalState
+pub use millipede::RequestHandler
 pub use millipede::RequestId
 pub use millipede::RequestQueue
 pub use millipede::RequestSource
 pub use millipede::RequestState
+pub use millipede::Router
 pub use millipede::StorageClient
 pub use millipede::StorageError
 pub use millipede::StorageResult

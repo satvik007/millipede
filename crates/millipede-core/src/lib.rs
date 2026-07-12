@@ -6,8 +6,12 @@ pub mod config;
 pub mod errors;
 /// Crawler lifecycle events and broadcast support.
 pub mod events;
+/// Request handler and middleware contracts.
+pub mod handler;
 /// Request data types and construction helpers.
 pub mod request;
+/// Label- and method-based request routing.
+pub mod router;
 /// Object-safe storage abstractions and typed convenience wrappers.
 pub mod storage;
 
@@ -18,10 +22,14 @@ pub mod prelude {
     pub use crate::events::{
         CrawlerEvent, EventBus, EventStream, HandledRequest, RequestFinalState,
     };
+    pub use crate::handler::{
+        FailedRequestContext, FailedRequestHandler, Middleware, RequestHandler,
+    };
     pub use crate::request::{
         HeaderMap, IntoUrl, Method, Request, RequestBody, RequestBuildError, RequestBuilder,
         RequestId, RequestState, UserData,
     };
+    pub use crate::router::{HasRequest, MethodFilter, Router};
     pub use crate::storage::{
         AddOptions, AddRequestsBatchedResult, AutoSaved, BatchAddHandle, Dataset, DatasetExt,
         DatasetInfo, KeyInfo, KeyList, KeyValueStore, KeyValueStoreExt, KvEntry, Lease, LeaseId,

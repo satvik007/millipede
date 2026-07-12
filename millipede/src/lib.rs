@@ -23,10 +23,24 @@ pub use millipede_core::errors::{AntiBotTech, CrawlError};
 pub use millipede_core::events::{
     CrawlerEvent, EventBus, EventStream, HandledRequest, RequestFinalState,
 };
+/// Context passed to a [`FailedRequestHandler`] after request handling fails.
+pub use millipede_core::handler::FailedRequestContext;
+/// Handler invoked after a request exhausts its retry policy.
+pub use millipede_core::handler::FailedRequestHandler;
+/// Middleware that wraps request-handler execution.
+pub use millipede_core::handler::Middleware;
+/// Asynchronous handler for a crawler request context.
+pub use millipede_core::handler::RequestHandler;
 pub use millipede_core::request::{
     HeaderMap, IntoUrl, Method, Request, RequestBody, RequestBuilder, RequestId, RequestState,
     UserData,
 };
+/// Accesses the request associated with a router context.
+pub use millipede_core::router::HasRequest;
+/// HTTP method constraint used when matching a route.
+pub use millipede_core::router::MethodFilter;
+/// Routes request contexts by label and HTTP method.
+pub use millipede_core::router::Router;
 pub use millipede_core::storage::{
     AddOptions, AutoSaved, Dataset, DatasetExt, KeyValueStore, KeyValueStoreExt, Lease, LeaseId,
     ListOptions, ProcessedRequest, QueueOpInfo, ReclaimOptions, RequestQueue, RequestSource,

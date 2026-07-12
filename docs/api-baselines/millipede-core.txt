@@ -266,6 +266,38 @@ impl core::marker::UnsafeUnpin for millipede_core::events::SystemSnapshot
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::events::SystemSnapshot
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::events::SystemSnapshot
 pub type millipede_core::events::EventStream = tokio::sync::broadcast::Receiver<millipede_core::events::CrawlerEvent>
+pub mod millipede_core::handler
+#[non_exhaustive] pub struct millipede_core::handler::FailedRequestContext
+pub millipede_core::handler::FailedRequestContext::error: alloc::sync::Arc<millipede_core::errors::CrawlError>
+pub millipede_core::handler::FailedRequestContext::request: alloc::sync::Arc<millipede_core::request::Request>
+pub millipede_core::handler::FailedRequestContext::retry_count: u32
+impl millipede_core::handler::FailedRequestContext
+pub fn millipede_core::handler::FailedRequestContext::new(alloc::sync::Arc<millipede_core::request::Request>, alloc::sync::Arc<millipede_core::errors::CrawlError>, u32) -> Self
+impl core::clone::Clone for millipede_core::handler::FailedRequestContext
+pub fn millipede_core::handler::FailedRequestContext::clone(&self) -> millipede_core::handler::FailedRequestContext
+impl core::fmt::Debug for millipede_core::handler::FailedRequestContext
+pub fn millipede_core::handler::FailedRequestContext::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::handler::FailedRequestContext
+impl core::marker::Send for millipede_core::handler::FailedRequestContext
+impl core::marker::Sync for millipede_core::handler::FailedRequestContext
+impl core::marker::Unpin for millipede_core::handler::FailedRequestContext
+impl core::marker::UnsafeUnpin for millipede_core::handler::FailedRequestContext
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::handler::FailedRequestContext
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::handler::FailedRequestContext
+pub trait millipede_core::handler::FailedRequestHandler: core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_core::handler::FailedRequestHandler::handle(&self, millipede_core::handler::FailedRequestContext) -> futures_core::future::BoxFuture<'static, core::result::Result<(), millipede_core::errors::CrawlError>>
+impl<F, Fut> millipede_core::handler::FailedRequestHandler for F where F: core::ops::function::Fn(millipede_core::handler::FailedRequestContext) -> Fut + core::marker::Send + core::marker::Sync + 'static, Fut: core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'static
+pub fn F::handle(&self, millipede_core::handler::FailedRequestContext) -> futures_core::future::BoxFuture<'static, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub trait millipede_core::handler::Middleware<C>: core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_core::handler::Middleware::run(&self, C) -> futures_core::future::BoxFuture<'static, core::result::Result<C, millipede_core::errors::CrawlError>>
+impl<C, F, Fut> millipede_core::handler::Middleware<C> for F where F: core::ops::function::Fn(C) -> Fut + core::marker::Send + core::marker::Sync + 'static, Fut: core::future::future::Future<Output = core::result::Result<C, millipede_core::errors::CrawlError>> + core::marker::Send + 'static
+pub fn F::run(&self, C) -> futures_core::future::BoxFuture<'static, core::result::Result<C, millipede_core::errors::CrawlError>>
+pub trait millipede_core::handler::RequestHandler<C>: core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_core::handler::RequestHandler::handle(&self, C) -> futures_core::future::BoxFuture<'static, core::result::Result<(), millipede_core::errors::CrawlError>>
+impl<C, F, Fut> millipede_core::handler::RequestHandler<C> for F where F: core::ops::function::Fn(C) -> Fut + core::marker::Send + core::marker::Sync + 'static, Fut: core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'static
+pub fn F::handle(&self, C) -> futures_core::future::BoxFuture<'static, core::result::Result<(), millipede_core::errors::CrawlError>>
+impl<C: millipede_core::router::HasRequest + core::marker::Send + 'static> millipede_core::handler::RequestHandler<C> for millipede_core::router::Router<C>
+pub fn millipede_core::router::Router<C>::handle(&self, C) -> futures_core::future::BoxFuture<'static, core::result::Result<(), millipede_core::errors::CrawlError>>
 pub mod millipede_core::prelude
 pub use millipede_core::prelude::HeaderMap
 pub use millipede_core::prelude::Method
@@ -387,6 +419,22 @@ impl core::marker::Unpin for millipede_core::config::LogLevel
 impl core::marker::UnsafeUnpin for millipede_core::config::LogLevel
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::config::LogLevel
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::config::LogLevel
+pub enum millipede_core::prelude::MethodFilter
+pub millipede_core::prelude::MethodFilter::Any
+pub millipede_core::prelude::MethodFilter::Only(alloc::vec::Vec<http::method::Method>)
+impl millipede_core::router::MethodFilter
+pub fn millipede_core::router::MethodFilter::matches(&self, &http::method::Method) -> bool
+impl core::clone::Clone for millipede_core::router::MethodFilter
+pub fn millipede_core::router::MethodFilter::clone(&self) -> millipede_core::router::MethodFilter
+impl core::fmt::Debug for millipede_core::router::MethodFilter
+pub fn millipede_core::router::MethodFilter::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::router::MethodFilter
+impl core::marker::Send for millipede_core::router::MethodFilter
+impl core::marker::Sync for millipede_core::router::MethodFilter
+impl core::marker::Unpin for millipede_core::router::MethodFilter
+impl core::marker::UnsafeUnpin for millipede_core::router::MethodFilter
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::router::MethodFilter
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::router::MethodFilter
 pub enum millipede_core::prelude::RequestBody
 pub millipede_core::prelude::RequestBody::Bytes(alloc::vec::Vec<u8>)
 pub millipede_core::prelude::RequestBody::Form(alloc::vec::Vec<(alloc::string::String, alloc::string::String)>)
@@ -678,6 +726,23 @@ impl core::marker::Unpin for millipede_core::events::EventBus
 impl core::marker::UnsafeUnpin for millipede_core::events::EventBus
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::events::EventBus
 impl !core::panic::unwind_safe::UnwindSafe for millipede_core::events::EventBus
+#[non_exhaustive] pub struct millipede_core::prelude::FailedRequestContext
+pub millipede_core::prelude::FailedRequestContext::error: alloc::sync::Arc<millipede_core::errors::CrawlError>
+pub millipede_core::prelude::FailedRequestContext::request: alloc::sync::Arc<millipede_core::request::Request>
+pub millipede_core::prelude::FailedRequestContext::retry_count: u32
+impl millipede_core::handler::FailedRequestContext
+pub fn millipede_core::handler::FailedRequestContext::new(alloc::sync::Arc<millipede_core::request::Request>, alloc::sync::Arc<millipede_core::errors::CrawlError>, u32) -> Self
+impl core::clone::Clone for millipede_core::handler::FailedRequestContext
+pub fn millipede_core::handler::FailedRequestContext::clone(&self) -> millipede_core::handler::FailedRequestContext
+impl core::fmt::Debug for millipede_core::handler::FailedRequestContext
+pub fn millipede_core::handler::FailedRequestContext::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::handler::FailedRequestContext
+impl core::marker::Send for millipede_core::handler::FailedRequestContext
+impl core::marker::Sync for millipede_core::handler::FailedRequestContext
+impl core::marker::Unpin for millipede_core::handler::FailedRequestContext
+impl core::marker::UnsafeUnpin for millipede_core::handler::FailedRequestContext
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::handler::FailedRequestContext
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::handler::FailedRequestContext
 pub struct millipede_core::prelude::HandledRequest
 pub millipede_core::prelude::HandledRequest::duration: core::time::Duration
 pub millipede_core::prelude::HandledRequest::loaded_url: core::option::Option<url::Url>
@@ -960,6 +1025,23 @@ impl core::marker::Unpin for millipede_core::request::RequestId
 impl core::marker::UnsafeUnpin for millipede_core::request::RequestId
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::request::RequestId
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::request::RequestId
+pub struct millipede_core::prelude::Router<C>
+impl<C: millipede_core::router::HasRequest + core::marker::Send + 'static> millipede_core::router::Router<C>
+pub fn millipede_core::router::Router<C>::default<H: millipede_core::handler::RequestHandler<C>>(self, H) -> Self
+pub fn millipede_core::router::Router<C>::middleware<M: millipede_core::handler::Middleware<C>>(self, M) -> Self
+pub fn millipede_core::router::Router<C>::new() -> Self
+pub fn millipede_core::router::Router<C>::route<H: millipede_core::handler::RequestHandler<C>>(self, impl core::convert::Into<alloc::string::String>, H) -> Self
+pub fn millipede_core::router::Router<C>::route_method<H: millipede_core::handler::RequestHandler<C>>(self, impl core::convert::Into<alloc::string::String>, http::method::Method, H) -> Self
+pub fn millipede_core::router::Router<C>::route_methods<H, I>(self, impl core::convert::Into<alloc::string::String>, I, H) -> Self where H: millipede_core::handler::RequestHandler<C>, I: core::iter::traits::collect::IntoIterator<Item = http::method::Method>
+impl<C: millipede_core::router::HasRequest + core::marker::Send + 'static> millipede_core::handler::RequestHandler<C> for millipede_core::router::Router<C>
+pub fn millipede_core::router::Router<C>::handle(&self, C) -> futures_core::future::BoxFuture<'static, core::result::Result<(), millipede_core::errors::CrawlError>>
+impl<C> core::marker::Freeze for millipede_core::router::Router<C>
+impl<C> core::marker::Send for millipede_core::router::Router<C>
+impl<C> core::marker::Sync for millipede_core::router::Router<C>
+impl<C> core::marker::Unpin for millipede_core::router::Router<C>
+impl<C> core::marker::UnsafeUnpin for millipede_core::router::Router<C>
+impl<C> !core::panic::unwind_safe::RefUnwindSafe for millipede_core::router::Router<C>
+impl<C> !core::panic::unwind_safe::UnwindSafe for millipede_core::router::Router<C>
 pub struct millipede_core::prelude::UserData(pub serde_json::map::Map<alloc::string::String, serde_json::value::Value>)
 impl millipede_core::request::UserData
 pub fn millipede_core::request::UserData::get(&self, &str) -> core::option::Option<&serde_json::value::Value>
@@ -1004,6 +1086,12 @@ pub fn D::list<'life0, 'async_trait, T>(&'life0 self, millipede_core::storage::L
 pub fn D::push<'life0, 'life1, 'async_trait, T>(&'life0 self, &'life1 T) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::ser::Serialize + core::marker::Send + core::marker::Sync, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
 pub fn D::push_batch<'life0, 'life1, 'async_trait, T>(&'life0 self, &'life1 [T]) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::ser::Serialize + core::marker::Send + core::marker::Sync, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
 pub fn D::stream<T: serde_core::de::DeserializeOwned + core::marker::Send + 'static>(&self, millipede_core::storage::ListOptions) -> futures_core::stream::BoxStream<'_, millipede_core::storage::StorageResult<T>>
+pub trait millipede_core::prelude::FailedRequestHandler: core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_core::prelude::FailedRequestHandler::handle(&self, millipede_core::handler::FailedRequestContext) -> futures_core::future::BoxFuture<'static, core::result::Result<(), millipede_core::errors::CrawlError>>
+impl<F, Fut> millipede_core::handler::FailedRequestHandler for F where F: core::ops::function::Fn(millipede_core::handler::FailedRequestContext) -> Fut + core::marker::Send + core::marker::Sync + 'static, Fut: core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'static
+pub fn F::handle(&self, millipede_core::handler::FailedRequestContext) -> futures_core::future::BoxFuture<'static, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub trait millipede_core::prelude::HasRequest
+pub fn millipede_core::prelude::HasRequest::request(&self) -> &millipede_core::request::Request
 pub trait millipede_core::prelude::IntoUrl
 pub fn millipede_core::prelude::IntoUrl::into_url(self) -> core::result::Result<url::Url, url::parser::ParseError>
 impl millipede_core::request::IntoUrl for &alloc::string::String
@@ -1025,6 +1113,16 @@ pub fn millipede_core::prelude::KeyValueStoreExt::set<'life0, 'life1, 'life2, 'a
 impl<K: millipede_core::storage::KeyValueStore + ?core::marker::Sized> millipede_core::storage::KeyValueStoreExt for K
 pub fn K::get<'life0, 'life1, 'async_trait, T>(&'life0 self, &'life1 str) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<core::option::Option<T>>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::de::DeserializeOwned + 'static, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
 pub fn K::set<'life0, 'life1, 'life2, 'async_trait, T>(&'life0 self, &'life1 str, &'life2 T) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::ser::Serialize + core::marker::Send + core::marker::Sync, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait, 'life2: 'async_trait
+pub trait millipede_core::prelude::Middleware<C>: core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_core::prelude::Middleware::run(&self, C) -> futures_core::future::BoxFuture<'static, core::result::Result<C, millipede_core::errors::CrawlError>>
+impl<C, F, Fut> millipede_core::handler::Middleware<C> for F where F: core::ops::function::Fn(C) -> Fut + core::marker::Send + core::marker::Sync + 'static, Fut: core::future::future::Future<Output = core::result::Result<C, millipede_core::errors::CrawlError>> + core::marker::Send + 'static
+pub fn F::run(&self, C) -> futures_core::future::BoxFuture<'static, core::result::Result<C, millipede_core::errors::CrawlError>>
+pub trait millipede_core::prelude::RequestHandler<C>: core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_core::prelude::RequestHandler::handle(&self, C) -> futures_core::future::BoxFuture<'static, core::result::Result<(), millipede_core::errors::CrawlError>>
+impl<C, F, Fut> millipede_core::handler::RequestHandler<C> for F where F: core::ops::function::Fn(C) -> Fut + core::marker::Send + core::marker::Sync + 'static, Fut: core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'static
+pub fn F::handle(&self, C) -> futures_core::future::BoxFuture<'static, core::result::Result<(), millipede_core::errors::CrawlError>>
+impl<C: millipede_core::router::HasRequest + core::marker::Send + 'static> millipede_core::handler::RequestHandler<C> for millipede_core::router::Router<C>
+pub fn millipede_core::router::Router<C>::handle(&self, C) -> futures_core::future::BoxFuture<'static, core::result::Result<(), millipede_core::errors::CrawlError>>
 pub trait millipede_core::prelude::RequestQueue: core::marker::Send + core::marker::Sync
 pub fn millipede_core::prelude::RequestQueue::abandon<'life0, 'async_trait>(&'life0 self, millipede_core::storage::Lease) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
 pub fn millipede_core::prelude::RequestQueue::add<'life0, 'async_trait>(&'life0 self, millipede_core::request::Request, millipede_core::storage::AddOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<millipede_core::storage::QueueOpInfo>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
@@ -1268,6 +1366,42 @@ impl millipede_core::request::IntoUrl for alloc::string::String
 pub fn alloc::string::String::into_url(self) -> core::result::Result<url::Url, url::parser::ParseError>
 impl millipede_core::request::IntoUrl for url::Url
 pub fn url::Url::into_url(self) -> core::result::Result<url::Url, url::parser::ParseError>
+pub mod millipede_core::router
+pub enum millipede_core::router::MethodFilter
+pub millipede_core::router::MethodFilter::Any
+pub millipede_core::router::MethodFilter::Only(alloc::vec::Vec<http::method::Method>)
+impl millipede_core::router::MethodFilter
+pub fn millipede_core::router::MethodFilter::matches(&self, &http::method::Method) -> bool
+impl core::clone::Clone for millipede_core::router::MethodFilter
+pub fn millipede_core::router::MethodFilter::clone(&self) -> millipede_core::router::MethodFilter
+impl core::fmt::Debug for millipede_core::router::MethodFilter
+pub fn millipede_core::router::MethodFilter::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::router::MethodFilter
+impl core::marker::Send for millipede_core::router::MethodFilter
+impl core::marker::Sync for millipede_core::router::MethodFilter
+impl core::marker::Unpin for millipede_core::router::MethodFilter
+impl core::marker::UnsafeUnpin for millipede_core::router::MethodFilter
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::router::MethodFilter
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::router::MethodFilter
+pub struct millipede_core::router::Router<C>
+impl<C: millipede_core::router::HasRequest + core::marker::Send + 'static> millipede_core::router::Router<C>
+pub fn millipede_core::router::Router<C>::default<H: millipede_core::handler::RequestHandler<C>>(self, H) -> Self
+pub fn millipede_core::router::Router<C>::middleware<M: millipede_core::handler::Middleware<C>>(self, M) -> Self
+pub fn millipede_core::router::Router<C>::new() -> Self
+pub fn millipede_core::router::Router<C>::route<H: millipede_core::handler::RequestHandler<C>>(self, impl core::convert::Into<alloc::string::String>, H) -> Self
+pub fn millipede_core::router::Router<C>::route_method<H: millipede_core::handler::RequestHandler<C>>(self, impl core::convert::Into<alloc::string::String>, http::method::Method, H) -> Self
+pub fn millipede_core::router::Router<C>::route_methods<H, I>(self, impl core::convert::Into<alloc::string::String>, I, H) -> Self where H: millipede_core::handler::RequestHandler<C>, I: core::iter::traits::collect::IntoIterator<Item = http::method::Method>
+impl<C: millipede_core::router::HasRequest + core::marker::Send + 'static> millipede_core::handler::RequestHandler<C> for millipede_core::router::Router<C>
+pub fn millipede_core::router::Router<C>::handle(&self, C) -> futures_core::future::BoxFuture<'static, core::result::Result<(), millipede_core::errors::CrawlError>>
+impl<C> core::marker::Freeze for millipede_core::router::Router<C>
+impl<C> core::marker::Send for millipede_core::router::Router<C>
+impl<C> core::marker::Sync for millipede_core::router::Router<C>
+impl<C> core::marker::Unpin for millipede_core::router::Router<C>
+impl<C> core::marker::UnsafeUnpin for millipede_core::router::Router<C>
+impl<C> !core::panic::unwind_safe::RefUnwindSafe for millipede_core::router::Router<C>
+impl<C> !core::panic::unwind_safe::UnwindSafe for millipede_core::router::Router<C>
+pub trait millipede_core::router::HasRequest
+pub fn millipede_core::router::HasRequest::request(&self) -> &millipede_core::request::Request
 pub mod millipede_core::storage
 #[non_exhaustive] pub enum millipede_core::storage::RequestSource
 pub millipede_core::storage::RequestSource::Request(millipede_core::request::Request)
