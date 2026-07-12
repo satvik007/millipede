@@ -337,7 +337,7 @@ The phase that makes Millipede usable for "real" scraping projects.
 - Redis-backed `RequestQueue` for distributed crawls.
 - `millipede-storage-apify`: Apify platform client. Pairs with a `Dockerfile.example` per crawler kind and an "Apify deployment" section in the guide (ChatGPT Pro review #5).
 - `millipede-extras` crate: community-maintained utility helpers (`infinite_scroll`, `save_snapshot`, login flows, click-to-enqueue), governed by the policy doc landed in Phase 8. ChatGPT Pro review #6.
-- Playwright provider (`millipede-browser-playwright`).
+- Additional browser providers, only if user demand materializes. Preferred order: WebDriver BiDi (standards-track cross-browser/Firefox from pure Rust, once Rust client support matures) > Playwright via a thin Node sidecar exposing a `BrowserPage`-shaped API (never a Rust protocol client — the protocol is internal and unstable) > classic WebDriver (lossy: no navigation status, no interception, no isolated contexts). See INTERFACE.md §12.1.
 - TLS-level fingerprinting (`impit`-style) once a stable Rust dependency exists.
 - `millipede-cli`: project scaffolder (`millipede new`, `millipede run`, future `millipede serve`). The 0.1.0-era `cargo-generate` template is the bridge until this lands.
 - Runtime-mutable configuration subset (`Arc<RwLock<RuntimeConfig>>`) for log level, proxy strategy choice, and autoscaler ceiling. Gemini #3.2 / ChatGPT Pro #7. Defer until a concrete user reports a long-running crawl that can't tolerate a restart.

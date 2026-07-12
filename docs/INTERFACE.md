@@ -42,8 +42,7 @@ millipede/                          # repo root (this directory)
 │   ├── millipede-http/              # HttpCrawler — reqwest-based fetcher.
 │   ├── millipede-html/              # HtmlCrawler — adds `scraper` (Cheerio-equivalent) parsing.
 │   ├── millipede-browser/           # BrowserCrawler core + BrowserProvider trait, BrowserPool.
-│   ├── millipede-browser-chromiumoxide/  # Chromium driver via `chromiumoxide`.
-│   ├── millipede-browser-playwright/     # Optional: Playwright via `playwright-rust`.
+│   ├── millipede-browser-chromiumoxide/  # Chromium driver via `chromiumoxide` (CDP).
 │   ├── millipede-fingerprint/       # Browser-like header generator, TLS fingerprinting hooks.
 │   └── millipede-cli/               # `millipede create` scaffolder (optional, post-MVP).
 ├── millipede/                        # Umbrella crate — re-exports a curated public API.
@@ -989,8 +988,15 @@ pub struct BrowserHooks<P: BrowserProvider> {
 
 Concrete providers live in their own crates so that pulling in `millipede-browser` does not force a Chromium dependency:
 
-- `millipede-browser-chromiumoxide::ChromiumoxideProvider` — uses [`chromiumoxide`](https://crates.io/crates/chromiumoxide) (Rust CDP client).
-- `millipede-browser-playwright::PlaywrightProvider` — optional, uses the `playwright` Rust binding.
+- `millipede-browser-chromiumoxide::ChromiumoxideProvider` — uses [`chromiumoxide`](https://crates.io/crates/chromiumoxide) (Rust CDP client). The only provider committed before 1.0.
+
+CDP is the only protocol that supports the full design in pure Rust today: navigation status/headers, network interception (resource blocking), and cheap cookie-isolated browser contexts. Other providers are deliberately *not* planned for 1.0, for the record:
+
+- **Playwright** — no viable Rust binding exists (`playwright-rust` is abandoned); the wire protocol is an internal, unstable contract between Microsoft's official bindings and the Node driver, and any binding drags a Node.js runtime into user deployments. If demand materializes post-1.0 (e.g. Camoufox-style Firefox stealth), the sane shape is a thin Node sidecar exposing an API mirroring `BrowserPage`, not a protocol client.
+- **Classic WebDriver** (`fantoccini`/`thirtyfour`) — protocol cannot report navigation status/headers, has no request interception, and offers no isolated contexts (all tabs share cookies), which breaks the session-per-page pool model.
+- **WebDriver BiDi** — the standards-track path to cross-browser (real Firefox) from pure Rust; it closes all three classic-WebDriver gaps. Revisit post-1.0 once Rust client support matures.
+
+Providers are allowed to be lossy: `goto` may return `None` (no `BrowserResponse`), and interception-dependent features must degrade gracefully. The engine must not assume CDP-level capabilities from the trait alone.
 
 Fingerprint injection runs as a `post_page_create` hook supplied by `millipede-fingerprint`.
 
