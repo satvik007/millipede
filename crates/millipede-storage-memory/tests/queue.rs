@@ -144,6 +144,51 @@ async fn abandon_does_not_increment_retry() {
 }
 
 #[tokio::test]
+async fn reclaim_persists_lease_request_mutations() {
+    let queue = MemoryRequestQueue::new("reclaim-mutations");
+    queue
+        .add(req("https://example.com/1"), AddOptions::default())
+        .await
+        .unwrap();
+    let mut lease = queue.fetch_next().await.unwrap().unwrap();
+    lease.request.session_rotation_count = 3;
+    lease
+        .request
+        .error_messages
+        .push("temporary failure".into());
+    queue
+        .reclaim(lease, ReclaimOptions::default())
+        .await
+        .unwrap();
+
+    let lease = queue.fetch_next().await.unwrap().unwrap();
+    assert_eq!(lease.request.session_rotation_count, 3);
+    assert_eq!(lease.request.error_messages, ["temporary failure"]);
+    assert_eq!(lease.request.retry_count, 1);
+}
+
+#[tokio::test]
+async fn abandon_persists_lease_request_mutations() {
+    let queue = MemoryRequestQueue::new("abandon-mutations");
+    queue
+        .add(req("https://example.com/1"), AddOptions::default())
+        .await
+        .unwrap();
+    let mut lease = queue.fetch_next().await.unwrap().unwrap();
+    lease.request.session_rotation_count = 3;
+    lease
+        .request
+        .error_messages
+        .push("temporary failure".into());
+    queue.abandon(lease).await.unwrap();
+
+    let lease = queue.fetch_next().await.unwrap().unwrap();
+    assert_eq!(lease.request.session_rotation_count, 3);
+    assert_eq!(lease.request.error_messages, ["temporary failure"]);
+    assert_eq!(lease.request.retry_count, 0);
+}
+
+#[tokio::test]
 async fn add_batch_is_inline_and_flags_duplicate() {
     let queue = MemoryRequestQueue::new("batch");
     let duplicate = req("https://example.com/1");

@@ -166,7 +166,8 @@ impl RequestQueue for MemoryRequestQueue {
 
     async fn reclaim(&self, lease: Lease, opts: ReclaimOptions) -> StorageResult<()> {
         let mut state = self.state.lock().expect("request queue mutex poisoned");
-        let mut request = Self::remove_lease(&mut state, &lease.lease_id)?.request;
+        Self::remove_lease(&mut state, &lease.lease_id)?;
+        let mut request = lease.request;
         if opts.increment_retry {
             request.retry_count += 1;
         }
@@ -191,8 +192,8 @@ impl RequestQueue for MemoryRequestQueue {
 
     async fn abandon(&self, lease: Lease) -> StorageResult<()> {
         let mut state = self.state.lock().expect("request queue mutex poisoned");
-        let request = Self::remove_lease(&mut state, &lease.lease_id)?.request;
-        state.pending.push_front(request);
+        Self::remove_lease(&mut state, &lease.lease_id)?;
+        state.pending.push_front(lease.request);
         Ok(())
     }
 

@@ -22,6 +22,7 @@ The companion `INTERFACE.md` describes the target API. This document describes *
 | Concern | Crate | Notes |
 |---|---|---|
 | Async runtime | `tokio` (full) | Only runtime supported in v1. |
+| Cancellation | `tokio-util` | CancellationToken for engine shutdown. CTO-approved addition for Phase 2. |
 | HTTP client | `reqwest` | rustls, cookies, gzip, brotli, deflate features. |
 | HTML parser | `scraper` | Cheerio analog exposed to user handlers. `html5ever` underneath. |
 | Streaming link extraction | `lol_html` | Candidate optional dependency; evaluated in Phase 5 for engine-owned `enqueue_links` hot path. |

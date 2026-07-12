@@ -183,10 +183,16 @@ pub trait RequestQueue: Send + Sync {
     /// Marks a leased request as successful and consumes its lease.
     async fn mark_handled(&self, lease: Lease) -> StorageResult<()>;
     /// Re-queues a lease, incrementing retry count unless `opts` disables it.
+    ///
+    /// Backends must persist the request state carried in the lease (e.g. mutated `error_messages`
+    /// or `session_rotation_count`), not a previously stored copy.
     async fn reclaim(&self, lease: Lease, opts: ReclaimOptions) -> StorageResult<()>;
     /// Extends an active lease deadline, returning `LeaseNotFound` if it is unknown or completed.
     async fn renew(&self, lease_id: &LeaseId, extend_by: Duration) -> StorageResult<()>;
     /// Re-queues and consumes a lease without incrementing its request retry count.
+    ///
+    /// Backends must persist the request state carried in the lease (e.g. mutated `error_messages`
+    /// or `session_rotation_count`), not a previously stored copy.
     async fn abandon(&self, lease: Lease) -> StorageResult<()>;
     /// Returns whether no requests are currently pending.
     async fn is_empty(&self) -> StorageResult<bool>;

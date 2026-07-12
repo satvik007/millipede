@@ -16,7 +16,7 @@ pub struct HandledRequest {
     pub response_status: Option<http::StatusCode>,
     /// The number of retry attempts made.
     pub retry_count: u32,
-    /// The total processing duration.
+    /// The total processing duration accumulated across every attempt of this request, including retried attempts.
     pub duration: Duration,
 }
 
@@ -72,6 +72,9 @@ pub enum CrawlerEvent {
 
 /// A receiver for crawler events.
 pub type EventStream = tokio::sync::broadcast::Receiver<CrawlerEvent>;
+
+/// A receiver for terminal request snapshots (the data-plane feed).
+pub type ResultStream = tokio::sync::broadcast::Receiver<HandledRequest>;
 
 /// A broadcast channel for crawler control-plane events.
 #[derive(Debug, Clone)]

@@ -99,6 +99,129 @@ impl core::marker::Unpin for millipede_core::config::ConfigurationBuilder
 impl core::marker::UnsafeUnpin for millipede_core::config::ConfigurationBuilder
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::config::ConfigurationBuilder
 impl !core::panic::unwind_safe::UnwindSafe for millipede_core::config::ConfigurationBuilder
+pub mod millipede_core::crawler
+pub enum millipede_core::crawler::RequestOutcome<C>
+pub millipede_core::crawler::RequestOutcome::ExecuteFailed
+pub millipede_core::crawler::RequestOutcome::ExecuteFailed::error: alloc::sync::Arc<millipede_core::errors::CrawlError>
+pub millipede_core::crawler::RequestOutcome::ExecuteFailed::request: alloc::sync::Arc<millipede_core::request::Request>
+pub millipede_core::crawler::RequestOutcome::Handled(C)
+pub millipede_core::crawler::RequestOutcome::HandlerFailed
+pub millipede_core::crawler::RequestOutcome::HandlerFailed::ctx: C
+pub millipede_core::crawler::RequestOutcome::HandlerFailed::error: alloc::sync::Arc<millipede_core::errors::CrawlError>
+impl<C> core::marker::Freeze for millipede_core::crawler::RequestOutcome<C> where C: core::marker::Freeze
+impl<C> core::marker::Send for millipede_core::crawler::RequestOutcome<C> where C: core::marker::Send
+impl<C> core::marker::Sync for millipede_core::crawler::RequestOutcome<C> where C: core::marker::Sync
+impl<C> core::marker::Unpin for millipede_core::crawler::RequestOutcome<C> where C: core::marker::Unpin
+impl<C> core::marker::UnsafeUnpin for millipede_core::crawler::RequestOutcome<C> where C: core::marker::UnsafeUnpin
+impl<C> core::panic::unwind_safe::RefUnwindSafe for millipede_core::crawler::RequestOutcome<C> where C: core::panic::unwind_safe::RefUnwindSafe
+impl<C> core::panic::unwind_safe::UnwindSafe for millipede_core::crawler::RequestOutcome<C> where C: core::panic::unwind_safe::UnwindSafe
+#[non_exhaustive] pub struct millipede_core::crawler::BasicContext
+pub millipede_core::crawler::BasicContext::crawler: millipede_core::crawler::CrawlerHandle
+pub millipede_core::crawler::BasicContext::request: alloc::sync::Arc<millipede_core::request::Request>
+impl core::clone::Clone for millipede_core::crawler::BasicContext
+pub fn millipede_core::crawler::BasicContext::clone(&self) -> millipede_core::crawler::BasicContext
+impl core::fmt::Debug for millipede_core::crawler::BasicContext
+pub fn millipede_core::crawler::BasicContext::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl millipede_core::router::HasRequest for millipede_core::crawler::BasicContext
+pub fn millipede_core::crawler::BasicContext::request(&self) -> &millipede_core::request::Request
+impl core::marker::Freeze for millipede_core::crawler::BasicContext
+impl core::marker::Send for millipede_core::crawler::BasicContext
+impl core::marker::Sync for millipede_core::crawler::BasicContext
+impl core::marker::Unpin for millipede_core::crawler::BasicContext
+impl core::marker::UnsafeUnpin for millipede_core::crawler::BasicContext
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::crawler::BasicContext
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::crawler::BasicContext
+pub struct millipede_core::crawler::BasicKind
+impl core::clone::Clone for millipede_core::crawler::BasicKind
+pub fn millipede_core::crawler::BasicKind::clone(&self) -> millipede_core::crawler::BasicKind
+impl core::default::Default for millipede_core::crawler::BasicKind
+pub fn millipede_core::crawler::BasicKind::default() -> millipede_core::crawler::BasicKind
+impl core::fmt::Debug for millipede_core::crawler::BasicKind
+pub fn millipede_core::crawler::BasicKind::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for millipede_core::crawler::BasicKind
+impl millipede_core::crawler::CrawlerKind for millipede_core::crawler::BasicKind
+pub type millipede_core::crawler::BasicKind::Context = millipede_core::crawler::BasicContext
+pub fn millipede_core::crawler::BasicKind::after_success<'a>(&'a self, &'a mut Self::Context) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::BasicKind::before_request<'a>(&'a self, &'a mut millipede_core::crawler::RequestPrep) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::BasicKind::cleanup(&self, millipede_core::crawler::RequestOutcome<millipede_core::crawler::BasicContext>) -> futures_core::future::BoxFuture<'_, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::BasicKind::execute<'a>(&'a self, millipede_core::crawler::RequestEnv<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<millipede_core::crawler::BasicContext, millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::BasicKind::start<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::BasicKind::stop<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+impl core::marker::Freeze for millipede_core::crawler::BasicKind
+impl core::marker::Send for millipede_core::crawler::BasicKind
+impl core::marker::Sync for millipede_core::crawler::BasicKind
+impl core::marker::Unpin for millipede_core::crawler::BasicKind
+impl core::marker::UnsafeUnpin for millipede_core::crawler::BasicKind
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::crawler::BasicKind
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::crawler::BasicKind
+pub struct millipede_core::crawler::CrawlerEnv
+impl millipede_core::crawler::CrawlerEnv
+pub fn millipede_core::crawler::CrawlerEnv::config(&self) -> &millipede_core::config::Configuration
+pub fn millipede_core::crawler::CrawlerEnv::events(&self) -> &millipede_core::events::EventBus
+pub fn millipede_core::crawler::CrawlerEnv::handle(&self) -> millipede_core::crawler::CrawlerHandle
+pub fn millipede_core::crawler::CrawlerEnv::stats(&self) -> &millipede_core::statistics::StatisticsHandle
+impl core::marker::Freeze for millipede_core::crawler::CrawlerEnv
+impl core::marker::Send for millipede_core::crawler::CrawlerEnv
+impl core::marker::Sync for millipede_core::crawler::CrawlerEnv
+impl core::marker::Unpin for millipede_core::crawler::CrawlerEnv
+impl core::marker::UnsafeUnpin for millipede_core::crawler::CrawlerEnv
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::crawler::CrawlerEnv
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::crawler::CrawlerEnv
+pub struct millipede_core::crawler::CrawlerHandle
+impl millipede_core::crawler::CrawlerHandle
+pub fn millipede_core::crawler::CrawlerHandle::abort(&self)
+pub async fn millipede_core::crawler::CrawlerHandle::add_requests(&self, impl core::iter::traits::collect::IntoIterator<Item = millipede_core::request::Request> + core::marker::Send) -> core::result::Result<millipede_core::storage::BatchAddHandle, millipede_core::errors::CrawlError>
+pub fn millipede_core::crawler::CrawlerHandle::events(&self) -> core::option::Option<millipede_core::events::EventStream>
+pub fn millipede_core::crawler::CrawlerHandle::results(&self) -> core::option::Option<millipede_core::events::ResultStream>
+pub fn millipede_core::crawler::CrawlerHandle::stats(&self) -> core::option::Option<millipede_core::statistics::StatisticsSnapshot>
+pub fn millipede_core::crawler::CrawlerHandle::stop(&self)
+impl core::clone::Clone for millipede_core::crawler::CrawlerHandle
+pub fn millipede_core::crawler::CrawlerHandle::clone(&self) -> millipede_core::crawler::CrawlerHandle
+impl core::fmt::Debug for millipede_core::crawler::CrawlerHandle
+pub fn millipede_core::crawler::CrawlerHandle::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::crawler::CrawlerHandle
+impl core::marker::Send for millipede_core::crawler::CrawlerHandle
+impl core::marker::Sync for millipede_core::crawler::CrawlerHandle
+impl core::marker::Unpin for millipede_core::crawler::CrawlerHandle
+impl core::marker::UnsafeUnpin for millipede_core::crawler::CrawlerHandle
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::crawler::CrawlerHandle
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::crawler::CrawlerHandle
+#[non_exhaustive] pub struct millipede_core::crawler::RequestEnv<'a>
+pub millipede_core::crawler::RequestEnv::crawler: millipede_core::crawler::CrawlerHandle
+pub millipede_core::crawler::RequestEnv::events: &'a millipede_core::events::EventBus
+pub millipede_core::crawler::RequestEnv::request: alloc::sync::Arc<millipede_core::request::Request>
+impl<'a> core::marker::Freeze for millipede_core::crawler::RequestEnv<'a>
+impl<'a> core::marker::Send for millipede_core::crawler::RequestEnv<'a>
+impl<'a> core::marker::Sync for millipede_core::crawler::RequestEnv<'a>
+impl<'a> core::marker::Unpin for millipede_core::crawler::RequestEnv<'a>
+impl<'a> core::marker::UnsafeUnpin for millipede_core::crawler::RequestEnv<'a>
+impl<'a> !core::panic::unwind_safe::RefUnwindSafe for millipede_core::crawler::RequestEnv<'a>
+impl<'a> !core::panic::unwind_safe::UnwindSafe for millipede_core::crawler::RequestEnv<'a>
+#[non_exhaustive] pub struct millipede_core::crawler::RequestPrep
+pub millipede_core::crawler::RequestPrep::request: millipede_core::request::Request
+impl core::marker::Freeze for millipede_core::crawler::RequestPrep
+impl core::marker::Send for millipede_core::crawler::RequestPrep
+impl core::marker::Sync for millipede_core::crawler::RequestPrep
+impl core::marker::Unpin for millipede_core::crawler::RequestPrep
+impl core::marker::UnsafeUnpin for millipede_core::crawler::RequestPrep
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::crawler::RequestPrep
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::crawler::RequestPrep
+pub trait millipede_core::crawler::CrawlerKind: core::marker::Send + core::marker::Sync + 'static
+pub type millipede_core::crawler::CrawlerKind::Context: core::marker::Send + core::clone::Clone + 'static
+pub fn millipede_core::crawler::CrawlerKind::after_success<'a>(&'a self, &'a mut Self::Context) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::CrawlerKind::before_request<'a>(&'a self, &'a mut millipede_core::crawler::RequestPrep) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::CrawlerKind::cleanup(&self, millipede_core::crawler::RequestOutcome<Self::Context>) -> futures_core::future::BoxFuture<'_, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::CrawlerKind::execute<'a>(&'a self, millipede_core::crawler::RequestEnv<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<Self::Context, millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::CrawlerKind::start<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::CrawlerKind::stop<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+impl millipede_core::crawler::CrawlerKind for millipede_core::crawler::BasicKind
+pub type millipede_core::crawler::BasicKind::Context = millipede_core::crawler::BasicContext
+pub fn millipede_core::crawler::BasicKind::after_success<'a>(&'a self, &'a mut Self::Context) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::BasicKind::before_request<'a>(&'a self, &'a mut millipede_core::crawler::RequestPrep) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::BasicKind::cleanup(&self, millipede_core::crawler::RequestOutcome<millipede_core::crawler::BasicContext>) -> futures_core::future::BoxFuture<'_, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::BasicKind::execute<'a>(&'a self, millipede_core::crawler::RequestEnv<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<millipede_core::crawler::BasicContext, millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::BasicKind::start<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::BasicKind::stop<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
 pub mod millipede_core::errors
 #[non_exhaustive] pub enum millipede_core::errors::AntiBotTech
 pub millipede_core::errors::AntiBotTech::Akamai
@@ -266,6 +389,7 @@ impl core::marker::UnsafeUnpin for millipede_core::events::SystemSnapshot
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::events::SystemSnapshot
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::events::SystemSnapshot
 pub type millipede_core::events::EventStream = tokio::sync::broadcast::Receiver<millipede_core::events::CrawlerEvent>
+pub type millipede_core::events::ResultStream = tokio::sync::broadcast::Receiver<millipede_core::events::HandledRequest>
 pub mod millipede_core::handler
 #[non_exhaustive] pub struct millipede_core::handler::FailedRequestContext
 pub millipede_core::handler::FailedRequestContext::error: alloc::sync::Arc<millipede_core::errors::CrawlError>
@@ -505,6 +629,21 @@ impl core::marker::Unpin for millipede_core::events::RequestFinalState
 impl core::marker::UnsafeUnpin for millipede_core::events::RequestFinalState
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::events::RequestFinalState
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::events::RequestFinalState
+pub enum millipede_core::prelude::RequestOutcome<C>
+pub millipede_core::prelude::RequestOutcome::ExecuteFailed
+pub millipede_core::prelude::RequestOutcome::ExecuteFailed::error: alloc::sync::Arc<millipede_core::errors::CrawlError>
+pub millipede_core::prelude::RequestOutcome::ExecuteFailed::request: alloc::sync::Arc<millipede_core::request::Request>
+pub millipede_core::prelude::RequestOutcome::Handled(C)
+pub millipede_core::prelude::RequestOutcome::HandlerFailed
+pub millipede_core::prelude::RequestOutcome::HandlerFailed::ctx: C
+pub millipede_core::prelude::RequestOutcome::HandlerFailed::error: alloc::sync::Arc<millipede_core::errors::CrawlError>
+impl<C> core::marker::Freeze for millipede_core::crawler::RequestOutcome<C> where C: core::marker::Freeze
+impl<C> core::marker::Send for millipede_core::crawler::RequestOutcome<C> where C: core::marker::Send
+impl<C> core::marker::Sync for millipede_core::crawler::RequestOutcome<C> where C: core::marker::Sync
+impl<C> core::marker::Unpin for millipede_core::crawler::RequestOutcome<C> where C: core::marker::Unpin
+impl<C> core::marker::UnsafeUnpin for millipede_core::crawler::RequestOutcome<C> where C: core::marker::UnsafeUnpin
+impl<C> core::panic::unwind_safe::RefUnwindSafe for millipede_core::crawler::RequestOutcome<C> where C: core::panic::unwind_safe::RefUnwindSafe
+impl<C> core::panic::unwind_safe::UnwindSafe for millipede_core::crawler::RequestOutcome<C> where C: core::panic::unwind_safe::UnwindSafe
 #[non_exhaustive] pub enum millipede_core::prelude::RequestSource
 pub millipede_core::prelude::RequestSource::Request(millipede_core::request::Request)
 impl core::clone::Clone for millipede_core::storage::RequestSource
@@ -621,6 +760,45 @@ impl<T> core::marker::Unpin for millipede_core::storage::AutoSaved<T> where T: c
 impl<T> core::marker::UnsafeUnpin for millipede_core::storage::AutoSaved<T> where T: core::marker::UnsafeUnpin
 impl<T> !core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::AutoSaved<T>
 impl<T> !core::panic::unwind_safe::UnwindSafe for millipede_core::storage::AutoSaved<T>
+#[non_exhaustive] pub struct millipede_core::prelude::BasicContext
+pub millipede_core::prelude::BasicContext::crawler: millipede_core::crawler::CrawlerHandle
+pub millipede_core::prelude::BasicContext::request: alloc::sync::Arc<millipede_core::request::Request>
+impl core::clone::Clone for millipede_core::crawler::BasicContext
+pub fn millipede_core::crawler::BasicContext::clone(&self) -> millipede_core::crawler::BasicContext
+impl core::fmt::Debug for millipede_core::crawler::BasicContext
+pub fn millipede_core::crawler::BasicContext::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl millipede_core::router::HasRequest for millipede_core::crawler::BasicContext
+pub fn millipede_core::crawler::BasicContext::request(&self) -> &millipede_core::request::Request
+impl core::marker::Freeze for millipede_core::crawler::BasicContext
+impl core::marker::Send for millipede_core::crawler::BasicContext
+impl core::marker::Sync for millipede_core::crawler::BasicContext
+impl core::marker::Unpin for millipede_core::crawler::BasicContext
+impl core::marker::UnsafeUnpin for millipede_core::crawler::BasicContext
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::crawler::BasicContext
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::crawler::BasicContext
+pub struct millipede_core::prelude::BasicKind
+impl core::clone::Clone for millipede_core::crawler::BasicKind
+pub fn millipede_core::crawler::BasicKind::clone(&self) -> millipede_core::crawler::BasicKind
+impl core::default::Default for millipede_core::crawler::BasicKind
+pub fn millipede_core::crawler::BasicKind::default() -> millipede_core::crawler::BasicKind
+impl core::fmt::Debug for millipede_core::crawler::BasicKind
+pub fn millipede_core::crawler::BasicKind::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for millipede_core::crawler::BasicKind
+impl millipede_core::crawler::CrawlerKind for millipede_core::crawler::BasicKind
+pub type millipede_core::crawler::BasicKind::Context = millipede_core::crawler::BasicContext
+pub fn millipede_core::crawler::BasicKind::after_success<'a>(&'a self, &'a mut Self::Context) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::BasicKind::before_request<'a>(&'a self, &'a mut millipede_core::crawler::RequestPrep) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::BasicKind::cleanup(&self, millipede_core::crawler::RequestOutcome<millipede_core::crawler::BasicContext>) -> futures_core::future::BoxFuture<'_, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::BasicKind::execute<'a>(&'a self, millipede_core::crawler::RequestEnv<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<millipede_core::crawler::BasicContext, millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::BasicKind::start<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::BasicKind::stop<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+impl core::marker::Freeze for millipede_core::crawler::BasicKind
+impl core::marker::Send for millipede_core::crawler::BasicKind
+impl core::marker::Sync for millipede_core::crawler::BasicKind
+impl core::marker::Unpin for millipede_core::crawler::BasicKind
+impl core::marker::UnsafeUnpin for millipede_core::crawler::BasicKind
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::crawler::BasicKind
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::crawler::BasicKind
 pub struct millipede_core::prelude::BatchAddHandle
 pub millipede_core::prelude::BatchAddHandle::added: alloc::vec::Vec<millipede_core::storage::ProcessedRequest>
 impl millipede_core::storage::BatchAddHandle
@@ -689,6 +867,38 @@ impl core::marker::Unpin for millipede_core::config::ConfigurationBuilder
 impl core::marker::UnsafeUnpin for millipede_core::config::ConfigurationBuilder
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::config::ConfigurationBuilder
 impl !core::panic::unwind_safe::UnwindSafe for millipede_core::config::ConfigurationBuilder
+pub struct millipede_core::prelude::CrawlerEnv
+impl millipede_core::crawler::CrawlerEnv
+pub fn millipede_core::crawler::CrawlerEnv::config(&self) -> &millipede_core::config::Configuration
+pub fn millipede_core::crawler::CrawlerEnv::events(&self) -> &millipede_core::events::EventBus
+pub fn millipede_core::crawler::CrawlerEnv::handle(&self) -> millipede_core::crawler::CrawlerHandle
+pub fn millipede_core::crawler::CrawlerEnv::stats(&self) -> &millipede_core::statistics::StatisticsHandle
+impl core::marker::Freeze for millipede_core::crawler::CrawlerEnv
+impl core::marker::Send for millipede_core::crawler::CrawlerEnv
+impl core::marker::Sync for millipede_core::crawler::CrawlerEnv
+impl core::marker::Unpin for millipede_core::crawler::CrawlerEnv
+impl core::marker::UnsafeUnpin for millipede_core::crawler::CrawlerEnv
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::crawler::CrawlerEnv
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::crawler::CrawlerEnv
+pub struct millipede_core::prelude::CrawlerHandle
+impl millipede_core::crawler::CrawlerHandle
+pub fn millipede_core::crawler::CrawlerHandle::abort(&self)
+pub async fn millipede_core::crawler::CrawlerHandle::add_requests(&self, impl core::iter::traits::collect::IntoIterator<Item = millipede_core::request::Request> + core::marker::Send) -> core::result::Result<millipede_core::storage::BatchAddHandle, millipede_core::errors::CrawlError>
+pub fn millipede_core::crawler::CrawlerHandle::events(&self) -> core::option::Option<millipede_core::events::EventStream>
+pub fn millipede_core::crawler::CrawlerHandle::results(&self) -> core::option::Option<millipede_core::events::ResultStream>
+pub fn millipede_core::crawler::CrawlerHandle::stats(&self) -> core::option::Option<millipede_core::statistics::StatisticsSnapshot>
+pub fn millipede_core::crawler::CrawlerHandle::stop(&self)
+impl core::clone::Clone for millipede_core::crawler::CrawlerHandle
+pub fn millipede_core::crawler::CrawlerHandle::clone(&self) -> millipede_core::crawler::CrawlerHandle
+impl core::fmt::Debug for millipede_core::crawler::CrawlerHandle
+pub fn millipede_core::crawler::CrawlerHandle::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::crawler::CrawlerHandle
+impl core::marker::Send for millipede_core::crawler::CrawlerHandle
+impl core::marker::Sync for millipede_core::crawler::CrawlerHandle
+impl core::marker::Unpin for millipede_core::crawler::CrawlerHandle
+impl core::marker::UnsafeUnpin for millipede_core::crawler::CrawlerHandle
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::crawler::CrawlerHandle
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::crawler::CrawlerHandle
 #[non_exhaustive] pub struct millipede_core::prelude::DatasetInfo
 pub millipede_core::prelude::DatasetInfo::created_at: time::offset_date_time::OffsetDateTime
 pub millipede_core::prelude::DatasetInfo::item_count: u64
@@ -1030,6 +1240,17 @@ impl core::marker::Unpin for millipede_core::request::RequestBuilder
 impl core::marker::UnsafeUnpin for millipede_core::request::RequestBuilder
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::request::RequestBuilder
 impl !core::panic::unwind_safe::UnwindSafe for millipede_core::request::RequestBuilder
+#[non_exhaustive] pub struct millipede_core::prelude::RequestEnv<'a>
+pub millipede_core::prelude::RequestEnv::crawler: millipede_core::crawler::CrawlerHandle
+pub millipede_core::prelude::RequestEnv::events: &'a millipede_core::events::EventBus
+pub millipede_core::prelude::RequestEnv::request: alloc::sync::Arc<millipede_core::request::Request>
+impl<'a> core::marker::Freeze for millipede_core::crawler::RequestEnv<'a>
+impl<'a> core::marker::Send for millipede_core::crawler::RequestEnv<'a>
+impl<'a> core::marker::Sync for millipede_core::crawler::RequestEnv<'a>
+impl<'a> core::marker::Unpin for millipede_core::crawler::RequestEnv<'a>
+impl<'a> core::marker::UnsafeUnpin for millipede_core::crawler::RequestEnv<'a>
+impl<'a> !core::panic::unwind_safe::RefUnwindSafe for millipede_core::crawler::RequestEnv<'a>
+impl<'a> !core::panic::unwind_safe::UnwindSafe for millipede_core::crawler::RequestEnv<'a>
 pub struct millipede_core::prelude::RequestId(_)
 impl millipede_core::request::RequestId
 pub fn millipede_core::request::RequestId::as_str(&self) -> &str
@@ -1057,6 +1278,15 @@ impl core::marker::Unpin for millipede_core::request::RequestId
 impl core::marker::UnsafeUnpin for millipede_core::request::RequestId
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::request::RequestId
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::request::RequestId
+#[non_exhaustive] pub struct millipede_core::prelude::RequestPrep
+pub millipede_core::prelude::RequestPrep::request: millipede_core::request::Request
+impl core::marker::Freeze for millipede_core::crawler::RequestPrep
+impl core::marker::Send for millipede_core::crawler::RequestPrep
+impl core::marker::Sync for millipede_core::crawler::RequestPrep
+impl core::marker::Unpin for millipede_core::crawler::RequestPrep
+impl core::marker::UnsafeUnpin for millipede_core::crawler::RequestPrep
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::crawler::RequestPrep
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::crawler::RequestPrep
 pub struct millipede_core::prelude::Router<C>
 impl<C: millipede_core::router::HasRequest + core::marker::Send + 'static> millipede_core::router::Router<C>
 pub fn millipede_core::router::Router<C>::default<H: millipede_core::handler::RequestHandler<C>>(self, H) -> Self
@@ -1157,6 +1387,22 @@ impl core::marker::UnsafeUnpin for millipede_core::request::UserData
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::request::UserData
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::request::UserData
 pub const millipede_core::prelude::STATISTICS_PERSIST_KEY: &str
+pub trait millipede_core::prelude::CrawlerKind: core::marker::Send + core::marker::Sync + 'static
+pub type millipede_core::prelude::CrawlerKind::Context: core::marker::Send + core::clone::Clone + 'static
+pub fn millipede_core::prelude::CrawlerKind::after_success<'a>(&'a self, &'a mut Self::Context) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_core::prelude::CrawlerKind::before_request<'a>(&'a self, &'a mut millipede_core::crawler::RequestPrep) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_core::prelude::CrawlerKind::cleanup(&self, millipede_core::crawler::RequestOutcome<Self::Context>) -> futures_core::future::BoxFuture<'_, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_core::prelude::CrawlerKind::execute<'a>(&'a self, millipede_core::crawler::RequestEnv<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<Self::Context, millipede_core::errors::CrawlError>>
+pub fn millipede_core::prelude::CrawlerKind::start<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_core::prelude::CrawlerKind::stop<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+impl millipede_core::crawler::CrawlerKind for millipede_core::crawler::BasicKind
+pub type millipede_core::crawler::BasicKind::Context = millipede_core::crawler::BasicContext
+pub fn millipede_core::crawler::BasicKind::after_success<'a>(&'a self, &'a mut Self::Context) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::BasicKind::before_request<'a>(&'a self, &'a mut millipede_core::crawler::RequestPrep) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::BasicKind::cleanup(&self, millipede_core::crawler::RequestOutcome<millipede_core::crawler::BasicContext>) -> futures_core::future::BoxFuture<'_, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::BasicKind::execute<'a>(&'a self, millipede_core::crawler::RequestEnv<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<millipede_core::crawler::BasicContext, millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::BasicKind::start<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::BasicKind::stop<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
 pub trait millipede_core::prelude::Dataset: core::marker::Send + core::marker::Sync
 pub fn millipede_core::prelude::Dataset::export_csv<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 std::path::Path) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
 pub fn millipede_core::prelude::Dataset::export_json<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 std::path::Path) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
@@ -1181,6 +1427,8 @@ impl<F, Fut> millipede_core::handler::FailedRequestHandler for F where F: core::
 pub fn F::handle(&self, millipede_core::handler::FailedRequestContext) -> futures_core::future::BoxFuture<'static, core::result::Result<(), millipede_core::errors::CrawlError>>
 pub trait millipede_core::prelude::HasRequest
 pub fn millipede_core::prelude::HasRequest::request(&self) -> &millipede_core::request::Request
+impl millipede_core::router::HasRequest for millipede_core::crawler::BasicContext
+pub fn millipede_core::crawler::BasicContext::request(&self) -> &millipede_core::request::Request
 pub trait millipede_core::prelude::IntoUrl
 pub fn millipede_core::prelude::IntoUrl::into_url(self) -> core::result::Result<url::Url, url::parser::ParseError>
 impl millipede_core::request::IntoUrl for &alloc::string::String
@@ -1231,6 +1479,7 @@ pub fn millipede_core::prelude::StorageClient::open_request_queue<'life0, 'life1
 pub fn millipede_core::prelude::StorageClient::purge<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
 pub type millipede_core::prelude::EventStream = tokio::sync::broadcast::Receiver<millipede_core::events::CrawlerEvent>
 pub type millipede_core::prelude::QueueOpInfo = millipede_core::storage::ProcessedRequest
+pub type millipede_core::prelude::ResultStream = tokio::sync::broadcast::Receiver<millipede_core::events::HandledRequest>
 pub type millipede_core::prelude::StorageResult<T> = core::result::Result<T, millipede_core::storage::StorageError>
 pub mod millipede_core::request
 pub use millipede_core::request::HeaderMap
@@ -1491,6 +1740,8 @@ impl<C> !core::panic::unwind_safe::RefUnwindSafe for millipede_core::router::Rou
 impl<C> !core::panic::unwind_safe::UnwindSafe for millipede_core::router::Router<C>
 pub trait millipede_core::router::HasRequest
 pub fn millipede_core::router::HasRequest::request(&self) -> &millipede_core::request::Request
+impl millipede_core::router::HasRequest for millipede_core::crawler::BasicContext
+pub fn millipede_core::crawler::BasicContext::request(&self) -> &millipede_core::request::Request
 pub mod millipede_core::statistics
 pub struct millipede_core::statistics::FinalStatistics
 pub millipede_core::statistics::FinalStatistics::crawler_runtime: core::time::Duration

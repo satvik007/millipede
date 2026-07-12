@@ -2,6 +2,8 @@
 
 /// Crawler configuration and environment resolution.
 pub mod config;
+/// Crawler lifecycle kinds, handles, and shared state.
+pub mod crawler;
 /// Crawl error taxonomy and retry classification.
 pub mod errors;
 /// Crawler lifecycle events and broadcast support.
@@ -20,9 +22,13 @@ pub mod storage;
 /// Commonly used items from this crate.
 pub mod prelude {
     pub use crate::config::{Configuration, ConfigurationBuilder, LogLevel};
+    pub use crate::crawler::{
+        BasicContext, BasicKind, CrawlerEnv, CrawlerHandle, CrawlerKind, RequestEnv,
+        RequestOutcome, RequestPrep,
+    };
     pub use crate::errors::{AntiBotTech, CrawlError};
     pub use crate::events::{
-        CrawlerEvent, EventBus, EventStream, HandledRequest, RequestFinalState,
+        CrawlerEvent, EventBus, EventStream, HandledRequest, RequestFinalState, ResultStream,
     };
     pub use crate::handler::{
         FailedRequestContext, FailedRequestHandler, Middleware, RequestHandler,
