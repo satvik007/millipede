@@ -122,6 +122,8 @@ impl<K: CrawlerKind> Engine<K> {
                     break;
                 }
                 let notified = self.shared.notify.notified();
+                tokio::pin!(notified);
+                notified.as_mut().enable();
                 if self
                     .queue_flag("is_finished", self.shared.queue.is_finished())
                     .await
@@ -137,7 +139,7 @@ impl<K: CrawlerKind> Engine<K> {
                     continue;
                 }
                 tokio::select! {
-                    _ = notified => {},
+                    _ = &mut notified => {},
                     _ = self.shared.cancel.cancelled() => {},
                     _ = self.shared.drain.cancelled(), if !draining => { draining = true; },
                     _ = ticker.tick() => self.persist_state().await,
@@ -552,16 +554,82 @@ mod tests {
         events::EventBus,
         router::Router,
         statistics::STATISTICS_PERSIST_KEY,
-        storage::{AddOptions, StorageClient},
+        storage::{
+            AddOptions, BatchAddHandle, LeaseId, QueueOpInfo, ReclaimOptions, RequestQueue,
+            RequestSource, StorageClient, StorageResult,
+        },
     };
     use std::{
         collections::HashSet,
         sync::{
             Mutex,
-            atomic::{AtomicUsize, Ordering},
+            atomic::{AtomicBool, AtomicUsize, Ordering},
         },
     };
     use tokio::sync::{Barrier, Notify};
+
+    struct IdleWindowQueue {
+        inner: Arc<dyn RequestQueue>,
+        blocked_empty_check: AtomicBool,
+        empty_check_started: Arc<Notify>,
+        release_empty_check: Arc<Notify>,
+    }
+
+    #[async_trait::async_trait]
+    impl RequestQueue for IdleWindowQueue {
+        async fn add(&self, request: Request, options: AddOptions) -> StorageResult<QueueOpInfo> {
+            self.inner.add(request, options).await
+        }
+
+        async fn add_batch(
+            &self,
+            requests: Vec<RequestSource>,
+            options: AddOptions,
+        ) -> StorageResult<BatchAddHandle> {
+            self.inner.add_batch(requests, options).await
+        }
+
+        async fn fetch_next(&self) -> StorageResult<Option<Lease>> {
+            self.inner.fetch_next().await
+        }
+
+        async fn mark_handled(&self, lease: Lease) -> StorageResult<()> {
+            self.inner.mark_handled(lease).await
+        }
+
+        async fn reclaim(&self, lease: Lease, options: ReclaimOptions) -> StorageResult<()> {
+            self.inner.reclaim(lease, options).await
+        }
+
+        async fn renew(&self, lease_id: &LeaseId, extend_by: Duration) -> StorageResult<()> {
+            self.inner.renew(lease_id, extend_by).await
+        }
+
+        async fn abandon(&self, lease: Lease) -> StorageResult<()> {
+            self.inner.abandon(lease).await
+        }
+
+        async fn is_empty(&self) -> StorageResult<bool> {
+            let is_empty = self.inner.is_empty().await?;
+            if is_empty && !self.blocked_empty_check.swap(true, Ordering::SeqCst) {
+                self.empty_check_started.notify_one();
+                self.release_empty_check.notified().await;
+            }
+            Ok(is_empty)
+        }
+
+        async fn is_finished(&self) -> StorageResult<bool> {
+            self.inner.is_finished().await.map(|_| false)
+        }
+
+        async fn handled_count(&self) -> StorageResult<u64> {
+            self.inner.handled_count().await
+        }
+
+        async fn pending_count(&self) -> StorageResult<u64> {
+            self.inner.pending_count().await
+        }
+    }
 
     async fn engine_with<H, F>(
         n_requests: usize,
@@ -1252,9 +1320,13 @@ mod tests {
             .wait()
             .await
             .unwrap();
-        while completed.load(Ordering::SeqCst) < 2 {
-            tokio::task::yield_now().await;
-        }
+        tokio::time::timeout(Duration::from_secs(2), async {
+            while completed.load(Ordering::SeqCst) < 2 {
+                tokio::task::yield_now().await;
+            }
+        })
+        .await
+        .expect("late external request should complete without waiting for the persist ticker");
         handle.stop();
         let stats = tokio::time::timeout(Duration::from_secs(1), run)
             .await
@@ -1263,5 +1335,73 @@ mod tests {
             .unwrap();
         assert_eq!(stats.requests_finished, 2);
         assert_eq!(peak.load(Ordering::SeqCst), 2);
+    }
+
+    #[tokio::test]
+    async fn idle_engine_preserves_notify_during_queue_check() {
+        let completed = Arc::new(AtomicUsize::new(0));
+        let (mut engine, original_shared) = engine_with(
+            1,
+            1,
+            {
+                let completed = completed.clone();
+                move |_ctx: BasicContext| {
+                    let completed = completed.clone();
+                    async move {
+                        tokio::time::sleep(Duration::from_millis(30)).await;
+                        completed.fetch_add(1, Ordering::SeqCst);
+                        Ok(())
+                    }
+                }
+            },
+            |opts| opts.persist_state_interval = Duration::from_secs(60),
+        )
+        .await;
+        let empty_check_started = Arc::new(Notify::new());
+        let release_empty_check = Arc::new(Notify::new());
+        let queue: Arc<dyn RequestQueue> = Arc::new(IdleWindowQueue {
+            inner: original_shared.queue.clone(),
+            blocked_empty_check: AtomicBool::new(false),
+            empty_check_started: empty_check_started.clone(),
+            release_empty_check: release_empty_check.clone(),
+        });
+        let shared = Arc::new(CrawlerShared::new(
+            queue,
+            EventBus::default(),
+            2048,
+            engine.opts.internal_operation_timeout,
+        ));
+        engine.shared = shared.clone();
+        let handle = CrawlerHandle::new(Arc::downgrade(&shared));
+        let run = tokio::spawn(engine.run());
+
+        tokio::time::timeout(Duration::from_secs(1), empty_check_started.notified())
+            .await
+            .expect("engine should reach the empty-queue idle check");
+        handle
+            .add_requests([Request::get("https://example.invalid/late-idle")
+                .build()
+                .unwrap()])
+            .await
+            .unwrap()
+            .wait()
+            .await
+            .unwrap();
+        release_empty_check.notify_one();
+
+        tokio::time::timeout(Duration::from_secs(2), async {
+            while completed.load(Ordering::SeqCst) < 2 {
+                tokio::task::yield_now().await;
+            }
+        })
+        .await
+        .expect("enabled idle notification should survive the queue check await");
+        handle.stop();
+        let stats = tokio::time::timeout(Duration::from_secs(1), run)
+            .await
+            .unwrap()
+            .unwrap()
+            .unwrap();
+        assert_eq!(stats.requests_finished, 2);
     }
 }

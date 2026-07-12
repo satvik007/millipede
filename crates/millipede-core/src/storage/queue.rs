@@ -153,6 +153,33 @@ impl BatchAddHandle {
         }
     }
 
+    /// Runs `notify` after this batch completes, even if the public handle is never awaited.
+    pub(crate) fn notify_on_completion<F>(self, notify: F) -> Self
+    where
+        F: FnOnce() + Send + 'static,
+    {
+        let Self { added, completion } = self;
+        match completion {
+            Completion::Ready(result) => {
+                notify();
+                Self {
+                    added,
+                    completion: Completion::Ready(result),
+                }
+            }
+            Completion::Task(task) => Self {
+                added,
+                completion: Completion::Task(tokio::spawn(async move {
+                    let result = task.await.map_err(|error| {
+                        StorageError::Backend(anyhow::anyhow!("batch add task failed: {error}"))
+                    });
+                    notify();
+                    result?
+                })),
+            },
+        }
+    }
+
     /// Waits until all requests in the batch have been processed.
     pub async fn wait(self) -> StorageResult<AddRequestsBatchedResult> {
         match self.completion {

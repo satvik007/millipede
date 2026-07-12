@@ -237,7 +237,9 @@ struct DeferredQueue {
     inner: Arc<MemoryRequestQueue>,
     add_calls: AtomicUsize,
     completion_pending: Arc<AtomicBool>,
+    initial_finished: Arc<AtomicBool>,
     deferred_returned: Arc<tokio::sync::Notify>,
+    reached_idle: Arc<tokio::sync::Notify>,
     complete_deferred: Arc<tokio::sync::Notify>,
 }
 
@@ -275,7 +277,14 @@ impl RequestQueue for DeferredQueue {
     }
 
     async fn fetch_next(&self) -> StorageResult<Option<Lease>> {
-        self.inner.fetch_next().await
+        let lease = self.inner.fetch_next().await?;
+        if lease.is_none()
+            && self.initial_finished.load(Ordering::SeqCst)
+            && self.completion_pending.load(Ordering::SeqCst)
+        {
+            self.reached_idle.notify_one();
+        }
+        Ok(lease)
     }
     async fn mark_handled(&self, lease: Lease) -> StorageResult<()> {
         self.inner.mark_handled(lease).await
@@ -335,7 +344,9 @@ async fn crawler_add_requests_wakes_engine_after_deferred_completion()
             inner: Arc::new(MemoryRequestQueue::new("deferred")),
             add_calls: AtomicUsize::new(0),
             completion_pending: Arc::new(AtomicBool::new(false)),
+            initial_finished: Arc::new(AtomicBool::new(false)),
             deferred_returned: Arc::new(tokio::sync::Notify::new()),
+            reached_idle: Arc::new(tokio::sync::Notify::new()),
             complete_deferred: Arc::new(tokio::sync::Notify::new()),
         });
         let storage: Arc<dyn StorageClient> = Arc::new(DeferredStorage {
@@ -344,19 +355,23 @@ async fn crawler_add_requests_wakes_engine_after_deferred_completion()
         });
         let initial_started = Arc::new(tokio::sync::Notify::new());
         let release_initial = Arc::new(tokio::sync::Notify::new());
+        let initial_finished = queue.initial_finished.clone();
         let crawler = Arc::new(
             Crawler::builder(BasicKind)
                 .storage_client(storage)
                 .request_handler({
                     let initial_started = initial_started.clone();
                     let release_initial = release_initial.clone();
+                    let initial_finished = initial_finished.clone();
                     move |ctx: BasicContext| {
                         let initial_started = initial_started.clone();
                         let release_initial = release_initial.clone();
+                        let initial_finished = initial_finished.clone();
                         async move {
                             if ctx.request.url.path() == "/initial" {
                                 initial_started.notify_one();
                                 release_initial.notified().await;
+                                initial_finished.store(true, Ordering::SeqCst);
                             }
                             Ok(())
                         }
@@ -371,22 +386,23 @@ async fn crawler_add_requests_wakes_engine_after_deferred_completion()
             tokio::spawn(async move { crawler.run(["https://example.com/initial"]).await })
         };
         initial_started.notified().await;
-        let adding = {
-            let crawler = crawler.clone();
-            tokio::spawn(async move {
-                crawler
-                    .add_requests([Request::get("https://example.com/deferred").build()?])
-                    .await
-            })
-        };
+        let batch = crawler
+            .handle()
+            .add_requests([Request::get("https://example.com/deferred").build()?])
+            .await?;
         queue.deferred_returned.notified().await;
         release_initial.notify_one();
-        tokio::task::yield_now().await;
+        queue.reached_idle.notified().await;
+        tokio::time::sleep(Duration::from_millis(20)).await;
         queue.complete_deferred.notify_one();
 
-        adding.await??;
-        let stats = running.await??;
-        assert_eq!(stats.requests_finished, 2);
+        tokio::time::timeout(Duration::from_secs(2), async {
+            batch.wait().await?;
+            let stats = running.await??;
+            assert_eq!(stats.requests_finished, 2);
+            Ok::<_, Box<dyn std::error::Error>>(())
+        })
+        .await??;
         Ok::<_, Box<dyn std::error::Error>>(())
     })
     .await??;

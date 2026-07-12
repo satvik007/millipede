@@ -107,7 +107,6 @@ impl<K: CrawlerKind> Crawler<K> {
         reqs: impl IntoIterator<Item = Request> + Send,
     ) -> Result<(), CrawlError> {
         self.handle().add_requests(reqs).await?.wait().await?;
-        self.shared.notify.notify_waiters();
         Ok(())
     }
     /// Subscribes to terminal request snapshots.
@@ -205,7 +204,10 @@ impl CrawlerHandle {
         )
         .await
         .map_err(|_| CrawlError::retry(anyhow::anyhow!("queue add timed out")))??;
-        shared.notify.notify_waiters();
+        let handle = handle.notify_on_completion({
+            let shared = shared.clone();
+            move || shared.notify.notify_waiters()
+        });
         Ok(handle)
     }
 
