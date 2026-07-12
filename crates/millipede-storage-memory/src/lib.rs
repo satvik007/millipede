@@ -1,6 +1,14 @@
 #![doc = include_str!("../README.md")]
 
+mod client;
+mod dataset;
+mod kvs;
+
+pub use client::MemoryStorageClient;
+pub use dataset::MemoryDataset;
+pub use kvs::MemoryKeyValueStore;
+
 /// Commonly used items from this crate.
-///
-/// Empty until this crate's first real types land (see `docs/ROADMAP.md`).
-pub mod prelude {}
+pub mod prelude {
+    pub use crate::{MemoryDataset, MemoryKeyValueStore, MemoryStorageClient};
+}

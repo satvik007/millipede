@@ -10,3 +10,16 @@ publish = false
 
 [lints]
 workspace = true
+
+[dependencies]
+millipede-core = { path = "../millipede-core", version = "0.1.0" }
+async-trait = { workspace = true }
+serde_json = { workspace = true }
+bytes = { workspace = true }
+time = { workspace = true }
+tokio = { workspace = true }
+futures-util = { workspace = true }
+
+[dev-dependencies]
+serde = { workspace = true }
+tempfile = { workspace = true }

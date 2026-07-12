@@ -382,6 +382,17 @@ version = "0.1.0"
 [[package]]
 name = "millipede-storage-memory"
 version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "bytes",
+ "futures-util",
+ "millipede-core",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "time",
+ "tokio",
+]
 
 [[package]]
 name = "mio"

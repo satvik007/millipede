@@ -43,6 +43,23 @@ pub struct DatasetInfo {
     pub modified_at: time::OffsetDateTime,
 }
 
+impl DatasetInfo {
+    /// Creates dataset metadata for a storage backend.
+    pub fn new(
+        name: String,
+        item_count: u64,
+        created_at: time::OffsetDateTime,
+        modified_at: time::OffsetDateTime,
+    ) -> Self {
+        Self {
+            name,
+            item_count,
+            created_at,
+            modified_at,
+        }
+    }
+}
+
 /// Object-safe storage for append-only JSON records.
 #[async_trait::async_trait]
 pub trait Dataset: Send + Sync {
