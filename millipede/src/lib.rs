@@ -17,6 +17,24 @@ pub use millipede_storage_fs as storage_fs;
 #[cfg(feature = "storage-memory")]
 pub use millipede_storage_memory as storage_memory;
 
+/// Curated public API for ergonomic `millipede::Type` imports.
+pub use millipede_core::config::{Configuration, ConfigurationBuilder, LogLevel};
+pub use millipede_core::errors::{AntiBotTech, CrawlError};
+pub use millipede_core::events::{
+    CrawlerEvent, EventBus, EventStream, HandledRequest, RequestFinalState,
+};
+pub use millipede_core::request::{
+    HeaderMap, IntoUrl, Method, Request, RequestBody, RequestBuilder, RequestId, RequestState,
+    UserData,
+};
+pub use millipede_core::storage::{
+    AddOptions, AutoSaved, Dataset, DatasetExt, KeyValueStore, KeyValueStoreExt, Lease, LeaseId,
+    ListOptions, ProcessedRequest, QueueOpInfo, ReclaimOptions, RequestQueue, RequestSource,
+    StorageClient, StorageError, StorageResult,
+};
+#[cfg(feature = "storage-memory")]
+pub use millipede_storage_memory::{MemoryQueuePolicy, MemoryRequestQueue, MemoryStorageClient};
+
 /// Commonly used items across all enabled Millipede crates.
 ///
 /// Empty until the first real types land (see `docs/ROADMAP.md`).
