@@ -1,0 +1,36 @@
+[package]
+name = "millipede"
+description = "An idiomatic Rust web-crawling library inspired by Crawlee. Umbrella crate re-exporting the Millipede workspace."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+millipede-core = { path = "../crates/millipede-core", version = "0.1.0" }
+millipede-storage-memory = { path = "../crates/millipede-storage-memory", version = "0.1.0", optional = true }
+millipede-storage-fs = { path = "../crates/millipede-storage-fs", version = "0.1.0", optional = true }
+millipede-http = { path = "../crates/millipede-http", version = "0.1.0", optional = true }
+millipede-html = { path = "../crates/millipede-html", version = "0.1.0", optional = true }
+millipede-browser = { path = "../crates/millipede-browser", version = "0.1.0", optional = true }
+millipede-browser-chromiumoxide = { path = "../crates/millipede-browser-chromiumoxide", version = "0.1.0", optional = true }
+millipede-fingerprint = { path = "../crates/millipede-fingerprint", version = "0.1.0", optional = true }
+
+[features]
+default = ["http", "html", "storage-memory"]
+http = ["dep:millipede-http"]
+html = ["dep:millipede-html"]
+storage-memory = ["dep:millipede-storage-memory"]
+storage-fs = ["dep:millipede-storage-fs"]
+browser = ["dep:millipede-browser"]
+browser-chromiumoxide = ["dep:millipede-browser-chromiumoxide", "browser"]
+fingerprint = ["dep:millipede-fingerprint"]
+
+[[example]]
+name = "phase0_hello"
+path = "../examples/phase0_hello.rs"

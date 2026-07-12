@@ -3,6 +3,20 @@
 version = 4
 
 [[package]]
+name = "millipede"
+version = "0.1.0"
+dependencies = [
+ "millipede-browser",
+ "millipede-browser-chromiumoxide",
+ "millipede-core",
+ "millipede-fingerprint",
+ "millipede-html",
+ "millipede-http",
+ "millipede-storage-fs",
+ "millipede-storage-memory",
+]
+
+[[package]]
 name = "millipede-browser"
 version = "0.1.0"
 
