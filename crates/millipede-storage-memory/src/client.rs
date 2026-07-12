@@ -1,7 +1,5 @@
-use crate::{MemoryDataset, MemoryKeyValueStore};
-use millipede_core::storage::{
-    Dataset, KeyValueStore, RequestQueue, StorageClient, StorageError, StorageResult,
-};
+use crate::{MemoryDataset, MemoryKeyValueStore, MemoryRequestQueue};
+use millipede_core::storage::{Dataset, KeyValueStore, RequestQueue, StorageClient, StorageResult};
 use std::{
     collections::HashMap,
     sync::{Arc, Mutex},
@@ -55,14 +53,13 @@ impl StorageClient for MemoryStorageClient {
             .clone())
     }
 
-    async fn open_request_queue(
-        &self,
-        _name: Option<&str>,
-    ) -> StorageResult<Arc<dyn RequestQueue>> {
-        // TODO: Implement the memory request queue in the next commit.
-        Err(StorageError::Unsupported(
-            "memory request queue lands in the next commit",
-        ))
+    async fn open_request_queue(&self, name: Option<&str>) -> StorageResult<Arc<dyn RequestQueue>> {
+        let name = name.unwrap_or("default");
+        let mut queues = self.queues.lock().expect("queues mutex poisoned");
+        Ok(queues
+            .entry(name.to_owned())
+            .or_insert_with(|| Arc::new(MemoryRequestQueue::new(name)))
+            .clone())
     }
 
     /// Empties existing handles, then detaches all datasets, stores, and queues.

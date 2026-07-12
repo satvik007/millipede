@@ -20,6 +20,7 @@ millipede-html = { path = "../crates/millipede-html", version = "0.1.0", optiona
 millipede-browser = { path = "../crates/millipede-browser", version = "0.1.0", optional = true }
 millipede-browser-chromiumoxide = { path = "../crates/millipede-browser-chromiumoxide", version = "0.1.0", optional = true }
 millipede-fingerprint = { path = "../crates/millipede-fingerprint", version = "0.1.0", optional = true }
+tokio = { workspace = true }
 
 [features]
 default = ["http", "html", "storage-memory"]
@@ -34,3 +35,8 @@ fingerprint = ["dep:millipede-fingerprint"]
 [[example]]
 name = "phase0_hello"
 path = "../examples/phase0_hello.rs"
+
+[[example]]
+name = "phase1_queue_demo"
+path = "../examples/phase1_queue_demo.rs"
+required-features = ["storage-memory"]

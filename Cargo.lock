@@ -335,6 +335,7 @@ dependencies = [
  "millipede-http",
  "millipede-storage-fs",
  "millipede-storage-memory",
+ "tokio",
 ]
 
 [[package]]
