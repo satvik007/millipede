@@ -5,6 +5,7 @@ use std::{
     fmt,
     path::{Path, PathBuf},
     str::FromStr,
+    sync::Arc,
     time::Duration,
 };
 
@@ -73,7 +74,7 @@ pub enum ConfigError {
 }
 
 /// Builds a resolved [`Configuration`].
-#[derive(Debug, Default, Clone)]
+#[derive(Default, Clone)]
 pub struct ConfigurationBuilder {
     default_dataset_id: Option<String>,
     default_key_value_store_id: Option<String>,
@@ -85,6 +86,32 @@ pub struct ConfigurationBuilder {
     persist_state_interval: Option<Duration>,
     purge_on_start: Option<bool>,
     log_level: Option<LogLevel>,
+    storage_client: Option<Arc<dyn crate::storage::StorageClient>>,
+}
+
+impl fmt::Debug for ConfigurationBuilder {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("ConfigurationBuilder")
+            .field("default_dataset_id", &self.default_dataset_id)
+            .field(
+                "default_key_value_store_id",
+                &self.default_key_value_store_id,
+            )
+            .field("default_request_queue_id", &self.default_request_queue_id)
+            .field("storage_dir", &self.storage_dir)
+            .field("max_used_cpu_ratio", &self.max_used_cpu_ratio)
+            .field("available_memory_ratio", &self.available_memory_ratio)
+            .field("memory_bytes", &self.memory_bytes)
+            .field("persist_state_interval", &self.persist_state_interval)
+            .field("purge_on_start", &self.purge_on_start)
+            .field("log_level", &self.log_level)
+            .field(
+                "storage_client",
+                &self.storage_client.as_ref().map(|_| "<dyn StorageClient>"),
+            )
+            .finish()
+    }
 }
 
 impl ConfigurationBuilder {
@@ -139,6 +166,12 @@ impl ConfigurationBuilder {
         self
     }
 
+    /// Sets the storage backend client.
+    pub fn storage_client(mut self, value: Arc<dyn crate::storage::StorageClient>) -> Self {
+        self.storage_client = Some(value);
+        self
+    }
+
     /// Resolves this builder using process environment overrides.
     pub fn build(self) -> Result<Configuration, ConfigError> {
         self.build_with_env(|name| std::env::var(name).ok())
@@ -164,6 +197,14 @@ impl ConfigurationBuilder {
             .storage_dir
             .or_else(|| lookup("CRAWLEE_STORAGE_DIR").map(PathBuf::from))
             .unwrap_or_else(|| PathBuf::from("./storage"));
+        let max_used_cpu_ratio = match self.max_used_cpu_ratio {
+            Some(value) => Some(value),
+            None => optional_parse(
+                &lookup,
+                "CRAWLEE_MAX_USED_CPU_RATIO",
+                "expected a floating-point number",
+            )?,
+        };
         let available_memory_ratio = match self.available_memory_ratio {
             Some(value) => Some(value),
             None => optional_parse(
@@ -219,19 +260,19 @@ impl ConfigurationBuilder {
             },
         };
 
-        // storage_client is added together with the storage traits
         Ok(Configuration {
             events: EventBus::default(),
             default_dataset_id,
             default_key_value_store_id,
             default_request_queue_id,
             storage_dir,
-            max_used_cpu_ratio: self.max_used_cpu_ratio,
+            max_used_cpu_ratio,
             available_memory_ratio,
             memory_bytes,
             persist_state_interval,
             purge_on_start,
             log_level,
+            storage_client: self.storage_client,
         })
     }
 }
@@ -266,11 +307,9 @@ fn parse_bool(name: &'static str, value: String) -> Result<bool, ConfigError> {
 
 /// Fully resolved crawler configuration.
 ///
-/// The `storage_client()` getter described by the interface arrives with the storage traits in the
-/// next commit. It will return an optional client because core cannot construct the memory backend
-/// without depending circularly on `millipede-storage-memory`; the Phase 2 crawler builder supplies
-/// the fallback backend instead.
-#[derive(Debug)]
+/// Unlike the interface's non-optional storage getter, core exposes an optional client because it
+/// cannot depend on `millipede-storage-memory` without a dependency cycle. The Phase 2 crawler
+/// builder injects the default backend.
 pub struct Configuration {
     events: EventBus,
     default_dataset_id: String,
@@ -283,6 +322,33 @@ pub struct Configuration {
     persist_state_interval: Duration,
     purge_on_start: bool,
     log_level: LogLevel,
+    storage_client: Option<Arc<dyn crate::storage::StorageClient>>,
+}
+
+impl fmt::Debug for Configuration {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("Configuration")
+            .field("events", &self.events)
+            .field("default_dataset_id", &self.default_dataset_id)
+            .field(
+                "default_key_value_store_id",
+                &self.default_key_value_store_id,
+            )
+            .field("default_request_queue_id", &self.default_request_queue_id)
+            .field("storage_dir", &self.storage_dir)
+            .field("max_used_cpu_ratio", &self.max_used_cpu_ratio)
+            .field("available_memory_ratio", &self.available_memory_ratio)
+            .field("memory_bytes", &self.memory_bytes)
+            .field("persist_state_interval", &self.persist_state_interval)
+            .field("purge_on_start", &self.purge_on_start)
+            .field("log_level", &self.log_level)
+            .field(
+                "storage_client",
+                &self.storage_client.as_ref().map(|_| "<dyn StorageClient>"),
+            )
+            .finish()
+    }
 }
 
 impl Configuration {
@@ -333,6 +399,10 @@ impl Configuration {
     /// Returns the logging verbosity.
     pub fn log_level(&self) -> LogLevel {
         self.log_level
+    }
+    /// Returns the configured storage client, when one was injected.
+    pub fn storage_client(&self) -> Option<&Arc<dyn crate::storage::StorageClient>> {
+        self.storage_client.as_ref()
     }
 }
 
@@ -389,6 +459,16 @@ mod tests {
         )
         .unwrap();
         assert_eq!(config.memory_bytes(), Some(512 * 1024 * 1024));
+    }
+
+    #[test]
+    fn environment_max_used_cpu_ratio_is_resolved() {
+        let config = with_env(
+            Configuration::builder(),
+            &[("CRAWLEE_MAX_USED_CPU_RATIO", "0.75")],
+        )
+        .unwrap();
+        assert_eq!(config.max_used_cpu_ratio(), Some(0.75));
     }
 
     #[test]

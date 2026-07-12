@@ -252,6 +252,24 @@ pub struct RequestBuilder {
 }
 
 impl RequestBuilder {
+    /// Builds and adds this request to a queue.
+    pub async fn enqueue(
+        self,
+        queue: &dyn crate::storage::RequestQueue,
+    ) -> Result<crate::storage::QueueOpInfo, crate::errors::CrawlError> {
+        let forefront = self.is_forefront();
+        let request = self.build()?;
+        Ok(queue
+            .add(
+                request,
+                crate::storage::AddOptions {
+                    forefront,
+                    ..Default::default()
+                },
+            )
+            .await?)
+    }
+
     /// Sets the request URL.
     pub fn url(mut self, url: impl IntoUrl) -> Self {
         self.url = Some(url.into_url());

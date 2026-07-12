@@ -8,6 +8,8 @@ pub mod errors;
 pub mod events;
 /// Request data types and construction helpers.
 pub mod request;
+/// Object-safe storage abstractions and typed convenience wrappers.
+pub mod storage;
 
 /// Commonly used items from this crate.
 pub mod prelude {
@@ -19,5 +21,11 @@ pub mod prelude {
     pub use crate::request::{
         HeaderMap, IntoUrl, Method, Request, RequestBody, RequestBuildError, RequestBuilder,
         RequestId, RequestState, UserData,
+    };
+    pub use crate::storage::{
+        AddOptions, AddRequestsBatchedResult, AutoSaved, BatchAddHandle, Dataset, DatasetExt,
+        DatasetInfo, KeyInfo, KeyList, KeyValueStore, KeyValueStoreExt, KvEntry, Lease, LeaseId,
+        ListKeysOptions, ListOptions, Page, ProcessedRequest, QueueOpInfo, ReclaimOptions,
+        RequestQueue, RequestSource, StorageClient, StorageError, StorageResult,
     };
 }
