@@ -71,6 +71,9 @@ pub enum ConfigError {
     /// A string is not a supported logging level.
     #[error("invalid log level {0:?}")]
     InvalidLogLevel(String),
+    /// The state persistence interval is zero.
+    #[error("persist_state_interval must be greater than zero")]
+    ZeroPersistStateInterval,
 }
 
 /// Builds a resolved [`Configuration`].
@@ -241,6 +244,9 @@ impl ConfigurationBuilder {
                 .unwrap_or(60_000),
             ),
         };
+        if persist_state_interval.is_zero() {
+            return Err(ConfigError::ZeroPersistStateInterval);
+        }
         let purge_on_start = match self.purge_on_start {
             Some(value) => value,
             None => match lookup("CRAWLEE_PURGE_ON_START") {
@@ -308,8 +314,10 @@ fn parse_bool(name: &'static str, value: String) -> Result<bool, ConfigError> {
 /// Fully resolved crawler configuration.
 ///
 /// Unlike the interface's non-optional storage getter, core exposes an optional client because it
-/// cannot depend on `millipede-storage-memory` without a dependency cycle. The Phase 2 crawler
-/// builder injects the default backend.
+/// cannot depend on `millipede-storage-memory` without a dependency cycle. The crawler builder
+/// takes the client from `CrawlerBuilder::storage_client` or `Configuration::storage_client` and
+/// returns `CrawlerBuildError::MissingStorage` when neither is set; default in-memory wiring lives
+/// with the umbrella crate's examples.
 pub struct Configuration {
     events: EventBus,
     default_dataset_id: String,
@@ -479,6 +487,29 @@ mod tests {
         )
         .unwrap();
         assert_eq!(config.persist_state_interval(), Duration::from_secs(5));
+    }
+
+    #[test]
+    fn zero_persist_interval_is_rejected() {
+        let builder_error = with_env(
+            Configuration::builder().persist_state_interval(Duration::ZERO),
+            &[],
+        )
+        .unwrap_err();
+        assert!(matches!(
+            builder_error,
+            ConfigError::ZeroPersistStateInterval
+        ));
+
+        let environment_error = with_env(
+            Configuration::builder(),
+            &[("CRAWLEE_PERSIST_STATE_INTERVAL_MILLIS", "0")],
+        )
+        .unwrap_err();
+        assert!(matches!(
+            environment_error,
+            ConfigError::ZeroPersistStateInterval
+        ));
     }
 
     #[test]

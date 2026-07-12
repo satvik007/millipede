@@ -12,6 +12,7 @@ use std::{collections::HashMap, panic::AssertUnwindSafe, sync::Arc, time::Durati
 use time::OffsetDateTime;
 use tokio::{task::AbortHandle, time::Instant};
 
+#[derive(Clone)]
 pub(crate) struct EngineOptions {
     pub(crate) max_concurrency: usize,
     pub(crate) max_request_retries: u32,

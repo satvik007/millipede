@@ -1,25 +1,136 @@
 //! The crawler engine: lifecycle kinds, handles, and shared state.
 
 mod basic;
-#[allow(dead_code)]
+mod builder;
 mod engine;
+mod start;
 
 pub use basic::{BasicContext, BasicKind};
+pub use builder::{CrawlerBuildError, CrawlerBuilder};
+pub use start::{IntoStartRequest, IntoStartRequests};
 
 use crate::{
     config::Configuration,
     errors::CrawlError,
-    events::{EventBus, EventStream, HandledRequest},
+    events::{EventBus, EventStream, HandledRequest, ResultStream},
+    handler::{FailedRequestHandler, RequestHandler},
     request::Request,
-    statistics::{StatisticsHandle, StatisticsSnapshot},
+    statistics::{FinalStatistics, StatisticsHandle, StatisticsSnapshot},
     storage::{AddOptions, BatchAddHandle, RequestQueue, RequestSource},
 };
 use futures_util::future::BoxFuture;
 use std::{
     fmt,
-    sync::{Arc, Weak},
+    sync::{
+        Arc, Weak,
+        atomic::{AtomicBool, Ordering},
+    },
     time::Duration,
 };
+
+use engine::{Engine, EngineOptions};
+
+/// A configured crawler using lifecycle behavior supplied by `K`.
+pub struct Crawler<K: CrawlerKind> {
+    kind: Arc<K>,
+    shared: Arc<CrawlerShared>,
+    config: Arc<Configuration>,
+    handler: Arc<dyn RequestHandler<K::Context>>,
+    failed_handler: Option<Arc<dyn FailedRequestHandler>>,
+    kvs: Option<Arc<dyn crate::storage::KeyValueStore>>,
+    opts: EngineOptions,
+    started: AtomicBool,
+}
+
+/// The no-HTTP crawler: drives the queue and hands requests straight to the handler.
+pub type BasicCrawler = Crawler<BasicKind>;
+
+impl<K: CrawlerKind> Crawler<K> {
+    /// Starts building a crawler around the given kind.
+    pub fn builder(kind: K) -> CrawlerBuilder<K> {
+        CrawlerBuilder::new(kind)
+    }
+
+    /// Runs the crawl to completion.
+    ///
+    /// A crawler runs at most once; a second call returns a non-retryable error.
+    pub async fn run(&self, start: impl IntoStartRequests) -> Result<FinalStatistics, CrawlError> {
+        if self.started.swap(true, Ordering::SeqCst) {
+            return Err(CrawlError::non_retryable(anyhow::anyhow!(
+                "this crawler has already been run"
+            )));
+        }
+        let start_requests = start.into_start_requests()?;
+        let env = CrawlerEnv {
+            shared: self.shared.clone(),
+            config: self.config.clone(),
+        };
+        self.kind.start(&env).await?;
+        let result = async {
+            let sources = start_requests
+                .into_iter()
+                .map(RequestSource::from)
+                .collect();
+            let batch = tokio::time::timeout(
+                self.opts.internal_operation_timeout,
+                self.shared.queue.add_batch(sources, AddOptions::default()),
+            )
+            .await
+            .map_err(|_| CrawlError::retry(anyhow::anyhow!("queue add timed out")))??;
+            batch.wait().await?;
+            self.shared.notify.notify_waiters();
+            Engine {
+                kind: self.kind.clone(),
+                handler: self.handler.clone(),
+                failed_handler: self.failed_handler.clone(),
+                shared: self.shared.clone(),
+                kvs: self.kvs.clone(),
+                opts: self.opts.clone(),
+            }
+            .run()
+            .await
+        }
+        .await;
+        if let Err(error) = self.kind.stop(&env).await {
+            tracing::warn!(%error, "crawler kind stop failed");
+        }
+        result
+    }
+
+    /// Creates a weak handle to this crawler.
+    pub fn handle(&self) -> CrawlerHandle {
+        CrawlerHandle::new(Arc::downgrade(&self.shared))
+    }
+    /// Adds requests and waits until the complete batch has been accepted.
+    pub async fn add_requests(
+        &self,
+        reqs: impl IntoIterator<Item = Request> + Send,
+    ) -> Result<(), CrawlError> {
+        self.handle().add_requests(reqs).await?.wait().await?;
+        self.shared.notify.notify_waiters();
+        Ok(())
+    }
+    /// Subscribes to terminal request snapshots.
+    pub fn results(&self) -> ResultStream {
+        self.shared.results_tx.subscribe()
+    }
+    /// Subscribes to control-plane crawler events.
+    pub fn events(&self) -> EventStream {
+        self.shared.events.subscribe()
+    }
+    /// Returns the live statistics handle.
+    pub fn stats(&self) -> StatisticsHandle {
+        self.shared.stats.clone()
+    }
+    /// Signals a graceful drain.
+    pub fn stop(&self) {
+        self.handle().stop();
+    }
+    /// Signals immediate cancellation.
+    pub fn abort(&self) {
+        self.handle().abort();
+    }
+}
 
 pub(crate) struct CrawlerShared {
     pub(crate) queue: Arc<dyn RequestQueue>,

@@ -43,3 +43,8 @@ path = "../examples/phase0_hello.rs"
 name = "phase1_queue_demo"
 path = "../examples/phase1_queue_demo.rs"
 required-features = ["storage-memory"]
+
+[[example]]
+name = "basic_engine"
+path = "../examples/basic_engine.rs"
+required-features = ["storage-memory"]

@@ -19,28 +19,23 @@ pub use millipede_storage_memory as storage_memory;
 
 /// Curated public API for ergonomic `millipede::Type` imports.
 pub use millipede_core::config::{Configuration, ConfigurationBuilder, LogLevel};
+pub use millipede_core::crawler::{
+    BasicContext, BasicCrawler, BasicKind, Crawler, CrawlerBuildError, CrawlerBuilder, CrawlerEnv,
+    CrawlerHandle, CrawlerKind, IntoStartRequest, IntoStartRequests, RequestEnv, RequestOutcome,
+    RequestPrep,
+};
 pub use millipede_core::errors::{AntiBotTech, CrawlError};
 pub use millipede_core::events::{
-    CrawlerEvent, EventBus, EventStream, HandledRequest, RequestFinalState,
+    CrawlerEvent, EventBus, EventStream, HandledRequest, RequestFinalState, ResultStream,
 };
-/// Context passed to a [`FailedRequestHandler`] after request handling fails.
-pub use millipede_core::handler::FailedRequestContext;
-/// Handler invoked after a request exhausts its retry policy.
-pub use millipede_core::handler::FailedRequestHandler;
-/// Middleware that wraps request-handler execution.
-pub use millipede_core::handler::Middleware;
-/// Asynchronous handler for a crawler request context.
-pub use millipede_core::handler::RequestHandler;
+pub use millipede_core::handler::{
+    FailedRequestContext, FailedRequestHandler, Middleware, RequestHandler,
+};
 pub use millipede_core::request::{
     HeaderMap, IntoUrl, Method, Request, RequestBody, RequestBuilder, RequestId, RequestState,
     UserData,
 };
-/// Accesses the request associated with a router context.
-pub use millipede_core::router::HasRequest;
-/// HTTP method constraint used when matching a route.
-pub use millipede_core::router::MethodFilter;
-/// Routes request contexts by label and HTTP method.
-pub use millipede_core::router::Router;
+pub use millipede_core::router::{HasRequest, MethodFilter, Router};
 pub use millipede_core::statistics::{
     FinalStatistics, STATISTICS_PERSIST_KEY, StatisticsHandle, StatisticsSnapshot,
 };

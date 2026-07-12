@@ -53,7 +53,8 @@ pub mod storage;
 pub mod prelude {
     pub use crate::config::{Configuration, ConfigurationBuilder, LogLevel};
     pub use crate::crawler::{
-        BasicContext, BasicKind, CrawlerEnv, CrawlerHandle, CrawlerKind, RequestEnv,
+        BasicContext, BasicCrawler, BasicKind, Crawler, CrawlerBuildError, CrawlerBuilder,
+        CrawlerEnv, CrawlerHandle, CrawlerKind, IntoStartRequest, IntoStartRequests, RequestEnv,
         RequestOutcome, RequestPrep,
     };
     pub use crate::errors::{AntiBotTech, CrawlError};
