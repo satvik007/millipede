@@ -2,7 +2,7 @@
 
 An idiomatic Rust web-crawling library inspired by Crawlee.
 
-> **Status: pre-alpha.** Phase 0 (the project skeleton) is complete, but the API does not exist yet. See the [roadmap](docs/ROADMAP.md) for the implementation plan and the [interface design](docs/INTERFACE.md) for the target API. CI badges and green runs activate on the first push to GitHub; the workflows are already committed but have not yet been exercised.
+> **Status: pre-alpha.** Phase 0 (the project skeleton) is complete, but the API does not exist yet. See the [roadmap](docs/ROADMAP.md) for the implementation plan and the [interface design](docs/INTERFACE.md) for the target API. The CI-green exit criterion is deferred until the workflows are exercised on the first push to GitHub.
 
 ## Workspace layout
 
