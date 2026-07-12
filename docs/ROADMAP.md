@@ -13,7 +13,7 @@ The companion `INTERFACE.md` describes the target API. This document describes *
 3. **The public API is permitted to break until 1.0.** We use `0.x.y` semver — `0.x.0` may break; `0.x.y` does not.
 4. **No premature browser work.** A user crawling 90% of the modern web from Rust will use HTTP + HTML parsing. Browser support is real work and must not block earlier value.
 5. **Reference Crawlee, do not transliterate it.** When in doubt, ask "what would a Rust user expect?" before "what does Crawlee do?".
-6. **MSRV: Rust 1.75 stable** (for stable `async fn` in traits, where used). Re-evaluate at each phase.
+6. **MSRV: Rust 1.85 stable** (edition 2024 floor; see docs/decisions/ADR-0001-msrv-and-async-traits.md). Re-evaluate at each phase.
 
 ---
 
