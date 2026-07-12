@@ -97,6 +97,21 @@ jobs:
           done
       - run: git diff --exit-code docs/api-baselines
 
+  semver-checks:
+    name: cargo-semver-checks
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-semver-checks
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo semver-checks check-release --workspace --baseline-rev "${{ github.event.pull_request.base.sha }}"
+
   msrv:
     name: MSRV 1.85 (${{ matrix.os }})
     strategy:
