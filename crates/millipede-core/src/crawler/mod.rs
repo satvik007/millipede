@@ -1,6 +1,8 @@
 //! The crawler engine: lifecycle kinds, handles, and shared state.
 
 mod basic;
+#[allow(dead_code)]
+mod engine;
 
 pub use basic::{BasicContext, BasicKind};
 
