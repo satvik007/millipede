@@ -1,0 +1,12 @@
+[package]
+name = "millipede-core"
+description = "Core primitives for the Millipede web crawler: request model, storage traits, events, errors, configuration."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[lints]
+workspace = true

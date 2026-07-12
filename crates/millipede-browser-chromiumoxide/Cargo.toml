@@ -1,0 +1,12 @@
+[package]
+name = "millipede-browser-chromiumoxide"
+description = "Chromium CDP browser provider for the Millipede web crawler, via chromiumoxide."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[lints]
+workspace = true

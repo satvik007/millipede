@@ -1,0 +1,12 @@
+[package]
+name = "millipede-browser"
+description = "BrowserCrawler core, BrowserProvider trait, and BrowserPool for the Millipede web crawler."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[lints]
+workspace = true
