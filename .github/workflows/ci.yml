@@ -57,6 +57,7 @@ jobs:
       - run: cargo test --workspace --all-features
       - run: cargo test -p millipede --no-default-features
       - run: cargo run -p millipede --example phase0_hello
+      - run: cargo run -p millipede --example phase1_queue_demo
 
   doc:
     name: rustdoc (${{ matrix.os }})
@@ -76,20 +77,25 @@ jobs:
   public-api:
     name: public API
     runs-on: ubuntu-latest
+    env:
+      CARGO_PUBLIC_API_VERSION: 0.52.0
+      PUBLIC_API_TOOLCHAIN: nightly-2026-07-12
     steps:
       - uses: actions/checkout@v4
-      # cargo-public-api 0.52.x supports rustdoc JSON from nightly-2025-08-02 onward.
-      # Regenerate with the two cargo rustdoc commands below, then run:
-      # cp target/public-api-core/doc/millipede_core.json crates/millipede-core/public-api/millipede_core.json
-      # cp target/public-api-memory/doc/millipede_storage_memory.json crates/millipede-storage-memory/public-api/millipede_storage_memory.json
-      - uses: dtolnay/rust-toolchain@nightly-2026-05-25
-      - uses: taiki-e/install-action@v2
+      - run: rustup toolchain install "$PUBLIC_API_TOOLCHAIN" --profile minimal
+      - uses: actions/cache@v4
+        id: cargo-public-api-cache
         with:
-          tool: cargo-public-api@0.52.0
-      - run: cargo rustdoc -p millipede-core --lib --target-dir target/public-api-core -- -Z unstable-options --output-format json
-      - run: cargo rustdoc -p millipede-storage-memory --lib --target-dir target/public-api-memory -- -Z unstable-options --output-format json
-      - run: cargo public-api diff crates/millipede-core/public-api/millipede_core.json target/public-api-core/doc/millipede_core.json --deny removed --deny changed
-      - run: cargo public-api diff crates/millipede-storage-memory/public-api/millipede_storage_memory.json target/public-api-memory/doc/millipede_storage_memory.json --deny removed --deny changed
+          path: ~/.cargo/bin/cargo-public-api
+          key: ${{ runner.os }}-cargo-public-api-${{ env.CARGO_PUBLIC_API_VERSION }}
+      - if: steps.cargo-public-api-cache.outputs.cache-hit != 'true'
+        run: cargo install --locked cargo-public-api --version "$CARGO_PUBLIC_API_VERSION"
+      - name: Regenerate public API baselines
+        run: |
+          for c in millipede millipede-core millipede-storage-memory millipede-storage-fs millipede-http millipede-html millipede-browser millipede-browser-chromiumoxide millipede-fingerprint; do
+            cargo +"$PUBLIC_API_TOOLCHAIN" public-api -p "$c" --simplified > "docs/api-baselines/$c.txt"
+          done
+      - run: git diff --exit-code docs/api-baselines
 
   msrv:
     name: MSRV 1.85 (${{ matrix.os }})

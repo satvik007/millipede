@@ -1,0 +1,1598 @@
+pub mod millipede_core
+pub mod millipede_core::config
+pub enum millipede_core::config::ConfigError
+pub millipede_core::config::ConfigError::InvalidEnvVar
+pub millipede_core::config::ConfigError::InvalidEnvVar::message: alloc::string::String
+pub millipede_core::config::ConfigError::InvalidEnvVar::name: &'static str
+pub millipede_core::config::ConfigError::InvalidEnvVar::value: alloc::string::String
+pub millipede_core::config::ConfigError::InvalidLogLevel(alloc::string::String)
+impl core::error::Error for millipede_core::config::ConfigError
+impl core::fmt::Debug for millipede_core::config::ConfigError
+pub fn millipede_core::config::ConfigError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::config::ConfigError
+pub fn millipede_core::config::ConfigError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::config::ConfigError
+impl core::marker::Send for millipede_core::config::ConfigError
+impl core::marker::Sync for millipede_core::config::ConfigError
+impl core::marker::Unpin for millipede_core::config::ConfigError
+impl core::marker::UnsafeUnpin for millipede_core::config::ConfigError
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::config::ConfigError
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::config::ConfigError
+pub enum millipede_core::config::LogLevel
+pub millipede_core::config::LogLevel::Debug
+pub millipede_core::config::LogLevel::Error
+pub millipede_core::config::LogLevel::Info
+pub millipede_core::config::LogLevel::Off
+pub millipede_core::config::LogLevel::Trace
+pub millipede_core::config::LogLevel::Warn
+impl core::clone::Clone for millipede_core::config::LogLevel
+pub fn millipede_core::config::LogLevel::clone(&self) -> millipede_core::config::LogLevel
+impl core::cmp::Eq for millipede_core::config::LogLevel
+impl core::cmp::PartialEq for millipede_core::config::LogLevel
+pub fn millipede_core::config::LogLevel::eq(&self, &millipede_core::config::LogLevel) -> bool
+impl core::fmt::Debug for millipede_core::config::LogLevel
+pub fn millipede_core::config::LogLevel::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::config::LogLevel
+pub fn millipede_core::config::LogLevel::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for millipede_core::config::LogLevel
+impl core::marker::StructuralPartialEq for millipede_core::config::LogLevel
+impl core::str::traits::FromStr for millipede_core::config::LogLevel
+pub type millipede_core::config::LogLevel::Err = millipede_core::config::ConfigError
+pub fn millipede_core::config::LogLevel::from_str(&str) -> core::result::Result<Self, Self::Err>
+impl core::marker::Freeze for millipede_core::config::LogLevel
+impl core::marker::Send for millipede_core::config::LogLevel
+impl core::marker::Sync for millipede_core::config::LogLevel
+impl core::marker::Unpin for millipede_core::config::LogLevel
+impl core::marker::UnsafeUnpin for millipede_core::config::LogLevel
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::config::LogLevel
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::config::LogLevel
+pub struct millipede_core::config::Configuration
+impl millipede_core::config::Configuration
+pub fn millipede_core::config::Configuration::available_memory_ratio(&self) -> core::option::Option<f32>
+pub fn millipede_core::config::Configuration::builder() -> millipede_core::config::ConfigurationBuilder
+pub fn millipede_core::config::Configuration::default_dataset_id(&self) -> &str
+pub fn millipede_core::config::Configuration::default_key_value_store_id(&self) -> &str
+pub fn millipede_core::config::Configuration::default_request_queue_id(&self) -> &str
+pub fn millipede_core::config::Configuration::events(&self) -> &millipede_core::events::EventBus
+pub fn millipede_core::config::Configuration::log_level(&self) -> millipede_core::config::LogLevel
+pub fn millipede_core::config::Configuration::max_used_cpu_ratio(&self) -> core::option::Option<f32>
+pub fn millipede_core::config::Configuration::memory_bytes(&self) -> core::option::Option<u64>
+pub fn millipede_core::config::Configuration::persist_state_interval(&self) -> core::time::Duration
+pub fn millipede_core::config::Configuration::purge_on_start(&self) -> bool
+pub fn millipede_core::config::Configuration::storage_client(&self) -> core::option::Option<&alloc::sync::Arc<dyn millipede_core::storage::StorageClient>>
+pub fn millipede_core::config::Configuration::storage_dir(&self) -> &std::path::Path
+impl core::default::Default for millipede_core::config::Configuration
+pub fn millipede_core::config::Configuration::default() -> Self
+impl core::fmt::Debug for millipede_core::config::Configuration
+pub fn millipede_core::config::Configuration::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::config::Configuration
+impl core::marker::Send for millipede_core::config::Configuration
+impl core::marker::Sync for millipede_core::config::Configuration
+impl core::marker::Unpin for millipede_core::config::Configuration
+impl core::marker::UnsafeUnpin for millipede_core::config::Configuration
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::config::Configuration
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::config::Configuration
+pub struct millipede_core::config::ConfigurationBuilder
+impl millipede_core::config::ConfigurationBuilder
+pub fn millipede_core::config::ConfigurationBuilder::available_memory_ratio(self, f32) -> Self
+pub fn millipede_core::config::ConfigurationBuilder::build(self) -> core::result::Result<millipede_core::config::Configuration, millipede_core::config::ConfigError>
+pub fn millipede_core::config::ConfigurationBuilder::default_dataset_id(self, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_core::config::ConfigurationBuilder::default_key_value_store_id(self, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_core::config::ConfigurationBuilder::default_request_queue_id(self, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_core::config::ConfigurationBuilder::log_level(self, millipede_core::config::LogLevel) -> Self
+pub fn millipede_core::config::ConfigurationBuilder::max_used_cpu_ratio(self, f32) -> Self
+pub fn millipede_core::config::ConfigurationBuilder::memory_bytes(self, u64) -> Self
+pub fn millipede_core::config::ConfigurationBuilder::persist_state_interval(self, core::time::Duration) -> Self
+pub fn millipede_core::config::ConfigurationBuilder::purge_on_start(self, bool) -> Self
+pub fn millipede_core::config::ConfigurationBuilder::storage_client(self, alloc::sync::Arc<dyn millipede_core::storage::StorageClient>) -> Self
+pub fn millipede_core::config::ConfigurationBuilder::storage_dir(self, impl core::convert::Into<std::path::PathBuf>) -> Self
+impl core::clone::Clone for millipede_core::config::ConfigurationBuilder
+pub fn millipede_core::config::ConfigurationBuilder::clone(&self) -> millipede_core::config::ConfigurationBuilder
+impl core::default::Default for millipede_core::config::ConfigurationBuilder
+pub fn millipede_core::config::ConfigurationBuilder::default() -> millipede_core::config::ConfigurationBuilder
+impl core::fmt::Debug for millipede_core::config::ConfigurationBuilder
+pub fn millipede_core::config::ConfigurationBuilder::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::config::ConfigurationBuilder
+impl core::marker::Send for millipede_core::config::ConfigurationBuilder
+impl core::marker::Sync for millipede_core::config::ConfigurationBuilder
+impl core::marker::Unpin for millipede_core::config::ConfigurationBuilder
+impl core::marker::UnsafeUnpin for millipede_core::config::ConfigurationBuilder
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::config::ConfigurationBuilder
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::config::ConfigurationBuilder
+pub mod millipede_core::errors
+#[non_exhaustive] pub enum millipede_core::errors::AntiBotTech
+pub millipede_core::errors::AntiBotTech::Akamai
+pub millipede_core::errors::AntiBotTech::Cloudflare
+pub millipede_core::errors::AntiBotTech::Custom(alloc::string::String)
+pub millipede_core::errors::AntiBotTech::DataDome
+pub millipede_core::errors::AntiBotTech::Imperva
+pub millipede_core::errors::AntiBotTech::Kasada
+pub millipede_core::errors::AntiBotTech::PerimeterX
+pub millipede_core::errors::AntiBotTech::Unknown
+impl core::clone::Clone for millipede_core::errors::AntiBotTech
+pub fn millipede_core::errors::AntiBotTech::clone(&self) -> millipede_core::errors::AntiBotTech
+impl core::cmp::Eq for millipede_core::errors::AntiBotTech
+impl core::cmp::PartialEq for millipede_core::errors::AntiBotTech
+pub fn millipede_core::errors::AntiBotTech::eq(&self, &millipede_core::errors::AntiBotTech) -> bool
+impl core::fmt::Debug for millipede_core::errors::AntiBotTech
+pub fn millipede_core::errors::AntiBotTech::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_core::errors::AntiBotTech
+impl core::marker::Freeze for millipede_core::errors::AntiBotTech
+impl core::marker::Send for millipede_core::errors::AntiBotTech
+impl core::marker::Sync for millipede_core::errors::AntiBotTech
+impl core::marker::Unpin for millipede_core::errors::AntiBotTech
+impl core::marker::UnsafeUnpin for millipede_core::errors::AntiBotTech
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::errors::AntiBotTech
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::errors::AntiBotTech
+pub enum millipede_core::errors::CrawlError
+pub millipede_core::errors::CrawlError::AntiBotDetected
+pub millipede_core::errors::CrawlError::AntiBotDetected::source: anyhow::Error
+pub millipede_core::errors::CrawlError::AntiBotDetected::tech: millipede_core::errors::AntiBotTech
+pub millipede_core::errors::CrawlError::Critical(anyhow::Error)
+pub millipede_core::errors::CrawlError::ForceRetry(anyhow::Error)
+pub millipede_core::errors::CrawlError::MissingRoute
+pub millipede_core::errors::CrawlError::MissingRoute::label: core::option::Option<alloc::string::String>
+pub millipede_core::errors::CrawlError::MissingRoute::method: http::method::Method
+pub millipede_core::errors::CrawlError::NonRetryable(anyhow::Error)
+pub millipede_core::errors::CrawlError::Retry(anyhow::Error)
+pub millipede_core::errors::CrawlError::Session(anyhow::Error)
+impl millipede_core::errors::CrawlError
+pub fn millipede_core::errors::CrawlError::counts_against_retries(&self) -> bool
+pub fn millipede_core::errors::CrawlError::critical<E: core::convert::Into<anyhow::Error>>(E) -> Self
+pub fn millipede_core::errors::CrawlError::fatal<E: core::convert::Into<anyhow::Error>>(E) -> Self
+pub fn millipede_core::errors::CrawlError::force_retry<E: core::convert::Into<anyhow::Error>>(E) -> Self
+pub fn millipede_core::errors::CrawlError::ignores_max_retries(&self) -> bool
+pub fn millipede_core::errors::CrawlError::is_critical(&self) -> bool
+pub fn millipede_core::errors::CrawlError::is_retryable(&self) -> bool
+pub fn millipede_core::errors::CrawlError::non_retryable<E: core::convert::Into<anyhow::Error>>(E) -> Self
+pub fn millipede_core::errors::CrawlError::retry<E: core::convert::Into<anyhow::Error>>(E) -> Self
+pub fn millipede_core::errors::CrawlError::rotates_session(&self) -> bool
+pub fn millipede_core::errors::CrawlError::session<E: core::convert::Into<anyhow::Error>>(E) -> Self
+impl core::convert::From<core::io::error::Error> for millipede_core::errors::CrawlError
+pub fn millipede_core::errors::CrawlError::from(core::io::error::Error) -> Self
+impl core::convert::From<millipede_core::request::RequestBuildError> for millipede_core::errors::CrawlError
+pub fn millipede_core::errors::CrawlError::from(millipede_core::request::RequestBuildError) -> Self
+impl core::convert::From<millipede_core::storage::StorageError> for millipede_core::errors::CrawlError
+pub fn millipede_core::errors::CrawlError::from(millipede_core::storage::StorageError) -> Self
+impl core::convert::From<serde_json::error::Error> for millipede_core::errors::CrawlError
+pub fn millipede_core::errors::CrawlError::from(serde_json::error::Error) -> Self
+impl core::error::Error for millipede_core::errors::CrawlError
+pub fn millipede_core::errors::CrawlError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for millipede_core::errors::CrawlError
+pub fn millipede_core::errors::CrawlError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::errors::CrawlError
+pub fn millipede_core::errors::CrawlError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::errors::CrawlError
+impl core::marker::Send for millipede_core::errors::CrawlError
+impl core::marker::Sync for millipede_core::errors::CrawlError
+impl core::marker::Unpin for millipede_core::errors::CrawlError
+impl core::marker::UnsafeUnpin for millipede_core::errors::CrawlError
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::errors::CrawlError
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::errors::CrawlError
+pub mod millipede_core::events
+pub enum millipede_core::events::CrawlerEvent
+pub millipede_core::events::CrawlerEvent::Aborting
+pub millipede_core::events::CrawlerEvent::Exiting
+pub millipede_core::events::CrawlerEvent::PersistState
+pub millipede_core::events::CrawlerEvent::PersistState::is_migrating: bool
+pub millipede_core::events::CrawlerEvent::RequestFailed
+pub millipede_core::events::CrawlerEvent::RequestFailed::error: alloc::string::String
+pub millipede_core::events::CrawlerEvent::RequestFailed::request: alloc::sync::Arc<millipede_core::request::Request>
+pub millipede_core::events::CrawlerEvent::RequestFinished(millipede_core::events::HandledRequest)
+pub millipede_core::events::CrawlerEvent::SystemInfo(millipede_core::events::SystemSnapshot)
+impl core::clone::Clone for millipede_core::events::CrawlerEvent
+pub fn millipede_core::events::CrawlerEvent::clone(&self) -> millipede_core::events::CrawlerEvent
+impl core::fmt::Debug for millipede_core::events::CrawlerEvent
+pub fn millipede_core::events::CrawlerEvent::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::events::CrawlerEvent
+impl core::marker::Send for millipede_core::events::CrawlerEvent
+impl core::marker::Sync for millipede_core::events::CrawlerEvent
+impl core::marker::Unpin for millipede_core::events::CrawlerEvent
+impl core::marker::UnsafeUnpin for millipede_core::events::CrawlerEvent
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::events::CrawlerEvent
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::events::CrawlerEvent
+pub enum millipede_core::events::RequestFinalState
+pub millipede_core::events::RequestFinalState::Failed
+pub millipede_core::events::RequestFinalState::Skipped
+pub millipede_core::events::RequestFinalState::Succeeded
+impl core::clone::Clone for millipede_core::events::RequestFinalState
+pub fn millipede_core::events::RequestFinalState::clone(&self) -> millipede_core::events::RequestFinalState
+impl core::cmp::Eq for millipede_core::events::RequestFinalState
+impl core::cmp::PartialEq for millipede_core::events::RequestFinalState
+pub fn millipede_core::events::RequestFinalState::eq(&self, &millipede_core::events::RequestFinalState) -> bool
+impl core::fmt::Debug for millipede_core::events::RequestFinalState
+pub fn millipede_core::events::RequestFinalState::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for millipede_core::events::RequestFinalState
+impl core::marker::StructuralPartialEq for millipede_core::events::RequestFinalState
+impl core::marker::Freeze for millipede_core::events::RequestFinalState
+impl core::marker::Send for millipede_core::events::RequestFinalState
+impl core::marker::Sync for millipede_core::events::RequestFinalState
+impl core::marker::Unpin for millipede_core::events::RequestFinalState
+impl core::marker::UnsafeUnpin for millipede_core::events::RequestFinalState
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::events::RequestFinalState
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::events::RequestFinalState
+pub struct millipede_core::events::EventBus
+impl millipede_core::events::EventBus
+pub fn millipede_core::events::EventBus::emit(&self, millipede_core::events::CrawlerEvent)
+pub fn millipede_core::events::EventBus::new(usize) -> Self
+pub fn millipede_core::events::EventBus::subscribe(&self) -> millipede_core::events::EventStream
+pub fn millipede_core::events::EventBus::subscriber_count(&self) -> usize
+impl core::clone::Clone for millipede_core::events::EventBus
+pub fn millipede_core::events::EventBus::clone(&self) -> millipede_core::events::EventBus
+impl core::default::Default for millipede_core::events::EventBus
+pub fn millipede_core::events::EventBus::default() -> Self
+impl core::fmt::Debug for millipede_core::events::EventBus
+pub fn millipede_core::events::EventBus::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::events::EventBus
+impl core::marker::Send for millipede_core::events::EventBus
+impl core::marker::Sync for millipede_core::events::EventBus
+impl core::marker::Unpin for millipede_core::events::EventBus
+impl core::marker::UnsafeUnpin for millipede_core::events::EventBus
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::events::EventBus
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::events::EventBus
+pub struct millipede_core::events::HandledRequest
+pub millipede_core::events::HandledRequest::duration: core::time::Duration
+pub millipede_core::events::HandledRequest::loaded_url: core::option::Option<url::Url>
+pub millipede_core::events::HandledRequest::outcome: millipede_core::events::RequestFinalState
+pub millipede_core::events::HandledRequest::request: alloc::sync::Arc<millipede_core::request::Request>
+pub millipede_core::events::HandledRequest::response_status: core::option::Option<http::status::StatusCode>
+pub millipede_core::events::HandledRequest::retry_count: u32
+impl core::clone::Clone for millipede_core::events::HandledRequest
+pub fn millipede_core::events::HandledRequest::clone(&self) -> millipede_core::events::HandledRequest
+impl core::fmt::Debug for millipede_core::events::HandledRequest
+pub fn millipede_core::events::HandledRequest::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::events::HandledRequest
+impl core::marker::Send for millipede_core::events::HandledRequest
+impl core::marker::Sync for millipede_core::events::HandledRequest
+impl core::marker::Unpin for millipede_core::events::HandledRequest
+impl core::marker::UnsafeUnpin for millipede_core::events::HandledRequest
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::events::HandledRequest
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::events::HandledRequest
+#[non_exhaustive] pub struct millipede_core::events::SystemSnapshot
+pub millipede_core::events::SystemSnapshot::cpu_used_ratio: core::option::Option<f32>
+pub millipede_core::events::SystemSnapshot::created_at: core::option::Option<time::offset_date_time::OffsetDateTime>
+pub millipede_core::events::SystemSnapshot::memory_used_bytes: core::option::Option<u64>
+impl core::clone::Clone for millipede_core::events::SystemSnapshot
+pub fn millipede_core::events::SystemSnapshot::clone(&self) -> millipede_core::events::SystemSnapshot
+impl core::default::Default for millipede_core::events::SystemSnapshot
+pub fn millipede_core::events::SystemSnapshot::default() -> millipede_core::events::SystemSnapshot
+impl core::fmt::Debug for millipede_core::events::SystemSnapshot
+pub fn millipede_core::events::SystemSnapshot::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::events::SystemSnapshot
+impl core::marker::Send for millipede_core::events::SystemSnapshot
+impl core::marker::Sync for millipede_core::events::SystemSnapshot
+impl core::marker::Unpin for millipede_core::events::SystemSnapshot
+impl core::marker::UnsafeUnpin for millipede_core::events::SystemSnapshot
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::events::SystemSnapshot
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::events::SystemSnapshot
+pub type millipede_core::events::EventStream = tokio::sync::broadcast::Receiver<millipede_core::events::CrawlerEvent>
+pub mod millipede_core::prelude
+pub use millipede_core::prelude::HeaderMap
+pub use millipede_core::prelude::Method
+#[non_exhaustive] pub enum millipede_core::prelude::AntiBotTech
+pub millipede_core::prelude::AntiBotTech::Akamai
+pub millipede_core::prelude::AntiBotTech::Cloudflare
+pub millipede_core::prelude::AntiBotTech::Custom(alloc::string::String)
+pub millipede_core::prelude::AntiBotTech::DataDome
+pub millipede_core::prelude::AntiBotTech::Imperva
+pub millipede_core::prelude::AntiBotTech::Kasada
+pub millipede_core::prelude::AntiBotTech::PerimeterX
+pub millipede_core::prelude::AntiBotTech::Unknown
+impl core::clone::Clone for millipede_core::errors::AntiBotTech
+pub fn millipede_core::errors::AntiBotTech::clone(&self) -> millipede_core::errors::AntiBotTech
+impl core::cmp::Eq for millipede_core::errors::AntiBotTech
+impl core::cmp::PartialEq for millipede_core::errors::AntiBotTech
+pub fn millipede_core::errors::AntiBotTech::eq(&self, &millipede_core::errors::AntiBotTech) -> bool
+impl core::fmt::Debug for millipede_core::errors::AntiBotTech
+pub fn millipede_core::errors::AntiBotTech::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_core::errors::AntiBotTech
+impl core::marker::Freeze for millipede_core::errors::AntiBotTech
+impl core::marker::Send for millipede_core::errors::AntiBotTech
+impl core::marker::Sync for millipede_core::errors::AntiBotTech
+impl core::marker::Unpin for millipede_core::errors::AntiBotTech
+impl core::marker::UnsafeUnpin for millipede_core::errors::AntiBotTech
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::errors::AntiBotTech
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::errors::AntiBotTech
+pub enum millipede_core::prelude::CrawlError
+pub millipede_core::prelude::CrawlError::AntiBotDetected
+pub millipede_core::prelude::CrawlError::AntiBotDetected::source: anyhow::Error
+pub millipede_core::prelude::CrawlError::AntiBotDetected::tech: millipede_core::errors::AntiBotTech
+pub millipede_core::prelude::CrawlError::Critical(anyhow::Error)
+pub millipede_core::prelude::CrawlError::ForceRetry(anyhow::Error)
+pub millipede_core::prelude::CrawlError::MissingRoute
+pub millipede_core::prelude::CrawlError::MissingRoute::label: core::option::Option<alloc::string::String>
+pub millipede_core::prelude::CrawlError::MissingRoute::method: http::method::Method
+pub millipede_core::prelude::CrawlError::NonRetryable(anyhow::Error)
+pub millipede_core::prelude::CrawlError::Retry(anyhow::Error)
+pub millipede_core::prelude::CrawlError::Session(anyhow::Error)
+impl millipede_core::errors::CrawlError
+pub fn millipede_core::errors::CrawlError::counts_against_retries(&self) -> bool
+pub fn millipede_core::errors::CrawlError::critical<E: core::convert::Into<anyhow::Error>>(E) -> Self
+pub fn millipede_core::errors::CrawlError::fatal<E: core::convert::Into<anyhow::Error>>(E) -> Self
+pub fn millipede_core::errors::CrawlError::force_retry<E: core::convert::Into<anyhow::Error>>(E) -> Self
+pub fn millipede_core::errors::CrawlError::ignores_max_retries(&self) -> bool
+pub fn millipede_core::errors::CrawlError::is_critical(&self) -> bool
+pub fn millipede_core::errors::CrawlError::is_retryable(&self) -> bool
+pub fn millipede_core::errors::CrawlError::non_retryable<E: core::convert::Into<anyhow::Error>>(E) -> Self
+pub fn millipede_core::errors::CrawlError::retry<E: core::convert::Into<anyhow::Error>>(E) -> Self
+pub fn millipede_core::errors::CrawlError::rotates_session(&self) -> bool
+pub fn millipede_core::errors::CrawlError::session<E: core::convert::Into<anyhow::Error>>(E) -> Self
+impl core::convert::From<core::io::error::Error> for millipede_core::errors::CrawlError
+pub fn millipede_core::errors::CrawlError::from(core::io::error::Error) -> Self
+impl core::convert::From<millipede_core::request::RequestBuildError> for millipede_core::errors::CrawlError
+pub fn millipede_core::errors::CrawlError::from(millipede_core::request::RequestBuildError) -> Self
+impl core::convert::From<millipede_core::storage::StorageError> for millipede_core::errors::CrawlError
+pub fn millipede_core::errors::CrawlError::from(millipede_core::storage::StorageError) -> Self
+impl core::convert::From<serde_json::error::Error> for millipede_core::errors::CrawlError
+pub fn millipede_core::errors::CrawlError::from(serde_json::error::Error) -> Self
+impl core::error::Error for millipede_core::errors::CrawlError
+pub fn millipede_core::errors::CrawlError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for millipede_core::errors::CrawlError
+pub fn millipede_core::errors::CrawlError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::errors::CrawlError
+pub fn millipede_core::errors::CrawlError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::errors::CrawlError
+impl core::marker::Send for millipede_core::errors::CrawlError
+impl core::marker::Sync for millipede_core::errors::CrawlError
+impl core::marker::Unpin for millipede_core::errors::CrawlError
+impl core::marker::UnsafeUnpin for millipede_core::errors::CrawlError
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::errors::CrawlError
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::errors::CrawlError
+pub enum millipede_core::prelude::CrawlerEvent
+pub millipede_core::prelude::CrawlerEvent::Aborting
+pub millipede_core::prelude::CrawlerEvent::Exiting
+pub millipede_core::prelude::CrawlerEvent::PersistState
+pub millipede_core::prelude::CrawlerEvent::PersistState::is_migrating: bool
+pub millipede_core::prelude::CrawlerEvent::RequestFailed
+pub millipede_core::prelude::CrawlerEvent::RequestFailed::error: alloc::string::String
+pub millipede_core::prelude::CrawlerEvent::RequestFailed::request: alloc::sync::Arc<millipede_core::request::Request>
+pub millipede_core::prelude::CrawlerEvent::RequestFinished(millipede_core::events::HandledRequest)
+pub millipede_core::prelude::CrawlerEvent::SystemInfo(millipede_core::events::SystemSnapshot)
+impl core::clone::Clone for millipede_core::events::CrawlerEvent
+pub fn millipede_core::events::CrawlerEvent::clone(&self) -> millipede_core::events::CrawlerEvent
+impl core::fmt::Debug for millipede_core::events::CrawlerEvent
+pub fn millipede_core::events::CrawlerEvent::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::events::CrawlerEvent
+impl core::marker::Send for millipede_core::events::CrawlerEvent
+impl core::marker::Sync for millipede_core::events::CrawlerEvent
+impl core::marker::Unpin for millipede_core::events::CrawlerEvent
+impl core::marker::UnsafeUnpin for millipede_core::events::CrawlerEvent
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::events::CrawlerEvent
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::events::CrawlerEvent
+pub enum millipede_core::prelude::LogLevel
+pub millipede_core::prelude::LogLevel::Debug
+pub millipede_core::prelude::LogLevel::Error
+pub millipede_core::prelude::LogLevel::Info
+pub millipede_core::prelude::LogLevel::Off
+pub millipede_core::prelude::LogLevel::Trace
+pub millipede_core::prelude::LogLevel::Warn
+impl core::clone::Clone for millipede_core::config::LogLevel
+pub fn millipede_core::config::LogLevel::clone(&self) -> millipede_core::config::LogLevel
+impl core::cmp::Eq for millipede_core::config::LogLevel
+impl core::cmp::PartialEq for millipede_core::config::LogLevel
+pub fn millipede_core::config::LogLevel::eq(&self, &millipede_core::config::LogLevel) -> bool
+impl core::fmt::Debug for millipede_core::config::LogLevel
+pub fn millipede_core::config::LogLevel::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::config::LogLevel
+pub fn millipede_core::config::LogLevel::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for millipede_core::config::LogLevel
+impl core::marker::StructuralPartialEq for millipede_core::config::LogLevel
+impl core::str::traits::FromStr for millipede_core::config::LogLevel
+pub type millipede_core::config::LogLevel::Err = millipede_core::config::ConfigError
+pub fn millipede_core::config::LogLevel::from_str(&str) -> core::result::Result<Self, Self::Err>
+impl core::marker::Freeze for millipede_core::config::LogLevel
+impl core::marker::Send for millipede_core::config::LogLevel
+impl core::marker::Sync for millipede_core::config::LogLevel
+impl core::marker::Unpin for millipede_core::config::LogLevel
+impl core::marker::UnsafeUnpin for millipede_core::config::LogLevel
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::config::LogLevel
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::config::LogLevel
+pub enum millipede_core::prelude::RequestBody
+pub millipede_core::prelude::RequestBody::Bytes(alloc::vec::Vec<u8>)
+pub millipede_core::prelude::RequestBody::Form(alloc::vec::Vec<(alloc::string::String, alloc::string::String)>)
+pub millipede_core::prelude::RequestBody::Json(serde_json::value::Value)
+impl millipede_core::request::RequestBody
+pub fn millipede_core::request::RequestBody::canonical_bytes(&self) -> alloc::vec::Vec<u8>
+impl core::clone::Clone for millipede_core::request::RequestBody
+pub fn millipede_core::request::RequestBody::clone(&self) -> millipede_core::request::RequestBody
+impl core::cmp::PartialEq for millipede_core::request::RequestBody
+pub fn millipede_core::request::RequestBody::eq(&self, &millipede_core::request::RequestBody) -> bool
+impl core::fmt::Debug for millipede_core::request::RequestBody
+pub fn millipede_core::request::RequestBody::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_core::request::RequestBody
+impl serde_core::ser::Serialize for millipede_core::request::RequestBody
+pub fn millipede_core::request::RequestBody::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl<'de> serde_core::de::Deserialize<'de> for millipede_core::request::RequestBody
+pub fn millipede_core::request::RequestBody::deserialize<__D>(__D) -> core::result::Result<Self, <__D as serde_core::de::Deserializer>::Error> where __D: serde_core::de::Deserializer<'de>
+impl core::marker::Freeze for millipede_core::request::RequestBody
+impl core::marker::Send for millipede_core::request::RequestBody
+impl core::marker::Sync for millipede_core::request::RequestBody
+impl core::marker::Unpin for millipede_core::request::RequestBody
+impl core::marker::UnsafeUnpin for millipede_core::request::RequestBody
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::request::RequestBody
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::request::RequestBody
+pub enum millipede_core::prelude::RequestBuildError
+pub millipede_core::prelude::RequestBuildError::InvalidHeader
+pub millipede_core::prelude::RequestBuildError::InvalidHeader::message: alloc::string::String
+pub millipede_core::prelude::RequestBuildError::InvalidHeader::name: alloc::string::String
+pub millipede_core::prelude::RequestBuildError::InvalidUrl(url::parser::ParseError)
+pub millipede_core::prelude::RequestBuildError::MissingUrl
+pub millipede_core::prelude::RequestBuildError::Serialization(serde_json::error::Error)
+impl core::convert::From<millipede_core::request::RequestBuildError> for millipede_core::errors::CrawlError
+pub fn millipede_core::errors::CrawlError::from(millipede_core::request::RequestBuildError) -> Self
+impl core::convert::From<serde_json::error::Error> for millipede_core::request::RequestBuildError
+pub fn millipede_core::request::RequestBuildError::from(serde_json::error::Error) -> Self
+impl core::convert::From<url::parser::ParseError> for millipede_core::request::RequestBuildError
+pub fn millipede_core::request::RequestBuildError::from(url::parser::ParseError) -> Self
+impl core::error::Error for millipede_core::request::RequestBuildError
+pub fn millipede_core::request::RequestBuildError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for millipede_core::request::RequestBuildError
+pub fn millipede_core::request::RequestBuildError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::request::RequestBuildError
+pub fn millipede_core::request::RequestBuildError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::request::RequestBuildError
+impl core::marker::Send for millipede_core::request::RequestBuildError
+impl core::marker::Sync for millipede_core::request::RequestBuildError
+impl core::marker::Unpin for millipede_core::request::RequestBuildError
+impl core::marker::UnsafeUnpin for millipede_core::request::RequestBuildError
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::request::RequestBuildError
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::request::RequestBuildError
+pub enum millipede_core::prelude::RequestFinalState
+pub millipede_core::prelude::RequestFinalState::Failed
+pub millipede_core::prelude::RequestFinalState::Skipped
+pub millipede_core::prelude::RequestFinalState::Succeeded
+impl core::clone::Clone for millipede_core::events::RequestFinalState
+pub fn millipede_core::events::RequestFinalState::clone(&self) -> millipede_core::events::RequestFinalState
+impl core::cmp::Eq for millipede_core::events::RequestFinalState
+impl core::cmp::PartialEq for millipede_core::events::RequestFinalState
+pub fn millipede_core::events::RequestFinalState::eq(&self, &millipede_core::events::RequestFinalState) -> bool
+impl core::fmt::Debug for millipede_core::events::RequestFinalState
+pub fn millipede_core::events::RequestFinalState::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for millipede_core::events::RequestFinalState
+impl core::marker::StructuralPartialEq for millipede_core::events::RequestFinalState
+impl core::marker::Freeze for millipede_core::events::RequestFinalState
+impl core::marker::Send for millipede_core::events::RequestFinalState
+impl core::marker::Sync for millipede_core::events::RequestFinalState
+impl core::marker::Unpin for millipede_core::events::RequestFinalState
+impl core::marker::UnsafeUnpin for millipede_core::events::RequestFinalState
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::events::RequestFinalState
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::events::RequestFinalState
+#[non_exhaustive] pub enum millipede_core::prelude::RequestSource
+pub millipede_core::prelude::RequestSource::Request(millipede_core::request::Request)
+impl core::clone::Clone for millipede_core::storage::RequestSource
+pub fn millipede_core::storage::RequestSource::clone(&self) -> millipede_core::storage::RequestSource
+impl core::convert::From<millipede_core::request::Request> for millipede_core::storage::RequestSource
+pub fn millipede_core::storage::RequestSource::from(millipede_core::request::Request) -> Self
+impl core::fmt::Debug for millipede_core::storage::RequestSource
+pub fn millipede_core::storage::RequestSource::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::RequestSource
+impl core::marker::Send for millipede_core::storage::RequestSource
+impl core::marker::Sync for millipede_core::storage::RequestSource
+impl core::marker::Unpin for millipede_core::storage::RequestSource
+impl core::marker::UnsafeUnpin for millipede_core::storage::RequestSource
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::RequestSource
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::RequestSource
+pub enum millipede_core::prelude::RequestState
+pub millipede_core::prelude::RequestState::AfterNav
+pub millipede_core::prelude::RequestState::BeforeNav
+pub millipede_core::prelude::RequestState::Done
+pub millipede_core::prelude::RequestState::Error
+pub millipede_core::prelude::RequestState::ErrorHandler
+pub millipede_core::prelude::RequestState::RequestHandler
+pub millipede_core::prelude::RequestState::Skipped
+pub millipede_core::prelude::RequestState::Unprocessed
+impl core::clone::Clone for millipede_core::request::RequestState
+pub fn millipede_core::request::RequestState::clone(&self) -> millipede_core::request::RequestState
+impl core::cmp::Eq for millipede_core::request::RequestState
+impl core::cmp::PartialEq for millipede_core::request::RequestState
+pub fn millipede_core::request::RequestState::eq(&self, &millipede_core::request::RequestState) -> bool
+impl core::default::Default for millipede_core::request::RequestState
+pub fn millipede_core::request::RequestState::default() -> millipede_core::request::RequestState
+impl core::fmt::Debug for millipede_core::request::RequestState
+pub fn millipede_core::request::RequestState::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for millipede_core::request::RequestState
+impl core::marker::StructuralPartialEq for millipede_core::request::RequestState
+impl serde_core::ser::Serialize for millipede_core::request::RequestState
+pub fn millipede_core::request::RequestState::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl<'de> serde_core::de::Deserialize<'de> for millipede_core::request::RequestState
+pub fn millipede_core::request::RequestState::deserialize<__D>(__D) -> core::result::Result<Self, <__D as serde_core::de::Deserializer>::Error> where __D: serde_core::de::Deserializer<'de>
+impl core::marker::Freeze for millipede_core::request::RequestState
+impl core::marker::Send for millipede_core::request::RequestState
+impl core::marker::Sync for millipede_core::request::RequestState
+impl core::marker::Unpin for millipede_core::request::RequestState
+impl core::marker::UnsafeUnpin for millipede_core::request::RequestState
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::request::RequestState
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::request::RequestState
+#[non_exhaustive] pub enum millipede_core::prelude::StorageError
+pub millipede_core::prelude::StorageError::Backend(anyhow::Error)
+pub millipede_core::prelude::StorageError::Io(core::io::error::Error)
+pub millipede_core::prelude::StorageError::LeaseNotFound
+pub millipede_core::prelude::StorageError::LeaseNotFound::lease_id: millipede_core::storage::LeaseId
+pub millipede_core::prelude::StorageError::Serialization(serde_json::error::Error)
+pub millipede_core::prelude::StorageError::Unsupported(&'static str)
+impl core::convert::From<core::io::error::Error> for millipede_core::storage::StorageError
+pub fn millipede_core::storage::StorageError::from(core::io::error::Error) -> Self
+impl core::convert::From<millipede_core::storage::StorageError> for millipede_core::errors::CrawlError
+pub fn millipede_core::errors::CrawlError::from(millipede_core::storage::StorageError) -> Self
+impl core::convert::From<serde_json::error::Error> for millipede_core::storage::StorageError
+pub fn millipede_core::storage::StorageError::from(serde_json::error::Error) -> Self
+impl core::error::Error for millipede_core::storage::StorageError
+pub fn millipede_core::storage::StorageError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for millipede_core::storage::StorageError
+pub fn millipede_core::storage::StorageError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::storage::StorageError
+pub fn millipede_core::storage::StorageError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::StorageError
+impl core::marker::Send for millipede_core::storage::StorageError
+impl core::marker::Sync for millipede_core::storage::StorageError
+impl core::marker::Unpin for millipede_core::storage::StorageError
+impl core::marker::UnsafeUnpin for millipede_core::storage::StorageError
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::StorageError
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::storage::StorageError
+#[non_exhaustive] pub struct millipede_core::prelude::AddOptions
+pub millipede_core::prelude::AddOptions::forefront: bool
+impl core::clone::Clone for millipede_core::storage::AddOptions
+pub fn millipede_core::storage::AddOptions::clone(&self) -> millipede_core::storage::AddOptions
+impl core::default::Default for millipede_core::storage::AddOptions
+pub fn millipede_core::storage::AddOptions::default() -> millipede_core::storage::AddOptions
+impl core::fmt::Debug for millipede_core::storage::AddOptions
+pub fn millipede_core::storage::AddOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::AddOptions
+impl core::marker::Send for millipede_core::storage::AddOptions
+impl core::marker::Sync for millipede_core::storage::AddOptions
+impl core::marker::Unpin for millipede_core::storage::AddOptions
+impl core::marker::UnsafeUnpin for millipede_core::storage::AddOptions
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::AddOptions
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::AddOptions
+#[non_exhaustive] pub struct millipede_core::prelude::AddRequestsBatchedResult
+pub millipede_core::prelude::AddRequestsBatchedResult::processed: alloc::vec::Vec<millipede_core::storage::ProcessedRequest>
+impl core::clone::Clone for millipede_core::storage::AddRequestsBatchedResult
+pub fn millipede_core::storage::AddRequestsBatchedResult::clone(&self) -> millipede_core::storage::AddRequestsBatchedResult
+impl core::fmt::Debug for millipede_core::storage::AddRequestsBatchedResult
+pub fn millipede_core::storage::AddRequestsBatchedResult::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::AddRequestsBatchedResult
+impl core::marker::Send for millipede_core::storage::AddRequestsBatchedResult
+impl core::marker::Sync for millipede_core::storage::AddRequestsBatchedResult
+impl core::marker::Unpin for millipede_core::storage::AddRequestsBatchedResult
+impl core::marker::UnsafeUnpin for millipede_core::storage::AddRequestsBatchedResult
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::AddRequestsBatchedResult
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::AddRequestsBatchedResult
+pub struct millipede_core::prelude::AutoSaved<T>
+impl<T: serde_core::ser::Serialize + serde_core::de::DeserializeOwned + core::marker::Send + core::marker::Sync + 'static> millipede_core::storage::AutoSaved<T>
+pub async fn millipede_core::storage::AutoSaved<T>::get(&self) -> T where T: core::clone::Clone
+pub async fn millipede_core::storage::AutoSaved<T>::open(alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>, impl core::convert::Into<alloc::string::String>, T) -> millipede_core::storage::StorageResult<Self>
+pub async fn millipede_core::storage::AutoSaved<T>::persist(&self) -> millipede_core::storage::StorageResult<()>
+pub async fn millipede_core::storage::AutoSaved<T>::set(&self, T)
+pub async fn millipede_core::storage::AutoSaved<T>::update<F: core::ops::function::FnOnce(&mut T) + core::marker::Send>(&self, F)
+impl<T> core::fmt::Debug for millipede_core::storage::AutoSaved<T>
+pub fn millipede_core::storage::AutoSaved<T>::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl<T> !core::marker::Freeze for millipede_core::storage::AutoSaved<T>
+impl<T> core::marker::Send for millipede_core::storage::AutoSaved<T> where T: core::marker::Send
+impl<T> core::marker::Sync for millipede_core::storage::AutoSaved<T> where T: core::marker::Send + core::marker::Sync
+impl<T> core::marker::Unpin for millipede_core::storage::AutoSaved<T> where T: core::marker::Unpin
+impl<T> core::marker::UnsafeUnpin for millipede_core::storage::AutoSaved<T> where T: core::marker::UnsafeUnpin
+impl<T> !core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::AutoSaved<T>
+impl<T> !core::panic::unwind_safe::UnwindSafe for millipede_core::storage::AutoSaved<T>
+pub struct millipede_core::prelude::BatchAddHandle
+pub millipede_core::prelude::BatchAddHandle::added: alloc::vec::Vec<millipede_core::storage::ProcessedRequest>
+impl millipede_core::storage::BatchAddHandle
+pub fn millipede_core::storage::BatchAddHandle::deferred(alloc::vec::Vec<millipede_core::storage::ProcessedRequest>, tokio::runtime::task::join::JoinHandle<millipede_core::storage::StorageResult<millipede_core::storage::AddRequestsBatchedResult>>) -> Self
+pub fn millipede_core::storage::BatchAddHandle::ready(alloc::vec::Vec<millipede_core::storage::ProcessedRequest>) -> Self
+pub async fn millipede_core::storage::BatchAddHandle::wait(self) -> millipede_core::storage::StorageResult<millipede_core::storage::AddRequestsBatchedResult>
+impl core::fmt::Debug for millipede_core::storage::BatchAddHandle
+pub fn millipede_core::storage::BatchAddHandle::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::BatchAddHandle
+impl core::marker::Send for millipede_core::storage::BatchAddHandle
+impl core::marker::Sync for millipede_core::storage::BatchAddHandle
+impl core::marker::Unpin for millipede_core::storage::BatchAddHandle
+impl core::marker::UnsafeUnpin for millipede_core::storage::BatchAddHandle
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::BatchAddHandle
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::BatchAddHandle
+pub struct millipede_core::prelude::Configuration
+impl millipede_core::config::Configuration
+pub fn millipede_core::config::Configuration::available_memory_ratio(&self) -> core::option::Option<f32>
+pub fn millipede_core::config::Configuration::builder() -> millipede_core::config::ConfigurationBuilder
+pub fn millipede_core::config::Configuration::default_dataset_id(&self) -> &str
+pub fn millipede_core::config::Configuration::default_key_value_store_id(&self) -> &str
+pub fn millipede_core::config::Configuration::default_request_queue_id(&self) -> &str
+pub fn millipede_core::config::Configuration::events(&self) -> &millipede_core::events::EventBus
+pub fn millipede_core::config::Configuration::log_level(&self) -> millipede_core::config::LogLevel
+pub fn millipede_core::config::Configuration::max_used_cpu_ratio(&self) -> core::option::Option<f32>
+pub fn millipede_core::config::Configuration::memory_bytes(&self) -> core::option::Option<u64>
+pub fn millipede_core::config::Configuration::persist_state_interval(&self) -> core::time::Duration
+pub fn millipede_core::config::Configuration::purge_on_start(&self) -> bool
+pub fn millipede_core::config::Configuration::storage_client(&self) -> core::option::Option<&alloc::sync::Arc<dyn millipede_core::storage::StorageClient>>
+pub fn millipede_core::config::Configuration::storage_dir(&self) -> &std::path::Path
+impl core::default::Default for millipede_core::config::Configuration
+pub fn millipede_core::config::Configuration::default() -> Self
+impl core::fmt::Debug for millipede_core::config::Configuration
+pub fn millipede_core::config::Configuration::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::config::Configuration
+impl core::marker::Send for millipede_core::config::Configuration
+impl core::marker::Sync for millipede_core::config::Configuration
+impl core::marker::Unpin for millipede_core::config::Configuration
+impl core::marker::UnsafeUnpin for millipede_core::config::Configuration
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::config::Configuration
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::config::Configuration
+pub struct millipede_core::prelude::ConfigurationBuilder
+impl millipede_core::config::ConfigurationBuilder
+pub fn millipede_core::config::ConfigurationBuilder::available_memory_ratio(self, f32) -> Self
+pub fn millipede_core::config::ConfigurationBuilder::build(self) -> core::result::Result<millipede_core::config::Configuration, millipede_core::config::ConfigError>
+pub fn millipede_core::config::ConfigurationBuilder::default_dataset_id(self, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_core::config::ConfigurationBuilder::default_key_value_store_id(self, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_core::config::ConfigurationBuilder::default_request_queue_id(self, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_core::config::ConfigurationBuilder::log_level(self, millipede_core::config::LogLevel) -> Self
+pub fn millipede_core::config::ConfigurationBuilder::max_used_cpu_ratio(self, f32) -> Self
+pub fn millipede_core::config::ConfigurationBuilder::memory_bytes(self, u64) -> Self
+pub fn millipede_core::config::ConfigurationBuilder::persist_state_interval(self, core::time::Duration) -> Self
+pub fn millipede_core::config::ConfigurationBuilder::purge_on_start(self, bool) -> Self
+pub fn millipede_core::config::ConfigurationBuilder::storage_client(self, alloc::sync::Arc<dyn millipede_core::storage::StorageClient>) -> Self
+pub fn millipede_core::config::ConfigurationBuilder::storage_dir(self, impl core::convert::Into<std::path::PathBuf>) -> Self
+impl core::clone::Clone for millipede_core::config::ConfigurationBuilder
+pub fn millipede_core::config::ConfigurationBuilder::clone(&self) -> millipede_core::config::ConfigurationBuilder
+impl core::default::Default for millipede_core::config::ConfigurationBuilder
+pub fn millipede_core::config::ConfigurationBuilder::default() -> millipede_core::config::ConfigurationBuilder
+impl core::fmt::Debug for millipede_core::config::ConfigurationBuilder
+pub fn millipede_core::config::ConfigurationBuilder::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::config::ConfigurationBuilder
+impl core::marker::Send for millipede_core::config::ConfigurationBuilder
+impl core::marker::Sync for millipede_core::config::ConfigurationBuilder
+impl core::marker::Unpin for millipede_core::config::ConfigurationBuilder
+impl core::marker::UnsafeUnpin for millipede_core::config::ConfigurationBuilder
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::config::ConfigurationBuilder
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::config::ConfigurationBuilder
+#[non_exhaustive] pub struct millipede_core::prelude::DatasetInfo
+pub millipede_core::prelude::DatasetInfo::created_at: time::offset_date_time::OffsetDateTime
+pub millipede_core::prelude::DatasetInfo::item_count: u64
+pub millipede_core::prelude::DatasetInfo::modified_at: time::offset_date_time::OffsetDateTime
+pub millipede_core::prelude::DatasetInfo::name: alloc::string::String
+impl millipede_core::storage::DatasetInfo
+pub fn millipede_core::storage::DatasetInfo::new(alloc::string::String, u64, time::offset_date_time::OffsetDateTime, time::offset_date_time::OffsetDateTime) -> Self
+impl core::clone::Clone for millipede_core::storage::DatasetInfo
+pub fn millipede_core::storage::DatasetInfo::clone(&self) -> millipede_core::storage::DatasetInfo
+impl core::fmt::Debug for millipede_core::storage::DatasetInfo
+pub fn millipede_core::storage::DatasetInfo::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::DatasetInfo
+impl core::marker::Send for millipede_core::storage::DatasetInfo
+impl core::marker::Sync for millipede_core::storage::DatasetInfo
+impl core::marker::Unpin for millipede_core::storage::DatasetInfo
+impl core::marker::UnsafeUnpin for millipede_core::storage::DatasetInfo
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::DatasetInfo
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::DatasetInfo
+pub struct millipede_core::prelude::EventBus
+impl millipede_core::events::EventBus
+pub fn millipede_core::events::EventBus::emit(&self, millipede_core::events::CrawlerEvent)
+pub fn millipede_core::events::EventBus::new(usize) -> Self
+pub fn millipede_core::events::EventBus::subscribe(&self) -> millipede_core::events::EventStream
+pub fn millipede_core::events::EventBus::subscriber_count(&self) -> usize
+impl core::clone::Clone for millipede_core::events::EventBus
+pub fn millipede_core::events::EventBus::clone(&self) -> millipede_core::events::EventBus
+impl core::default::Default for millipede_core::events::EventBus
+pub fn millipede_core::events::EventBus::default() -> Self
+impl core::fmt::Debug for millipede_core::events::EventBus
+pub fn millipede_core::events::EventBus::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::events::EventBus
+impl core::marker::Send for millipede_core::events::EventBus
+impl core::marker::Sync for millipede_core::events::EventBus
+impl core::marker::Unpin for millipede_core::events::EventBus
+impl core::marker::UnsafeUnpin for millipede_core::events::EventBus
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::events::EventBus
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::events::EventBus
+pub struct millipede_core::prelude::HandledRequest
+pub millipede_core::prelude::HandledRequest::duration: core::time::Duration
+pub millipede_core::prelude::HandledRequest::loaded_url: core::option::Option<url::Url>
+pub millipede_core::prelude::HandledRequest::outcome: millipede_core::events::RequestFinalState
+pub millipede_core::prelude::HandledRequest::request: alloc::sync::Arc<millipede_core::request::Request>
+pub millipede_core::prelude::HandledRequest::response_status: core::option::Option<http::status::StatusCode>
+pub millipede_core::prelude::HandledRequest::retry_count: u32
+impl core::clone::Clone for millipede_core::events::HandledRequest
+pub fn millipede_core::events::HandledRequest::clone(&self) -> millipede_core::events::HandledRequest
+impl core::fmt::Debug for millipede_core::events::HandledRequest
+pub fn millipede_core::events::HandledRequest::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::events::HandledRequest
+impl core::marker::Send for millipede_core::events::HandledRequest
+impl core::marker::Sync for millipede_core::events::HandledRequest
+impl core::marker::Unpin for millipede_core::events::HandledRequest
+impl core::marker::UnsafeUnpin for millipede_core::events::HandledRequest
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::events::HandledRequest
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::events::HandledRequest
+pub struct millipede_core::prelude::KeyInfo
+pub millipede_core::prelude::KeyInfo::key: alloc::string::String
+pub millipede_core::prelude::KeyInfo::size: u64
+impl core::clone::Clone for millipede_core::storage::KeyInfo
+pub fn millipede_core::storage::KeyInfo::clone(&self) -> millipede_core::storage::KeyInfo
+impl core::fmt::Debug for millipede_core::storage::KeyInfo
+pub fn millipede_core::storage::KeyInfo::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::KeyInfo
+impl core::marker::Send for millipede_core::storage::KeyInfo
+impl core::marker::Sync for millipede_core::storage::KeyInfo
+impl core::marker::Unpin for millipede_core::storage::KeyInfo
+impl core::marker::UnsafeUnpin for millipede_core::storage::KeyInfo
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::KeyInfo
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::KeyInfo
+pub struct millipede_core::prelude::KeyList
+pub millipede_core::prelude::KeyList::is_truncated: bool
+pub millipede_core::prelude::KeyList::keys: alloc::vec::Vec<millipede_core::storage::KeyInfo>
+pub millipede_core::prelude::KeyList::next_exclusive_start_key: core::option::Option<alloc::string::String>
+impl core::clone::Clone for millipede_core::storage::KeyList
+pub fn millipede_core::storage::KeyList::clone(&self) -> millipede_core::storage::KeyList
+impl core::fmt::Debug for millipede_core::storage::KeyList
+pub fn millipede_core::storage::KeyList::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::KeyList
+impl core::marker::Send for millipede_core::storage::KeyList
+impl core::marker::Sync for millipede_core::storage::KeyList
+impl core::marker::Unpin for millipede_core::storage::KeyList
+impl core::marker::UnsafeUnpin for millipede_core::storage::KeyList
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::KeyList
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::KeyList
+pub struct millipede_core::prelude::KvEntry
+pub millipede_core::prelude::KvEntry::content_type: alloc::string::String
+pub millipede_core::prelude::KvEntry::key: alloc::string::String
+pub millipede_core::prelude::KvEntry::value: bytes::bytes::Bytes
+impl core::clone::Clone for millipede_core::storage::KvEntry
+pub fn millipede_core::storage::KvEntry::clone(&self) -> millipede_core::storage::KvEntry
+impl core::fmt::Debug for millipede_core::storage::KvEntry
+pub fn millipede_core::storage::KvEntry::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl !core::marker::Freeze for millipede_core::storage::KvEntry
+impl core::marker::Send for millipede_core::storage::KvEntry
+impl core::marker::Sync for millipede_core::storage::KvEntry
+impl core::marker::Unpin for millipede_core::storage::KvEntry
+impl core::marker::UnsafeUnpin for millipede_core::storage::KvEntry
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::KvEntry
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::KvEntry
+pub struct millipede_core::prelude::Lease
+pub millipede_core::prelude::Lease::expires_at: std::time::Instant
+pub millipede_core::prelude::Lease::lease_id: millipede_core::storage::LeaseId
+pub millipede_core::prelude::Lease::request: millipede_core::request::Request
+impl core::fmt::Debug for millipede_core::storage::Lease
+pub fn millipede_core::storage::Lease::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::Lease
+impl core::marker::Send for millipede_core::storage::Lease
+impl core::marker::Sync for millipede_core::storage::Lease
+impl core::marker::Unpin for millipede_core::storage::Lease
+impl core::marker::UnsafeUnpin for millipede_core::storage::Lease
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::Lease
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::Lease
+pub struct millipede_core::prelude::LeaseId(_)
+impl millipede_core::storage::LeaseId
+pub fn millipede_core::storage::LeaseId::as_u64(&self) -> u64
+pub fn millipede_core::storage::LeaseId::new(u64) -> Self
+impl core::clone::Clone for millipede_core::storage::LeaseId
+pub fn millipede_core::storage::LeaseId::clone(&self) -> millipede_core::storage::LeaseId
+impl core::cmp::Eq for millipede_core::storage::LeaseId
+impl core::cmp::PartialEq for millipede_core::storage::LeaseId
+pub fn millipede_core::storage::LeaseId::eq(&self, &millipede_core::storage::LeaseId) -> bool
+impl core::fmt::Debug for millipede_core::storage::LeaseId
+pub fn millipede_core::storage::LeaseId::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::storage::LeaseId
+pub fn millipede_core::storage::LeaseId::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for millipede_core::storage::LeaseId
+pub fn millipede_core::storage::LeaseId::hash<__H: core::hash::Hasher>(&self, &mut __H)
+impl core::marker::StructuralPartialEq for millipede_core::storage::LeaseId
+impl core::marker::Freeze for millipede_core::storage::LeaseId
+impl core::marker::Send for millipede_core::storage::LeaseId
+impl core::marker::Sync for millipede_core::storage::LeaseId
+impl core::marker::Unpin for millipede_core::storage::LeaseId
+impl core::marker::UnsafeUnpin for millipede_core::storage::LeaseId
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::LeaseId
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::LeaseId
+#[non_exhaustive] pub struct millipede_core::prelude::ListKeysOptions
+pub millipede_core::prelude::ListKeysOptions::exclusive_start_key: core::option::Option<alloc::string::String>
+pub millipede_core::prelude::ListKeysOptions::limit: core::option::Option<usize>
+impl core::clone::Clone for millipede_core::storage::ListKeysOptions
+pub fn millipede_core::storage::ListKeysOptions::clone(&self) -> millipede_core::storage::ListKeysOptions
+impl core::default::Default for millipede_core::storage::ListKeysOptions
+pub fn millipede_core::storage::ListKeysOptions::default() -> millipede_core::storage::ListKeysOptions
+impl core::fmt::Debug for millipede_core::storage::ListKeysOptions
+pub fn millipede_core::storage::ListKeysOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::ListKeysOptions
+impl core::marker::Send for millipede_core::storage::ListKeysOptions
+impl core::marker::Sync for millipede_core::storage::ListKeysOptions
+impl core::marker::Unpin for millipede_core::storage::ListKeysOptions
+impl core::marker::UnsafeUnpin for millipede_core::storage::ListKeysOptions
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::ListKeysOptions
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::ListKeysOptions
+#[non_exhaustive] pub struct millipede_core::prelude::ListOptions
+pub millipede_core::prelude::ListOptions::desc: bool
+pub millipede_core::prelude::ListOptions::limit: core::option::Option<u64>
+pub millipede_core::prelude::ListOptions::offset: u64
+impl core::clone::Clone for millipede_core::storage::ListOptions
+pub fn millipede_core::storage::ListOptions::clone(&self) -> millipede_core::storage::ListOptions
+impl core::default::Default for millipede_core::storage::ListOptions
+pub fn millipede_core::storage::ListOptions::default() -> millipede_core::storage::ListOptions
+impl core::fmt::Debug for millipede_core::storage::ListOptions
+pub fn millipede_core::storage::ListOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::ListOptions
+impl core::marker::Send for millipede_core::storage::ListOptions
+impl core::marker::Sync for millipede_core::storage::ListOptions
+impl core::marker::Unpin for millipede_core::storage::ListOptions
+impl core::marker::UnsafeUnpin for millipede_core::storage::ListOptions
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::ListOptions
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::ListOptions
+pub struct millipede_core::prelude::Page<T>
+pub millipede_core::prelude::Page::items: alloc::vec::Vec<T>
+pub millipede_core::prelude::Page::limit: core::option::Option<u64>
+pub millipede_core::prelude::Page::offset: u64
+pub millipede_core::prelude::Page::total: u64
+impl<T: core::clone::Clone> core::clone::Clone for millipede_core::storage::Page<T>
+pub fn millipede_core::storage::Page<T>::clone(&self) -> millipede_core::storage::Page<T>
+impl<T: core::fmt::Debug> core::fmt::Debug for millipede_core::storage::Page<T>
+pub fn millipede_core::storage::Page<T>::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl<T> core::marker::Freeze for millipede_core::storage::Page<T>
+impl<T> core::marker::Send for millipede_core::storage::Page<T> where T: core::marker::Send
+impl<T> core::marker::Sync for millipede_core::storage::Page<T> where T: core::marker::Sync
+impl<T> core::marker::Unpin for millipede_core::storage::Page<T> where T: core::marker::Unpin
+impl<T> core::marker::UnsafeUnpin for millipede_core::storage::Page<T>
+impl<T> core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::Page<T> where T: core::panic::unwind_safe::RefUnwindSafe
+impl<T> core::panic::unwind_safe::UnwindSafe for millipede_core::storage::Page<T> where T: core::panic::unwind_safe::UnwindSafe
+pub struct millipede_core::prelude::ProcessedRequest
+pub millipede_core::prelude::ProcessedRequest::request_id: millipede_core::request::RequestId
+pub millipede_core::prelude::ProcessedRequest::unique_key: alloc::string::String
+pub millipede_core::prelude::ProcessedRequest::was_already_handled: bool
+pub millipede_core::prelude::ProcessedRequest::was_already_present: bool
+impl core::clone::Clone for millipede_core::storage::ProcessedRequest
+pub fn millipede_core::storage::ProcessedRequest::clone(&self) -> millipede_core::storage::ProcessedRequest
+impl core::fmt::Debug for millipede_core::storage::ProcessedRequest
+pub fn millipede_core::storage::ProcessedRequest::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::ProcessedRequest
+impl core::marker::Send for millipede_core::storage::ProcessedRequest
+impl core::marker::Sync for millipede_core::storage::ProcessedRequest
+impl core::marker::Unpin for millipede_core::storage::ProcessedRequest
+impl core::marker::UnsafeUnpin for millipede_core::storage::ProcessedRequest
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::ProcessedRequest
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::ProcessedRequest
+#[non_exhaustive] pub struct millipede_core::prelude::ReclaimOptions
+pub millipede_core::prelude::ReclaimOptions::forefront: bool
+pub millipede_core::prelude::ReclaimOptions::increment_retry: bool
+impl core::clone::Clone for millipede_core::storage::ReclaimOptions
+pub fn millipede_core::storage::ReclaimOptions::clone(&self) -> millipede_core::storage::ReclaimOptions
+impl core::default::Default for millipede_core::storage::ReclaimOptions
+pub fn millipede_core::storage::ReclaimOptions::default() -> Self
+impl core::fmt::Debug for millipede_core::storage::ReclaimOptions
+pub fn millipede_core::storage::ReclaimOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::ReclaimOptions
+impl core::marker::Send for millipede_core::storage::ReclaimOptions
+impl core::marker::Sync for millipede_core::storage::ReclaimOptions
+impl core::marker::Unpin for millipede_core::storage::ReclaimOptions
+impl core::marker::UnsafeUnpin for millipede_core::storage::ReclaimOptions
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::ReclaimOptions
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::ReclaimOptions
+pub struct millipede_core::prelude::Request
+pub millipede_core::prelude::Request::body: core::option::Option<millipede_core::request::RequestBody>
+pub millipede_core::prelude::Request::crawl_depth: u32
+pub millipede_core::prelude::Request::error_messages: alloc::vec::Vec<alloc::string::String>
+pub millipede_core::prelude::Request::handled_at: core::option::Option<time::offset_date_time::OffsetDateTime>
+pub millipede_core::prelude::Request::headers: http::header::map::HeaderMap
+pub millipede_core::prelude::Request::id: millipede_core::request::RequestId
+pub millipede_core::prelude::Request::label: core::option::Option<alloc::string::String>
+pub millipede_core::prelude::Request::loaded_url: core::option::Option<url::Url>
+pub millipede_core::prelude::Request::max_retries: core::option::Option<u32>
+pub millipede_core::prelude::Request::method: http::method::Method
+pub millipede_core::prelude::Request::no_retry: bool
+pub millipede_core::prelude::Request::retry_count: u32
+pub millipede_core::prelude::Request::session_rotation_count: u32
+pub millipede_core::prelude::Request::skip_navigation: bool
+pub millipede_core::prelude::Request::state: millipede_core::request::RequestState
+pub millipede_core::prelude::Request::unique_key: alloc::string::String
+pub millipede_core::prelude::Request::url: url::Url
+pub millipede_core::prelude::Request::user_data: millipede_core::request::UserData
+impl millipede_core::request::Request
+pub fn millipede_core::request::Request::builder() -> millipede_core::request::RequestBuilder
+pub fn millipede_core::request::Request::compute_unique_key(&url::Url, &http::method::Method, core::option::Option<&millipede_core::request::RequestBody>) -> alloc::string::String
+pub fn millipede_core::request::Request::get(impl millipede_core::request::IntoUrl) -> millipede_core::request::RequestBuilder
+pub fn millipede_core::request::Request::post(impl millipede_core::request::IntoUrl) -> millipede_core::request::RequestBuilder
+impl core::clone::Clone for millipede_core::request::Request
+pub fn millipede_core::request::Request::clone(&self) -> millipede_core::request::Request
+impl core::cmp::PartialEq for millipede_core::request::Request
+pub fn millipede_core::request::Request::eq(&self, &millipede_core::request::Request) -> bool
+impl core::convert::From<millipede_core::request::Request> for millipede_core::storage::RequestSource
+pub fn millipede_core::storage::RequestSource::from(millipede_core::request::Request) -> Self
+impl core::fmt::Debug for millipede_core::request::Request
+pub fn millipede_core::request::Request::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_core::request::Request
+impl serde_core::ser::Serialize for millipede_core::request::Request
+pub fn millipede_core::request::Request::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl<'de> serde_core::de::Deserialize<'de> for millipede_core::request::Request
+pub fn millipede_core::request::Request::deserialize<__D>(__D) -> core::result::Result<Self, <__D as serde_core::de::Deserializer>::Error> where __D: serde_core::de::Deserializer<'de>
+impl core::marker::Freeze for millipede_core::request::Request
+impl core::marker::Send for millipede_core::request::Request
+impl core::marker::Sync for millipede_core::request::Request
+impl core::marker::Unpin for millipede_core::request::Request
+impl core::marker::UnsafeUnpin for millipede_core::request::Request
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::request::Request
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::request::Request
+pub struct millipede_core::prelude::RequestBuilder
+impl millipede_core::request::RequestBuilder
+pub fn millipede_core::request::RequestBuilder::body(self, millipede_core::request::RequestBody) -> Self
+pub fn millipede_core::request::RequestBuilder::build(self) -> core::result::Result<millipede_core::request::Request, millipede_core::request::RequestBuildError>
+pub fn millipede_core::request::RequestBuilder::crawl_depth(self, u32) -> Self
+pub async fn millipede_core::request::RequestBuilder::enqueue(self, &dyn millipede_core::storage::RequestQueue) -> core::result::Result<millipede_core::storage::QueueOpInfo, millipede_core::errors::CrawlError>
+pub fn millipede_core::request::RequestBuilder::forefront(self, bool) -> Self
+pub fn millipede_core::request::RequestBuilder::form(self, impl core::iter::traits::collect::IntoIterator<Item = (alloc::string::String, alloc::string::String)>) -> Self
+pub fn millipede_core::request::RequestBuilder::header(self, &str, &str) -> Self
+pub fn millipede_core::request::RequestBuilder::headers(self, http::header::map::HeaderMap) -> Self
+pub fn millipede_core::request::RequestBuilder::is_forefront(&self) -> bool
+pub fn millipede_core::request::RequestBuilder::json<T: serde_core::ser::Serialize>(self, &T) -> Self
+pub fn millipede_core::request::RequestBuilder::label(self, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_core::request::RequestBuilder::max_retries(self, u32) -> Self
+pub fn millipede_core::request::RequestBuilder::method(self, http::method::Method) -> Self
+pub fn millipede_core::request::RequestBuilder::no_retry(self, bool) -> Self
+pub fn millipede_core::request::RequestBuilder::skip_navigation(self, bool) -> Self
+pub fn millipede_core::request::RequestBuilder::unique_key(self, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_core::request::RequestBuilder::url(self, impl millipede_core::request::IntoUrl) -> Self
+pub fn millipede_core::request::RequestBuilder::user_data(self, millipede_core::request::UserData) -> Self
+pub fn millipede_core::request::RequestBuilder::user_data_entry<T: serde_core::ser::Serialize>(self, impl core::convert::Into<alloc::string::String>, &T) -> Self
+impl core::default::Default for millipede_core::request::RequestBuilder
+pub fn millipede_core::request::RequestBuilder::default() -> millipede_core::request::RequestBuilder
+impl core::fmt::Debug for millipede_core::request::RequestBuilder
+pub fn millipede_core::request::RequestBuilder::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::request::RequestBuilder
+impl core::marker::Send for millipede_core::request::RequestBuilder
+impl core::marker::Sync for millipede_core::request::RequestBuilder
+impl core::marker::Unpin for millipede_core::request::RequestBuilder
+impl core::marker::UnsafeUnpin for millipede_core::request::RequestBuilder
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::request::RequestBuilder
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::request::RequestBuilder
+pub struct millipede_core::prelude::RequestId(_)
+impl millipede_core::request::RequestId
+pub fn millipede_core::request::RequestId::as_str(&self) -> &str
+pub fn millipede_core::request::RequestId::from_unique_key(&str) -> Self
+impl core::clone::Clone for millipede_core::request::RequestId
+pub fn millipede_core::request::RequestId::clone(&self) -> millipede_core::request::RequestId
+impl core::cmp::Eq for millipede_core::request::RequestId
+impl core::cmp::PartialEq for millipede_core::request::RequestId
+pub fn millipede_core::request::RequestId::eq(&self, &millipede_core::request::RequestId) -> bool
+impl core::fmt::Debug for millipede_core::request::RequestId
+pub fn millipede_core::request::RequestId::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::request::RequestId
+pub fn millipede_core::request::RequestId::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for millipede_core::request::RequestId
+pub fn millipede_core::request::RequestId::hash<__H: core::hash::Hasher>(&self, &mut __H)
+impl core::marker::StructuralPartialEq for millipede_core::request::RequestId
+impl serde_core::ser::Serialize for millipede_core::request::RequestId
+pub fn millipede_core::request::RequestId::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl<'de> serde_core::de::Deserialize<'de> for millipede_core::request::RequestId
+pub fn millipede_core::request::RequestId::deserialize<__D>(__D) -> core::result::Result<Self, <__D as serde_core::de::Deserializer>::Error> where __D: serde_core::de::Deserializer<'de>
+impl core::marker::Freeze for millipede_core::request::RequestId
+impl core::marker::Send for millipede_core::request::RequestId
+impl core::marker::Sync for millipede_core::request::RequestId
+impl core::marker::Unpin for millipede_core::request::RequestId
+impl core::marker::UnsafeUnpin for millipede_core::request::RequestId
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::request::RequestId
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::request::RequestId
+pub struct millipede_core::prelude::UserData(pub serde_json::map::Map<alloc::string::String, serde_json::value::Value>)
+impl millipede_core::request::UserData
+pub fn millipede_core::request::UserData::get(&self, &str) -> core::option::Option<&serde_json::value::Value>
+pub fn millipede_core::request::UserData::get_typed<T: serde_core::de::DeserializeOwned>(&self, &str) -> core::option::Option<core::result::Result<T, serde_json::error::Error>>
+pub fn millipede_core::request::UserData::is_empty(&self) -> bool
+pub fn millipede_core::request::UserData::set_typed<T: serde_core::ser::Serialize>(&mut self, &str, &T) -> core::result::Result<(), serde_json::error::Error>
+impl core::clone::Clone for millipede_core::request::UserData
+pub fn millipede_core::request::UserData::clone(&self) -> millipede_core::request::UserData
+impl core::cmp::PartialEq for millipede_core::request::UserData
+pub fn millipede_core::request::UserData::eq(&self, &millipede_core::request::UserData) -> bool
+impl core::default::Default for millipede_core::request::UserData
+pub fn millipede_core::request::UserData::default() -> millipede_core::request::UserData
+impl core::fmt::Debug for millipede_core::request::UserData
+pub fn millipede_core::request::UserData::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_core::request::UserData
+impl serde_core::ser::Serialize for millipede_core::request::UserData
+pub fn millipede_core::request::UserData::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl<'de> serde_core::de::Deserialize<'de> for millipede_core::request::UserData
+pub fn millipede_core::request::UserData::deserialize<__D>(__D) -> core::result::Result<Self, <__D as serde_core::de::Deserializer>::Error> where __D: serde_core::de::Deserializer<'de>
+impl core::marker::Freeze for millipede_core::request::UserData
+impl core::marker::Send for millipede_core::request::UserData
+impl core::marker::Sync for millipede_core::request::UserData
+impl core::marker::Unpin for millipede_core::request::UserData
+impl core::marker::UnsafeUnpin for millipede_core::request::UserData
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::request::UserData
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::request::UserData
+pub trait millipede_core::prelude::Dataset: core::marker::Send + core::marker::Sync
+pub fn millipede_core::prelude::Dataset::export_csv<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 std::path::Path) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::prelude::Dataset::export_json<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 std::path::Path) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::prelude::Dataset::info<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<millipede_core::storage::DatasetInfo>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::prelude::Dataset::list_raw<'life0, 'async_trait>(&'life0 self, millipede_core::storage::ListOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<millipede_core::storage::Page<serde_json::value::Value>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::prelude::Dataset::push_json<'life0, 'async_trait>(&'life0 self, serde_json::value::Value) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::prelude::Dataset::push_json_batch<'life0, 'async_trait>(&'life0 self, alloc::vec::Vec<serde_json::value::Value>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::prelude::Dataset::stream_raw(&self, millipede_core::storage::ListOptions) -> futures_core::stream::BoxStream<'_, millipede_core::storage::StorageResult<serde_json::value::Value>>
+pub trait millipede_core::prelude::DatasetExt: millipede_core::storage::Dataset
+pub fn millipede_core::prelude::DatasetExt::list<'life0, 'async_trait, T>(&'life0 self, millipede_core::storage::ListOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<millipede_core::storage::Page<T>>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::de::DeserializeOwned, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::prelude::DatasetExt::push<'life0, 'life1, 'async_trait, T>(&'life0 self, &'life1 T) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::ser::Serialize + core::marker::Send + core::marker::Sync, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::prelude::DatasetExt::push_batch<'life0, 'life1, 'async_trait, T>(&'life0 self, &'life1 [T]) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::ser::Serialize + core::marker::Send + core::marker::Sync, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::prelude::DatasetExt::stream<T: serde_core::de::DeserializeOwned + core::marker::Send + 'static>(&self, millipede_core::storage::ListOptions) -> futures_core::stream::BoxStream<'_, millipede_core::storage::StorageResult<T>>
+impl<D: millipede_core::storage::Dataset + ?core::marker::Sized> millipede_core::storage::DatasetExt for D
+pub fn D::list<'life0, 'async_trait, T>(&'life0 self, millipede_core::storage::ListOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<millipede_core::storage::Page<T>>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::de::DeserializeOwned, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait
+pub fn D::push<'life0, 'life1, 'async_trait, T>(&'life0 self, &'life1 T) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::ser::Serialize + core::marker::Send + core::marker::Sync, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn D::push_batch<'life0, 'life1, 'async_trait, T>(&'life0 self, &'life1 [T]) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::ser::Serialize + core::marker::Send + core::marker::Sync, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn D::stream<T: serde_core::de::DeserializeOwned + core::marker::Send + 'static>(&self, millipede_core::storage::ListOptions) -> futures_core::stream::BoxStream<'_, millipede_core::storage::StorageResult<T>>
+pub trait millipede_core::prelude::IntoUrl
+pub fn millipede_core::prelude::IntoUrl::into_url(self) -> core::result::Result<url::Url, url::parser::ParseError>
+impl millipede_core::request::IntoUrl for &alloc::string::String
+pub fn &alloc::string::String::into_url(self) -> core::result::Result<url::Url, url::parser::ParseError>
+impl millipede_core::request::IntoUrl for &str
+pub fn &str::into_url(self) -> core::result::Result<url::Url, url::parser::ParseError>
+impl millipede_core::request::IntoUrl for alloc::string::String
+pub fn alloc::string::String::into_url(self) -> core::result::Result<url::Url, url::parser::ParseError>
+impl millipede_core::request::IntoUrl for url::Url
+pub fn url::Url::into_url(self) -> core::result::Result<url::Url, url::parser::ParseError>
+pub trait millipede_core::prelude::KeyValueStore: core::marker::Send + core::marker::Sync
+pub fn millipede_core::prelude::KeyValueStore::delete<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 str) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::prelude::KeyValueStore::get_bytes<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 str) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<core::option::Option<millipede_core::storage::KvEntry>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::prelude::KeyValueStore::list_keys<'life0, 'async_trait>(&'life0 self, millipede_core::storage::ListKeysOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<millipede_core::storage::KeyList>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::prelude::KeyValueStore::set_bytes<'life0, 'life1, 'life2, 'async_trait>(&'life0 self, &'life1 str, bytes::bytes::Bytes, &'life2 str) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait, 'life2: 'async_trait
+pub trait millipede_core::prelude::KeyValueStoreExt: millipede_core::storage::KeyValueStore
+pub fn millipede_core::prelude::KeyValueStoreExt::get<'life0, 'life1, 'async_trait, T>(&'life0 self, &'life1 str) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<core::option::Option<T>>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::de::DeserializeOwned + 'static, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::prelude::KeyValueStoreExt::set<'life0, 'life1, 'life2, 'async_trait, T>(&'life0 self, &'life1 str, &'life2 T) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::ser::Serialize + core::marker::Send + core::marker::Sync, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait, 'life2: 'async_trait
+impl<K: millipede_core::storage::KeyValueStore + ?core::marker::Sized> millipede_core::storage::KeyValueStoreExt for K
+pub fn K::get<'life0, 'life1, 'async_trait, T>(&'life0 self, &'life1 str) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<core::option::Option<T>>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::de::DeserializeOwned + 'static, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn K::set<'life0, 'life1, 'life2, 'async_trait, T>(&'life0 self, &'life1 str, &'life2 T) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::ser::Serialize + core::marker::Send + core::marker::Sync, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait, 'life2: 'async_trait
+pub trait millipede_core::prelude::RequestQueue: core::marker::Send + core::marker::Sync
+pub fn millipede_core::prelude::RequestQueue::abandon<'life0, 'async_trait>(&'life0 self, millipede_core::storage::Lease) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::prelude::RequestQueue::add<'life0, 'async_trait>(&'life0 self, millipede_core::request::Request, millipede_core::storage::AddOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<millipede_core::storage::QueueOpInfo>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::prelude::RequestQueue::add_batch<'life0, 'async_trait>(&'life0 self, alloc::vec::Vec<millipede_core::storage::RequestSource>, millipede_core::storage::AddOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<millipede_core::storage::BatchAddHandle>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::prelude::RequestQueue::fetch_next<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<core::option::Option<millipede_core::storage::Lease>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::prelude::RequestQueue::handled_count<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<u64>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::prelude::RequestQueue::is_empty<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<bool>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::prelude::RequestQueue::is_finished<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<bool>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::prelude::RequestQueue::mark_handled<'life0, 'async_trait>(&'life0 self, millipede_core::storage::Lease) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::prelude::RequestQueue::pending_count<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<u64>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::prelude::RequestQueue::reclaim<'life0, 'async_trait>(&'life0 self, millipede_core::storage::Lease, millipede_core::storage::ReclaimOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::prelude::RequestQueue::renew<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 millipede_core::storage::LeaseId, core::time::Duration) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub trait millipede_core::prelude::StorageClient: core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_core::prelude::StorageClient::open_dataset<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::Dataset>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::prelude::StorageClient::open_key_value_store<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::prelude::StorageClient::open_request_queue<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::RequestQueue>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::prelude::StorageClient::purge<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub type millipede_core::prelude::EventStream = tokio::sync::broadcast::Receiver<millipede_core::events::CrawlerEvent>
+pub type millipede_core::prelude::QueueOpInfo = millipede_core::storage::ProcessedRequest
+pub type millipede_core::prelude::StorageResult<T> = core::result::Result<T, millipede_core::storage::StorageError>
+pub mod millipede_core::request
+pub use millipede_core::request::HeaderMap
+pub use millipede_core::request::Method
+pub enum millipede_core::request::RequestBody
+pub millipede_core::request::RequestBody::Bytes(alloc::vec::Vec<u8>)
+pub millipede_core::request::RequestBody::Form(alloc::vec::Vec<(alloc::string::String, alloc::string::String)>)
+pub millipede_core::request::RequestBody::Json(serde_json::value::Value)
+impl millipede_core::request::RequestBody
+pub fn millipede_core::request::RequestBody::canonical_bytes(&self) -> alloc::vec::Vec<u8>
+impl core::clone::Clone for millipede_core::request::RequestBody
+pub fn millipede_core::request::RequestBody::clone(&self) -> millipede_core::request::RequestBody
+impl core::cmp::PartialEq for millipede_core::request::RequestBody
+pub fn millipede_core::request::RequestBody::eq(&self, &millipede_core::request::RequestBody) -> bool
+impl core::fmt::Debug for millipede_core::request::RequestBody
+pub fn millipede_core::request::RequestBody::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_core::request::RequestBody
+impl serde_core::ser::Serialize for millipede_core::request::RequestBody
+pub fn millipede_core::request::RequestBody::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl<'de> serde_core::de::Deserialize<'de> for millipede_core::request::RequestBody
+pub fn millipede_core::request::RequestBody::deserialize<__D>(__D) -> core::result::Result<Self, <__D as serde_core::de::Deserializer>::Error> where __D: serde_core::de::Deserializer<'de>
+impl core::marker::Freeze for millipede_core::request::RequestBody
+impl core::marker::Send for millipede_core::request::RequestBody
+impl core::marker::Sync for millipede_core::request::RequestBody
+impl core::marker::Unpin for millipede_core::request::RequestBody
+impl core::marker::UnsafeUnpin for millipede_core::request::RequestBody
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::request::RequestBody
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::request::RequestBody
+pub enum millipede_core::request::RequestBuildError
+pub millipede_core::request::RequestBuildError::InvalidHeader
+pub millipede_core::request::RequestBuildError::InvalidHeader::message: alloc::string::String
+pub millipede_core::request::RequestBuildError::InvalidHeader::name: alloc::string::String
+pub millipede_core::request::RequestBuildError::InvalidUrl(url::parser::ParseError)
+pub millipede_core::request::RequestBuildError::MissingUrl
+pub millipede_core::request::RequestBuildError::Serialization(serde_json::error::Error)
+impl core::convert::From<millipede_core::request::RequestBuildError> for millipede_core::errors::CrawlError
+pub fn millipede_core::errors::CrawlError::from(millipede_core::request::RequestBuildError) -> Self
+impl core::convert::From<serde_json::error::Error> for millipede_core::request::RequestBuildError
+pub fn millipede_core::request::RequestBuildError::from(serde_json::error::Error) -> Self
+impl core::convert::From<url::parser::ParseError> for millipede_core::request::RequestBuildError
+pub fn millipede_core::request::RequestBuildError::from(url::parser::ParseError) -> Self
+impl core::error::Error for millipede_core::request::RequestBuildError
+pub fn millipede_core::request::RequestBuildError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for millipede_core::request::RequestBuildError
+pub fn millipede_core::request::RequestBuildError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::request::RequestBuildError
+pub fn millipede_core::request::RequestBuildError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::request::RequestBuildError
+impl core::marker::Send for millipede_core::request::RequestBuildError
+impl core::marker::Sync for millipede_core::request::RequestBuildError
+impl core::marker::Unpin for millipede_core::request::RequestBuildError
+impl core::marker::UnsafeUnpin for millipede_core::request::RequestBuildError
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::request::RequestBuildError
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::request::RequestBuildError
+pub enum millipede_core::request::RequestState
+pub millipede_core::request::RequestState::AfterNav
+pub millipede_core::request::RequestState::BeforeNav
+pub millipede_core::request::RequestState::Done
+pub millipede_core::request::RequestState::Error
+pub millipede_core::request::RequestState::ErrorHandler
+pub millipede_core::request::RequestState::RequestHandler
+pub millipede_core::request::RequestState::Skipped
+pub millipede_core::request::RequestState::Unprocessed
+impl core::clone::Clone for millipede_core::request::RequestState
+pub fn millipede_core::request::RequestState::clone(&self) -> millipede_core::request::RequestState
+impl core::cmp::Eq for millipede_core::request::RequestState
+impl core::cmp::PartialEq for millipede_core::request::RequestState
+pub fn millipede_core::request::RequestState::eq(&self, &millipede_core::request::RequestState) -> bool
+impl core::default::Default for millipede_core::request::RequestState
+pub fn millipede_core::request::RequestState::default() -> millipede_core::request::RequestState
+impl core::fmt::Debug for millipede_core::request::RequestState
+pub fn millipede_core::request::RequestState::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for millipede_core::request::RequestState
+impl core::marker::StructuralPartialEq for millipede_core::request::RequestState
+impl serde_core::ser::Serialize for millipede_core::request::RequestState
+pub fn millipede_core::request::RequestState::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl<'de> serde_core::de::Deserialize<'de> for millipede_core::request::RequestState
+pub fn millipede_core::request::RequestState::deserialize<__D>(__D) -> core::result::Result<Self, <__D as serde_core::de::Deserializer>::Error> where __D: serde_core::de::Deserializer<'de>
+impl core::marker::Freeze for millipede_core::request::RequestState
+impl core::marker::Send for millipede_core::request::RequestState
+impl core::marker::Sync for millipede_core::request::RequestState
+impl core::marker::Unpin for millipede_core::request::RequestState
+impl core::marker::UnsafeUnpin for millipede_core::request::RequestState
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::request::RequestState
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::request::RequestState
+pub struct millipede_core::request::Request
+pub millipede_core::request::Request::body: core::option::Option<millipede_core::request::RequestBody>
+pub millipede_core::request::Request::crawl_depth: u32
+pub millipede_core::request::Request::error_messages: alloc::vec::Vec<alloc::string::String>
+pub millipede_core::request::Request::handled_at: core::option::Option<time::offset_date_time::OffsetDateTime>
+pub millipede_core::request::Request::headers: http::header::map::HeaderMap
+pub millipede_core::request::Request::id: millipede_core::request::RequestId
+pub millipede_core::request::Request::label: core::option::Option<alloc::string::String>
+pub millipede_core::request::Request::loaded_url: core::option::Option<url::Url>
+pub millipede_core::request::Request::max_retries: core::option::Option<u32>
+pub millipede_core::request::Request::method: http::method::Method
+pub millipede_core::request::Request::no_retry: bool
+pub millipede_core::request::Request::retry_count: u32
+pub millipede_core::request::Request::session_rotation_count: u32
+pub millipede_core::request::Request::skip_navigation: bool
+pub millipede_core::request::Request::state: millipede_core::request::RequestState
+pub millipede_core::request::Request::unique_key: alloc::string::String
+pub millipede_core::request::Request::url: url::Url
+pub millipede_core::request::Request::user_data: millipede_core::request::UserData
+impl millipede_core::request::Request
+pub fn millipede_core::request::Request::builder() -> millipede_core::request::RequestBuilder
+pub fn millipede_core::request::Request::compute_unique_key(&url::Url, &http::method::Method, core::option::Option<&millipede_core::request::RequestBody>) -> alloc::string::String
+pub fn millipede_core::request::Request::get(impl millipede_core::request::IntoUrl) -> millipede_core::request::RequestBuilder
+pub fn millipede_core::request::Request::post(impl millipede_core::request::IntoUrl) -> millipede_core::request::RequestBuilder
+impl core::clone::Clone for millipede_core::request::Request
+pub fn millipede_core::request::Request::clone(&self) -> millipede_core::request::Request
+impl core::cmp::PartialEq for millipede_core::request::Request
+pub fn millipede_core::request::Request::eq(&self, &millipede_core::request::Request) -> bool
+impl core::convert::From<millipede_core::request::Request> for millipede_core::storage::RequestSource
+pub fn millipede_core::storage::RequestSource::from(millipede_core::request::Request) -> Self
+impl core::fmt::Debug for millipede_core::request::Request
+pub fn millipede_core::request::Request::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_core::request::Request
+impl serde_core::ser::Serialize for millipede_core::request::Request
+pub fn millipede_core::request::Request::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl<'de> serde_core::de::Deserialize<'de> for millipede_core::request::Request
+pub fn millipede_core::request::Request::deserialize<__D>(__D) -> core::result::Result<Self, <__D as serde_core::de::Deserializer>::Error> where __D: serde_core::de::Deserializer<'de>
+impl core::marker::Freeze for millipede_core::request::Request
+impl core::marker::Send for millipede_core::request::Request
+impl core::marker::Sync for millipede_core::request::Request
+impl core::marker::Unpin for millipede_core::request::Request
+impl core::marker::UnsafeUnpin for millipede_core::request::Request
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::request::Request
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::request::Request
+pub struct millipede_core::request::RequestBuilder
+impl millipede_core::request::RequestBuilder
+pub fn millipede_core::request::RequestBuilder::body(self, millipede_core::request::RequestBody) -> Self
+pub fn millipede_core::request::RequestBuilder::build(self) -> core::result::Result<millipede_core::request::Request, millipede_core::request::RequestBuildError>
+pub fn millipede_core::request::RequestBuilder::crawl_depth(self, u32) -> Self
+pub async fn millipede_core::request::RequestBuilder::enqueue(self, &dyn millipede_core::storage::RequestQueue) -> core::result::Result<millipede_core::storage::QueueOpInfo, millipede_core::errors::CrawlError>
+pub fn millipede_core::request::RequestBuilder::forefront(self, bool) -> Self
+pub fn millipede_core::request::RequestBuilder::form(self, impl core::iter::traits::collect::IntoIterator<Item = (alloc::string::String, alloc::string::String)>) -> Self
+pub fn millipede_core::request::RequestBuilder::header(self, &str, &str) -> Self
+pub fn millipede_core::request::RequestBuilder::headers(self, http::header::map::HeaderMap) -> Self
+pub fn millipede_core::request::RequestBuilder::is_forefront(&self) -> bool
+pub fn millipede_core::request::RequestBuilder::json<T: serde_core::ser::Serialize>(self, &T) -> Self
+pub fn millipede_core::request::RequestBuilder::label(self, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_core::request::RequestBuilder::max_retries(self, u32) -> Self
+pub fn millipede_core::request::RequestBuilder::method(self, http::method::Method) -> Self
+pub fn millipede_core::request::RequestBuilder::no_retry(self, bool) -> Self
+pub fn millipede_core::request::RequestBuilder::skip_navigation(self, bool) -> Self
+pub fn millipede_core::request::RequestBuilder::unique_key(self, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_core::request::RequestBuilder::url(self, impl millipede_core::request::IntoUrl) -> Self
+pub fn millipede_core::request::RequestBuilder::user_data(self, millipede_core::request::UserData) -> Self
+pub fn millipede_core::request::RequestBuilder::user_data_entry<T: serde_core::ser::Serialize>(self, impl core::convert::Into<alloc::string::String>, &T) -> Self
+impl core::default::Default for millipede_core::request::RequestBuilder
+pub fn millipede_core::request::RequestBuilder::default() -> millipede_core::request::RequestBuilder
+impl core::fmt::Debug for millipede_core::request::RequestBuilder
+pub fn millipede_core::request::RequestBuilder::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::request::RequestBuilder
+impl core::marker::Send for millipede_core::request::RequestBuilder
+impl core::marker::Sync for millipede_core::request::RequestBuilder
+impl core::marker::Unpin for millipede_core::request::RequestBuilder
+impl core::marker::UnsafeUnpin for millipede_core::request::RequestBuilder
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::request::RequestBuilder
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::request::RequestBuilder
+pub struct millipede_core::request::RequestId(_)
+impl millipede_core::request::RequestId
+pub fn millipede_core::request::RequestId::as_str(&self) -> &str
+pub fn millipede_core::request::RequestId::from_unique_key(&str) -> Self
+impl core::clone::Clone for millipede_core::request::RequestId
+pub fn millipede_core::request::RequestId::clone(&self) -> millipede_core::request::RequestId
+impl core::cmp::Eq for millipede_core::request::RequestId
+impl core::cmp::PartialEq for millipede_core::request::RequestId
+pub fn millipede_core::request::RequestId::eq(&self, &millipede_core::request::RequestId) -> bool
+impl core::fmt::Debug for millipede_core::request::RequestId
+pub fn millipede_core::request::RequestId::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::request::RequestId
+pub fn millipede_core::request::RequestId::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for millipede_core::request::RequestId
+pub fn millipede_core::request::RequestId::hash<__H: core::hash::Hasher>(&self, &mut __H)
+impl core::marker::StructuralPartialEq for millipede_core::request::RequestId
+impl serde_core::ser::Serialize for millipede_core::request::RequestId
+pub fn millipede_core::request::RequestId::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl<'de> serde_core::de::Deserialize<'de> for millipede_core::request::RequestId
+pub fn millipede_core::request::RequestId::deserialize<__D>(__D) -> core::result::Result<Self, <__D as serde_core::de::Deserializer>::Error> where __D: serde_core::de::Deserializer<'de>
+impl core::marker::Freeze for millipede_core::request::RequestId
+impl core::marker::Send for millipede_core::request::RequestId
+impl core::marker::Sync for millipede_core::request::RequestId
+impl core::marker::Unpin for millipede_core::request::RequestId
+impl core::marker::UnsafeUnpin for millipede_core::request::RequestId
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::request::RequestId
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::request::RequestId
+pub struct millipede_core::request::UserData(pub serde_json::map::Map<alloc::string::String, serde_json::value::Value>)
+impl millipede_core::request::UserData
+pub fn millipede_core::request::UserData::get(&self, &str) -> core::option::Option<&serde_json::value::Value>
+pub fn millipede_core::request::UserData::get_typed<T: serde_core::de::DeserializeOwned>(&self, &str) -> core::option::Option<core::result::Result<T, serde_json::error::Error>>
+pub fn millipede_core::request::UserData::is_empty(&self) -> bool
+pub fn millipede_core::request::UserData::set_typed<T: serde_core::ser::Serialize>(&mut self, &str, &T) -> core::result::Result<(), serde_json::error::Error>
+impl core::clone::Clone for millipede_core::request::UserData
+pub fn millipede_core::request::UserData::clone(&self) -> millipede_core::request::UserData
+impl core::cmp::PartialEq for millipede_core::request::UserData
+pub fn millipede_core::request::UserData::eq(&self, &millipede_core::request::UserData) -> bool
+impl core::default::Default for millipede_core::request::UserData
+pub fn millipede_core::request::UserData::default() -> millipede_core::request::UserData
+impl core::fmt::Debug for millipede_core::request::UserData
+pub fn millipede_core::request::UserData::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_core::request::UserData
+impl serde_core::ser::Serialize for millipede_core::request::UserData
+pub fn millipede_core::request::UserData::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl<'de> serde_core::de::Deserialize<'de> for millipede_core::request::UserData
+pub fn millipede_core::request::UserData::deserialize<__D>(__D) -> core::result::Result<Self, <__D as serde_core::de::Deserializer>::Error> where __D: serde_core::de::Deserializer<'de>
+impl core::marker::Freeze for millipede_core::request::UserData
+impl core::marker::Send for millipede_core::request::UserData
+impl core::marker::Sync for millipede_core::request::UserData
+impl core::marker::Unpin for millipede_core::request::UserData
+impl core::marker::UnsafeUnpin for millipede_core::request::UserData
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::request::UserData
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::request::UserData
+pub trait millipede_core::request::IntoUrl
+pub fn millipede_core::request::IntoUrl::into_url(self) -> core::result::Result<url::Url, url::parser::ParseError>
+impl millipede_core::request::IntoUrl for &alloc::string::String
+pub fn &alloc::string::String::into_url(self) -> core::result::Result<url::Url, url::parser::ParseError>
+impl millipede_core::request::IntoUrl for &str
+pub fn &str::into_url(self) -> core::result::Result<url::Url, url::parser::ParseError>
+impl millipede_core::request::IntoUrl for alloc::string::String
+pub fn alloc::string::String::into_url(self) -> core::result::Result<url::Url, url::parser::ParseError>
+impl millipede_core::request::IntoUrl for url::Url
+pub fn url::Url::into_url(self) -> core::result::Result<url::Url, url::parser::ParseError>
+pub mod millipede_core::storage
+#[non_exhaustive] pub enum millipede_core::storage::RequestSource
+pub millipede_core::storage::RequestSource::Request(millipede_core::request::Request)
+impl core::clone::Clone for millipede_core::storage::RequestSource
+pub fn millipede_core::storage::RequestSource::clone(&self) -> millipede_core::storage::RequestSource
+impl core::convert::From<millipede_core::request::Request> for millipede_core::storage::RequestSource
+pub fn millipede_core::storage::RequestSource::from(millipede_core::request::Request) -> Self
+impl core::fmt::Debug for millipede_core::storage::RequestSource
+pub fn millipede_core::storage::RequestSource::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::RequestSource
+impl core::marker::Send for millipede_core::storage::RequestSource
+impl core::marker::Sync for millipede_core::storage::RequestSource
+impl core::marker::Unpin for millipede_core::storage::RequestSource
+impl core::marker::UnsafeUnpin for millipede_core::storage::RequestSource
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::RequestSource
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::RequestSource
+#[non_exhaustive] pub enum millipede_core::storage::StorageError
+pub millipede_core::storage::StorageError::Backend(anyhow::Error)
+pub millipede_core::storage::StorageError::Io(core::io::error::Error)
+pub millipede_core::storage::StorageError::LeaseNotFound
+pub millipede_core::storage::StorageError::LeaseNotFound::lease_id: millipede_core::storage::LeaseId
+pub millipede_core::storage::StorageError::Serialization(serde_json::error::Error)
+pub millipede_core::storage::StorageError::Unsupported(&'static str)
+impl core::convert::From<core::io::error::Error> for millipede_core::storage::StorageError
+pub fn millipede_core::storage::StorageError::from(core::io::error::Error) -> Self
+impl core::convert::From<millipede_core::storage::StorageError> for millipede_core::errors::CrawlError
+pub fn millipede_core::errors::CrawlError::from(millipede_core::storage::StorageError) -> Self
+impl core::convert::From<serde_json::error::Error> for millipede_core::storage::StorageError
+pub fn millipede_core::storage::StorageError::from(serde_json::error::Error) -> Self
+impl core::error::Error for millipede_core::storage::StorageError
+pub fn millipede_core::storage::StorageError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for millipede_core::storage::StorageError
+pub fn millipede_core::storage::StorageError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::storage::StorageError
+pub fn millipede_core::storage::StorageError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::StorageError
+impl core::marker::Send for millipede_core::storage::StorageError
+impl core::marker::Sync for millipede_core::storage::StorageError
+impl core::marker::Unpin for millipede_core::storage::StorageError
+impl core::marker::UnsafeUnpin for millipede_core::storage::StorageError
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::StorageError
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::storage::StorageError
+#[non_exhaustive] pub struct millipede_core::storage::AddOptions
+pub millipede_core::storage::AddOptions::forefront: bool
+impl core::clone::Clone for millipede_core::storage::AddOptions
+pub fn millipede_core::storage::AddOptions::clone(&self) -> millipede_core::storage::AddOptions
+impl core::default::Default for millipede_core::storage::AddOptions
+pub fn millipede_core::storage::AddOptions::default() -> millipede_core::storage::AddOptions
+impl core::fmt::Debug for millipede_core::storage::AddOptions
+pub fn millipede_core::storage::AddOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::AddOptions
+impl core::marker::Send for millipede_core::storage::AddOptions
+impl core::marker::Sync for millipede_core::storage::AddOptions
+impl core::marker::Unpin for millipede_core::storage::AddOptions
+impl core::marker::UnsafeUnpin for millipede_core::storage::AddOptions
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::AddOptions
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::AddOptions
+#[non_exhaustive] pub struct millipede_core::storage::AddRequestsBatchedResult
+pub millipede_core::storage::AddRequestsBatchedResult::processed: alloc::vec::Vec<millipede_core::storage::ProcessedRequest>
+impl core::clone::Clone for millipede_core::storage::AddRequestsBatchedResult
+pub fn millipede_core::storage::AddRequestsBatchedResult::clone(&self) -> millipede_core::storage::AddRequestsBatchedResult
+impl core::fmt::Debug for millipede_core::storage::AddRequestsBatchedResult
+pub fn millipede_core::storage::AddRequestsBatchedResult::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::AddRequestsBatchedResult
+impl core::marker::Send for millipede_core::storage::AddRequestsBatchedResult
+impl core::marker::Sync for millipede_core::storage::AddRequestsBatchedResult
+impl core::marker::Unpin for millipede_core::storage::AddRequestsBatchedResult
+impl core::marker::UnsafeUnpin for millipede_core::storage::AddRequestsBatchedResult
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::AddRequestsBatchedResult
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::AddRequestsBatchedResult
+pub struct millipede_core::storage::AutoSaved<T>
+impl<T: serde_core::ser::Serialize + serde_core::de::DeserializeOwned + core::marker::Send + core::marker::Sync + 'static> millipede_core::storage::AutoSaved<T>
+pub async fn millipede_core::storage::AutoSaved<T>::get(&self) -> T where T: core::clone::Clone
+pub async fn millipede_core::storage::AutoSaved<T>::open(alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>, impl core::convert::Into<alloc::string::String>, T) -> millipede_core::storage::StorageResult<Self>
+pub async fn millipede_core::storage::AutoSaved<T>::persist(&self) -> millipede_core::storage::StorageResult<()>
+pub async fn millipede_core::storage::AutoSaved<T>::set(&self, T)
+pub async fn millipede_core::storage::AutoSaved<T>::update<F: core::ops::function::FnOnce(&mut T) + core::marker::Send>(&self, F)
+impl<T> core::fmt::Debug for millipede_core::storage::AutoSaved<T>
+pub fn millipede_core::storage::AutoSaved<T>::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl<T> !core::marker::Freeze for millipede_core::storage::AutoSaved<T>
+impl<T> core::marker::Send for millipede_core::storage::AutoSaved<T> where T: core::marker::Send
+impl<T> core::marker::Sync for millipede_core::storage::AutoSaved<T> where T: core::marker::Send + core::marker::Sync
+impl<T> core::marker::Unpin for millipede_core::storage::AutoSaved<T> where T: core::marker::Unpin
+impl<T> core::marker::UnsafeUnpin for millipede_core::storage::AutoSaved<T> where T: core::marker::UnsafeUnpin
+impl<T> !core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::AutoSaved<T>
+impl<T> !core::panic::unwind_safe::UnwindSafe for millipede_core::storage::AutoSaved<T>
+pub struct millipede_core::storage::BatchAddHandle
+pub millipede_core::storage::BatchAddHandle::added: alloc::vec::Vec<millipede_core::storage::ProcessedRequest>
+impl millipede_core::storage::BatchAddHandle
+pub fn millipede_core::storage::BatchAddHandle::deferred(alloc::vec::Vec<millipede_core::storage::ProcessedRequest>, tokio::runtime::task::join::JoinHandle<millipede_core::storage::StorageResult<millipede_core::storage::AddRequestsBatchedResult>>) -> Self
+pub fn millipede_core::storage::BatchAddHandle::ready(alloc::vec::Vec<millipede_core::storage::ProcessedRequest>) -> Self
+pub async fn millipede_core::storage::BatchAddHandle::wait(self) -> millipede_core::storage::StorageResult<millipede_core::storage::AddRequestsBatchedResult>
+impl core::fmt::Debug for millipede_core::storage::BatchAddHandle
+pub fn millipede_core::storage::BatchAddHandle::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::BatchAddHandle
+impl core::marker::Send for millipede_core::storage::BatchAddHandle
+impl core::marker::Sync for millipede_core::storage::BatchAddHandle
+impl core::marker::Unpin for millipede_core::storage::BatchAddHandle
+impl core::marker::UnsafeUnpin for millipede_core::storage::BatchAddHandle
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::BatchAddHandle
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::BatchAddHandle
+#[non_exhaustive] pub struct millipede_core::storage::DatasetInfo
+pub millipede_core::storage::DatasetInfo::created_at: time::offset_date_time::OffsetDateTime
+pub millipede_core::storage::DatasetInfo::item_count: u64
+pub millipede_core::storage::DatasetInfo::modified_at: time::offset_date_time::OffsetDateTime
+pub millipede_core::storage::DatasetInfo::name: alloc::string::String
+impl millipede_core::storage::DatasetInfo
+pub fn millipede_core::storage::DatasetInfo::new(alloc::string::String, u64, time::offset_date_time::OffsetDateTime, time::offset_date_time::OffsetDateTime) -> Self
+impl core::clone::Clone for millipede_core::storage::DatasetInfo
+pub fn millipede_core::storage::DatasetInfo::clone(&self) -> millipede_core::storage::DatasetInfo
+impl core::fmt::Debug for millipede_core::storage::DatasetInfo
+pub fn millipede_core::storage::DatasetInfo::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::DatasetInfo
+impl core::marker::Send for millipede_core::storage::DatasetInfo
+impl core::marker::Sync for millipede_core::storage::DatasetInfo
+impl core::marker::Unpin for millipede_core::storage::DatasetInfo
+impl core::marker::UnsafeUnpin for millipede_core::storage::DatasetInfo
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::DatasetInfo
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::DatasetInfo
+pub struct millipede_core::storage::KeyInfo
+pub millipede_core::storage::KeyInfo::key: alloc::string::String
+pub millipede_core::storage::KeyInfo::size: u64
+impl core::clone::Clone for millipede_core::storage::KeyInfo
+pub fn millipede_core::storage::KeyInfo::clone(&self) -> millipede_core::storage::KeyInfo
+impl core::fmt::Debug for millipede_core::storage::KeyInfo
+pub fn millipede_core::storage::KeyInfo::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::KeyInfo
+impl core::marker::Send for millipede_core::storage::KeyInfo
+impl core::marker::Sync for millipede_core::storage::KeyInfo
+impl core::marker::Unpin for millipede_core::storage::KeyInfo
+impl core::marker::UnsafeUnpin for millipede_core::storage::KeyInfo
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::KeyInfo
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::KeyInfo
+pub struct millipede_core::storage::KeyList
+pub millipede_core::storage::KeyList::is_truncated: bool
+pub millipede_core::storage::KeyList::keys: alloc::vec::Vec<millipede_core::storage::KeyInfo>
+pub millipede_core::storage::KeyList::next_exclusive_start_key: core::option::Option<alloc::string::String>
+impl core::clone::Clone for millipede_core::storage::KeyList
+pub fn millipede_core::storage::KeyList::clone(&self) -> millipede_core::storage::KeyList
+impl core::fmt::Debug for millipede_core::storage::KeyList
+pub fn millipede_core::storage::KeyList::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::KeyList
+impl core::marker::Send for millipede_core::storage::KeyList
+impl core::marker::Sync for millipede_core::storage::KeyList
+impl core::marker::Unpin for millipede_core::storage::KeyList
+impl core::marker::UnsafeUnpin for millipede_core::storage::KeyList
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::KeyList
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::KeyList
+pub struct millipede_core::storage::KvEntry
+pub millipede_core::storage::KvEntry::content_type: alloc::string::String
+pub millipede_core::storage::KvEntry::key: alloc::string::String
+pub millipede_core::storage::KvEntry::value: bytes::bytes::Bytes
+impl core::clone::Clone for millipede_core::storage::KvEntry
+pub fn millipede_core::storage::KvEntry::clone(&self) -> millipede_core::storage::KvEntry
+impl core::fmt::Debug for millipede_core::storage::KvEntry
+pub fn millipede_core::storage::KvEntry::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl !core::marker::Freeze for millipede_core::storage::KvEntry
+impl core::marker::Send for millipede_core::storage::KvEntry
+impl core::marker::Sync for millipede_core::storage::KvEntry
+impl core::marker::Unpin for millipede_core::storage::KvEntry
+impl core::marker::UnsafeUnpin for millipede_core::storage::KvEntry
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::KvEntry
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::KvEntry
+pub struct millipede_core::storage::Lease
+pub millipede_core::storage::Lease::expires_at: std::time::Instant
+pub millipede_core::storage::Lease::lease_id: millipede_core::storage::LeaseId
+pub millipede_core::storage::Lease::request: millipede_core::request::Request
+impl core::fmt::Debug for millipede_core::storage::Lease
+pub fn millipede_core::storage::Lease::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::Lease
+impl core::marker::Send for millipede_core::storage::Lease
+impl core::marker::Sync for millipede_core::storage::Lease
+impl core::marker::Unpin for millipede_core::storage::Lease
+impl core::marker::UnsafeUnpin for millipede_core::storage::Lease
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::Lease
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::Lease
+pub struct millipede_core::storage::LeaseId(_)
+impl millipede_core::storage::LeaseId
+pub fn millipede_core::storage::LeaseId::as_u64(&self) -> u64
+pub fn millipede_core::storage::LeaseId::new(u64) -> Self
+impl core::clone::Clone for millipede_core::storage::LeaseId
+pub fn millipede_core::storage::LeaseId::clone(&self) -> millipede_core::storage::LeaseId
+impl core::cmp::Eq for millipede_core::storage::LeaseId
+impl core::cmp::PartialEq for millipede_core::storage::LeaseId
+pub fn millipede_core::storage::LeaseId::eq(&self, &millipede_core::storage::LeaseId) -> bool
+impl core::fmt::Debug for millipede_core::storage::LeaseId
+pub fn millipede_core::storage::LeaseId::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::storage::LeaseId
+pub fn millipede_core::storage::LeaseId::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for millipede_core::storage::LeaseId
+pub fn millipede_core::storage::LeaseId::hash<__H: core::hash::Hasher>(&self, &mut __H)
+impl core::marker::StructuralPartialEq for millipede_core::storage::LeaseId
+impl core::marker::Freeze for millipede_core::storage::LeaseId
+impl core::marker::Send for millipede_core::storage::LeaseId
+impl core::marker::Sync for millipede_core::storage::LeaseId
+impl core::marker::Unpin for millipede_core::storage::LeaseId
+impl core::marker::UnsafeUnpin for millipede_core::storage::LeaseId
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::LeaseId
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::LeaseId
+#[non_exhaustive] pub struct millipede_core::storage::ListKeysOptions
+pub millipede_core::storage::ListKeysOptions::exclusive_start_key: core::option::Option<alloc::string::String>
+pub millipede_core::storage::ListKeysOptions::limit: core::option::Option<usize>
+impl core::clone::Clone for millipede_core::storage::ListKeysOptions
+pub fn millipede_core::storage::ListKeysOptions::clone(&self) -> millipede_core::storage::ListKeysOptions
+impl core::default::Default for millipede_core::storage::ListKeysOptions
+pub fn millipede_core::storage::ListKeysOptions::default() -> millipede_core::storage::ListKeysOptions
+impl core::fmt::Debug for millipede_core::storage::ListKeysOptions
+pub fn millipede_core::storage::ListKeysOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::ListKeysOptions
+impl core::marker::Send for millipede_core::storage::ListKeysOptions
+impl core::marker::Sync for millipede_core::storage::ListKeysOptions
+impl core::marker::Unpin for millipede_core::storage::ListKeysOptions
+impl core::marker::UnsafeUnpin for millipede_core::storage::ListKeysOptions
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::ListKeysOptions
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::ListKeysOptions
+#[non_exhaustive] pub struct millipede_core::storage::ListOptions
+pub millipede_core::storage::ListOptions::desc: bool
+pub millipede_core::storage::ListOptions::limit: core::option::Option<u64>
+pub millipede_core::storage::ListOptions::offset: u64
+impl core::clone::Clone for millipede_core::storage::ListOptions
+pub fn millipede_core::storage::ListOptions::clone(&self) -> millipede_core::storage::ListOptions
+impl core::default::Default for millipede_core::storage::ListOptions
+pub fn millipede_core::storage::ListOptions::default() -> millipede_core::storage::ListOptions
+impl core::fmt::Debug for millipede_core::storage::ListOptions
+pub fn millipede_core::storage::ListOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::ListOptions
+impl core::marker::Send for millipede_core::storage::ListOptions
+impl core::marker::Sync for millipede_core::storage::ListOptions
+impl core::marker::Unpin for millipede_core::storage::ListOptions
+impl core::marker::UnsafeUnpin for millipede_core::storage::ListOptions
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::ListOptions
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::ListOptions
+pub struct millipede_core::storage::Page<T>
+pub millipede_core::storage::Page::items: alloc::vec::Vec<T>
+pub millipede_core::storage::Page::limit: core::option::Option<u64>
+pub millipede_core::storage::Page::offset: u64
+pub millipede_core::storage::Page::total: u64
+impl<T: core::clone::Clone> core::clone::Clone for millipede_core::storage::Page<T>
+pub fn millipede_core::storage::Page<T>::clone(&self) -> millipede_core::storage::Page<T>
+impl<T: core::fmt::Debug> core::fmt::Debug for millipede_core::storage::Page<T>
+pub fn millipede_core::storage::Page<T>::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl<T> core::marker::Freeze for millipede_core::storage::Page<T>
+impl<T> core::marker::Send for millipede_core::storage::Page<T> where T: core::marker::Send
+impl<T> core::marker::Sync for millipede_core::storage::Page<T> where T: core::marker::Sync
+impl<T> core::marker::Unpin for millipede_core::storage::Page<T> where T: core::marker::Unpin
+impl<T> core::marker::UnsafeUnpin for millipede_core::storage::Page<T>
+impl<T> core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::Page<T> where T: core::panic::unwind_safe::RefUnwindSafe
+impl<T> core::panic::unwind_safe::UnwindSafe for millipede_core::storage::Page<T> where T: core::panic::unwind_safe::UnwindSafe
+pub struct millipede_core::storage::ProcessedRequest
+pub millipede_core::storage::ProcessedRequest::request_id: millipede_core::request::RequestId
+pub millipede_core::storage::ProcessedRequest::unique_key: alloc::string::String
+pub millipede_core::storage::ProcessedRequest::was_already_handled: bool
+pub millipede_core::storage::ProcessedRequest::was_already_present: bool
+impl core::clone::Clone for millipede_core::storage::ProcessedRequest
+pub fn millipede_core::storage::ProcessedRequest::clone(&self) -> millipede_core::storage::ProcessedRequest
+impl core::fmt::Debug for millipede_core::storage::ProcessedRequest
+pub fn millipede_core::storage::ProcessedRequest::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::ProcessedRequest
+impl core::marker::Send for millipede_core::storage::ProcessedRequest
+impl core::marker::Sync for millipede_core::storage::ProcessedRequest
+impl core::marker::Unpin for millipede_core::storage::ProcessedRequest
+impl core::marker::UnsafeUnpin for millipede_core::storage::ProcessedRequest
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::ProcessedRequest
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::ProcessedRequest
+#[non_exhaustive] pub struct millipede_core::storage::ReclaimOptions
+pub millipede_core::storage::ReclaimOptions::forefront: bool
+pub millipede_core::storage::ReclaimOptions::increment_retry: bool
+impl core::clone::Clone for millipede_core::storage::ReclaimOptions
+pub fn millipede_core::storage::ReclaimOptions::clone(&self) -> millipede_core::storage::ReclaimOptions
+impl core::default::Default for millipede_core::storage::ReclaimOptions
+pub fn millipede_core::storage::ReclaimOptions::default() -> Self
+impl core::fmt::Debug for millipede_core::storage::ReclaimOptions
+pub fn millipede_core::storage::ReclaimOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::ReclaimOptions
+impl core::marker::Send for millipede_core::storage::ReclaimOptions
+impl core::marker::Sync for millipede_core::storage::ReclaimOptions
+impl core::marker::Unpin for millipede_core::storage::ReclaimOptions
+impl core::marker::UnsafeUnpin for millipede_core::storage::ReclaimOptions
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::ReclaimOptions
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::ReclaimOptions
+pub trait millipede_core::storage::Dataset: core::marker::Send + core::marker::Sync
+pub fn millipede_core::storage::Dataset::export_csv<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 std::path::Path) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::storage::Dataset::export_json<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 std::path::Path) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::storage::Dataset::info<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<millipede_core::storage::DatasetInfo>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::storage::Dataset::list_raw<'life0, 'async_trait>(&'life0 self, millipede_core::storage::ListOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<millipede_core::storage::Page<serde_json::value::Value>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::storage::Dataset::push_json<'life0, 'async_trait>(&'life0 self, serde_json::value::Value) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::storage::Dataset::push_json_batch<'life0, 'async_trait>(&'life0 self, alloc::vec::Vec<serde_json::value::Value>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::storage::Dataset::stream_raw(&self, millipede_core::storage::ListOptions) -> futures_core::stream::BoxStream<'_, millipede_core::storage::StorageResult<serde_json::value::Value>>
+pub trait millipede_core::storage::DatasetExt: millipede_core::storage::Dataset
+pub fn millipede_core::storage::DatasetExt::list<'life0, 'async_trait, T>(&'life0 self, millipede_core::storage::ListOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<millipede_core::storage::Page<T>>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::de::DeserializeOwned, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::storage::DatasetExt::push<'life0, 'life1, 'async_trait, T>(&'life0 self, &'life1 T) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::ser::Serialize + core::marker::Send + core::marker::Sync, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::storage::DatasetExt::push_batch<'life0, 'life1, 'async_trait, T>(&'life0 self, &'life1 [T]) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::ser::Serialize + core::marker::Send + core::marker::Sync, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::storage::DatasetExt::stream<T: serde_core::de::DeserializeOwned + core::marker::Send + 'static>(&self, millipede_core::storage::ListOptions) -> futures_core::stream::BoxStream<'_, millipede_core::storage::StorageResult<T>>
+impl<D: millipede_core::storage::Dataset + ?core::marker::Sized> millipede_core::storage::DatasetExt for D
+pub fn D::list<'life0, 'async_trait, T>(&'life0 self, millipede_core::storage::ListOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<millipede_core::storage::Page<T>>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::de::DeserializeOwned, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait
+pub fn D::push<'life0, 'life1, 'async_trait, T>(&'life0 self, &'life1 T) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::ser::Serialize + core::marker::Send + core::marker::Sync, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn D::push_batch<'life0, 'life1, 'async_trait, T>(&'life0 self, &'life1 [T]) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::ser::Serialize + core::marker::Send + core::marker::Sync, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn D::stream<T: serde_core::de::DeserializeOwned + core::marker::Send + 'static>(&self, millipede_core::storage::ListOptions) -> futures_core::stream::BoxStream<'_, millipede_core::storage::StorageResult<T>>
+pub trait millipede_core::storage::KeyValueStore: core::marker::Send + core::marker::Sync
+pub fn millipede_core::storage::KeyValueStore::delete<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 str) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::storage::KeyValueStore::get_bytes<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 str) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<core::option::Option<millipede_core::storage::KvEntry>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::storage::KeyValueStore::list_keys<'life0, 'async_trait>(&'life0 self, millipede_core::storage::ListKeysOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<millipede_core::storage::KeyList>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::storage::KeyValueStore::set_bytes<'life0, 'life1, 'life2, 'async_trait>(&'life0 self, &'life1 str, bytes::bytes::Bytes, &'life2 str) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait, 'life2: 'async_trait
+pub trait millipede_core::storage::KeyValueStoreExt: millipede_core::storage::KeyValueStore
+pub fn millipede_core::storage::KeyValueStoreExt::get<'life0, 'life1, 'async_trait, T>(&'life0 self, &'life1 str) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<core::option::Option<T>>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::de::DeserializeOwned + 'static, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::storage::KeyValueStoreExt::set<'life0, 'life1, 'life2, 'async_trait, T>(&'life0 self, &'life1 str, &'life2 T) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::ser::Serialize + core::marker::Send + core::marker::Sync, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait, 'life2: 'async_trait
+impl<K: millipede_core::storage::KeyValueStore + ?core::marker::Sized> millipede_core::storage::KeyValueStoreExt for K
+pub fn K::get<'life0, 'life1, 'async_trait, T>(&'life0 self, &'life1 str) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<core::option::Option<T>>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::de::DeserializeOwned + 'static, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn K::set<'life0, 'life1, 'life2, 'async_trait, T>(&'life0 self, &'life1 str, &'life2 T) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::ser::Serialize + core::marker::Send + core::marker::Sync, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait, 'life2: 'async_trait
+pub trait millipede_core::storage::RequestQueue: core::marker::Send + core::marker::Sync
+pub fn millipede_core::storage::RequestQueue::abandon<'life0, 'async_trait>(&'life0 self, millipede_core::storage::Lease) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::storage::RequestQueue::add<'life0, 'async_trait>(&'life0 self, millipede_core::request::Request, millipede_core::storage::AddOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<millipede_core::storage::QueueOpInfo>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::storage::RequestQueue::add_batch<'life0, 'async_trait>(&'life0 self, alloc::vec::Vec<millipede_core::storage::RequestSource>, millipede_core::storage::AddOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<millipede_core::storage::BatchAddHandle>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::storage::RequestQueue::fetch_next<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<core::option::Option<millipede_core::storage::Lease>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::storage::RequestQueue::handled_count<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<u64>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::storage::RequestQueue::is_empty<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<bool>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::storage::RequestQueue::is_finished<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<bool>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::storage::RequestQueue::mark_handled<'life0, 'async_trait>(&'life0 self, millipede_core::storage::Lease) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::storage::RequestQueue::pending_count<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<u64>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::storage::RequestQueue::reclaim<'life0, 'async_trait>(&'life0 self, millipede_core::storage::Lease, millipede_core::storage::ReclaimOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::storage::RequestQueue::renew<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 millipede_core::storage::LeaseId, core::time::Duration) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub trait millipede_core::storage::StorageClient: core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_core::storage::StorageClient::open_dataset<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::Dataset>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::storage::StorageClient::open_key_value_store<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::storage::StorageClient::open_request_queue<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::RequestQueue>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::storage::StorageClient::purge<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub type millipede_core::storage::QueueOpInfo = millipede_core::storage::ProcessedRequest
+pub type millipede_core::storage::StorageResult<T> = core::result::Result<T, millipede_core::storage::StorageError>
