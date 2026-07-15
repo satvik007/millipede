@@ -1,9 +1,13 @@
-use super::{CrawlerHandle, CrawlerKind, CrawlerShared, RequestEnv, RequestOutcome, RequestPrep};
+use super::{
+    AttemptObservation, CrawlerHandle, CrawlerKind, CrawlerShared, RequestEnv, RequestOutcome,
+    RequestPrep,
+};
 use crate::{
     errors::CrawlError,
     events::{CrawlerEvent, HandledRequest, RequestFinalState},
     handler::{FailedRequestContext, FailedRequestHandler, RequestHandler},
     request::{Request, RequestState},
+    retry_strategy::{AttemptOutcome, AttemptOverrides, RetryStrategy, SessionRetryAction},
     statistics::FinalStatistics,
     storage::{KeyValueStore, Lease, ReclaimOptions},
 };
@@ -20,6 +24,7 @@ pub(crate) struct EngineOptions {
     pub(crate) request_handler_timeout: Duration,
     pub(crate) internal_operation_timeout: Duration,
     pub(crate) persist_state_interval: Duration,
+    pub(crate) retry_strategy: Option<Arc<dyn RetryStrategy>>,
 }
 
 impl Default for EngineOptions {
@@ -31,6 +36,7 @@ impl Default for EngineOptions {
             request_handler_timeout: Duration::from_secs(60),
             internal_operation_timeout: Duration::from_secs(30),
             persist_state_interval: Duration::from_secs(60),
+            retry_strategy: None,
         }
     }
 }
@@ -48,6 +54,7 @@ struct AttemptOutput {
     result: Result<(), Arc<CrawlError>>,
     duration: Duration,
     request: Request,
+    observation: AttemptObservation,
 }
 
 struct SlotState {
@@ -68,6 +75,7 @@ impl<K: CrawlerKind> Engine<K> {
         let mut in_flight: FuturesUnordered<AttemptFuture> = FuturesUnordered::new();
         let mut slots = HashMap::new();
         let mut accumulated = HashMap::new();
+        let mut overrides: HashMap<String, AttemptOverrides> = HashMap::new();
         let mut next_slot = 0_u64;
         let mut draining = false;
         let mut ticker = tokio::time::interval(self.opts.persist_state_interval);
@@ -90,10 +98,13 @@ impl<K: CrawlerKind> Engine<K> {
                 .await
                 {
                     Ok(Ok(Some(lease))) => {
+                        let carried = overrides
+                            .remove(&lease.request.unique_key)
+                            .unwrap_or_default();
                         let slot = next_slot;
                         next_slot = next_slot.wrapping_add(1);
                         let started = Instant::now();
-                        let handle = self.spawn_attempt(lease.request.clone());
+                        let handle = self.spawn_attempt(lease.request.clone(), carried);
                         let abort = handle.abort_handle();
                         in_flight.push(Box::pin(async move { (slot, handle.await) }));
                         slots.insert(
@@ -149,7 +160,7 @@ impl<K: CrawlerKind> Engine<K> {
 
             tokio::select! {
                 Some((slot, joined)) = in_flight.next() => {
-                    if let Err(error) = self.handle_completion(slot, joined, &mut slots, &mut accumulated).await {
+                    if let Err(error) = self.handle_completion(slot, joined, &mut slots, &mut accumulated, &mut overrides).await {
                         self.abort_remaining(&mut in_flight, &mut slots).await;
                         let _ = self.finish().await;
                         return Err(error);
@@ -165,7 +176,11 @@ impl<K: CrawlerKind> Engine<K> {
         Ok(self.finish().await)
     }
 
-    fn spawn_attempt(&self, request: Request) -> tokio::task::JoinHandle<AttemptOutput> {
+    fn spawn_attempt(
+        &self,
+        request: Request,
+        carried: AttemptOverrides,
+    ) -> tokio::task::JoinHandle<AttemptOutput> {
         let kind = self.kind.clone();
         let handler = self.handler.clone();
         let shared = self.shared.clone();
@@ -173,6 +188,9 @@ impl<K: CrawlerKind> Engine<K> {
         let events = shared.events.clone();
         let request_handler_timeout = self.opts.request_handler_timeout;
         tokio::spawn(async move {
+            if let Some(delay) = carried.backoff {
+                tokio::time::sleep(delay).await;
+            }
             let started = Instant::now();
             let mut prep = RequestPrep { request };
             if let Err(error) = kind.before_request(&mut prep).await {
@@ -192,6 +210,7 @@ impl<K: CrawlerKind> Engine<K> {
                     result: Err(error),
                     duration: started.elapsed(),
                     request: request_owned,
+                    observation: AttemptObservation::default(),
                 };
             }
             let request_owned = prep.request;
@@ -201,6 +220,7 @@ impl<K: CrawlerKind> Engine<K> {
                     request: request_arc.clone(),
                     crawler,
                     events: &events,
+                    overrides: carried,
                 })
                 .await
             {
@@ -220,9 +240,11 @@ impl<K: CrawlerKind> Engine<K> {
                         result: Err(error),
                         duration: started.elapsed(),
                         request: request_owned,
+                        observation: AttemptObservation::default(),
                     };
                 }
             };
+            let observation = kind.observe(&ctx);
             let result =
                 match tokio::time::timeout(request_handler_timeout, handler.handle(ctx.clone()))
                     .await
@@ -282,6 +304,7 @@ impl<K: CrawlerKind> Engine<K> {
                 result,
                 duration: started.elapsed(),
                 request: request_owned,
+                observation,
             }
         })
     }
@@ -309,6 +332,7 @@ impl<K: CrawlerKind> Engine<K> {
         joined: Result<AttemptOutput, tokio::task::JoinError>,
         slots: &mut HashMap<u64, SlotState>,
         accumulated: &mut HashMap<String, Duration>,
+        overrides: &mut HashMap<String, AttemptOverrides>,
     ) -> Result<(), CrawlError> {
         let SlotState {
             mut lease,
@@ -317,7 +341,7 @@ impl<K: CrawlerKind> Engine<K> {
         } = slots
             .remove(&slot)
             .expect("completed task has a retained lease");
-        let (result, duration) = match joined {
+        let (result, duration, observation) = match joined {
             Err(error) if error.is_cancelled() => {
                 self.shared
                     .queue
@@ -333,6 +357,7 @@ impl<K: CrawlerKind> Engine<K> {
                         "request handler panicked: {message}"
                     )))),
                     started.elapsed(),
+                    AttemptObservation::default(),
                 )
             }
             Ok(output) => {
@@ -343,7 +368,7 @@ impl<K: CrawlerKind> Engine<K> {
                 lease.request = output.request;
                 lease.request.retry_count = retry_count;
                 lease.request.session_rotation_count = rotations;
-                (output.result, output.duration)
+                (output.result, output.duration, output.observation)
             }
         };
         let key = lease.request.unique_key.clone();
@@ -351,6 +376,8 @@ impl<K: CrawlerKind> Engine<K> {
         match result {
             Ok(()) => {
                 accumulated.remove(&key);
+                overrides.remove(&key);
+                lease.request.loaded_url = observation.loaded_url.clone();
                 lease.request.state = RequestState::Done;
                 lease.request.handled_at = Some(OffsetDateTime::now_utc());
                 let snapshot = Arc::new(lease.request.clone());
@@ -360,12 +387,16 @@ impl<K: CrawlerKind> Engine<K> {
                     .mark_handled(lease)
                     .await
                     .map_err(storage_failure)?;
-                self.shared.stats.record_finished(total, None, retry_count);
+                self.shared.stats.record_finished(
+                    total,
+                    observation.status.map(|status| status.as_u16()),
+                    retry_count,
+                );
                 let handled = HandledRequest {
                     request: snapshot,
-                    loaded_url: None,
+                    loaded_url: observation.loaded_url,
                     outcome: RequestFinalState::Succeeded,
-                    response_status: None,
+                    response_status: observation.status,
                     retry_count,
                     duration: total,
                 };
@@ -378,6 +409,7 @@ impl<K: CrawlerKind> Engine<K> {
             Err(error) if error.is_critical() => {
                 push_error(&mut lease.request, &error.to_string());
                 accumulated.remove(&key);
+                overrides.remove(&key);
                 if let Err(abandon_error) = self.shared.queue.abandon(lease).await {
                     tracing::warn!(%abandon_error, "failed to abandon critical request lease");
                 }
@@ -386,24 +418,77 @@ impl<K: CrawlerKind> Engine<K> {
                 Err(CrawlError::critical(anyhow::anyhow!(error.to_string())))
             }
             Err(error) => {
-                let eligible = error.ignores_max_retries()
-                    || (error.is_retryable()
-                        && !lease.request.no_retry
-                        && if error.rotates_session() {
-                            lease.request.session_rotation_count < self.opts.max_session_rotations
-                        } else {
-                            lease.request.retry_count
-                                < lease
-                                    .request
-                                    .max_retries
-                                    .unwrap_or(self.opts.max_request_retries)
+                let status = observation.status.or_else(|| error.http_status());
+                let mut strategy_rotates = None;
+                let eligible = if let Some(strategy) = &self.opts.retry_strategy {
+                    if lease.request.no_retry {
+                        false
+                    } else {
+                        let directive = strategy.on_retry(&AttemptOutcome {
+                            request: &lease.request,
+                            attempt: lease.request.retry_count,
+                            status,
+                            error: Some(&error),
+                            anti_bot: match &*error {
+                                CrawlError::AntiBotDetected { tech, .. } => Some(tech.clone()),
+                                _ => None,
+                            },
+                            proxy_info: observation.proxy_info.as_ref(),
+                            session_id: observation.session_id.as_ref(),
+                            response_bytes: observation.response_bytes,
                         });
+                        let rotates = error.rotates_session()
+                            || matches!(
+                                directive.session_action,
+                                SessionRetryAction::Rotate | SessionRetryAction::Retire
+                            );
+                        let cap = lease.request.max_retries.unwrap_or(strategy.max_retries());
+                        let eligible = directive.should_retry
+                            && (error.ignores_max_retries()
+                                || if rotates {
+                                    lease.request.session_rotation_count
+                                        < self.opts.max_session_rotations
+                                } else {
+                                    lease.request.retry_count < cap
+                                });
+                        if eligible
+                            && (directive.proxy_kind.is_some()
+                                || directive.user_agent_profile.is_some()
+                                || directive.backoff.is_some())
+                        {
+                            overrides.insert(
+                                key.clone(),
+                                AttemptOverrides {
+                                    proxy_kind: directive.proxy_kind,
+                                    user_agent_profile: directive.user_agent_profile,
+                                    backoff: directive.backoff,
+                                },
+                            );
+                        }
+                        strategy_rotates = Some(rotates);
+                        eligible
+                    }
+                } else {
+                    error.ignores_max_retries()
+                        || (error.is_retryable()
+                            && !lease.request.no_retry
+                            && if error.rotates_session() {
+                                lease.request.session_rotation_count
+                                    < self.opts.max_session_rotations
+                            } else {
+                                lease.request.retry_count
+                                    < lease
+                                        .request
+                                        .max_retries
+                                        .unwrap_or(self.opts.max_request_retries)
+                            })
+                };
                 if eligible {
-                    accumulated.insert(key, total);
+                    accumulated.insert(key.clone(), total);
                     let error_text = error.to_string();
                     push_error(&mut lease.request, &error_text);
                     self.shared.stats.record_retry(&error_text);
-                    let rotates = error.rotates_session();
+                    let rotates = strategy_rotates.unwrap_or_else(|| error.rotates_session());
                     if rotates {
                         lease.request.session_rotation_count += 1;
                     }
@@ -421,6 +506,7 @@ impl<K: CrawlerKind> Engine<K> {
                     return Ok(());
                 }
                 accumulated.remove(&key);
+                overrides.remove(&key);
                 let error_text = error.to_string();
                 push_error(&mut lease.request, &error_text);
                 lease.request.state = RequestState::Error;
@@ -464,9 +550,9 @@ impl<K: CrawlerKind> Engine<K> {
                 });
                 let _ = self.shared.results_tx.send(HandledRequest {
                     request: snapshot,
-                    loaded_url: None,
+                    loaded_url: observation.loaded_url,
                     outcome: RequestFinalState::Failed,
-                    response_status: None,
+                    response_status: status,
                     retry_count,
                     duration: total,
                 });

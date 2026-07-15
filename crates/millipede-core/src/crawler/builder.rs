@@ -46,6 +46,7 @@ pub struct CrawlerBuilder<K: CrawlerKind> {
     configuration: Option<Configuration>,
     storage_client: Option<Arc<dyn StorageClient>>,
     results_capacity: usize,
+    retry_strategy: Option<Arc<dyn crate::retry_strategy::RetryStrategy>>,
 }
 
 impl<K: CrawlerKind> CrawlerBuilder<K> {
@@ -63,6 +64,7 @@ impl<K: CrawlerKind> CrawlerBuilder<K> {
             configuration: None,
             storage_client: None,
             results_capacity: 1024,
+            retry_strategy: None,
         }
     }
 
@@ -119,6 +121,12 @@ impl<K: CrawlerKind> CrawlerBuilder<K> {
         self
     }
 
+    /// Installs an attempt-level retry strategy.
+    pub fn retry_strategy<S: crate::retry_strategy::RetryStrategy>(mut self, strategy: S) -> Self {
+        self.retry_strategy = Some(Arc::new(strategy));
+        self
+    }
+
     /// Builds the crawler and opens its configured storage objects.
     ///
     /// The default [`Configuration`] purges all data managed by the selected storage client before
@@ -159,6 +167,7 @@ impl<K: CrawlerKind> CrawlerBuilder<K> {
             request_handler_timeout: self.request_handler_timeout,
             internal_operation_timeout: self.internal_operation_timeout,
             persist_state_interval: config.persist_state_interval(),
+            retry_strategy: self.retry_strategy,
         };
         let shared = Arc::new(CrawlerShared::new(
             queue,
@@ -173,6 +182,7 @@ impl<K: CrawlerKind> CrawlerBuilder<K> {
             handler,
             failed_handler: self.failed_handler,
             kvs,
+            storage: Some(storage),
             opts,
             started: std::sync::atomic::AtomicBool::new(false),
         })

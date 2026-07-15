@@ -62,6 +62,8 @@ mod tests {
         let crawler_env = CrawlerEnv {
             shared: shared.clone(),
             config,
+            storage: None,
+            kvs: None,
         };
         let request = Arc::new(Request::get("https://example.com/").build().unwrap());
         let kind = BasicKind;
@@ -76,6 +78,7 @@ mod tests {
                 request: request.clone(),
                 crawler: crawler_env.handle(),
                 events: crawler_env.events(),
+                overrides: Default::default(),
             })
             .await
             .unwrap();

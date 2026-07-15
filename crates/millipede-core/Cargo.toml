@@ -30,3 +30,4 @@ cookie_store = { workspace = true }
 [dev-dependencies]
 proptest = { workspace = true }
 millipede-storage-memory = { path = "../millipede-storage-memory" }
+tokio = { workspace = true, features = ["test-util"] }

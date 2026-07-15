@@ -36,6 +36,8 @@ pub mod config;
 pub mod cookies;
 /// Crawler lifecycle kinds, handles, and shared state.
 pub mod crawler;
+/// Link enqueueing from handler contexts.
+pub mod enqueue;
 /// Crawl error taxonomy and retry classification.
 pub mod errors;
 /// Crawler lifecycle events and broadcast support.
@@ -48,6 +50,8 @@ pub mod http_client;
 pub mod proxy;
 /// Request data types and construction helpers.
 pub mod request;
+/// Attempt-level retry strategy hooks.
+pub mod retry_strategy;
 /// Label- and method-based request routing.
 pub mod router;
 /// Sessions and reusable session pools.
@@ -64,9 +68,12 @@ pub mod prelude {
     pub use crate::config::{Configuration, ConfigurationBuilder, LogLevel};
     pub use crate::cookies::{CookieJar, CookieJarError};
     pub use crate::crawler::{
-        BasicContext, BasicCrawler, BasicKind, Crawler, CrawlerBuildError, CrawlerBuilder,
-        CrawlerEnv, CrawlerHandle, CrawlerKind, IntoStartRequest, IntoStartRequests, RequestEnv,
-        RequestOutcome, RequestPrep,
+        AttemptObservation, BasicContext, BasicCrawler, BasicKind, Crawler, CrawlerBuildError,
+        CrawlerBuilder, CrawlerEnv, CrawlerHandle, CrawlerKind, IntoStartRequest,
+        IntoStartRequests, RequestEnv, RequestOutcome, RequestPrep,
+    };
+    pub use crate::enqueue::{
+        EnqueueLinker, EnqueueLinksOptions, EnqueueResult, SkipReason, SkippedUrl,
     };
     pub use crate::errors::{AntiBotTech, CrawlError};
     pub use crate::events::{
@@ -76,7 +83,7 @@ pub mod prelude {
         FailedRequestContext, FailedRequestHandler, Middleware, RequestHandler,
     };
     pub use crate::http_client::{
-        HttpClient, HttpClientError, HttpRequest, HttpResponse, StreamingResponse,
+        HttpClient, HttpClientError, HttpRequest, HttpResponse, HttpStatusError, StreamingResponse,
     };
     pub use crate::proxy::{
         ProxyBuckets, ProxyConfiguration, ProxyInfo, ProxyKind, ProxyResolveContext, ProxyResolver,
@@ -85,6 +92,9 @@ pub mod prelude {
     pub use crate::request::{
         HeaderMap, IntoUrl, Method, Request, RequestBody, RequestBuildError, RequestBuilder,
         RequestId, RequestState, UserData,
+    };
+    pub use crate::retry_strategy::{
+        AttemptOutcome, AttemptOverrides, RetryDirective, RetryStrategy, SessionRetryAction,
     };
     pub use crate::router::{HasRequest, MethodFilter, Router};
     pub use crate::session::{

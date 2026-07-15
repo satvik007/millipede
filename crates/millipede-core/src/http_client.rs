@@ -12,6 +12,31 @@ use crate::{
     request::{Method, Request, RequestBody},
 };
 
+/// A typed HTTP status carried inside a [`crate::errors::CrawlError`].
+///
+/// # Examples
+///
+/// ```
+/// use http::StatusCode;
+/// use millipede_core::http_client::HttpStatusError;
+///
+/// let error = HttpStatusError::new(StatusCode::TOO_MANY_REQUESTS);
+/// assert_eq!(error.status, StatusCode::TOO_MANY_REQUESTS);
+/// ```
+#[derive(Debug, Clone, Copy, PartialEq, Eq, thiserror::Error)]
+#[error("HTTP status {status}")]
+pub struct HttpStatusError {
+    /// The response status.
+    pub status: StatusCode,
+}
+
+impl HttpStatusError {
+    /// Creates a status carrier.
+    pub fn new(status: StatusCode) -> Self {
+        Self { status }
+    }
+}
+
 /// An error produced while preparing or executing an HTTP request.
 ///
 /// # Examples

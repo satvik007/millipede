@@ -38,6 +38,7 @@ pub struct Crawler<K: CrawlerKind> {
     handler: Arc<dyn RequestHandler<K::Context>>,
     failed_handler: Option<Arc<dyn FailedRequestHandler>>,
     kvs: Option<Arc<dyn crate::storage::KeyValueStore>>,
+    storage: Option<Arc<dyn crate::storage::StorageClient>>,
     opts: EngineOptions,
     started: AtomicBool,
 }
@@ -64,6 +65,8 @@ impl<K: CrawlerKind> Crawler<K> {
         let env = CrawlerEnv {
             shared: self.shared.clone(),
             config: self.config.clone(),
+            storage: self.storage.clone(),
+            kvs: self.kvs.clone(),
         };
         self.kind.start(&env).await?;
         let result = async {
@@ -194,13 +197,23 @@ impl CrawlerHandle {
         &self,
         reqs: impl IntoIterator<Item = Request> + Send,
     ) -> Result<BatchAddHandle, CrawlError> {
+        self.add_requests_with_options(reqs, AddOptions::default())
+            .await
+    }
+
+    /// Adds requests with explicit queue insertion options.
+    pub async fn add_requests_with_options(
+        &self,
+        reqs: impl IntoIterator<Item = Request> + Send,
+        options: AddOptions,
+    ) -> Result<BatchAddHandle, CrawlError> {
         let shared = self.inner.upgrade().ok_or_else(|| {
             CrawlError::non_retryable(anyhow::anyhow!("crawler is no longer running"))
         })?;
         let sources = reqs.into_iter().map(RequestSource::from).collect();
         let handle = tokio::time::timeout(
             shared.internal_operation_timeout,
-            shared.queue.add_batch(sources, AddOptions::default()),
+            shared.queue.add_batch(sources, options),
         )
         .await
         .map_err(|_| CrawlError::retry(anyhow::anyhow!("queue add timed out")))??;
@@ -249,6 +262,8 @@ impl CrawlerHandle {
 pub struct CrawlerEnv {
     pub(crate) shared: Arc<CrawlerShared>,
     pub(crate) config: Arc<Configuration>,
+    pub(crate) storage: Option<Arc<dyn crate::storage::StorageClient>>,
+    pub(crate) kvs: Option<Arc<dyn crate::storage::KeyValueStore>>,
 }
 
 impl CrawlerEnv {
@@ -265,6 +280,21 @@ impl CrawlerEnv {
     /// Returns the resolved crawler configuration.
     pub fn config(&self) -> &Configuration {
         &self.config
+    }
+
+    /// Returns the resolved storage client used by the crawler.
+    pub fn storage_client(&self) -> Option<&Arc<dyn crate::storage::StorageClient>> {
+        self.storage.as_ref()
+    }
+
+    /// Returns the crawler's resolved key-value store.
+    pub fn kvs(&self) -> Option<&Arc<dyn crate::storage::KeyValueStore>> {
+        self.kvs.as_ref()
+    }
+
+    /// Returns the crawler's request queue.
+    pub fn request_queue(&self) -> &Arc<dyn RequestQueue> {
+        &self.shared.queue
     }
 
     /// Creates a weak handle to the crawler.
@@ -289,6 +319,35 @@ pub struct RequestEnv<'a> {
     pub crawler: CrawlerHandle,
     /// The crawler's event bus.
     pub events: &'a EventBus,
+    /// Overrides carried from the previous attempt of this request.
+    pub overrides: crate::retry_strategy::AttemptOverrides,
+}
+
+/// Metadata observed after a kind successfully constructs its handler context.
+///
+/// # Examples
+///
+/// ```
+/// use http::StatusCode;
+/// use millipede_core::crawler::AttemptObservation;
+///
+/// let mut observation = AttemptObservation::default();
+/// observation.status = Some(StatusCode::OK);
+/// observation.response_bytes = Some(1_024);
+/// ```
+#[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+pub struct AttemptObservation {
+    /// HTTP response status, when applicable.
+    pub status: Option<http::StatusCode>,
+    /// Final loaded URL after redirects, when applicable.
+    pub loaded_url: Option<url::Url>,
+    /// Session used by the attempt.
+    pub session_id: Option<crate::session::SessionId>,
+    /// Proxy used by the attempt.
+    pub proxy_info: Option<crate::proxy::ProxyInfo>,
+    /// Buffered response size.
+    pub response_bytes: Option<usize>,
 }
 
 /// The outcome supplied to per-attempt cleanup.
@@ -342,6 +401,13 @@ pub trait CrawlerKind: Send + Sync + 'static {
         &'a self,
         env: RequestEnv<'a>,
     ) -> BoxFuture<'a, Result<Self::Context, CrawlError>>;
+
+    /// Called once after `execute()` succeeds; feeds statistics, `HandledRequest`, and
+    /// `RetryStrategy` metadata.
+    fn observe(&self, ctx: &Self::Context) -> AttemptObservation {
+        let _ = ctx;
+        AttemptObservation::default()
+    }
 
     /// Runs after the user handler succeeds.
     fn after_success<'a>(

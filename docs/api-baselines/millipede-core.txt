@@ -179,6 +179,25 @@ impl<C> core::marker::Unpin for millipede_core::crawler::RequestOutcome<C> where
 impl<C> core::marker::UnsafeUnpin for millipede_core::crawler::RequestOutcome<C> where C: core::marker::UnsafeUnpin
 impl<C> core::panic::unwind_safe::RefUnwindSafe for millipede_core::crawler::RequestOutcome<C> where C: core::panic::unwind_safe::RefUnwindSafe
 impl<C> core::panic::unwind_safe::UnwindSafe for millipede_core::crawler::RequestOutcome<C> where C: core::panic::unwind_safe::UnwindSafe
+#[non_exhaustive] pub struct millipede_core::crawler::AttemptObservation
+pub millipede_core::crawler::AttemptObservation::loaded_url: core::option::Option<url::Url>
+pub millipede_core::crawler::AttemptObservation::proxy_info: core::option::Option<millipede_core::proxy::ProxyInfo>
+pub millipede_core::crawler::AttemptObservation::response_bytes: core::option::Option<usize>
+pub millipede_core::crawler::AttemptObservation::session_id: core::option::Option<millipede_core::session::SessionId>
+pub millipede_core::crawler::AttemptObservation::status: core::option::Option<http::status::StatusCode>
+impl core::clone::Clone for millipede_core::crawler::AttemptObservation
+pub fn millipede_core::crawler::AttemptObservation::clone(&self) -> millipede_core::crawler::AttemptObservation
+impl core::default::Default for millipede_core::crawler::AttemptObservation
+pub fn millipede_core::crawler::AttemptObservation::default() -> millipede_core::crawler::AttemptObservation
+impl core::fmt::Debug for millipede_core::crawler::AttemptObservation
+pub fn millipede_core::crawler::AttemptObservation::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::crawler::AttemptObservation
+impl core::marker::Send for millipede_core::crawler::AttemptObservation
+impl core::marker::Sync for millipede_core::crawler::AttemptObservation
+impl core::marker::Unpin for millipede_core::crawler::AttemptObservation
+impl core::marker::UnsafeUnpin for millipede_core::crawler::AttemptObservation
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::crawler::AttemptObservation
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::crawler::AttemptObservation
 #[non_exhaustive] pub struct millipede_core::crawler::BasicContext
 pub millipede_core::crawler::BasicContext::crawler: millipede_core::crawler::CrawlerHandle
 pub millipede_core::crawler::BasicContext::request: alloc::sync::Arc<millipede_core::request::Request>
@@ -209,6 +228,7 @@ pub fn millipede_core::crawler::BasicKind::after_success<'a>(&'a self, &'a mut S
 pub fn millipede_core::crawler::BasicKind::before_request<'a>(&'a self, &'a mut millipede_core::crawler::RequestPrep) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
 pub fn millipede_core::crawler::BasicKind::cleanup(&self, millipede_core::crawler::RequestOutcome<millipede_core::crawler::BasicContext>) -> futures_core::future::BoxFuture<'_, core::result::Result<(), millipede_core::errors::CrawlError>>
 pub fn millipede_core::crawler::BasicKind::execute<'a>(&'a self, millipede_core::crawler::RequestEnv<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<millipede_core::crawler::BasicContext, millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::BasicKind::observe(&self, &Self::Context) -> millipede_core::crawler::AttemptObservation
 pub fn millipede_core::crawler::BasicKind::start<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
 pub fn millipede_core::crawler::BasicKind::stop<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
 impl core::marker::Freeze for millipede_core::crawler::BasicKind
@@ -249,6 +269,7 @@ pub fn millipede_core::crawler::CrawlerBuilder<K>::new(K) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::request_handler<H: millipede_core::handler::RequestHandler<<K as millipede_core::crawler::CrawlerKind>::Context>>(self, H) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::request_handler_timeout(self, core::time::Duration) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::results_capacity(self, usize) -> Self
+pub fn millipede_core::crawler::CrawlerBuilder<K>::retry_strategy<S: millipede_core::retry_strategy::RetryStrategy>(self, S) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::storage_client(self, alloc::sync::Arc<dyn millipede_core::storage::StorageClient>) -> Self
 impl<K> core::marker::Freeze for millipede_core::crawler::CrawlerBuilder<K> where K: core::marker::Freeze
 impl<K> core::marker::Send for millipede_core::crawler::CrawlerBuilder<K>
@@ -262,7 +283,10 @@ impl millipede_core::crawler::CrawlerEnv
 pub fn millipede_core::crawler::CrawlerEnv::config(&self) -> &millipede_core::config::Configuration
 pub fn millipede_core::crawler::CrawlerEnv::events(&self) -> &millipede_core::events::EventBus
 pub fn millipede_core::crawler::CrawlerEnv::handle(&self) -> millipede_core::crawler::CrawlerHandle
+pub fn millipede_core::crawler::CrawlerEnv::kvs(&self) -> core::option::Option<&alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>>
+pub fn millipede_core::crawler::CrawlerEnv::request_queue(&self) -> &alloc::sync::Arc<dyn millipede_core::storage::RequestQueue>
 pub fn millipede_core::crawler::CrawlerEnv::stats(&self) -> &millipede_core::statistics::StatisticsHandle
+pub fn millipede_core::crawler::CrawlerEnv::storage_client(&self) -> core::option::Option<&alloc::sync::Arc<dyn millipede_core::storage::StorageClient>>
 impl core::marker::Freeze for millipede_core::crawler::CrawlerEnv
 impl core::marker::Send for millipede_core::crawler::CrawlerEnv
 impl core::marker::Sync for millipede_core::crawler::CrawlerEnv
@@ -274,6 +298,7 @@ pub struct millipede_core::crawler::CrawlerHandle
 impl millipede_core::crawler::CrawlerHandle
 pub fn millipede_core::crawler::CrawlerHandle::abort(&self)
 pub async fn millipede_core::crawler::CrawlerHandle::add_requests(&self, impl core::iter::traits::collect::IntoIterator<Item = millipede_core::request::Request> + core::marker::Send) -> core::result::Result<millipede_core::storage::BatchAddHandle, millipede_core::errors::CrawlError>
+pub async fn millipede_core::crawler::CrawlerHandle::add_requests_with_options(&self, impl core::iter::traits::collect::IntoIterator<Item = millipede_core::request::Request> + core::marker::Send, millipede_core::storage::AddOptions) -> core::result::Result<millipede_core::storage::BatchAddHandle, millipede_core::errors::CrawlError>
 pub fn millipede_core::crawler::CrawlerHandle::events(&self) -> core::option::Option<millipede_core::events::EventStream>
 pub fn millipede_core::crawler::CrawlerHandle::results(&self) -> core::option::Option<millipede_core::events::ResultStream>
 pub fn millipede_core::crawler::CrawlerHandle::stats(&self) -> core::option::Option<millipede_core::statistics::StatisticsSnapshot>
@@ -292,6 +317,7 @@ impl !core::panic::unwind_safe::UnwindSafe for millipede_core::crawler::CrawlerH
 #[non_exhaustive] pub struct millipede_core::crawler::RequestEnv<'a>
 pub millipede_core::crawler::RequestEnv::crawler: millipede_core::crawler::CrawlerHandle
 pub millipede_core::crawler::RequestEnv::events: &'a millipede_core::events::EventBus
+pub millipede_core::crawler::RequestEnv::overrides: millipede_core::retry_strategy::AttemptOverrides
 pub millipede_core::crawler::RequestEnv::request: alloc::sync::Arc<millipede_core::request::Request>
 impl<'a> core::marker::Freeze for millipede_core::crawler::RequestEnv<'a>
 impl<'a> core::marker::Send for millipede_core::crawler::RequestEnv<'a>
@@ -315,6 +341,7 @@ pub fn millipede_core::crawler::CrawlerKind::after_success<'a>(&'a self, &'a mut
 pub fn millipede_core::crawler::CrawlerKind::before_request<'a>(&'a self, &'a mut millipede_core::crawler::RequestPrep) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
 pub fn millipede_core::crawler::CrawlerKind::cleanup(&self, millipede_core::crawler::RequestOutcome<Self::Context>) -> futures_core::future::BoxFuture<'_, core::result::Result<(), millipede_core::errors::CrawlError>>
 pub fn millipede_core::crawler::CrawlerKind::execute<'a>(&'a self, millipede_core::crawler::RequestEnv<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<Self::Context, millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::CrawlerKind::observe(&self, &Self::Context) -> millipede_core::crawler::AttemptObservation
 pub fn millipede_core::crawler::CrawlerKind::start<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
 pub fn millipede_core::crawler::CrawlerKind::stop<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
 impl millipede_core::crawler::CrawlerKind for millipede_core::crawler::BasicKind
@@ -323,6 +350,7 @@ pub fn millipede_core::crawler::BasicKind::after_success<'a>(&'a self, &'a mut S
 pub fn millipede_core::crawler::BasicKind::before_request<'a>(&'a self, &'a mut millipede_core::crawler::RequestPrep) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
 pub fn millipede_core::crawler::BasicKind::cleanup(&self, millipede_core::crawler::RequestOutcome<millipede_core::crawler::BasicContext>) -> futures_core::future::BoxFuture<'_, core::result::Result<(), millipede_core::errors::CrawlError>>
 pub fn millipede_core::crawler::BasicKind::execute<'a>(&'a self, millipede_core::crawler::RequestEnv<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<millipede_core::crawler::BasicContext, millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::BasicKind::observe(&self, &Self::Context) -> millipede_core::crawler::AttemptObservation
 pub fn millipede_core::crawler::BasicKind::start<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
 pub fn millipede_core::crawler::BasicKind::stop<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
 pub trait millipede_core::crawler::IntoStartRequest
@@ -352,6 +380,89 @@ pub fn [T; N]::into_start_requests(self) -> core::result::Result<alloc::vec::Vec
 impl<T: millipede_core::crawler::IntoStartRequest> millipede_core::crawler::IntoStartRequests for alloc::vec::Vec<T>
 pub fn alloc::vec::Vec<T>::into_start_requests(self) -> core::result::Result<alloc::vec::Vec<millipede_core::request::Request>, millipede_core::errors::CrawlError>
 pub type millipede_core::crawler::BasicCrawler = millipede_core::crawler::Crawler<millipede_core::crawler::BasicKind>
+pub mod millipede_core::enqueue
+#[non_exhaustive] pub enum millipede_core::enqueue::SkipReason
+pub millipede_core::enqueue::SkipReason::DuplicateUniqueKey
+pub millipede_core::enqueue::SkipReason::InvalidUrl
+impl core::clone::Clone for millipede_core::enqueue::SkipReason
+pub fn millipede_core::enqueue::SkipReason::clone(&self) -> millipede_core::enqueue::SkipReason
+impl core::cmp::Eq for millipede_core::enqueue::SkipReason
+impl core::cmp::PartialEq for millipede_core::enqueue::SkipReason
+pub fn millipede_core::enqueue::SkipReason::eq(&self, &millipede_core::enqueue::SkipReason) -> bool
+impl core::fmt::Debug for millipede_core::enqueue::SkipReason
+pub fn millipede_core::enqueue::SkipReason::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::enqueue::SkipReason
+pub fn millipede_core::enqueue::SkipReason::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_core::enqueue::SkipReason
+impl core::marker::Freeze for millipede_core::enqueue::SkipReason
+impl core::marker::Send for millipede_core::enqueue::SkipReason
+impl core::marker::Sync for millipede_core::enqueue::SkipReason
+impl core::marker::Unpin for millipede_core::enqueue::SkipReason
+impl core::marker::UnsafeUnpin for millipede_core::enqueue::SkipReason
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::enqueue::SkipReason
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::enqueue::SkipReason
+pub struct millipede_core::enqueue::EnqueueLinker
+impl millipede_core::enqueue::EnqueueLinker
+pub fn millipede_core::enqueue::EnqueueLinker::new(millipede_core::crawler::CrawlerHandle, &millipede_core::request::Request) -> Self
+pub fn millipede_core::enqueue::EnqueueLinker::options(&self) -> millipede_core::enqueue::EnqueueLinksOptions<'_>
+pub async fn millipede_core::enqueue::EnqueueLinker::urls(&self, impl core::iter::traits::collect::IntoIterator<Item = url::Url>) -> core::result::Result<millipede_core::enqueue::EnqueueResult, millipede_core::errors::CrawlError>
+impl core::clone::Clone for millipede_core::enqueue::EnqueueLinker
+pub fn millipede_core::enqueue::EnqueueLinker::clone(&self) -> millipede_core::enqueue::EnqueueLinker
+impl core::fmt::Debug for millipede_core::enqueue::EnqueueLinker
+pub fn millipede_core::enqueue::EnqueueLinker::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::enqueue::EnqueueLinker
+impl core::marker::Send for millipede_core::enqueue::EnqueueLinker
+impl core::marker::Sync for millipede_core::enqueue::EnqueueLinker
+impl core::marker::Unpin for millipede_core::enqueue::EnqueueLinker
+impl core::marker::UnsafeUnpin for millipede_core::enqueue::EnqueueLinker
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::enqueue::EnqueueLinker
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::enqueue::EnqueueLinker
+pub struct millipede_core::enqueue::EnqueueLinksOptions<'a>
+impl<'a> millipede_core::enqueue::EnqueueLinksOptions<'a>
+pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::base_url(self, url::Url) -> Self
+pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::forefront(self, bool) -> Self
+pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::label(self, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::limit(self, usize) -> Self
+pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::raw_urls<S: core::convert::Into<alloc::string::String>>(self, impl core::iter::traits::collect::IntoIterator<Item = S>) -> Self
+pub async fn millipede_core::enqueue::EnqueueLinksOptions<'a>::send(self) -> core::result::Result<millipede_core::enqueue::EnqueueResult, millipede_core::errors::CrawlError>
+pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::urls(self, impl core::iter::traits::collect::IntoIterator<Item = url::Url>) -> Self
+pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::user_data(self, millipede_core::request::UserData) -> Self
+impl<'a> core::marker::Freeze for millipede_core::enqueue::EnqueueLinksOptions<'a>
+impl<'a> core::marker::Send for millipede_core::enqueue::EnqueueLinksOptions<'a>
+impl<'a> core::marker::Sync for millipede_core::enqueue::EnqueueLinksOptions<'a>
+impl<'a> core::marker::Unpin for millipede_core::enqueue::EnqueueLinksOptions<'a>
+impl<'a> core::marker::UnsafeUnpin for millipede_core::enqueue::EnqueueLinksOptions<'a>
+impl<'a> !core::panic::unwind_safe::RefUnwindSafe for millipede_core::enqueue::EnqueueLinksOptions<'a>
+impl<'a> !core::panic::unwind_safe::UnwindSafe for millipede_core::enqueue::EnqueueLinksOptions<'a>
+#[non_exhaustive] pub struct millipede_core::enqueue::EnqueueResult
+pub millipede_core::enqueue::EnqueueResult::added: alloc::vec::Vec<millipede_core::storage::ProcessedRequest>
+pub millipede_core::enqueue::EnqueueResult::skipped: alloc::vec::Vec<millipede_core::enqueue::SkippedUrl>
+impl millipede_core::enqueue::EnqueueResult
+pub fn millipede_core::enqueue::EnqueueResult::added_count(&self) -> usize
+pub fn millipede_core::enqueue::EnqueueResult::skipped_count(&self) -> usize
+impl core::fmt::Debug for millipede_core::enqueue::EnqueueResult
+pub fn millipede_core::enqueue::EnqueueResult::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::enqueue::EnqueueResult
+impl core::marker::Send for millipede_core::enqueue::EnqueueResult
+impl core::marker::Sync for millipede_core::enqueue::EnqueueResult
+impl core::marker::Unpin for millipede_core::enqueue::EnqueueResult
+impl core::marker::UnsafeUnpin for millipede_core::enqueue::EnqueueResult
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::enqueue::EnqueueResult
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::enqueue::EnqueueResult
+pub struct millipede_core::enqueue::SkippedUrl
+pub millipede_core::enqueue::SkippedUrl::reason: millipede_core::enqueue::SkipReason
+pub millipede_core::enqueue::SkippedUrl::url: alloc::string::String
+impl core::clone::Clone for millipede_core::enqueue::SkippedUrl
+pub fn millipede_core::enqueue::SkippedUrl::clone(&self) -> millipede_core::enqueue::SkippedUrl
+impl core::fmt::Debug for millipede_core::enqueue::SkippedUrl
+pub fn millipede_core::enqueue::SkippedUrl::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::enqueue::SkippedUrl
+impl core::marker::Send for millipede_core::enqueue::SkippedUrl
+impl core::marker::Sync for millipede_core::enqueue::SkippedUrl
+impl core::marker::Unpin for millipede_core::enqueue::SkippedUrl
+impl core::marker::UnsafeUnpin for millipede_core::enqueue::SkippedUrl
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::enqueue::SkippedUrl
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::enqueue::SkippedUrl
 pub mod millipede_core::errors
 #[non_exhaustive] pub enum millipede_core::errors::AntiBotTech
 pub millipede_core::errors::AntiBotTech::Akamai
@@ -394,6 +505,7 @@ pub fn millipede_core::errors::CrawlError::counts_against_retries(&self) -> bool
 pub fn millipede_core::errors::CrawlError::critical<E: core::convert::Into<anyhow::Error>>(E) -> Self
 pub fn millipede_core::errors::CrawlError::fatal<E: core::convert::Into<anyhow::Error>>(E) -> Self
 pub fn millipede_core::errors::CrawlError::force_retry<E: core::convert::Into<anyhow::Error>>(E) -> Self
+pub fn millipede_core::errors::CrawlError::http_status(&self) -> core::option::Option<http::status::StatusCode>
 pub fn millipede_core::errors::CrawlError::ignores_max_retries(&self) -> bool
 pub fn millipede_core::errors::CrawlError::is_critical(&self) -> bool
 pub fn millipede_core::errors::CrawlError::is_retryable(&self) -> bool
@@ -638,6 +750,29 @@ impl core::marker::Unpin for millipede_core::http_client::HttpResponse
 impl core::marker::UnsafeUnpin for millipede_core::http_client::HttpResponse
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::http_client::HttpResponse
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::http_client::HttpResponse
+pub struct millipede_core::http_client::HttpStatusError
+pub millipede_core::http_client::HttpStatusError::status: http::status::StatusCode
+impl millipede_core::http_client::HttpStatusError
+pub fn millipede_core::http_client::HttpStatusError::new(http::status::StatusCode) -> Self
+impl core::clone::Clone for millipede_core::http_client::HttpStatusError
+pub fn millipede_core::http_client::HttpStatusError::clone(&self) -> millipede_core::http_client::HttpStatusError
+impl core::cmp::Eq for millipede_core::http_client::HttpStatusError
+impl core::cmp::PartialEq for millipede_core::http_client::HttpStatusError
+pub fn millipede_core::http_client::HttpStatusError::eq(&self, &millipede_core::http_client::HttpStatusError) -> bool
+impl core::error::Error for millipede_core::http_client::HttpStatusError
+impl core::fmt::Debug for millipede_core::http_client::HttpStatusError
+pub fn millipede_core::http_client::HttpStatusError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::http_client::HttpStatusError
+pub fn millipede_core::http_client::HttpStatusError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for millipede_core::http_client::HttpStatusError
+impl core::marker::StructuralPartialEq for millipede_core::http_client::HttpStatusError
+impl core::marker::Freeze for millipede_core::http_client::HttpStatusError
+impl core::marker::Send for millipede_core::http_client::HttpStatusError
+impl core::marker::Sync for millipede_core::http_client::HttpStatusError
+impl core::marker::Unpin for millipede_core::http_client::HttpStatusError
+impl core::marker::UnsafeUnpin for millipede_core::http_client::HttpStatusError
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::http_client::HttpStatusError
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::http_client::HttpStatusError
 #[non_exhaustive] pub struct millipede_core::http_client::StreamingResponse
 pub millipede_core::http_client::StreamingResponse::body: futures_core::stream::BoxStream<'static, core::result::Result<bytes::bytes::Bytes, millipede_core::http_client::HttpClientError>>
 pub millipede_core::http_client::StreamingResponse::headers: http::header::map::HeaderMap
@@ -717,6 +852,7 @@ pub fn millipede_core::errors::CrawlError::counts_against_retries(&self) -> bool
 pub fn millipede_core::errors::CrawlError::critical<E: core::convert::Into<anyhow::Error>>(E) -> Self
 pub fn millipede_core::errors::CrawlError::fatal<E: core::convert::Into<anyhow::Error>>(E) -> Self
 pub fn millipede_core::errors::CrawlError::force_retry<E: core::convert::Into<anyhow::Error>>(E) -> Self
+pub fn millipede_core::errors::CrawlError::http_status(&self) -> core::option::Option<http::status::StatusCode>
 pub fn millipede_core::errors::CrawlError::ignores_max_retries(&self) -> bool
 pub fn millipede_core::errors::CrawlError::is_critical(&self) -> bool
 pub fn millipede_core::errors::CrawlError::is_retryable(&self) -> bool
@@ -1042,6 +1178,48 @@ impl core::marker::Unpin for millipede_core::proxy::RotationStrategy
 impl core::marker::UnsafeUnpin for millipede_core::proxy::RotationStrategy
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::proxy::RotationStrategy
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::proxy::RotationStrategy
+pub enum millipede_core::prelude::SessionRetryAction
+pub millipede_core::prelude::SessionRetryAction::Keep
+pub millipede_core::prelude::SessionRetryAction::Retire
+pub millipede_core::prelude::SessionRetryAction::Rotate
+impl core::clone::Clone for millipede_core::retry_strategy::SessionRetryAction
+pub fn millipede_core::retry_strategy::SessionRetryAction::clone(&self) -> millipede_core::retry_strategy::SessionRetryAction
+impl core::cmp::Eq for millipede_core::retry_strategy::SessionRetryAction
+impl core::cmp::PartialEq for millipede_core::retry_strategy::SessionRetryAction
+pub fn millipede_core::retry_strategy::SessionRetryAction::eq(&self, &millipede_core::retry_strategy::SessionRetryAction) -> bool
+impl core::default::Default for millipede_core::retry_strategy::SessionRetryAction
+pub fn millipede_core::retry_strategy::SessionRetryAction::default() -> millipede_core::retry_strategy::SessionRetryAction
+impl core::fmt::Debug for millipede_core::retry_strategy::SessionRetryAction
+pub fn millipede_core::retry_strategy::SessionRetryAction::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for millipede_core::retry_strategy::SessionRetryAction
+impl core::marker::StructuralPartialEq for millipede_core::retry_strategy::SessionRetryAction
+impl core::marker::Freeze for millipede_core::retry_strategy::SessionRetryAction
+impl core::marker::Send for millipede_core::retry_strategy::SessionRetryAction
+impl core::marker::Sync for millipede_core::retry_strategy::SessionRetryAction
+impl core::marker::Unpin for millipede_core::retry_strategy::SessionRetryAction
+impl core::marker::UnsafeUnpin for millipede_core::retry_strategy::SessionRetryAction
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::retry_strategy::SessionRetryAction
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::retry_strategy::SessionRetryAction
+#[non_exhaustive] pub enum millipede_core::prelude::SkipReason
+pub millipede_core::prelude::SkipReason::DuplicateUniqueKey
+pub millipede_core::prelude::SkipReason::InvalidUrl
+impl core::clone::Clone for millipede_core::enqueue::SkipReason
+pub fn millipede_core::enqueue::SkipReason::clone(&self) -> millipede_core::enqueue::SkipReason
+impl core::cmp::Eq for millipede_core::enqueue::SkipReason
+impl core::cmp::PartialEq for millipede_core::enqueue::SkipReason
+pub fn millipede_core::enqueue::SkipReason::eq(&self, &millipede_core::enqueue::SkipReason) -> bool
+impl core::fmt::Debug for millipede_core::enqueue::SkipReason
+pub fn millipede_core::enqueue::SkipReason::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::enqueue::SkipReason
+pub fn millipede_core::enqueue::SkipReason::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_core::enqueue::SkipReason
+impl core::marker::Freeze for millipede_core::enqueue::SkipReason
+impl core::marker::Send for millipede_core::enqueue::SkipReason
+impl core::marker::Sync for millipede_core::enqueue::SkipReason
+impl core::marker::Unpin for millipede_core::enqueue::SkipReason
+impl core::marker::UnsafeUnpin for millipede_core::enqueue::SkipReason
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::enqueue::SkipReason
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::enqueue::SkipReason
 #[non_exhaustive] pub enum millipede_core::prelude::StorageError
 pub millipede_core::prelude::StorageError::Backend(anyhow::Error)
 pub millipede_core::prelude::StorageError::Io(core::io::error::Error)
@@ -1098,6 +1276,58 @@ impl core::marker::Unpin for millipede_core::storage::AddRequestsBatchedResult
 impl core::marker::UnsafeUnpin for millipede_core::storage::AddRequestsBatchedResult
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::AddRequestsBatchedResult
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::AddRequestsBatchedResult
+#[non_exhaustive] pub struct millipede_core::prelude::AttemptObservation
+pub millipede_core::prelude::AttemptObservation::loaded_url: core::option::Option<url::Url>
+pub millipede_core::prelude::AttemptObservation::proxy_info: core::option::Option<millipede_core::proxy::ProxyInfo>
+pub millipede_core::prelude::AttemptObservation::response_bytes: core::option::Option<usize>
+pub millipede_core::prelude::AttemptObservation::session_id: core::option::Option<millipede_core::session::SessionId>
+pub millipede_core::prelude::AttemptObservation::status: core::option::Option<http::status::StatusCode>
+impl core::clone::Clone for millipede_core::crawler::AttemptObservation
+pub fn millipede_core::crawler::AttemptObservation::clone(&self) -> millipede_core::crawler::AttemptObservation
+impl core::default::Default for millipede_core::crawler::AttemptObservation
+pub fn millipede_core::crawler::AttemptObservation::default() -> millipede_core::crawler::AttemptObservation
+impl core::fmt::Debug for millipede_core::crawler::AttemptObservation
+pub fn millipede_core::crawler::AttemptObservation::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::crawler::AttemptObservation
+impl core::marker::Send for millipede_core::crawler::AttemptObservation
+impl core::marker::Sync for millipede_core::crawler::AttemptObservation
+impl core::marker::Unpin for millipede_core::crawler::AttemptObservation
+impl core::marker::UnsafeUnpin for millipede_core::crawler::AttemptObservation
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::crawler::AttemptObservation
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::crawler::AttemptObservation
+#[non_exhaustive] pub struct millipede_core::prelude::AttemptOutcome<'a>
+pub millipede_core::prelude::AttemptOutcome::anti_bot: core::option::Option<millipede_core::errors::AntiBotTech>
+pub millipede_core::prelude::AttemptOutcome::attempt: u32
+pub millipede_core::prelude::AttemptOutcome::error: core::option::Option<&'a millipede_core::errors::CrawlError>
+pub millipede_core::prelude::AttemptOutcome::proxy_info: core::option::Option<&'a millipede_core::proxy::ProxyInfo>
+pub millipede_core::prelude::AttemptOutcome::request: &'a millipede_core::request::Request
+pub millipede_core::prelude::AttemptOutcome::response_bytes: core::option::Option<usize>
+pub millipede_core::prelude::AttemptOutcome::session_id: core::option::Option<&'a millipede_core::session::SessionId>
+pub millipede_core::prelude::AttemptOutcome::status: core::option::Option<http::status::StatusCode>
+impl<'a> core::marker::Freeze for millipede_core::retry_strategy::AttemptOutcome<'a>
+impl<'a> core::marker::Send for millipede_core::retry_strategy::AttemptOutcome<'a>
+impl<'a> core::marker::Sync for millipede_core::retry_strategy::AttemptOutcome<'a>
+impl<'a> core::marker::Unpin for millipede_core::retry_strategy::AttemptOutcome<'a>
+impl<'a> core::marker::UnsafeUnpin for millipede_core::retry_strategy::AttemptOutcome<'a>
+impl<'a> core::panic::unwind_safe::RefUnwindSafe for millipede_core::retry_strategy::AttemptOutcome<'a>
+impl<'a> core::panic::unwind_safe::UnwindSafe for millipede_core::retry_strategy::AttemptOutcome<'a>
+#[non_exhaustive] pub struct millipede_core::prelude::AttemptOverrides
+pub millipede_core::prelude::AttemptOverrides::backoff: core::option::Option<core::time::Duration>
+pub millipede_core::prelude::AttemptOverrides::proxy_kind: core::option::Option<millipede_core::proxy::ProxyKind>
+pub millipede_core::prelude::AttemptOverrides::user_agent_profile: core::option::Option<alloc::string::String>
+impl core::clone::Clone for millipede_core::retry_strategy::AttemptOverrides
+pub fn millipede_core::retry_strategy::AttemptOverrides::clone(&self) -> millipede_core::retry_strategy::AttemptOverrides
+impl core::default::Default for millipede_core::retry_strategy::AttemptOverrides
+pub fn millipede_core::retry_strategy::AttemptOverrides::default() -> millipede_core::retry_strategy::AttemptOverrides
+impl core::fmt::Debug for millipede_core::retry_strategy::AttemptOverrides
+pub fn millipede_core::retry_strategy::AttemptOverrides::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::retry_strategy::AttemptOverrides
+impl core::marker::Send for millipede_core::retry_strategy::AttemptOverrides
+impl core::marker::Sync for millipede_core::retry_strategy::AttemptOverrides
+impl core::marker::Unpin for millipede_core::retry_strategy::AttemptOverrides
+impl core::marker::UnsafeUnpin for millipede_core::retry_strategy::AttemptOverrides
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::retry_strategy::AttemptOverrides
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::retry_strategy::AttemptOverrides
 pub struct millipede_core::prelude::AutoSaved<T>
 impl<T: serde_core::ser::Serialize + serde_core::de::DeserializeOwned + core::marker::Send + core::marker::Sync + 'static> millipede_core::storage::AutoSaved<T>
 pub async fn millipede_core::storage::AutoSaved<T>::get(&self) -> T where T: core::clone::Clone
@@ -1144,6 +1374,7 @@ pub fn millipede_core::crawler::BasicKind::after_success<'a>(&'a self, &'a mut S
 pub fn millipede_core::crawler::BasicKind::before_request<'a>(&'a self, &'a mut millipede_core::crawler::RequestPrep) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
 pub fn millipede_core::crawler::BasicKind::cleanup(&self, millipede_core::crawler::RequestOutcome<millipede_core::crawler::BasicContext>) -> futures_core::future::BoxFuture<'_, core::result::Result<(), millipede_core::errors::CrawlError>>
 pub fn millipede_core::crawler::BasicKind::execute<'a>(&'a self, millipede_core::crawler::RequestEnv<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<millipede_core::crawler::BasicContext, millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::BasicKind::observe(&self, &Self::Context) -> millipede_core::crawler::AttemptObservation
 pub fn millipede_core::crawler::BasicKind::start<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
 pub fn millipede_core::crawler::BasicKind::stop<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
 impl core::marker::Freeze for millipede_core::crawler::BasicKind
@@ -1272,6 +1503,7 @@ pub fn millipede_core::crawler::CrawlerBuilder<K>::new(K) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::request_handler<H: millipede_core::handler::RequestHandler<<K as millipede_core::crawler::CrawlerKind>::Context>>(self, H) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::request_handler_timeout(self, core::time::Duration) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::results_capacity(self, usize) -> Self
+pub fn millipede_core::crawler::CrawlerBuilder<K>::retry_strategy<S: millipede_core::retry_strategy::RetryStrategy>(self, S) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::storage_client(self, alloc::sync::Arc<dyn millipede_core::storage::StorageClient>) -> Self
 impl<K> core::marker::Freeze for millipede_core::crawler::CrawlerBuilder<K> where K: core::marker::Freeze
 impl<K> core::marker::Send for millipede_core::crawler::CrawlerBuilder<K>
@@ -1285,7 +1517,10 @@ impl millipede_core::crawler::CrawlerEnv
 pub fn millipede_core::crawler::CrawlerEnv::config(&self) -> &millipede_core::config::Configuration
 pub fn millipede_core::crawler::CrawlerEnv::events(&self) -> &millipede_core::events::EventBus
 pub fn millipede_core::crawler::CrawlerEnv::handle(&self) -> millipede_core::crawler::CrawlerHandle
+pub fn millipede_core::crawler::CrawlerEnv::kvs(&self) -> core::option::Option<&alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>>
+pub fn millipede_core::crawler::CrawlerEnv::request_queue(&self) -> &alloc::sync::Arc<dyn millipede_core::storage::RequestQueue>
 pub fn millipede_core::crawler::CrawlerEnv::stats(&self) -> &millipede_core::statistics::StatisticsHandle
+pub fn millipede_core::crawler::CrawlerEnv::storage_client(&self) -> core::option::Option<&alloc::sync::Arc<dyn millipede_core::storage::StorageClient>>
 impl core::marker::Freeze for millipede_core::crawler::CrawlerEnv
 impl core::marker::Send for millipede_core::crawler::CrawlerEnv
 impl core::marker::Sync for millipede_core::crawler::CrawlerEnv
@@ -1297,6 +1532,7 @@ pub struct millipede_core::prelude::CrawlerHandle
 impl millipede_core::crawler::CrawlerHandle
 pub fn millipede_core::crawler::CrawlerHandle::abort(&self)
 pub async fn millipede_core::crawler::CrawlerHandle::add_requests(&self, impl core::iter::traits::collect::IntoIterator<Item = millipede_core::request::Request> + core::marker::Send) -> core::result::Result<millipede_core::storage::BatchAddHandle, millipede_core::errors::CrawlError>
+pub async fn millipede_core::crawler::CrawlerHandle::add_requests_with_options(&self, impl core::iter::traits::collect::IntoIterator<Item = millipede_core::request::Request> + core::marker::Send, millipede_core::storage::AddOptions) -> core::result::Result<millipede_core::storage::BatchAddHandle, millipede_core::errors::CrawlError>
 pub fn millipede_core::crawler::CrawlerHandle::events(&self) -> core::option::Option<millipede_core::events::EventStream>
 pub fn millipede_core::crawler::CrawlerHandle::results(&self) -> core::option::Option<millipede_core::events::ResultStream>
 pub fn millipede_core::crawler::CrawlerHandle::stats(&self) -> core::option::Option<millipede_core::statistics::StatisticsSnapshot>
@@ -1330,6 +1566,54 @@ impl core::marker::Unpin for millipede_core::storage::DatasetInfo
 impl core::marker::UnsafeUnpin for millipede_core::storage::DatasetInfo
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::DatasetInfo
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::DatasetInfo
+pub struct millipede_core::prelude::EnqueueLinker
+impl millipede_core::enqueue::EnqueueLinker
+pub fn millipede_core::enqueue::EnqueueLinker::new(millipede_core::crawler::CrawlerHandle, &millipede_core::request::Request) -> Self
+pub fn millipede_core::enqueue::EnqueueLinker::options(&self) -> millipede_core::enqueue::EnqueueLinksOptions<'_>
+pub async fn millipede_core::enqueue::EnqueueLinker::urls(&self, impl core::iter::traits::collect::IntoIterator<Item = url::Url>) -> core::result::Result<millipede_core::enqueue::EnqueueResult, millipede_core::errors::CrawlError>
+impl core::clone::Clone for millipede_core::enqueue::EnqueueLinker
+pub fn millipede_core::enqueue::EnqueueLinker::clone(&self) -> millipede_core::enqueue::EnqueueLinker
+impl core::fmt::Debug for millipede_core::enqueue::EnqueueLinker
+pub fn millipede_core::enqueue::EnqueueLinker::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::enqueue::EnqueueLinker
+impl core::marker::Send for millipede_core::enqueue::EnqueueLinker
+impl core::marker::Sync for millipede_core::enqueue::EnqueueLinker
+impl core::marker::Unpin for millipede_core::enqueue::EnqueueLinker
+impl core::marker::UnsafeUnpin for millipede_core::enqueue::EnqueueLinker
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::enqueue::EnqueueLinker
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::enqueue::EnqueueLinker
+pub struct millipede_core::prelude::EnqueueLinksOptions<'a>
+impl<'a> millipede_core::enqueue::EnqueueLinksOptions<'a>
+pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::base_url(self, url::Url) -> Self
+pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::forefront(self, bool) -> Self
+pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::label(self, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::limit(self, usize) -> Self
+pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::raw_urls<S: core::convert::Into<alloc::string::String>>(self, impl core::iter::traits::collect::IntoIterator<Item = S>) -> Self
+pub async fn millipede_core::enqueue::EnqueueLinksOptions<'a>::send(self) -> core::result::Result<millipede_core::enqueue::EnqueueResult, millipede_core::errors::CrawlError>
+pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::urls(self, impl core::iter::traits::collect::IntoIterator<Item = url::Url>) -> Self
+pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::user_data(self, millipede_core::request::UserData) -> Self
+impl<'a> core::marker::Freeze for millipede_core::enqueue::EnqueueLinksOptions<'a>
+impl<'a> core::marker::Send for millipede_core::enqueue::EnqueueLinksOptions<'a>
+impl<'a> core::marker::Sync for millipede_core::enqueue::EnqueueLinksOptions<'a>
+impl<'a> core::marker::Unpin for millipede_core::enqueue::EnqueueLinksOptions<'a>
+impl<'a> core::marker::UnsafeUnpin for millipede_core::enqueue::EnqueueLinksOptions<'a>
+impl<'a> !core::panic::unwind_safe::RefUnwindSafe for millipede_core::enqueue::EnqueueLinksOptions<'a>
+impl<'a> !core::panic::unwind_safe::UnwindSafe for millipede_core::enqueue::EnqueueLinksOptions<'a>
+#[non_exhaustive] pub struct millipede_core::prelude::EnqueueResult
+pub millipede_core::prelude::EnqueueResult::added: alloc::vec::Vec<millipede_core::storage::ProcessedRequest>
+pub millipede_core::prelude::EnqueueResult::skipped: alloc::vec::Vec<millipede_core::enqueue::SkippedUrl>
+impl millipede_core::enqueue::EnqueueResult
+pub fn millipede_core::enqueue::EnqueueResult::added_count(&self) -> usize
+pub fn millipede_core::enqueue::EnqueueResult::skipped_count(&self) -> usize
+impl core::fmt::Debug for millipede_core::enqueue::EnqueueResult
+pub fn millipede_core::enqueue::EnqueueResult::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::enqueue::EnqueueResult
+impl core::marker::Send for millipede_core::enqueue::EnqueueResult
+impl core::marker::Sync for millipede_core::enqueue::EnqueueResult
+impl core::marker::Unpin for millipede_core::enqueue::EnqueueResult
+impl core::marker::UnsafeUnpin for millipede_core::enqueue::EnqueueResult
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::enqueue::EnqueueResult
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::enqueue::EnqueueResult
 pub struct millipede_core::prelude::EventBus
 impl millipede_core::events::EventBus
 pub fn millipede_core::events::EventBus::emit(&self, millipede_core::events::CrawlerEvent)
@@ -1468,6 +1752,29 @@ impl core::marker::Unpin for millipede_core::http_client::HttpResponse
 impl core::marker::UnsafeUnpin for millipede_core::http_client::HttpResponse
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::http_client::HttpResponse
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::http_client::HttpResponse
+pub struct millipede_core::prelude::HttpStatusError
+pub millipede_core::prelude::HttpStatusError::status: http::status::StatusCode
+impl millipede_core::http_client::HttpStatusError
+pub fn millipede_core::http_client::HttpStatusError::new(http::status::StatusCode) -> Self
+impl core::clone::Clone for millipede_core::http_client::HttpStatusError
+pub fn millipede_core::http_client::HttpStatusError::clone(&self) -> millipede_core::http_client::HttpStatusError
+impl core::cmp::Eq for millipede_core::http_client::HttpStatusError
+impl core::cmp::PartialEq for millipede_core::http_client::HttpStatusError
+pub fn millipede_core::http_client::HttpStatusError::eq(&self, &millipede_core::http_client::HttpStatusError) -> bool
+impl core::error::Error for millipede_core::http_client::HttpStatusError
+impl core::fmt::Debug for millipede_core::http_client::HttpStatusError
+pub fn millipede_core::http_client::HttpStatusError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::http_client::HttpStatusError
+pub fn millipede_core::http_client::HttpStatusError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for millipede_core::http_client::HttpStatusError
+impl core::marker::StructuralPartialEq for millipede_core::http_client::HttpStatusError
+impl core::marker::Freeze for millipede_core::http_client::HttpStatusError
+impl core::marker::Send for millipede_core::http_client::HttpStatusError
+impl core::marker::Sync for millipede_core::http_client::HttpStatusError
+impl core::marker::Unpin for millipede_core::http_client::HttpStatusError
+impl core::marker::UnsafeUnpin for millipede_core::http_client::HttpStatusError
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::http_client::HttpStatusError
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::http_client::HttpStatusError
 pub struct millipede_core::prelude::KeyInfo
 pub millipede_core::prelude::KeyInfo::key: alloc::string::String
 pub millipede_core::prelude::KeyInfo::size: u64
@@ -1813,6 +2120,7 @@ impl !core::panic::unwind_safe::UnwindSafe for millipede_core::request::RequestB
 #[non_exhaustive] pub struct millipede_core::prelude::RequestEnv<'a>
 pub millipede_core::prelude::RequestEnv::crawler: millipede_core::crawler::CrawlerHandle
 pub millipede_core::prelude::RequestEnv::events: &'a millipede_core::events::EventBus
+pub millipede_core::prelude::RequestEnv::overrides: millipede_core::retry_strategy::AttemptOverrides
 pub millipede_core::prelude::RequestEnv::request: alloc::sync::Arc<millipede_core::request::Request>
 impl<'a> core::marker::Freeze for millipede_core::crawler::RequestEnv<'a>
 impl<'a> core::marker::Send for millipede_core::crawler::RequestEnv<'a>
@@ -1857,6 +2165,32 @@ impl core::marker::Unpin for millipede_core::crawler::RequestPrep
 impl core::marker::UnsafeUnpin for millipede_core::crawler::RequestPrep
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::crawler::RequestPrep
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::crawler::RequestPrep
+#[non_exhaustive] pub struct millipede_core::prelude::RetryDirective
+pub millipede_core::prelude::RetryDirective::backoff: core::option::Option<core::time::Duration>
+pub millipede_core::prelude::RetryDirective::proxy_kind: core::option::Option<millipede_core::proxy::ProxyKind>
+pub millipede_core::prelude::RetryDirective::session_action: millipede_core::retry_strategy::SessionRetryAction
+pub millipede_core::prelude::RetryDirective::should_retry: bool
+pub millipede_core::prelude::RetryDirective::user_agent_profile: core::option::Option<alloc::string::String>
+impl millipede_core::retry_strategy::RetryDirective
+pub fn millipede_core::retry_strategy::RetryDirective::backoff(self, core::time::Duration) -> Self
+pub fn millipede_core::retry_strategy::RetryDirective::proxy_kind(self, millipede_core::proxy::ProxyKind) -> Self
+pub fn millipede_core::retry_strategy::RetryDirective::retry() -> Self
+pub fn millipede_core::retry_strategy::RetryDirective::session_action(self, millipede_core::retry_strategy::SessionRetryAction) -> Self
+pub fn millipede_core::retry_strategy::RetryDirective::stop() -> Self
+pub fn millipede_core::retry_strategy::RetryDirective::user_agent_profile(self, impl core::convert::Into<alloc::string::String>) -> Self
+impl core::clone::Clone for millipede_core::retry_strategy::RetryDirective
+pub fn millipede_core::retry_strategy::RetryDirective::clone(&self) -> millipede_core::retry_strategy::RetryDirective
+impl core::default::Default for millipede_core::retry_strategy::RetryDirective
+pub fn millipede_core::retry_strategy::RetryDirective::default() -> millipede_core::retry_strategy::RetryDirective
+impl core::fmt::Debug for millipede_core::retry_strategy::RetryDirective
+pub fn millipede_core::retry_strategy::RetryDirective::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::retry_strategy::RetryDirective
+impl core::marker::Send for millipede_core::retry_strategy::RetryDirective
+impl core::marker::Sync for millipede_core::retry_strategy::RetryDirective
+impl core::marker::Unpin for millipede_core::retry_strategy::RetryDirective
+impl core::marker::UnsafeUnpin for millipede_core::retry_strategy::RetryDirective
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::retry_strategy::RetryDirective
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::retry_strategy::RetryDirective
 pub struct millipede_core::prelude::Router<C>
 impl<C: millipede_core::router::HasRequest + core::marker::Send + 'static> millipede_core::router::Router<C>
 pub fn millipede_core::router::Router<C>::default<H: millipede_core::handler::RequestHandler<C>>(self, H) -> Self
@@ -1990,6 +2324,20 @@ impl core::marker::Unpin for millipede_core::session::SessionPoolOptions
 impl core::marker::UnsafeUnpin for millipede_core::session::SessionPoolOptions
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::session::SessionPoolOptions
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::session::SessionPoolOptions
+pub struct millipede_core::prelude::SkippedUrl
+pub millipede_core::prelude::SkippedUrl::reason: millipede_core::enqueue::SkipReason
+pub millipede_core::prelude::SkippedUrl::url: alloc::string::String
+impl core::clone::Clone for millipede_core::enqueue::SkippedUrl
+pub fn millipede_core::enqueue::SkippedUrl::clone(&self) -> millipede_core::enqueue::SkippedUrl
+impl core::fmt::Debug for millipede_core::enqueue::SkippedUrl
+pub fn millipede_core::enqueue::SkippedUrl::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::enqueue::SkippedUrl
+impl core::marker::Send for millipede_core::enqueue::SkippedUrl
+impl core::marker::Sync for millipede_core::enqueue::SkippedUrl
+impl core::marker::Unpin for millipede_core::enqueue::SkippedUrl
+impl core::marker::UnsafeUnpin for millipede_core::enqueue::SkippedUrl
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::enqueue::SkippedUrl
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::enqueue::SkippedUrl
 pub struct millipede_core::prelude::StatisticsHandle
 impl millipede_core::statistics::StatisticsHandle
 pub fn millipede_core::statistics::StatisticsHandle::finalize(&self) -> millipede_core::statistics::FinalStatistics
@@ -2116,6 +2464,7 @@ pub fn millipede_core::prelude::CrawlerKind::after_success<'a>(&'a self, &'a mut
 pub fn millipede_core::prelude::CrawlerKind::before_request<'a>(&'a self, &'a mut millipede_core::crawler::RequestPrep) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
 pub fn millipede_core::prelude::CrawlerKind::cleanup(&self, millipede_core::crawler::RequestOutcome<Self::Context>) -> futures_core::future::BoxFuture<'_, core::result::Result<(), millipede_core::errors::CrawlError>>
 pub fn millipede_core::prelude::CrawlerKind::execute<'a>(&'a self, millipede_core::crawler::RequestEnv<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<Self::Context, millipede_core::errors::CrawlError>>
+pub fn millipede_core::prelude::CrawlerKind::observe(&self, &Self::Context) -> millipede_core::crawler::AttemptObservation
 pub fn millipede_core::prelude::CrawlerKind::start<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
 pub fn millipede_core::prelude::CrawlerKind::stop<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
 impl millipede_core::crawler::CrawlerKind for millipede_core::crawler::BasicKind
@@ -2124,6 +2473,7 @@ pub fn millipede_core::crawler::BasicKind::after_success<'a>(&'a self, &'a mut S
 pub fn millipede_core::crawler::BasicKind::before_request<'a>(&'a self, &'a mut millipede_core::crawler::RequestPrep) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
 pub fn millipede_core::crawler::BasicKind::cleanup(&self, millipede_core::crawler::RequestOutcome<millipede_core::crawler::BasicContext>) -> futures_core::future::BoxFuture<'_, core::result::Result<(), millipede_core::errors::CrawlError>>
 pub fn millipede_core::crawler::BasicKind::execute<'a>(&'a self, millipede_core::crawler::RequestEnv<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<millipede_core::crawler::BasicContext, millipede_core::errors::CrawlError>>
+pub fn millipede_core::crawler::BasicKind::observe(&self, &Self::Context) -> millipede_core::crawler::AttemptObservation
 pub fn millipede_core::crawler::BasicKind::start<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
 pub fn millipede_core::crawler::BasicKind::stop<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
 pub trait millipede_core::prelude::Dataset: core::marker::Send + core::marker::Sync
@@ -2228,6 +2578,9 @@ pub fn millipede_core::prelude::RequestQueue::mark_handled<'life0, 'async_trait>
 pub fn millipede_core::prelude::RequestQueue::pending_count<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<u64>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
 pub fn millipede_core::prelude::RequestQueue::reclaim<'life0, 'async_trait>(&'life0 self, millipede_core::storage::Lease, millipede_core::storage::ReclaimOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
 pub fn millipede_core::prelude::RequestQueue::renew<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 millipede_core::storage::LeaseId, core::time::Duration) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub trait millipede_core::prelude::RetryStrategy: core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_core::prelude::RetryStrategy::max_retries(&self) -> u32
+pub fn millipede_core::prelude::RetryStrategy::on_retry(&self, &millipede_core::retry_strategy::AttemptOutcome<'_>) -> millipede_core::retry_strategy::RetryDirective
 pub trait millipede_core::prelude::StorageClient: core::marker::Send + core::marker::Sync + 'static
 pub fn millipede_core::prelude::StorageClient::open_dataset<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::Dataset>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
 pub fn millipede_core::prelude::StorageClient::open_key_value_store<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
@@ -2615,6 +2968,91 @@ impl millipede_core::request::IntoUrl for alloc::string::String
 pub fn alloc::string::String::into_url(self) -> core::result::Result<url::Url, url::parser::ParseError>
 impl millipede_core::request::IntoUrl for url::Url
 pub fn url::Url::into_url(self) -> core::result::Result<url::Url, url::parser::ParseError>
+pub mod millipede_core::retry_strategy
+pub enum millipede_core::retry_strategy::SessionRetryAction
+pub millipede_core::retry_strategy::SessionRetryAction::Keep
+pub millipede_core::retry_strategy::SessionRetryAction::Retire
+pub millipede_core::retry_strategy::SessionRetryAction::Rotate
+impl core::clone::Clone for millipede_core::retry_strategy::SessionRetryAction
+pub fn millipede_core::retry_strategy::SessionRetryAction::clone(&self) -> millipede_core::retry_strategy::SessionRetryAction
+impl core::cmp::Eq for millipede_core::retry_strategy::SessionRetryAction
+impl core::cmp::PartialEq for millipede_core::retry_strategy::SessionRetryAction
+pub fn millipede_core::retry_strategy::SessionRetryAction::eq(&self, &millipede_core::retry_strategy::SessionRetryAction) -> bool
+impl core::default::Default for millipede_core::retry_strategy::SessionRetryAction
+pub fn millipede_core::retry_strategy::SessionRetryAction::default() -> millipede_core::retry_strategy::SessionRetryAction
+impl core::fmt::Debug for millipede_core::retry_strategy::SessionRetryAction
+pub fn millipede_core::retry_strategy::SessionRetryAction::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for millipede_core::retry_strategy::SessionRetryAction
+impl core::marker::StructuralPartialEq for millipede_core::retry_strategy::SessionRetryAction
+impl core::marker::Freeze for millipede_core::retry_strategy::SessionRetryAction
+impl core::marker::Send for millipede_core::retry_strategy::SessionRetryAction
+impl core::marker::Sync for millipede_core::retry_strategy::SessionRetryAction
+impl core::marker::Unpin for millipede_core::retry_strategy::SessionRetryAction
+impl core::marker::UnsafeUnpin for millipede_core::retry_strategy::SessionRetryAction
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::retry_strategy::SessionRetryAction
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::retry_strategy::SessionRetryAction
+#[non_exhaustive] pub struct millipede_core::retry_strategy::AttemptOutcome<'a>
+pub millipede_core::retry_strategy::AttemptOutcome::anti_bot: core::option::Option<millipede_core::errors::AntiBotTech>
+pub millipede_core::retry_strategy::AttemptOutcome::attempt: u32
+pub millipede_core::retry_strategy::AttemptOutcome::error: core::option::Option<&'a millipede_core::errors::CrawlError>
+pub millipede_core::retry_strategy::AttemptOutcome::proxy_info: core::option::Option<&'a millipede_core::proxy::ProxyInfo>
+pub millipede_core::retry_strategy::AttemptOutcome::request: &'a millipede_core::request::Request
+pub millipede_core::retry_strategy::AttemptOutcome::response_bytes: core::option::Option<usize>
+pub millipede_core::retry_strategy::AttemptOutcome::session_id: core::option::Option<&'a millipede_core::session::SessionId>
+pub millipede_core::retry_strategy::AttemptOutcome::status: core::option::Option<http::status::StatusCode>
+impl<'a> core::marker::Freeze for millipede_core::retry_strategy::AttemptOutcome<'a>
+impl<'a> core::marker::Send for millipede_core::retry_strategy::AttemptOutcome<'a>
+impl<'a> core::marker::Sync for millipede_core::retry_strategy::AttemptOutcome<'a>
+impl<'a> core::marker::Unpin for millipede_core::retry_strategy::AttemptOutcome<'a>
+impl<'a> core::marker::UnsafeUnpin for millipede_core::retry_strategy::AttemptOutcome<'a>
+impl<'a> core::panic::unwind_safe::RefUnwindSafe for millipede_core::retry_strategy::AttemptOutcome<'a>
+impl<'a> core::panic::unwind_safe::UnwindSafe for millipede_core::retry_strategy::AttemptOutcome<'a>
+#[non_exhaustive] pub struct millipede_core::retry_strategy::AttemptOverrides
+pub millipede_core::retry_strategy::AttemptOverrides::backoff: core::option::Option<core::time::Duration>
+pub millipede_core::retry_strategy::AttemptOverrides::proxy_kind: core::option::Option<millipede_core::proxy::ProxyKind>
+pub millipede_core::retry_strategy::AttemptOverrides::user_agent_profile: core::option::Option<alloc::string::String>
+impl core::clone::Clone for millipede_core::retry_strategy::AttemptOverrides
+pub fn millipede_core::retry_strategy::AttemptOverrides::clone(&self) -> millipede_core::retry_strategy::AttemptOverrides
+impl core::default::Default for millipede_core::retry_strategy::AttemptOverrides
+pub fn millipede_core::retry_strategy::AttemptOverrides::default() -> millipede_core::retry_strategy::AttemptOverrides
+impl core::fmt::Debug for millipede_core::retry_strategy::AttemptOverrides
+pub fn millipede_core::retry_strategy::AttemptOverrides::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::retry_strategy::AttemptOverrides
+impl core::marker::Send for millipede_core::retry_strategy::AttemptOverrides
+impl core::marker::Sync for millipede_core::retry_strategy::AttemptOverrides
+impl core::marker::Unpin for millipede_core::retry_strategy::AttemptOverrides
+impl core::marker::UnsafeUnpin for millipede_core::retry_strategy::AttemptOverrides
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::retry_strategy::AttemptOverrides
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::retry_strategy::AttemptOverrides
+#[non_exhaustive] pub struct millipede_core::retry_strategy::RetryDirective
+pub millipede_core::retry_strategy::RetryDirective::backoff: core::option::Option<core::time::Duration>
+pub millipede_core::retry_strategy::RetryDirective::proxy_kind: core::option::Option<millipede_core::proxy::ProxyKind>
+pub millipede_core::retry_strategy::RetryDirective::session_action: millipede_core::retry_strategy::SessionRetryAction
+pub millipede_core::retry_strategy::RetryDirective::should_retry: bool
+pub millipede_core::retry_strategy::RetryDirective::user_agent_profile: core::option::Option<alloc::string::String>
+impl millipede_core::retry_strategy::RetryDirective
+pub fn millipede_core::retry_strategy::RetryDirective::backoff(self, core::time::Duration) -> Self
+pub fn millipede_core::retry_strategy::RetryDirective::proxy_kind(self, millipede_core::proxy::ProxyKind) -> Self
+pub fn millipede_core::retry_strategy::RetryDirective::retry() -> Self
+pub fn millipede_core::retry_strategy::RetryDirective::session_action(self, millipede_core::retry_strategy::SessionRetryAction) -> Self
+pub fn millipede_core::retry_strategy::RetryDirective::stop() -> Self
+pub fn millipede_core::retry_strategy::RetryDirective::user_agent_profile(self, impl core::convert::Into<alloc::string::String>) -> Self
+impl core::clone::Clone for millipede_core::retry_strategy::RetryDirective
+pub fn millipede_core::retry_strategy::RetryDirective::clone(&self) -> millipede_core::retry_strategy::RetryDirective
+impl core::default::Default for millipede_core::retry_strategy::RetryDirective
+pub fn millipede_core::retry_strategy::RetryDirective::default() -> millipede_core::retry_strategy::RetryDirective
+impl core::fmt::Debug for millipede_core::retry_strategy::RetryDirective
+pub fn millipede_core::retry_strategy::RetryDirective::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::retry_strategy::RetryDirective
+impl core::marker::Send for millipede_core::retry_strategy::RetryDirective
+impl core::marker::Sync for millipede_core::retry_strategy::RetryDirective
+impl core::marker::Unpin for millipede_core::retry_strategy::RetryDirective
+impl core::marker::UnsafeUnpin for millipede_core::retry_strategy::RetryDirective
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::retry_strategy::RetryDirective
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::retry_strategy::RetryDirective
+pub trait millipede_core::retry_strategy::RetryStrategy: core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_core::retry_strategy::RetryStrategy::max_retries(&self) -> u32
+pub fn millipede_core::retry_strategy::RetryStrategy::on_retry(&self, &millipede_core::retry_strategy::AttemptOutcome<'_>) -> millipede_core::retry_strategy::RetryDirective
 pub mod millipede_core::router
 pub enum millipede_core::router::MethodFilter
 pub millipede_core::router::MethodFilter::Any

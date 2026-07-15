@@ -62,6 +62,23 @@ pub enum AntiBotTech {
 }
 
 impl CrawlError {
+    /// Returns an HTTP status carried anywhere in the underlying error chain.
+    pub fn http_status(&self) -> Option<http::StatusCode> {
+        let source = match self {
+            Self::Retry(error)
+            | Self::Session(error)
+            | Self::ForceRetry(error)
+            | Self::NonRetryable(error)
+            | Self::Critical(error) => error,
+            Self::AntiBotDetected { source, .. } => source,
+            Self::MissingRoute { .. } => return None,
+        };
+        source.chain().find_map(|error| {
+            error
+                .downcast_ref::<crate::http_client::HttpStatusError>()
+                .map(|status| status.status)
+        })
+    }
     /// Creates a retryable error that counts against the retry limit.
     pub fn retry<E: Into<anyhow::Error>>(error: E) -> Self {
         Self::Retry(error.into())
@@ -144,6 +161,7 @@ impl From<RequestBuildError> for CrawlError {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use http::StatusCode;
 
     #[test]
     fn constructors_produce_expected_variants() {
@@ -171,6 +189,23 @@ mod tests {
             CrawlError::critical(anyhow::anyhow!("x")),
             CrawlError::Critical(_)
         ));
+    }
+
+    #[test]
+    fn extracts_http_status_from_error_chain() {
+        let direct = CrawlError::retry(crate::http_client::HttpStatusError::new(
+            StatusCode::TOO_MANY_REQUESTS,
+        ));
+        assert_eq!(direct.http_status(), Some(StatusCode::TOO_MANY_REQUESTS));
+
+        let wrapped = anyhow::Error::new(crate::http_client::HttpStatusError::new(
+            StatusCode::BAD_GATEWAY,
+        ))
+        .context("fetch failed");
+        assert_eq!(
+            CrawlError::retry(wrapped).http_status(),
+            Some(StatusCode::BAD_GATEWAY)
+        );
     }
 
     #[test]
