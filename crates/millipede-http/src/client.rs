@@ -174,30 +174,32 @@ impl ReqwestClient {
         loop {
             let client = self.client_for(request.proxy.as_ref())?;
             let mut headers = request.headers.clone();
-            if !headers.contains_key(USER_AGENT)
-                && let Some(user_agent) = &self.options.default_user_agent
-            {
-                let value = user_agent.parse().map_err(|error| {
-                    HttpClientError::invalid_request(anyhow!("invalid default User-Agent: {error}"))
-                })?;
-                headers.insert(USER_AGENT, value);
-            }
-            if let Some(jar) = &request.cookie_jar
-                && let Some(jar_cookie) = jar.cookie_header_for(&current_url)
-            {
-                if let Some(existing) = headers.get(COOKIE) {
-                    let mut combined = Vec::with_capacity(
-                        existing.as_bytes().len() + 2 + jar_cookie.as_bytes().len(),
-                    );
-                    combined.extend_from_slice(existing.as_bytes());
-                    combined.extend_from_slice(b"; ");
-                    combined.extend_from_slice(jar_cookie.as_bytes());
-                    let value = http::HeaderValue::from_bytes(&combined).map_err(|error| {
-                        HttpClientError::invalid_request(anyhow::Error::new(error))
+            if !headers.contains_key(USER_AGENT) {
+                if let Some(user_agent) = &self.options.default_user_agent {
+                    let value = user_agent.parse().map_err(|error| {
+                        HttpClientError::invalid_request(anyhow!(
+                            "invalid default User-Agent: {error}"
+                        ))
                     })?;
-                    headers.insert(COOKIE, value);
-                } else {
-                    headers.insert(COOKIE, jar_cookie);
+                    headers.insert(USER_AGENT, value);
+                }
+            }
+            if let Some(jar) = &request.cookie_jar {
+                if let Some(jar_cookie) = jar.cookie_header_for(&current_url) {
+                    if let Some(existing) = headers.get(COOKIE) {
+                        let mut combined = Vec::with_capacity(
+                            existing.as_bytes().len() + 2 + jar_cookie.as_bytes().len(),
+                        );
+                        combined.extend_from_slice(existing.as_bytes());
+                        combined.extend_from_slice(b"; ");
+                        combined.extend_from_slice(jar_cookie.as_bytes());
+                        let value = http::HeaderValue::from_bytes(&combined).map_err(|error| {
+                            HttpClientError::invalid_request(anyhow::Error::new(error))
+                        })?;
+                        headers.insert(COOKIE, value);
+                    } else {
+                        headers.insert(COOKIE, jar_cookie);
+                    }
                 }
             }
 
@@ -221,35 +223,37 @@ impl ReqwestClient {
                 jar.store_response_cookies(&current_url, response.headers());
             }
 
-            if status.is_redirection()
-                && let Some(location) = response.headers().get(LOCATION)
-            {
-                if chain.len() as u32 >= request.max_redirects {
-                    return Err(HttpClientError::redirect(anyhow!(
-                        "exceeded {} redirects",
-                        request.max_redirects
-                    )));
-                }
-                let location = location.to_str().map_err(|error| {
-                    HttpClientError::redirect(anyhow!("invalid redirect Location header: {error}"))
-                })?;
-                let next_url = current_url.join(location).map_err(|error| {
-                    HttpClientError::redirect(anyhow!("invalid redirect target: {error}"))
-                })?;
-                chain.push(current_url);
+            if status.is_redirection() {
+                if let Some(location) = response.headers().get(LOCATION) {
+                    if chain.len() as u32 >= request.max_redirects {
+                        return Err(HttpClientError::redirect(anyhow!(
+                            "exceeded {} redirects",
+                            request.max_redirects
+                        )));
+                    }
+                    let location = location.to_str().map_err(|error| {
+                        HttpClientError::redirect(anyhow!(
+                            "invalid redirect Location header: {error}"
+                        ))
+                    })?;
+                    let next_url = current_url.join(location).map_err(|error| {
+                        HttpClientError::redirect(anyhow!("invalid redirect target: {error}"))
+                    })?;
+                    chain.push(current_url);
 
-                // Match browser-compatible behavior for legacy POST redirects.
-                if status == http::StatusCode::SEE_OTHER
-                    || ((status == http::StatusCode::MOVED_PERMANENTLY
-                        || status == http::StatusCode::FOUND)
-                        && current_method != Method::GET
-                        && current_method != Method::HEAD)
-                {
-                    current_method = Method::GET;
-                    current_body = None;
+                    // Match browser-compatible behavior for legacy POST redirects.
+                    if status == http::StatusCode::SEE_OTHER
+                        || ((status == http::StatusCode::MOVED_PERMANENTLY
+                            || status == http::StatusCode::FOUND)
+                            && current_method != Method::GET
+                            && current_method != Method::HEAD)
+                    {
+                        current_method = Method::GET;
+                        current_body = None;
+                    }
+                    current_url = next_url;
+                    continue;
                 }
-                current_url = next_url;
-                continue;
             }
 
             return Ok((response, chain));
@@ -317,16 +321,15 @@ fn percent_decode(value: &str) -> String {
     let mut decoded = Vec::with_capacity(bytes.len());
     let mut index = 0;
     while index < bytes.len() {
-        if bytes[index] == b'%'
-            && index + 2 < bytes.len()
-            && let (Some(high), Some(low)) = (hex(bytes[index + 1]), hex(bytes[index + 2]))
-        {
-            decoded.push(high * 16 + low);
-            index += 3;
-        } else {
-            decoded.push(bytes[index]);
-            index += 1;
+        if bytes[index] == b'%' && index + 2 < bytes.len() {
+            if let (Some(high), Some(low)) = (hex(bytes[index + 1]), hex(bytes[index + 2])) {
+                decoded.push(high * 16 + low);
+                index += 3;
+                continue;
+            }
         }
+        decoded.push(bytes[index]);
+        index += 1;
     }
     String::from_utf8_lossy(&decoded).into_owned()
 }
