@@ -30,6 +30,8 @@ use kvs::MemoryKeyValueStore;
 #[cfg(test)]
 use queue::MemoryRequestQueue;
 
+/// Autoscaling: dynamic concurrency, load signals, and rate limiting.
+pub mod autoscale;
 /// Crawler configuration and environment resolution.
 pub mod config;
 /// Session cookie storage and persistence.
@@ -65,6 +67,11 @@ mod util;
 
 /// Commonly used items from this crate.
 pub mod prelude {
+    pub use crate::autoscale::{
+        AimdController, AutoscaleMode, AutoscaledPool, AutoscaledPoolOptions, LoadSignal,
+        LoadSnapshot, ScaleDecision, Snapshotter, SnapshotterOptions, SystemStatus,
+        SystemStatusOptions,
+    };
     pub use crate::config::{Configuration, ConfigurationBuilder, LogLevel};
     pub use crate::cookies::{CookieJar, CookieJarError};
     pub use crate::crawler::{

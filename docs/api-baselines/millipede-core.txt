@@ -1,4 +1,179 @@
 pub mod millipede_core
+pub mod millipede_core::autoscale
+pub enum millipede_core::autoscale::AutoscaleMode
+pub millipede_core::autoscale::AutoscaleMode::Aimd
+pub millipede_core::autoscale::AutoscaleMode::Aimd::decrease_factor: f32
+pub millipede_core::autoscale::AutoscaleMode::Aimd::increase_after_successes: usize
+pub millipede_core::autoscale::AutoscaleMode::LoadSignals
+impl core::clone::Clone for millipede_core::autoscale::AutoscaleMode
+pub fn millipede_core::autoscale::AutoscaleMode::clone(&self) -> millipede_core::autoscale::AutoscaleMode
+impl core::fmt::Debug for millipede_core::autoscale::AutoscaleMode
+pub fn millipede_core::autoscale::AutoscaleMode::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::autoscale::AutoscaleMode
+impl core::marker::Send for millipede_core::autoscale::AutoscaleMode
+impl core::marker::Sync for millipede_core::autoscale::AutoscaleMode
+impl core::marker::Unpin for millipede_core::autoscale::AutoscaleMode
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::AutoscaleMode
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::AutoscaleMode
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::AutoscaleMode
+#[non_exhaustive] pub enum millipede_core::autoscale::ScaleDecision
+pub millipede_core::autoscale::ScaleDecision::Hold
+pub millipede_core::autoscale::ScaleDecision::ScaleDown
+pub millipede_core::autoscale::ScaleDecision::ScaleUp
+impl core::clone::Clone for millipede_core::autoscale::ScaleDecision
+pub fn millipede_core::autoscale::ScaleDecision::clone(&self) -> millipede_core::autoscale::ScaleDecision
+impl core::cmp::Eq for millipede_core::autoscale::ScaleDecision
+impl core::cmp::PartialEq for millipede_core::autoscale::ScaleDecision
+pub fn millipede_core::autoscale::ScaleDecision::eq(&self, &millipede_core::autoscale::ScaleDecision) -> bool
+impl core::fmt::Debug for millipede_core::autoscale::ScaleDecision
+pub fn millipede_core::autoscale::ScaleDecision::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for millipede_core::autoscale::ScaleDecision
+impl core::marker::StructuralPartialEq for millipede_core::autoscale::ScaleDecision
+impl core::marker::Freeze for millipede_core::autoscale::ScaleDecision
+impl core::marker::Send for millipede_core::autoscale::ScaleDecision
+impl core::marker::Sync for millipede_core::autoscale::ScaleDecision
+impl core::marker::Unpin for millipede_core::autoscale::ScaleDecision
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::ScaleDecision
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::ScaleDecision
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::ScaleDecision
+pub struct millipede_core::autoscale::AimdController
+impl millipede_core::autoscale::AimdController
+pub fn millipede_core::autoscale::AimdController::desired_concurrency(&self) -> usize
+pub fn millipede_core::autoscale::AimdController::new(usize, usize, usize, usize, f32) -> Self
+pub fn millipede_core::autoscale::AimdController::record_setback(&self)
+pub fn millipede_core::autoscale::AimdController::record_success(&self)
+impl !core::marker::Freeze for millipede_core::autoscale::AimdController
+impl core::marker::Send for millipede_core::autoscale::AimdController
+impl core::marker::Sync for millipede_core::autoscale::AimdController
+impl core::marker::Unpin for millipede_core::autoscale::AimdController
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::AimdController
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::AimdController
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::AimdController
+pub struct millipede_core::autoscale::AutoscaledPool
+impl millipede_core::autoscale::AutoscaledPool
+pub fn millipede_core::autoscale::AutoscaledPool::desired_concurrency(&self) -> usize
+pub fn millipede_core::autoscale::AutoscaledPool::is_fixed(&self) -> bool
+pub fn millipede_core::autoscale::AutoscaledPool::max_concurrency(&self) -> usize
+pub fn millipede_core::autoscale::AutoscaledPool::min_concurrency(&self) -> usize
+pub fn millipede_core::autoscale::AutoscaledPool::new(millipede_core::autoscale::AutoscaledPoolOptions) -> Self
+pub fn millipede_core::autoscale::AutoscaledPool::set_domain_delay_floor(&self, &str, core::time::Duration)
+impl !core::marker::Freeze for millipede_core::autoscale::AutoscaledPool
+impl core::marker::Send for millipede_core::autoscale::AutoscaledPool
+impl core::marker::Sync for millipede_core::autoscale::AutoscaledPool
+impl core::marker::Unpin for millipede_core::autoscale::AutoscaledPool
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::AutoscaledPool
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::AutoscaledPool
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::AutoscaledPool
+pub struct millipede_core::autoscale::AutoscaledPoolOptions
+pub millipede_core::autoscale::AutoscaledPoolOptions::autoscale_interval: core::time::Duration
+pub millipede_core::autoscale::AutoscaledPoolOptions::desired_concurrency: core::option::Option<usize>
+pub millipede_core::autoscale::AutoscaledPoolOptions::desired_utilization_ratio: f32
+pub millipede_core::autoscale::AutoscaledPoolOptions::fixed_concurrency: core::option::Option<usize>
+pub millipede_core::autoscale::AutoscaledPoolOptions::max_concurrency: usize
+pub millipede_core::autoscale::AutoscaledPoolOptions::max_tasks_per_minute: core::option::Option<u32>
+pub millipede_core::autoscale::AutoscaledPoolOptions::maybe_run_interval: core::time::Duration
+pub millipede_core::autoscale::AutoscaledPoolOptions::min_concurrency: usize
+pub millipede_core::autoscale::AutoscaledPoolOptions::mode: millipede_core::autoscale::AutoscaleMode
+pub millipede_core::autoscale::AutoscaledPoolOptions::same_domain_delay: core::time::Duration
+pub millipede_core::autoscale::AutoscaledPoolOptions::scale_down_step_ratio: f32
+pub millipede_core::autoscale::AutoscaledPoolOptions::scale_up_step_ratio: f32
+pub millipede_core::autoscale::AutoscaledPoolOptions::snapshotter: millipede_core::autoscale::SnapshotterOptions
+pub millipede_core::autoscale::AutoscaledPoolOptions::system_status: millipede_core::autoscale::SystemStatusOptions
+pub millipede_core::autoscale::AutoscaledPoolOptions::task_timeout: core::option::Option<core::time::Duration>
+impl core::clone::Clone for millipede_core::autoscale::AutoscaledPoolOptions
+pub fn millipede_core::autoscale::AutoscaledPoolOptions::clone(&self) -> millipede_core::autoscale::AutoscaledPoolOptions
+impl core::default::Default for millipede_core::autoscale::AutoscaledPoolOptions
+pub fn millipede_core::autoscale::AutoscaledPoolOptions::default() -> Self
+impl core::fmt::Debug for millipede_core::autoscale::AutoscaledPoolOptions
+pub fn millipede_core::autoscale::AutoscaledPoolOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::autoscale::AutoscaledPoolOptions
+impl core::marker::Send for millipede_core::autoscale::AutoscaledPoolOptions
+impl core::marker::Sync for millipede_core::autoscale::AutoscaledPoolOptions
+impl core::marker::Unpin for millipede_core::autoscale::AutoscaledPoolOptions
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::AutoscaledPoolOptions
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::AutoscaledPoolOptions
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::AutoscaledPoolOptions
+pub struct millipede_core::autoscale::LoadSnapshot
+pub millipede_core::autoscale::LoadSnapshot::at: tokio::time::instant::Instant
+pub millipede_core::autoscale::LoadSnapshot::overloaded: bool
+impl core::clone::Clone for millipede_core::autoscale::LoadSnapshot
+pub fn millipede_core::autoscale::LoadSnapshot::clone(&self) -> millipede_core::autoscale::LoadSnapshot
+impl core::cmp::Eq for millipede_core::autoscale::LoadSnapshot
+impl core::cmp::PartialEq for millipede_core::autoscale::LoadSnapshot
+pub fn millipede_core::autoscale::LoadSnapshot::eq(&self, &millipede_core::autoscale::LoadSnapshot) -> bool
+impl core::fmt::Debug for millipede_core::autoscale::LoadSnapshot
+pub fn millipede_core::autoscale::LoadSnapshot::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for millipede_core::autoscale::LoadSnapshot
+impl core::marker::StructuralPartialEq for millipede_core::autoscale::LoadSnapshot
+impl core::marker::Freeze for millipede_core::autoscale::LoadSnapshot
+impl core::marker::Send for millipede_core::autoscale::LoadSnapshot
+impl core::marker::Sync for millipede_core::autoscale::LoadSnapshot
+impl core::marker::Unpin for millipede_core::autoscale::LoadSnapshot
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::LoadSnapshot
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::LoadSnapshot
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::LoadSnapshot
+pub struct millipede_core::autoscale::Snapshotter
+impl millipede_core::autoscale::Snapshotter
+pub fn millipede_core::autoscale::Snapshotter::new(millipede_core::autoscale::SnapshotterOptions) -> Self
+pub fn millipede_core::autoscale::Snapshotter::signals(&self) -> &[alloc::sync::Arc<dyn millipede_core::autoscale::LoadSignal>]
+pub async fn millipede_core::autoscale::Snapshotter::start(&self) -> core::result::Result<(), millipede_core::errors::CrawlError>
+pub async fn millipede_core::autoscale::Snapshotter::stop(&self) -> core::result::Result<(), millipede_core::errors::CrawlError>
+pub fn millipede_core::autoscale::Snapshotter::window(&self) -> core::time::Duration
+impl core::marker::Freeze for millipede_core::autoscale::Snapshotter
+impl core::marker::Send for millipede_core::autoscale::Snapshotter
+impl core::marker::Sync for millipede_core::autoscale::Snapshotter
+impl core::marker::Unpin for millipede_core::autoscale::Snapshotter
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::Snapshotter
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::Snapshotter
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::Snapshotter
+pub struct millipede_core::autoscale::SnapshotterOptions
+pub millipede_core::autoscale::SnapshotterOptions::signals: alloc::vec::Vec<alloc::sync::Arc<dyn millipede_core::autoscale::LoadSignal>>
+pub millipede_core::autoscale::SnapshotterOptions::window: core::time::Duration
+impl core::clone::Clone for millipede_core::autoscale::SnapshotterOptions
+pub fn millipede_core::autoscale::SnapshotterOptions::clone(&self) -> millipede_core::autoscale::SnapshotterOptions
+impl core::default::Default for millipede_core::autoscale::SnapshotterOptions
+pub fn millipede_core::autoscale::SnapshotterOptions::default() -> Self
+impl core::fmt::Debug for millipede_core::autoscale::SnapshotterOptions
+pub fn millipede_core::autoscale::SnapshotterOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::autoscale::SnapshotterOptions
+impl core::marker::Send for millipede_core::autoscale::SnapshotterOptions
+impl core::marker::Sync for millipede_core::autoscale::SnapshotterOptions
+impl core::marker::Unpin for millipede_core::autoscale::SnapshotterOptions
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::SnapshotterOptions
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::SnapshotterOptions
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::SnapshotterOptions
+pub struct millipede_core::autoscale::SystemStatus
+impl millipede_core::autoscale::SystemStatus
+pub fn millipede_core::autoscale::SystemStatus::evaluate(&self, &millipede_core::autoscale::Snapshotter, f32, tokio::time::instant::Instant) -> millipede_core::autoscale::ScaleDecision
+pub fn millipede_core::autoscale::SystemStatus::new(millipede_core::autoscale::SystemStatusOptions) -> Self
+impl core::marker::Freeze for millipede_core::autoscale::SystemStatus
+impl core::marker::Send for millipede_core::autoscale::SystemStatus
+impl core::marker::Sync for millipede_core::autoscale::SystemStatus
+impl core::marker::Unpin for millipede_core::autoscale::SystemStatus
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::SystemStatus
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::SystemStatus
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::SystemStatus
+pub struct millipede_core::autoscale::SystemStatusOptions
+pub millipede_core::autoscale::SystemStatusOptions::min_samples: usize
+impl core::clone::Clone for millipede_core::autoscale::SystemStatusOptions
+pub fn millipede_core::autoscale::SystemStatusOptions::clone(&self) -> millipede_core::autoscale::SystemStatusOptions
+impl core::default::Default for millipede_core::autoscale::SystemStatusOptions
+pub fn millipede_core::autoscale::SystemStatusOptions::default() -> millipede_core::autoscale::SystemStatusOptions
+impl core::fmt::Debug for millipede_core::autoscale::SystemStatusOptions
+pub fn millipede_core::autoscale::SystemStatusOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::autoscale::SystemStatusOptions
+impl core::marker::Send for millipede_core::autoscale::SystemStatusOptions
+impl core::marker::Sync for millipede_core::autoscale::SystemStatusOptions
+impl core::marker::Unpin for millipede_core::autoscale::SystemStatusOptions
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::SystemStatusOptions
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::SystemStatusOptions
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::SystemStatusOptions
+pub trait millipede_core::autoscale::LoadSignal: core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_core::autoscale::LoadSignal::name(&self) -> &str
+pub fn millipede_core::autoscale::LoadSignal::overload_threshold(&self) -> f32
+pub fn millipede_core::autoscale::LoadSignal::sample(&self, core::time::Duration) -> alloc::vec::Vec<millipede_core::autoscale::LoadSnapshot>
+pub fn millipede_core::autoscale::LoadSignal::start<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::autoscale::LoadSignal::stop<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
 pub mod millipede_core::config
 pub enum millipede_core::config::ConfigError
 pub millipede_core::config::ConfigError::InvalidEnvVar
@@ -819,6 +994,22 @@ impl core::marker::Unpin for millipede_core::errors::AntiBotTech
 impl core::marker::UnsafeUnpin for millipede_core::errors::AntiBotTech
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::errors::AntiBotTech
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::errors::AntiBotTech
+pub enum millipede_core::prelude::AutoscaleMode
+pub millipede_core::prelude::AutoscaleMode::Aimd
+pub millipede_core::prelude::AutoscaleMode::Aimd::decrease_factor: f32
+pub millipede_core::prelude::AutoscaleMode::Aimd::increase_after_successes: usize
+pub millipede_core::prelude::AutoscaleMode::LoadSignals
+impl core::clone::Clone for millipede_core::autoscale::AutoscaleMode
+pub fn millipede_core::autoscale::AutoscaleMode::clone(&self) -> millipede_core::autoscale::AutoscaleMode
+impl core::fmt::Debug for millipede_core::autoscale::AutoscaleMode
+pub fn millipede_core::autoscale::AutoscaleMode::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::autoscale::AutoscaleMode
+impl core::marker::Send for millipede_core::autoscale::AutoscaleMode
+impl core::marker::Sync for millipede_core::autoscale::AutoscaleMode
+impl core::marker::Unpin for millipede_core::autoscale::AutoscaleMode
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::AutoscaleMode
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::AutoscaleMode
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::AutoscaleMode
 pub enum millipede_core::prelude::CookieJarError
 pub millipede_core::prelude::CookieJarError::Deserialize(anyhow::Error)
 pub millipede_core::prelude::CookieJarError::Serialize(anyhow::Error)
@@ -1178,6 +1369,26 @@ impl core::marker::Unpin for millipede_core::proxy::RotationStrategy
 impl core::marker::UnsafeUnpin for millipede_core::proxy::RotationStrategy
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::proxy::RotationStrategy
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::proxy::RotationStrategy
+#[non_exhaustive] pub enum millipede_core::prelude::ScaleDecision
+pub millipede_core::prelude::ScaleDecision::Hold
+pub millipede_core::prelude::ScaleDecision::ScaleDown
+pub millipede_core::prelude::ScaleDecision::ScaleUp
+impl core::clone::Clone for millipede_core::autoscale::ScaleDecision
+pub fn millipede_core::autoscale::ScaleDecision::clone(&self) -> millipede_core::autoscale::ScaleDecision
+impl core::cmp::Eq for millipede_core::autoscale::ScaleDecision
+impl core::cmp::PartialEq for millipede_core::autoscale::ScaleDecision
+pub fn millipede_core::autoscale::ScaleDecision::eq(&self, &millipede_core::autoscale::ScaleDecision) -> bool
+impl core::fmt::Debug for millipede_core::autoscale::ScaleDecision
+pub fn millipede_core::autoscale::ScaleDecision::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for millipede_core::autoscale::ScaleDecision
+impl core::marker::StructuralPartialEq for millipede_core::autoscale::ScaleDecision
+impl core::marker::Freeze for millipede_core::autoscale::ScaleDecision
+impl core::marker::Send for millipede_core::autoscale::ScaleDecision
+impl core::marker::Sync for millipede_core::autoscale::ScaleDecision
+impl core::marker::Unpin for millipede_core::autoscale::ScaleDecision
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::ScaleDecision
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::ScaleDecision
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::ScaleDecision
 pub enum millipede_core::prelude::SessionRetryAction
 pub millipede_core::prelude::SessionRetryAction::Keep
 pub millipede_core::prelude::SessionRetryAction::Retire
@@ -1276,6 +1487,19 @@ impl core::marker::Unpin for millipede_core::storage::AddRequestsBatchedResult
 impl core::marker::UnsafeUnpin for millipede_core::storage::AddRequestsBatchedResult
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::AddRequestsBatchedResult
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::AddRequestsBatchedResult
+pub struct millipede_core::prelude::AimdController
+impl millipede_core::autoscale::AimdController
+pub fn millipede_core::autoscale::AimdController::desired_concurrency(&self) -> usize
+pub fn millipede_core::autoscale::AimdController::new(usize, usize, usize, usize, f32) -> Self
+pub fn millipede_core::autoscale::AimdController::record_setback(&self)
+pub fn millipede_core::autoscale::AimdController::record_success(&self)
+impl !core::marker::Freeze for millipede_core::autoscale::AimdController
+impl core::marker::Send for millipede_core::autoscale::AimdController
+impl core::marker::Sync for millipede_core::autoscale::AimdController
+impl core::marker::Unpin for millipede_core::autoscale::AimdController
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::AimdController
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::AimdController
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::AimdController
 #[non_exhaustive] pub struct millipede_core::prelude::AttemptObservation
 pub millipede_core::prelude::AttemptObservation::loaded_url: core::option::Option<url::Url>
 pub millipede_core::prelude::AttemptObservation::proxy_info: core::option::Option<millipede_core::proxy::ProxyInfo>
@@ -1344,6 +1568,50 @@ impl<T> core::marker::Unpin for millipede_core::storage::AutoSaved<T> where T: c
 impl<T> core::marker::UnsafeUnpin for millipede_core::storage::AutoSaved<T> where T: core::marker::UnsafeUnpin
 impl<T> !core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::AutoSaved<T>
 impl<T> !core::panic::unwind_safe::UnwindSafe for millipede_core::storage::AutoSaved<T>
+pub struct millipede_core::prelude::AutoscaledPool
+impl millipede_core::autoscale::AutoscaledPool
+pub fn millipede_core::autoscale::AutoscaledPool::desired_concurrency(&self) -> usize
+pub fn millipede_core::autoscale::AutoscaledPool::is_fixed(&self) -> bool
+pub fn millipede_core::autoscale::AutoscaledPool::max_concurrency(&self) -> usize
+pub fn millipede_core::autoscale::AutoscaledPool::min_concurrency(&self) -> usize
+pub fn millipede_core::autoscale::AutoscaledPool::new(millipede_core::autoscale::AutoscaledPoolOptions) -> Self
+pub fn millipede_core::autoscale::AutoscaledPool::set_domain_delay_floor(&self, &str, core::time::Duration)
+impl !core::marker::Freeze for millipede_core::autoscale::AutoscaledPool
+impl core::marker::Send for millipede_core::autoscale::AutoscaledPool
+impl core::marker::Sync for millipede_core::autoscale::AutoscaledPool
+impl core::marker::Unpin for millipede_core::autoscale::AutoscaledPool
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::AutoscaledPool
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::AutoscaledPool
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::AutoscaledPool
+pub struct millipede_core::prelude::AutoscaledPoolOptions
+pub millipede_core::prelude::AutoscaledPoolOptions::autoscale_interval: core::time::Duration
+pub millipede_core::prelude::AutoscaledPoolOptions::desired_concurrency: core::option::Option<usize>
+pub millipede_core::prelude::AutoscaledPoolOptions::desired_utilization_ratio: f32
+pub millipede_core::prelude::AutoscaledPoolOptions::fixed_concurrency: core::option::Option<usize>
+pub millipede_core::prelude::AutoscaledPoolOptions::max_concurrency: usize
+pub millipede_core::prelude::AutoscaledPoolOptions::max_tasks_per_minute: core::option::Option<u32>
+pub millipede_core::prelude::AutoscaledPoolOptions::maybe_run_interval: core::time::Duration
+pub millipede_core::prelude::AutoscaledPoolOptions::min_concurrency: usize
+pub millipede_core::prelude::AutoscaledPoolOptions::mode: millipede_core::autoscale::AutoscaleMode
+pub millipede_core::prelude::AutoscaledPoolOptions::same_domain_delay: core::time::Duration
+pub millipede_core::prelude::AutoscaledPoolOptions::scale_down_step_ratio: f32
+pub millipede_core::prelude::AutoscaledPoolOptions::scale_up_step_ratio: f32
+pub millipede_core::prelude::AutoscaledPoolOptions::snapshotter: millipede_core::autoscale::SnapshotterOptions
+pub millipede_core::prelude::AutoscaledPoolOptions::system_status: millipede_core::autoscale::SystemStatusOptions
+pub millipede_core::prelude::AutoscaledPoolOptions::task_timeout: core::option::Option<core::time::Duration>
+impl core::clone::Clone for millipede_core::autoscale::AutoscaledPoolOptions
+pub fn millipede_core::autoscale::AutoscaledPoolOptions::clone(&self) -> millipede_core::autoscale::AutoscaledPoolOptions
+impl core::default::Default for millipede_core::autoscale::AutoscaledPoolOptions
+pub fn millipede_core::autoscale::AutoscaledPoolOptions::default() -> Self
+impl core::fmt::Debug for millipede_core::autoscale::AutoscaledPoolOptions
+pub fn millipede_core::autoscale::AutoscaledPoolOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::autoscale::AutoscaledPoolOptions
+impl core::marker::Send for millipede_core::autoscale::AutoscaledPoolOptions
+impl core::marker::Sync for millipede_core::autoscale::AutoscaledPoolOptions
+impl core::marker::Unpin for millipede_core::autoscale::AutoscaledPoolOptions
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::AutoscaledPoolOptions
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::AutoscaledPoolOptions
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::AutoscaledPoolOptions
 #[non_exhaustive] pub struct millipede_core::prelude::BasicContext
 pub millipede_core::prelude::BasicContext::crawler: millipede_core::crawler::CrawlerHandle
 pub millipede_core::prelude::BasicContext::request: alloc::sync::Arc<millipede_core::request::Request>
@@ -1888,6 +2156,25 @@ impl core::marker::Unpin for millipede_core::storage::ListOptions
 impl core::marker::UnsafeUnpin for millipede_core::storage::ListOptions
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::ListOptions
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::ListOptions
+pub struct millipede_core::prelude::LoadSnapshot
+pub millipede_core::prelude::LoadSnapshot::at: tokio::time::instant::Instant
+pub millipede_core::prelude::LoadSnapshot::overloaded: bool
+impl core::clone::Clone for millipede_core::autoscale::LoadSnapshot
+pub fn millipede_core::autoscale::LoadSnapshot::clone(&self) -> millipede_core::autoscale::LoadSnapshot
+impl core::cmp::Eq for millipede_core::autoscale::LoadSnapshot
+impl core::cmp::PartialEq for millipede_core::autoscale::LoadSnapshot
+pub fn millipede_core::autoscale::LoadSnapshot::eq(&self, &millipede_core::autoscale::LoadSnapshot) -> bool
+impl core::fmt::Debug for millipede_core::autoscale::LoadSnapshot
+pub fn millipede_core::autoscale::LoadSnapshot::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for millipede_core::autoscale::LoadSnapshot
+impl core::marker::StructuralPartialEq for millipede_core::autoscale::LoadSnapshot
+impl core::marker::Freeze for millipede_core::autoscale::LoadSnapshot
+impl core::marker::Send for millipede_core::autoscale::LoadSnapshot
+impl core::marker::Sync for millipede_core::autoscale::LoadSnapshot
+impl core::marker::Unpin for millipede_core::autoscale::LoadSnapshot
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::LoadSnapshot
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::LoadSnapshot
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::LoadSnapshot
 pub struct millipede_core::prelude::Page<T>
 pub millipede_core::prelude::Page::items: alloc::vec::Vec<T>
 pub millipede_core::prelude::Page::limit: core::option::Option<u64>
@@ -2338,6 +2625,36 @@ impl core::marker::Unpin for millipede_core::enqueue::SkippedUrl
 impl core::marker::UnsafeUnpin for millipede_core::enqueue::SkippedUrl
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::enqueue::SkippedUrl
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::enqueue::SkippedUrl
+pub struct millipede_core::prelude::Snapshotter
+impl millipede_core::autoscale::Snapshotter
+pub fn millipede_core::autoscale::Snapshotter::new(millipede_core::autoscale::SnapshotterOptions) -> Self
+pub fn millipede_core::autoscale::Snapshotter::signals(&self) -> &[alloc::sync::Arc<dyn millipede_core::autoscale::LoadSignal>]
+pub async fn millipede_core::autoscale::Snapshotter::start(&self) -> core::result::Result<(), millipede_core::errors::CrawlError>
+pub async fn millipede_core::autoscale::Snapshotter::stop(&self) -> core::result::Result<(), millipede_core::errors::CrawlError>
+pub fn millipede_core::autoscale::Snapshotter::window(&self) -> core::time::Duration
+impl core::marker::Freeze for millipede_core::autoscale::Snapshotter
+impl core::marker::Send for millipede_core::autoscale::Snapshotter
+impl core::marker::Sync for millipede_core::autoscale::Snapshotter
+impl core::marker::Unpin for millipede_core::autoscale::Snapshotter
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::Snapshotter
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::Snapshotter
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::Snapshotter
+pub struct millipede_core::prelude::SnapshotterOptions
+pub millipede_core::prelude::SnapshotterOptions::signals: alloc::vec::Vec<alloc::sync::Arc<dyn millipede_core::autoscale::LoadSignal>>
+pub millipede_core::prelude::SnapshotterOptions::window: core::time::Duration
+impl core::clone::Clone for millipede_core::autoscale::SnapshotterOptions
+pub fn millipede_core::autoscale::SnapshotterOptions::clone(&self) -> millipede_core::autoscale::SnapshotterOptions
+impl core::default::Default for millipede_core::autoscale::SnapshotterOptions
+pub fn millipede_core::autoscale::SnapshotterOptions::default() -> Self
+impl core::fmt::Debug for millipede_core::autoscale::SnapshotterOptions
+pub fn millipede_core::autoscale::SnapshotterOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::autoscale::SnapshotterOptions
+impl core::marker::Send for millipede_core::autoscale::SnapshotterOptions
+impl core::marker::Sync for millipede_core::autoscale::SnapshotterOptions
+impl core::marker::Unpin for millipede_core::autoscale::SnapshotterOptions
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::SnapshotterOptions
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::SnapshotterOptions
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::SnapshotterOptions
 pub struct millipede_core::prelude::StatisticsHandle
 impl millipede_core::statistics::StatisticsHandle
 pub fn millipede_core::statistics::StatisticsHandle::finalize(&self) -> millipede_core::statistics::FinalStatistics
@@ -2430,6 +2747,32 @@ impl core::marker::Unpin for millipede_core::http_client::StreamingResponse
 impl core::marker::UnsafeUnpin for millipede_core::http_client::StreamingResponse
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::http_client::StreamingResponse
 impl !core::panic::unwind_safe::UnwindSafe for millipede_core::http_client::StreamingResponse
+pub struct millipede_core::prelude::SystemStatus
+impl millipede_core::autoscale::SystemStatus
+pub fn millipede_core::autoscale::SystemStatus::evaluate(&self, &millipede_core::autoscale::Snapshotter, f32, tokio::time::instant::Instant) -> millipede_core::autoscale::ScaleDecision
+pub fn millipede_core::autoscale::SystemStatus::new(millipede_core::autoscale::SystemStatusOptions) -> Self
+impl core::marker::Freeze for millipede_core::autoscale::SystemStatus
+impl core::marker::Send for millipede_core::autoscale::SystemStatus
+impl core::marker::Sync for millipede_core::autoscale::SystemStatus
+impl core::marker::Unpin for millipede_core::autoscale::SystemStatus
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::SystemStatus
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::SystemStatus
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::SystemStatus
+pub struct millipede_core::prelude::SystemStatusOptions
+pub millipede_core::prelude::SystemStatusOptions::min_samples: usize
+impl core::clone::Clone for millipede_core::autoscale::SystemStatusOptions
+pub fn millipede_core::autoscale::SystemStatusOptions::clone(&self) -> millipede_core::autoscale::SystemStatusOptions
+impl core::default::Default for millipede_core::autoscale::SystemStatusOptions
+pub fn millipede_core::autoscale::SystemStatusOptions::default() -> millipede_core::autoscale::SystemStatusOptions
+impl core::fmt::Debug for millipede_core::autoscale::SystemStatusOptions
+pub fn millipede_core::autoscale::SystemStatusOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::autoscale::SystemStatusOptions
+impl core::marker::Send for millipede_core::autoscale::SystemStatusOptions
+impl core::marker::Sync for millipede_core::autoscale::SystemStatusOptions
+impl core::marker::Unpin for millipede_core::autoscale::SystemStatusOptions
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::SystemStatusOptions
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::SystemStatusOptions
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::SystemStatusOptions
 pub struct millipede_core::prelude::UserData(pub serde_json::map::Map<alloc::string::String, serde_json::value::Value>)
 impl millipede_core::request::UserData
 pub fn millipede_core::request::UserData::get(&self, &str) -> core::option::Option<&serde_json::value::Value>
@@ -2552,6 +2895,12 @@ pub fn millipede_core::prelude::KeyValueStoreExt::set<'life0, 'life1, 'life2, 'a
 impl<K: millipede_core::storage::KeyValueStore + ?core::marker::Sized> millipede_core::storage::KeyValueStoreExt for K
 pub fn K::get<'life0, 'life1, 'async_trait, T>(&'life0 self, &'life1 str) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<core::option::Option<T>>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::de::DeserializeOwned + 'static, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
 pub fn K::set<'life0, 'life1, 'life2, 'async_trait, T>(&'life0 self, &'life1 str, &'life2 T) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::ser::Serialize + core::marker::Send + core::marker::Sync, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait, 'life2: 'async_trait
+pub trait millipede_core::prelude::LoadSignal: core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_core::prelude::LoadSignal::name(&self) -> &str
+pub fn millipede_core::prelude::LoadSignal::overload_threshold(&self) -> f32
+pub fn millipede_core::prelude::LoadSignal::sample(&self, core::time::Duration) -> alloc::vec::Vec<millipede_core::autoscale::LoadSnapshot>
+pub fn millipede_core::prelude::LoadSignal::start<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::prelude::LoadSignal::stop<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
 pub trait millipede_core::prelude::Middleware<C>: core::marker::Send + core::marker::Sync + 'static
 pub fn millipede_core::prelude::Middleware::run(&self, C) -> futures_core::future::BoxFuture<'static, core::result::Result<C, millipede_core::errors::CrawlError>>
 impl<C, F, Fut> millipede_core::handler::Middleware<C> for F where F: core::ops::function::Fn(C) -> Fut + core::marker::Send + core::marker::Sync + 'static, Fut: core::future::future::Future<Output = core::result::Result<C, millipede_core::errors::CrawlError>> + core::marker::Send + 'static
