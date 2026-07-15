@@ -49,3 +49,8 @@ required-features = ["storage-memory"]
 name = "basic_engine"
 path = "../examples/basic_engine.rs"
 required-features = ["storage-memory"]
+
+[[example]]
+name = "http_crawl"
+path = "../examples/http_crawl.rs"
+required-features = ["http", "storage-memory"]
