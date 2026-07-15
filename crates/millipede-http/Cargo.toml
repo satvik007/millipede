@@ -10,3 +10,22 @@ publish = false
 
 [lints]
 workspace = true
+
+[dependencies]
+millipede-core = { path = "../millipede-core", version = "0.1.0" }
+reqwest = { workspace = true }
+http = { workspace = true }
+bytes = { workspace = true }
+url = { workspace = true }
+futures-util = { workspace = true }
+tokio = { workspace = true }
+async-trait = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+wiremock = { workspace = true }
+serde_json = { workspace = true }
+console-subscriber = { workspace = true }
+millipede-storage-memory = { path = "../millipede-storage-memory" }

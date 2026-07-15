@@ -23,12 +23,12 @@ The companion `INTERFACE.md` describes the target API. This document describes *
 |---|---|---|
 | Async runtime | `tokio` (full) | Only runtime supported in v1. |
 | Cancellation | `tokio-util` | CancellationToken for engine shutdown. CTO-approved addition for Phase 2. |
-| HTTP client | `reqwest` | rustls, cookies, gzip, brotli, deflate features. |
+| HTTP client | `reqwest` | rustls-tls, http2, gzip, brotli, deflate, json, stream features; the cookies feature is deliberately off (ADR-0002 — cookies are threaded per hop by ReqwestClient's manual redirect loop). |
 | HTML parser | `scraper` | Cheerio analog exposed to user handlers. `html5ever` underneath. |
 | Streaming link extraction | `lol_html` | Candidate optional dependency; evaluated in Phase 5 for engine-owned `enqueue_links` hot path. |
 | CSS selectors | `scraper::Selector` | Built-in. |
 | URL handling | `url` | |
-| Cookies | `reqwest_cookie_store` | Persistable, `Arc<CookieStoreMutex>`-friendly. |
+| Cookies | `cookie_store` | Wrapped by millipede-core's CookieJar newtype behind std::sync::Mutex; reqwest_cookie_store rejected — see docs/decisions/ADR-0002-cookie-jar.md. |
 | Serde | `serde`, `serde_json` | |
 | Errors | `thiserror` + `anyhow` | Library boundary: `thiserror`; user-facing: `anyhow`. |
 | Logging | `tracing` + `tracing-subscriber` | |
@@ -154,7 +154,7 @@ A complete `HttpCrawler`: real HTTP fetches via `reqwest`, session pool, proxy r
   - Timeout / redirect handling.
   - Typed client-build errors; no unsafe shortcuts or unchecked unwraps around TLS/proxy setup.
 - `millipede-core::session::{Session, SessionPool, SessionOptions}`.
-  - Cookie store: `reqwest_cookie_store::CookieStoreMutex` shared via `Arc`.
+  - Cookie store: the custom `CookieJar` newtype over `cookie_store` behind `std::sync::Mutex`, shared via `Arc` (ADR-0002).
   - Error scoring, retirement, rotation.
   - Persistence to KVS via `auto_saved`.
 - `millipede-core::proxy::{ProxyConfiguration, ProxyResolver, ProxyInfo, RotationStrategy}` + tiered support.
@@ -165,7 +165,7 @@ A complete `HttpCrawler`: real HTTP fetches via `reqwest`, session pool, proxy r
   - `reqwest::Error::is_connect` / `is_timeout` ⇒ `Retry`.
   - HTTP 408/429/5xx (configurable list) ⇒ `Retry`. 401/403 ⇒ `Session`.
 - `EnqueueLinker` for `HttpContext` (URLs-only mode; no DOM).
-- **Resolve the cookie-jar concretion (`docs/INTERFACE.md` §22 Q1, ChatGPT Pro review #1).** Inner type: `reqwest_cookie_store::CookieStoreMutex` vs. `Arc<tokio::sync::RwLock<cookie_store::CookieStore>>`. Decided here, not deferred — once `Session` is on disk the choice is hard to reverse.
+- **Cookie-jar concretion resolved (`docs/INTERFACE.md` §22 Q1, ADR-0002).** The public `millipede_core::cookies::CookieJar` newtype wraps `std::sync::Mutex<cookie_store::CookieStore>`.
 
 ### Tests
 - `wiremock`-backed HTTP server fixtures.

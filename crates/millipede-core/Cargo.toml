@@ -25,6 +25,7 @@ tokio-util = { workspace = true }
 async-trait = { workspace = true }
 futures-util = { workspace = true }
 tracing = { workspace = true }
+cookie_store = { workspace = true }
 
 [dev-dependencies]
 proptest = { workspace = true }

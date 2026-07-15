@@ -102,6 +102,43 @@ impl core::marker::Unpin for millipede_core::config::ConfigurationBuilder
 impl core::marker::UnsafeUnpin for millipede_core::config::ConfigurationBuilder
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::config::ConfigurationBuilder
 impl !core::panic::unwind_safe::UnwindSafe for millipede_core::config::ConfigurationBuilder
+pub mod millipede_core::cookies
+pub enum millipede_core::cookies::CookieJarError
+pub millipede_core::cookies::CookieJarError::Deserialize(anyhow::Error)
+pub millipede_core::cookies::CookieJarError::Serialize(anyhow::Error)
+impl core::error::Error for millipede_core::cookies::CookieJarError
+pub fn millipede_core::cookies::CookieJarError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for millipede_core::cookies::CookieJarError
+pub fn millipede_core::cookies::CookieJarError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::cookies::CookieJarError
+pub fn millipede_core::cookies::CookieJarError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::cookies::CookieJarError
+impl core::marker::Send for millipede_core::cookies::CookieJarError
+impl core::marker::Sync for millipede_core::cookies::CookieJarError
+impl core::marker::Unpin for millipede_core::cookies::CookieJarError
+impl core::marker::UnsafeUnpin for millipede_core::cookies::CookieJarError
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::cookies::CookieJarError
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::cookies::CookieJarError
+pub struct millipede_core::cookies::CookieJar
+impl millipede_core::cookies::CookieJar
+pub fn millipede_core::cookies::CookieJar::clear(&self)
+pub fn millipede_core::cookies::CookieJar::cookie_count(&self) -> usize
+pub fn millipede_core::cookies::CookieJar::cookie_header_for(&self, &url::Url) -> core::option::Option<http::header::value::HeaderValue>
+pub fn millipede_core::cookies::CookieJar::from_json(&str) -> core::result::Result<Self, millipede_core::cookies::CookieJarError>
+pub fn millipede_core::cookies::CookieJar::new() -> Self
+pub fn millipede_core::cookies::CookieJar::store_response_cookies(&self, &url::Url, &http::header::map::HeaderMap)
+pub fn millipede_core::cookies::CookieJar::to_json(&self) -> core::result::Result<alloc::string::String, millipede_core::cookies::CookieJarError>
+impl core::default::Default for millipede_core::cookies::CookieJar
+pub fn millipede_core::cookies::CookieJar::default() -> Self
+impl core::fmt::Debug for millipede_core::cookies::CookieJar
+pub fn millipede_core::cookies::CookieJar::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl !core::marker::Freeze for millipede_core::cookies::CookieJar
+impl core::marker::Send for millipede_core::cookies::CookieJar
+impl core::marker::Sync for millipede_core::cookies::CookieJar
+impl core::marker::Unpin for millipede_core::cookies::CookieJar
+impl core::marker::UnsafeUnpin for millipede_core::cookies::CookieJar
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::cookies::CookieJar
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::cookies::CookieJar
 pub mod millipede_core::crawler
 pub enum millipede_core::crawler::CrawlerBuildError
 pub millipede_core::crawler::CrawlerBuildError::Config(millipede_core::config::ConfigError)
@@ -515,6 +552,111 @@ impl<C, F, Fut> millipede_core::handler::RequestHandler<C> for F where F: core::
 pub fn F::handle(&self, C) -> futures_core::future::BoxFuture<'static, core::result::Result<(), millipede_core::errors::CrawlError>>
 impl<C: millipede_core::router::HasRequest + core::marker::Send + 'static> millipede_core::handler::RequestHandler<C> for millipede_core::router::Router<C>
 pub fn millipede_core::router::Router<C>::handle(&self, C) -> futures_core::future::BoxFuture<'static, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub mod millipede_core::http_client
+#[non_exhaustive] pub enum millipede_core::http_client::HttpClientError
+pub millipede_core::http_client::HttpClientError::Build(anyhow::Error)
+pub millipede_core::http_client::HttpClientError::Connect(anyhow::Error)
+pub millipede_core::http_client::HttpClientError::Decode(anyhow::Error)
+pub millipede_core::http_client::HttpClientError::InvalidRequest(anyhow::Error)
+pub millipede_core::http_client::HttpClientError::Io(anyhow::Error)
+pub millipede_core::http_client::HttpClientError::Other(anyhow::Error)
+pub millipede_core::http_client::HttpClientError::Redirect(anyhow::Error)
+pub millipede_core::http_client::HttpClientError::Timeout(anyhow::Error)
+impl millipede_core::http_client::HttpClientError
+pub fn millipede_core::http_client::HttpClientError::build(impl core::convert::Into<anyhow::Error>) -> Self
+pub fn millipede_core::http_client::HttpClientError::connect(impl core::convert::Into<anyhow::Error>) -> Self
+pub fn millipede_core::http_client::HttpClientError::decode(impl core::convert::Into<anyhow::Error>) -> Self
+pub fn millipede_core::http_client::HttpClientError::invalid_request(impl core::convert::Into<anyhow::Error>) -> Self
+pub fn millipede_core::http_client::HttpClientError::io(impl core::convert::Into<anyhow::Error>) -> Self
+pub fn millipede_core::http_client::HttpClientError::is_connect(&self) -> bool
+pub fn millipede_core::http_client::HttpClientError::is_timeout(&self) -> bool
+pub fn millipede_core::http_client::HttpClientError::other(impl core::convert::Into<anyhow::Error>) -> Self
+pub fn millipede_core::http_client::HttpClientError::redirect(impl core::convert::Into<anyhow::Error>) -> Self
+pub fn millipede_core::http_client::HttpClientError::timeout(impl core::convert::Into<anyhow::Error>) -> Self
+impl core::error::Error for millipede_core::http_client::HttpClientError
+pub fn millipede_core::http_client::HttpClientError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for millipede_core::http_client::HttpClientError
+pub fn millipede_core::http_client::HttpClientError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::http_client::HttpClientError
+pub fn millipede_core::http_client::HttpClientError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::http_client::HttpClientError
+impl core::marker::Send for millipede_core::http_client::HttpClientError
+impl core::marker::Sync for millipede_core::http_client::HttpClientError
+impl core::marker::Unpin for millipede_core::http_client::HttpClientError
+impl core::marker::UnsafeUnpin for millipede_core::http_client::HttpClientError
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::http_client::HttpClientError
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::http_client::HttpClientError
+#[non_exhaustive] pub struct millipede_core::http_client::HttpRequest
+pub millipede_core::http_client::HttpRequest::body: core::option::Option<millipede_core::request::RequestBody>
+pub millipede_core::http_client::HttpRequest::cookie_jar: core::option::Option<alloc::sync::Arc<millipede_core::cookies::CookieJar>>
+pub millipede_core::http_client::HttpRequest::headers: http::header::map::HeaderMap
+pub millipede_core::http_client::HttpRequest::max_redirects: u32
+pub millipede_core::http_client::HttpRequest::method: http::method::Method
+pub millipede_core::http_client::HttpRequest::proxy: core::option::Option<url::Url>
+pub millipede_core::http_client::HttpRequest::timeout: core::option::Option<core::time::Duration>
+pub millipede_core::http_client::HttpRequest::url: url::Url
+impl millipede_core::http_client::HttpRequest
+pub fn millipede_core::http_client::HttpRequest::body(self, millipede_core::request::RequestBody) -> Self
+pub fn millipede_core::http_client::HttpRequest::cookie_jar(self, alloc::sync::Arc<millipede_core::cookies::CookieJar>) -> Self
+pub fn millipede_core::http_client::HttpRequest::from_request(&millipede_core::request::Request) -> Self
+pub fn millipede_core::http_client::HttpRequest::headers(self, http::header::map::HeaderMap) -> Self
+pub fn millipede_core::http_client::HttpRequest::max_redirects(self, u32) -> Self
+pub fn millipede_core::http_client::HttpRequest::method(self, http::method::Method) -> Self
+pub fn millipede_core::http_client::HttpRequest::new(url::Url) -> Self
+pub fn millipede_core::http_client::HttpRequest::proxy(self, url::Url) -> Self
+pub fn millipede_core::http_client::HttpRequest::timeout(self, core::time::Duration) -> Self
+impl core::clone::Clone for millipede_core::http_client::HttpRequest
+pub fn millipede_core::http_client::HttpRequest::clone(&self) -> millipede_core::http_client::HttpRequest
+impl core::fmt::Debug for millipede_core::http_client::HttpRequest
+pub fn millipede_core::http_client::HttpRequest::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::http_client::HttpRequest
+impl core::marker::Send for millipede_core::http_client::HttpRequest
+impl core::marker::Sync for millipede_core::http_client::HttpRequest
+impl core::marker::Unpin for millipede_core::http_client::HttpRequest
+impl core::marker::UnsafeUnpin for millipede_core::http_client::HttpRequest
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::http_client::HttpRequest
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::http_client::HttpRequest
+#[non_exhaustive] pub struct millipede_core::http_client::HttpResponse
+pub millipede_core::http_client::HttpResponse::body: bytes::bytes::Bytes
+pub millipede_core::http_client::HttpResponse::headers: http::header::map::HeaderMap
+pub millipede_core::http_client::HttpResponse::redirect_chain: alloc::vec::Vec<url::Url>
+pub millipede_core::http_client::HttpResponse::status: http::status::StatusCode
+pub millipede_core::http_client::HttpResponse::url: url::Url
+impl millipede_core::http_client::HttpResponse
+pub fn millipede_core::http_client::HttpResponse::json<T: serde_core::de::DeserializeOwned>(&self) -> core::result::Result<T, serde_json::error::Error>
+pub fn millipede_core::http_client::HttpResponse::new(url::Url, http::status::StatusCode, http::header::map::HeaderMap, bytes::bytes::Bytes) -> Self
+pub fn millipede_core::http_client::HttpResponse::text(&self) -> alloc::borrow::Cow<'_, str>
+pub fn millipede_core::http_client::HttpResponse::with_redirect_chain(self, alloc::vec::Vec<url::Url>) -> Self
+impl core::clone::Clone for millipede_core::http_client::HttpResponse
+pub fn millipede_core::http_client::HttpResponse::clone(&self) -> millipede_core::http_client::HttpResponse
+impl core::fmt::Debug for millipede_core::http_client::HttpResponse
+pub fn millipede_core::http_client::HttpResponse::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl !core::marker::Freeze for millipede_core::http_client::HttpResponse
+impl core::marker::Send for millipede_core::http_client::HttpResponse
+impl core::marker::Sync for millipede_core::http_client::HttpResponse
+impl core::marker::Unpin for millipede_core::http_client::HttpResponse
+impl core::marker::UnsafeUnpin for millipede_core::http_client::HttpResponse
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::http_client::HttpResponse
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::http_client::HttpResponse
+#[non_exhaustive] pub struct millipede_core::http_client::StreamingResponse
+pub millipede_core::http_client::StreamingResponse::body: futures_core::stream::BoxStream<'static, core::result::Result<bytes::bytes::Bytes, millipede_core::http_client::HttpClientError>>
+pub millipede_core::http_client::StreamingResponse::headers: http::header::map::HeaderMap
+pub millipede_core::http_client::StreamingResponse::status: http::status::StatusCode
+pub millipede_core::http_client::StreamingResponse::url: url::Url
+impl millipede_core::http_client::StreamingResponse
+pub fn millipede_core::http_client::StreamingResponse::new(url::Url, http::status::StatusCode, http::header::map::HeaderMap, futures_core::stream::BoxStream<'static, core::result::Result<bytes::bytes::Bytes, millipede_core::http_client::HttpClientError>>) -> Self
+impl core::fmt::Debug for millipede_core::http_client::StreamingResponse
+pub fn millipede_core::http_client::StreamingResponse::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::http_client::StreamingResponse
+impl core::marker::Send for millipede_core::http_client::StreamingResponse
+impl !core::marker::Sync for millipede_core::http_client::StreamingResponse
+impl core::marker::Unpin for millipede_core::http_client::StreamingResponse
+impl core::marker::UnsafeUnpin for millipede_core::http_client::StreamingResponse
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::http_client::StreamingResponse
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::http_client::StreamingResponse
+pub trait millipede_core::http_client::HttpClient: core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_core::http_client::HttpClient::send<'life0, 'async_trait>(&'life0 self, millipede_core::http_client::HttpRequest) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<millipede_core::http_client::HttpResponse, millipede_core::http_client::HttpClientError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::http_client::HttpClient::stream<'life0, 'async_trait>(&'life0 self, millipede_core::http_client::HttpRequest) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<millipede_core::http_client::StreamingResponse, millipede_core::http_client::HttpClientError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
 pub mod millipede_core::prelude
 pub use millipede_core::prelude::HeaderMap
 pub use millipede_core::prelude::Method
@@ -542,6 +684,22 @@ impl core::marker::Unpin for millipede_core::errors::AntiBotTech
 impl core::marker::UnsafeUnpin for millipede_core::errors::AntiBotTech
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::errors::AntiBotTech
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::errors::AntiBotTech
+pub enum millipede_core::prelude::CookieJarError
+pub millipede_core::prelude::CookieJarError::Deserialize(anyhow::Error)
+pub millipede_core::prelude::CookieJarError::Serialize(anyhow::Error)
+impl core::error::Error for millipede_core::cookies::CookieJarError
+pub fn millipede_core::cookies::CookieJarError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for millipede_core::cookies::CookieJarError
+pub fn millipede_core::cookies::CookieJarError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::cookies::CookieJarError
+pub fn millipede_core::cookies::CookieJarError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::cookies::CookieJarError
+impl core::marker::Send for millipede_core::cookies::CookieJarError
+impl core::marker::Sync for millipede_core::cookies::CookieJarError
+impl core::marker::Unpin for millipede_core::cookies::CookieJarError
+impl core::marker::UnsafeUnpin for millipede_core::cookies::CookieJarError
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::cookies::CookieJarError
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::cookies::CookieJarError
 pub enum millipede_core::prelude::CrawlError
 pub millipede_core::prelude::CrawlError::AntiBotDetected
 pub millipede_core::prelude::CrawlError::AntiBotDetected::source: anyhow::Error
@@ -632,6 +790,39 @@ impl core::marker::Unpin for millipede_core::events::CrawlerEvent
 impl core::marker::UnsafeUnpin for millipede_core::events::CrawlerEvent
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::events::CrawlerEvent
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::events::CrawlerEvent
+#[non_exhaustive] pub enum millipede_core::prelude::HttpClientError
+pub millipede_core::prelude::HttpClientError::Build(anyhow::Error)
+pub millipede_core::prelude::HttpClientError::Connect(anyhow::Error)
+pub millipede_core::prelude::HttpClientError::Decode(anyhow::Error)
+pub millipede_core::prelude::HttpClientError::InvalidRequest(anyhow::Error)
+pub millipede_core::prelude::HttpClientError::Io(anyhow::Error)
+pub millipede_core::prelude::HttpClientError::Other(anyhow::Error)
+pub millipede_core::prelude::HttpClientError::Redirect(anyhow::Error)
+pub millipede_core::prelude::HttpClientError::Timeout(anyhow::Error)
+impl millipede_core::http_client::HttpClientError
+pub fn millipede_core::http_client::HttpClientError::build(impl core::convert::Into<anyhow::Error>) -> Self
+pub fn millipede_core::http_client::HttpClientError::connect(impl core::convert::Into<anyhow::Error>) -> Self
+pub fn millipede_core::http_client::HttpClientError::decode(impl core::convert::Into<anyhow::Error>) -> Self
+pub fn millipede_core::http_client::HttpClientError::invalid_request(impl core::convert::Into<anyhow::Error>) -> Self
+pub fn millipede_core::http_client::HttpClientError::io(impl core::convert::Into<anyhow::Error>) -> Self
+pub fn millipede_core::http_client::HttpClientError::is_connect(&self) -> bool
+pub fn millipede_core::http_client::HttpClientError::is_timeout(&self) -> bool
+pub fn millipede_core::http_client::HttpClientError::other(impl core::convert::Into<anyhow::Error>) -> Self
+pub fn millipede_core::http_client::HttpClientError::redirect(impl core::convert::Into<anyhow::Error>) -> Self
+pub fn millipede_core::http_client::HttpClientError::timeout(impl core::convert::Into<anyhow::Error>) -> Self
+impl core::error::Error for millipede_core::http_client::HttpClientError
+pub fn millipede_core::http_client::HttpClientError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for millipede_core::http_client::HttpClientError
+pub fn millipede_core::http_client::HttpClientError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::http_client::HttpClientError
+pub fn millipede_core::http_client::HttpClientError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::http_client::HttpClientError
+impl core::marker::Send for millipede_core::http_client::HttpClientError
+impl core::marker::Sync for millipede_core::http_client::HttpClientError
+impl core::marker::Unpin for millipede_core::http_client::HttpClientError
+impl core::marker::UnsafeUnpin for millipede_core::http_client::HttpClientError
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::http_client::HttpClientError
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::http_client::HttpClientError
 pub enum millipede_core::prelude::LogLevel
 pub millipede_core::prelude::LogLevel::Debug
 pub millipede_core::prelude::LogLevel::Error
@@ -986,6 +1177,26 @@ impl core::marker::Unpin for millipede_core::config::ConfigurationBuilder
 impl core::marker::UnsafeUnpin for millipede_core::config::ConfigurationBuilder
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::config::ConfigurationBuilder
 impl !core::panic::unwind_safe::UnwindSafe for millipede_core::config::ConfigurationBuilder
+pub struct millipede_core::prelude::CookieJar
+impl millipede_core::cookies::CookieJar
+pub fn millipede_core::cookies::CookieJar::clear(&self)
+pub fn millipede_core::cookies::CookieJar::cookie_count(&self) -> usize
+pub fn millipede_core::cookies::CookieJar::cookie_header_for(&self, &url::Url) -> core::option::Option<http::header::value::HeaderValue>
+pub fn millipede_core::cookies::CookieJar::from_json(&str) -> core::result::Result<Self, millipede_core::cookies::CookieJarError>
+pub fn millipede_core::cookies::CookieJar::new() -> Self
+pub fn millipede_core::cookies::CookieJar::store_response_cookies(&self, &url::Url, &http::header::map::HeaderMap)
+pub fn millipede_core::cookies::CookieJar::to_json(&self) -> core::result::Result<alloc::string::String, millipede_core::cookies::CookieJarError>
+impl core::default::Default for millipede_core::cookies::CookieJar
+pub fn millipede_core::cookies::CookieJar::default() -> Self
+impl core::fmt::Debug for millipede_core::cookies::CookieJar
+pub fn millipede_core::cookies::CookieJar::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl !core::marker::Freeze for millipede_core::cookies::CookieJar
+impl core::marker::Send for millipede_core::cookies::CookieJar
+impl core::marker::Sync for millipede_core::cookies::CookieJar
+impl core::marker::Unpin for millipede_core::cookies::CookieJar
+impl core::marker::UnsafeUnpin for millipede_core::cookies::CookieJar
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::cookies::CookieJar
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::cookies::CookieJar
 pub struct millipede_core::prelude::Crawler<K: millipede_core::crawler::CrawlerKind>
 impl<K: millipede_core::crawler::CrawlerKind> millipede_core::crawler::Crawler<K>
 pub fn millipede_core::crawler::Crawler<K>::abort(&self)
@@ -1161,6 +1372,58 @@ impl core::marker::Unpin for millipede_core::events::HandledRequest
 impl core::marker::UnsafeUnpin for millipede_core::events::HandledRequest
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::events::HandledRequest
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::events::HandledRequest
+#[non_exhaustive] pub struct millipede_core::prelude::HttpRequest
+pub millipede_core::prelude::HttpRequest::body: core::option::Option<millipede_core::request::RequestBody>
+pub millipede_core::prelude::HttpRequest::cookie_jar: core::option::Option<alloc::sync::Arc<millipede_core::cookies::CookieJar>>
+pub millipede_core::prelude::HttpRequest::headers: http::header::map::HeaderMap
+pub millipede_core::prelude::HttpRequest::max_redirects: u32
+pub millipede_core::prelude::HttpRequest::method: http::method::Method
+pub millipede_core::prelude::HttpRequest::proxy: core::option::Option<url::Url>
+pub millipede_core::prelude::HttpRequest::timeout: core::option::Option<core::time::Duration>
+pub millipede_core::prelude::HttpRequest::url: url::Url
+impl millipede_core::http_client::HttpRequest
+pub fn millipede_core::http_client::HttpRequest::body(self, millipede_core::request::RequestBody) -> Self
+pub fn millipede_core::http_client::HttpRequest::cookie_jar(self, alloc::sync::Arc<millipede_core::cookies::CookieJar>) -> Self
+pub fn millipede_core::http_client::HttpRequest::from_request(&millipede_core::request::Request) -> Self
+pub fn millipede_core::http_client::HttpRequest::headers(self, http::header::map::HeaderMap) -> Self
+pub fn millipede_core::http_client::HttpRequest::max_redirects(self, u32) -> Self
+pub fn millipede_core::http_client::HttpRequest::method(self, http::method::Method) -> Self
+pub fn millipede_core::http_client::HttpRequest::new(url::Url) -> Self
+pub fn millipede_core::http_client::HttpRequest::proxy(self, url::Url) -> Self
+pub fn millipede_core::http_client::HttpRequest::timeout(self, core::time::Duration) -> Self
+impl core::clone::Clone for millipede_core::http_client::HttpRequest
+pub fn millipede_core::http_client::HttpRequest::clone(&self) -> millipede_core::http_client::HttpRequest
+impl core::fmt::Debug for millipede_core::http_client::HttpRequest
+pub fn millipede_core::http_client::HttpRequest::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::http_client::HttpRequest
+impl core::marker::Send for millipede_core::http_client::HttpRequest
+impl core::marker::Sync for millipede_core::http_client::HttpRequest
+impl core::marker::Unpin for millipede_core::http_client::HttpRequest
+impl core::marker::UnsafeUnpin for millipede_core::http_client::HttpRequest
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::http_client::HttpRequest
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::http_client::HttpRequest
+#[non_exhaustive] pub struct millipede_core::prelude::HttpResponse
+pub millipede_core::prelude::HttpResponse::body: bytes::bytes::Bytes
+pub millipede_core::prelude::HttpResponse::headers: http::header::map::HeaderMap
+pub millipede_core::prelude::HttpResponse::redirect_chain: alloc::vec::Vec<url::Url>
+pub millipede_core::prelude::HttpResponse::status: http::status::StatusCode
+pub millipede_core::prelude::HttpResponse::url: url::Url
+impl millipede_core::http_client::HttpResponse
+pub fn millipede_core::http_client::HttpResponse::json<T: serde_core::de::DeserializeOwned>(&self) -> core::result::Result<T, serde_json::error::Error>
+pub fn millipede_core::http_client::HttpResponse::new(url::Url, http::status::StatusCode, http::header::map::HeaderMap, bytes::bytes::Bytes) -> Self
+pub fn millipede_core::http_client::HttpResponse::text(&self) -> alloc::borrow::Cow<'_, str>
+pub fn millipede_core::http_client::HttpResponse::with_redirect_chain(self, alloc::vec::Vec<url::Url>) -> Self
+impl core::clone::Clone for millipede_core::http_client::HttpResponse
+pub fn millipede_core::http_client::HttpResponse::clone(&self) -> millipede_core::http_client::HttpResponse
+impl core::fmt::Debug for millipede_core::http_client::HttpResponse
+pub fn millipede_core::http_client::HttpResponse::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl !core::marker::Freeze for millipede_core::http_client::HttpResponse
+impl core::marker::Send for millipede_core::http_client::HttpResponse
+impl core::marker::Sync for millipede_core::http_client::HttpResponse
+impl core::marker::Unpin for millipede_core::http_client::HttpResponse
+impl core::marker::UnsafeUnpin for millipede_core::http_client::HttpResponse
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::http_client::HttpResponse
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::http_client::HttpResponse
 pub struct millipede_core::prelude::KeyInfo
 pub millipede_core::prelude::KeyInfo::key: alloc::string::String
 pub millipede_core::prelude::KeyInfo::size: u64
@@ -1522,6 +1785,22 @@ impl core::marker::Unpin for millipede_core::statistics::StatisticsSnapshot
 impl core::marker::UnsafeUnpin for millipede_core::statistics::StatisticsSnapshot
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::statistics::StatisticsSnapshot
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::statistics::StatisticsSnapshot
+#[non_exhaustive] pub struct millipede_core::prelude::StreamingResponse
+pub millipede_core::prelude::StreamingResponse::body: futures_core::stream::BoxStream<'static, core::result::Result<bytes::bytes::Bytes, millipede_core::http_client::HttpClientError>>
+pub millipede_core::prelude::StreamingResponse::headers: http::header::map::HeaderMap
+pub millipede_core::prelude::StreamingResponse::status: http::status::StatusCode
+pub millipede_core::prelude::StreamingResponse::url: url::Url
+impl millipede_core::http_client::StreamingResponse
+pub fn millipede_core::http_client::StreamingResponse::new(url::Url, http::status::StatusCode, http::header::map::HeaderMap, futures_core::stream::BoxStream<'static, core::result::Result<bytes::bytes::Bytes, millipede_core::http_client::HttpClientError>>) -> Self
+impl core::fmt::Debug for millipede_core::http_client::StreamingResponse
+pub fn millipede_core::http_client::StreamingResponse::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::http_client::StreamingResponse
+impl core::marker::Send for millipede_core::http_client::StreamingResponse
+impl !core::marker::Sync for millipede_core::http_client::StreamingResponse
+impl core::marker::Unpin for millipede_core::http_client::StreamingResponse
+impl core::marker::UnsafeUnpin for millipede_core::http_client::StreamingResponse
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::http_client::StreamingResponse
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::http_client::StreamingResponse
 pub struct millipede_core::prelude::UserData(pub serde_json::map::Map<alloc::string::String, serde_json::value::Value>)
 impl millipede_core::request::UserData
 pub fn millipede_core::request::UserData::get(&self, &str) -> core::option::Option<&serde_json::value::Value>
@@ -1591,6 +1870,9 @@ pub trait millipede_core::prelude::HasRequest
 pub fn millipede_core::prelude::HasRequest::request(&self) -> &millipede_core::request::Request
 impl millipede_core::router::HasRequest for millipede_core::crawler::BasicContext
 pub fn millipede_core::crawler::BasicContext::request(&self) -> &millipede_core::request::Request
+pub trait millipede_core::prelude::HttpClient: core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_core::prelude::HttpClient::send<'life0, 'async_trait>(&'life0 self, millipede_core::http_client::HttpRequest) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<millipede_core::http_client::HttpResponse, millipede_core::http_client::HttpClientError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::prelude::HttpClient::stream<'life0, 'async_trait>(&'life0 self, millipede_core::http_client::HttpRequest) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<millipede_core::http_client::StreamingResponse, millipede_core::http_client::HttpClientError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
 pub trait millipede_core::prelude::IntoStartRequest
 pub fn millipede_core::prelude::IntoStartRequest::into_start_request(self) -> core::result::Result<millipede_core::request::Request, millipede_core::errors::CrawlError>
 impl millipede_core::crawler::IntoStartRequest for &str

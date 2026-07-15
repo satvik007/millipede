@@ -32,6 +32,8 @@ use queue::MemoryRequestQueue;
 
 /// Crawler configuration and environment resolution.
 pub mod config;
+/// Session cookie storage and persistence.
+pub mod cookies;
 /// Crawler lifecycle kinds, handles, and shared state.
 pub mod crawler;
 /// Crawl error taxonomy and retry classification.
@@ -40,6 +42,8 @@ pub mod errors;
 pub mod events;
 /// Request handler and middleware contracts.
 pub mod handler;
+/// Backend-independent HTTP request, response, and client abstractions.
+pub mod http_client;
 /// Request data types and construction helpers.
 pub mod request;
 /// Label- and method-based request routing.
@@ -52,6 +56,7 @@ pub mod storage;
 /// Commonly used items from this crate.
 pub mod prelude {
     pub use crate::config::{Configuration, ConfigurationBuilder, LogLevel};
+    pub use crate::cookies::{CookieJar, CookieJarError};
     pub use crate::crawler::{
         BasicContext, BasicCrawler, BasicKind, Crawler, CrawlerBuildError, CrawlerBuilder,
         CrawlerEnv, CrawlerHandle, CrawlerKind, IntoStartRequest, IntoStartRequests, RequestEnv,
@@ -63,6 +68,9 @@ pub mod prelude {
     };
     pub use crate::handler::{
         FailedRequestContext, FailedRequestHandler, Middleware, RequestHandler,
+    };
+    pub use crate::http_client::{
+        HttpClient, HttpClientError, HttpRequest, HttpResponse, StreamingResponse,
     };
     pub use crate::request::{
         HeaderMap, IntoUrl, Method, Request, RequestBody, RequestBuildError, RequestBuilder,

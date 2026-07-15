@@ -24,6 +24,7 @@ millipede-fingerprint = { path = "../crates/millipede-fingerprint", version = "0
 [dev-dependencies]
 anyhow = { workspace = true }
 tokio = { workspace = true }
+wiremock = { workspace = true }
 
 [features]
 default = ["http", "html", "storage-memory"]
