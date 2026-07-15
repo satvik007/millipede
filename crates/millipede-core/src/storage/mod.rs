@@ -2,11 +2,13 @@
 
 mod auto_saved;
 mod dataset;
+mod handle;
 mod kvs;
 mod queue;
 
 pub use auto_saved::AutoSaved;
 pub use dataset::{Dataset, DatasetExt, DatasetInfo, ListOptions, Page};
+pub use handle::StorageHandle;
 pub use kvs::{KeyInfo, KeyList, KeyValueStore, KeyValueStoreExt, KvEntry, ListKeysOptions};
 pub use queue::{
     AddOptions, AddRequestsBatchedResult, BatchAddHandle, Lease, LeaseId, ProcessedRequest,

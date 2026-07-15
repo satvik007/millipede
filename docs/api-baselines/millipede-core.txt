@@ -867,6 +867,29 @@ impl core::marker::Unpin for millipede_core::router::MethodFilter
 impl core::marker::UnsafeUnpin for millipede_core::router::MethodFilter
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::router::MethodFilter
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::router::MethodFilter
+#[non_exhaustive] pub enum millipede_core::prelude::ProxyKind
+pub millipede_core::prelude::ProxyKind::Custom(alloc::string::String)
+pub millipede_core::prelude::ProxyKind::Default
+pub millipede_core::prelude::ProxyKind::MediaAsset
+impl core::clone::Clone for millipede_core::proxy::ProxyKind
+pub fn millipede_core::proxy::ProxyKind::clone(&self) -> millipede_core::proxy::ProxyKind
+impl core::cmp::Eq for millipede_core::proxy::ProxyKind
+impl core::cmp::PartialEq for millipede_core::proxy::ProxyKind
+pub fn millipede_core::proxy::ProxyKind::eq(&self, &millipede_core::proxy::ProxyKind) -> bool
+impl core::default::Default for millipede_core::proxy::ProxyKind
+pub fn millipede_core::proxy::ProxyKind::default() -> millipede_core::proxy::ProxyKind
+impl core::fmt::Debug for millipede_core::proxy::ProxyKind
+pub fn millipede_core::proxy::ProxyKind::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for millipede_core::proxy::ProxyKind
+pub fn millipede_core::proxy::ProxyKind::hash<__H: core::hash::Hasher>(&self, &mut __H)
+impl core::marker::StructuralPartialEq for millipede_core::proxy::ProxyKind
+impl core::marker::Freeze for millipede_core::proxy::ProxyKind
+impl core::marker::Send for millipede_core::proxy::ProxyKind
+impl core::marker::Sync for millipede_core::proxy::ProxyKind
+impl core::marker::Unpin for millipede_core::proxy::ProxyKind
+impl core::marker::UnsafeUnpin for millipede_core::proxy::ProxyKind
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::proxy::ProxyKind
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::proxy::ProxyKind
 pub enum millipede_core::prelude::RequestBody
 pub millipede_core::prelude::RequestBody::Bytes(alloc::vec::Vec<u8>)
 pub millipede_core::prelude::RequestBody::Form(alloc::vec::Vec<(alloc::string::String, alloc::string::String)>)
@@ -998,6 +1021,27 @@ impl core::marker::Unpin for millipede_core::request::RequestState
 impl core::marker::UnsafeUnpin for millipede_core::request::RequestState
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::request::RequestState
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::request::RequestState
+pub enum millipede_core::prelude::RotationStrategy
+pub millipede_core::prelude::RotationStrategy::Random
+pub millipede_core::prelude::RotationStrategy::RoundRobin
+impl core::clone::Clone for millipede_core::proxy::RotationStrategy
+pub fn millipede_core::proxy::RotationStrategy::clone(&self) -> millipede_core::proxy::RotationStrategy
+impl core::cmp::Eq for millipede_core::proxy::RotationStrategy
+impl core::cmp::PartialEq for millipede_core::proxy::RotationStrategy
+pub fn millipede_core::proxy::RotationStrategy::eq(&self, &millipede_core::proxy::RotationStrategy) -> bool
+impl core::default::Default for millipede_core::proxy::RotationStrategy
+pub fn millipede_core::proxy::RotationStrategy::default() -> millipede_core::proxy::RotationStrategy
+impl core::fmt::Debug for millipede_core::proxy::RotationStrategy
+pub fn millipede_core::proxy::RotationStrategy::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for millipede_core::proxy::RotationStrategy
+impl core::marker::StructuralPartialEq for millipede_core::proxy::RotationStrategy
+impl core::marker::Freeze for millipede_core::proxy::RotationStrategy
+impl core::marker::Send for millipede_core::proxy::RotationStrategy
+impl core::marker::Sync for millipede_core::proxy::RotationStrategy
+impl core::marker::Unpin for millipede_core::proxy::RotationStrategy
+impl core::marker::UnsafeUnpin for millipede_core::proxy::RotationStrategy
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::proxy::RotationStrategy
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::proxy::RotationStrategy
 #[non_exhaustive] pub enum millipede_core::prelude::StorageError
 pub millipede_core::prelude::StorageError::Backend(anyhow::Error)
 pub millipede_core::prelude::StorageError::Io(core::io::error::Error)
@@ -1569,6 +1613,107 @@ impl core::marker::Unpin for millipede_core::storage::ProcessedRequest
 impl core::marker::UnsafeUnpin for millipede_core::storage::ProcessedRequest
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::ProcessedRequest
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::ProcessedRequest
+pub struct millipede_core::prelude::ProxyBuckets
+impl millipede_core::proxy::ProxyBuckets
+pub fn millipede_core::proxy::ProxyBuckets::for_kind(&self, &millipede_core::proxy::ProxyKind) -> core::option::Option<&millipede_core::proxy::ProxyConfiguration>
+pub fn millipede_core::proxy::ProxyBuckets::new() -> Self
+pub fn millipede_core::proxy::ProxyBuckets::with_custom(self, impl core::convert::Into<alloc::string::String>, millipede_core::proxy::ProxyConfiguration) -> Self
+pub fn millipede_core::proxy::ProxyBuckets::with_default(self, millipede_core::proxy::ProxyConfiguration) -> Self
+pub fn millipede_core::proxy::ProxyBuckets::with_media(self, millipede_core::proxy::ProxyConfiguration) -> Self
+impl core::default::Default for millipede_core::proxy::ProxyBuckets
+pub fn millipede_core::proxy::ProxyBuckets::default() -> millipede_core::proxy::ProxyBuckets
+impl core::fmt::Debug for millipede_core::proxy::ProxyBuckets
+pub fn millipede_core::proxy::ProxyBuckets::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl !core::marker::Freeze for millipede_core::proxy::ProxyBuckets
+impl core::marker::Send for millipede_core::proxy::ProxyBuckets
+impl core::marker::Sync for millipede_core::proxy::ProxyBuckets
+impl core::marker::Unpin for millipede_core::proxy::ProxyBuckets
+impl core::marker::UnsafeUnpin for millipede_core::proxy::ProxyBuckets
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::proxy::ProxyBuckets
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::proxy::ProxyBuckets
+pub struct millipede_core::prelude::ProxyConfiguration
+impl millipede_core::proxy::ProxyConfiguration
+pub fn millipede_core::proxy::ProxyConfiguration::custom<R: millipede_core::proxy::ProxyResolver>(R) -> Self
+pub async fn millipede_core::proxy::ProxyConfiguration::new_proxy_info(&self, millipede_core::proxy::ProxyResolveContext<'_>) -> core::result::Result<core::option::Option<millipede_core::proxy::ProxyInfo>, millipede_core::errors::CrawlError>
+pub async fn millipede_core::proxy::ProxyConfiguration::new_url(&self, millipede_core::proxy::ProxyResolveContext<'_>) -> core::result::Result<core::option::Option<url::Url>, millipede_core::errors::CrawlError>
+pub fn millipede_core::proxy::ProxyConfiguration::report_blocked(&self, &url::Url)
+pub fn millipede_core::proxy::ProxyConfiguration::report_success(&self, &url::Url)
+pub fn millipede_core::proxy::ProxyConfiguration::rotating(impl core::iter::traits::collect::IntoIterator<Item = url::Url>, millipede_core::proxy::RotationStrategy) -> Self
+pub fn millipede_core::proxy::ProxyConfiguration::round_robin(impl core::iter::traits::collect::IntoIterator<Item = url::Url>) -> Self
+pub fn millipede_core::proxy::ProxyConfiguration::tiered(alloc::vec::Vec<alloc::vec::Vec<core::option::Option<url::Url>>>) -> Self
+pub fn millipede_core::proxy::ProxyConfiguration::tiered_with_probe_interval(alloc::vec::Vec<alloc::vec::Vec<core::option::Option<url::Url>>>, u32) -> Self
+impl core::fmt::Debug for millipede_core::proxy::ProxyConfiguration
+pub fn millipede_core::proxy::ProxyConfiguration::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl !core::marker::Freeze for millipede_core::proxy::ProxyConfiguration
+impl core::marker::Send for millipede_core::proxy::ProxyConfiguration
+impl core::marker::Sync for millipede_core::proxy::ProxyConfiguration
+impl core::marker::Unpin for millipede_core::proxy::ProxyConfiguration
+impl core::marker::UnsafeUnpin for millipede_core::proxy::ProxyConfiguration
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::proxy::ProxyConfiguration
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::proxy::ProxyConfiguration
+#[non_exhaustive] pub struct millipede_core::prelude::ProxyInfo
+pub millipede_core::prelude::ProxyInfo::hostname: alloc::string::String
+pub millipede_core::prelude::ProxyInfo::password: core::option::Option<alloc::string::String>
+pub millipede_core::prelude::ProxyInfo::port: u16
+pub millipede_core::prelude::ProxyInfo::session_id: core::option::Option<millipede_core::session::SessionId>
+pub millipede_core::prelude::ProxyInfo::tier: core::option::Option<u8>
+pub millipede_core::prelude::ProxyInfo::url: url::Url
+pub millipede_core::prelude::ProxyInfo::username: core::option::Option<alloc::string::String>
+impl millipede_core::proxy::ProxyInfo
+pub fn millipede_core::proxy::ProxyInfo::from_url(url::Url) -> Self
+pub fn millipede_core::proxy::ProxyInfo::with_session_id(self, millipede_core::session::SessionId) -> Self
+pub fn millipede_core::proxy::ProxyInfo::with_tier(self, u8) -> Self
+impl core::clone::Clone for millipede_core::proxy::ProxyInfo
+pub fn millipede_core::proxy::ProxyInfo::clone(&self) -> millipede_core::proxy::ProxyInfo
+impl core::cmp::PartialEq for millipede_core::proxy::ProxyInfo
+pub fn millipede_core::proxy::ProxyInfo::eq(&self, &millipede_core::proxy::ProxyInfo) -> bool
+impl core::fmt::Debug for millipede_core::proxy::ProxyInfo
+pub fn millipede_core::proxy::ProxyInfo::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_core::proxy::ProxyInfo
+impl core::marker::Freeze for millipede_core::proxy::ProxyInfo
+impl core::marker::Send for millipede_core::proxy::ProxyInfo
+impl core::marker::Sync for millipede_core::proxy::ProxyInfo
+impl core::marker::Unpin for millipede_core::proxy::ProxyInfo
+impl core::marker::UnsafeUnpin for millipede_core::proxy::ProxyInfo
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::proxy::ProxyInfo
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::proxy::ProxyInfo
+pub struct millipede_core::prelude::ProxyResolveContext<'a>
+pub millipede_core::prelude::ProxyResolveContext::attempt: u32
+pub millipede_core::prelude::ProxyResolveContext::request: core::option::Option<&'a millipede_core::request::Request>
+pub millipede_core::prelude::ProxyResolveContext::session_id: core::option::Option<&'a millipede_core::session::SessionId>
+impl<'a> millipede_core::proxy::ProxyResolveContext<'a>
+pub fn millipede_core::proxy::ProxyResolveContext<'a>::attempt(self, u32) -> Self
+pub fn millipede_core::proxy::ProxyResolveContext<'a>::new() -> Self
+pub fn millipede_core::proxy::ProxyResolveContext<'a>::request(self, &'a millipede_core::request::Request) -> Self
+pub fn millipede_core::proxy::ProxyResolveContext<'a>::session_id(self, &'a millipede_core::session::SessionId) -> Self
+impl<'a> core::clone::Clone for millipede_core::proxy::ProxyResolveContext<'a>
+pub fn millipede_core::proxy::ProxyResolveContext<'a>::clone(&self) -> millipede_core::proxy::ProxyResolveContext<'a>
+impl<'a> core::default::Default for millipede_core::proxy::ProxyResolveContext<'a>
+pub fn millipede_core::proxy::ProxyResolveContext<'a>::default() -> millipede_core::proxy::ProxyResolveContext<'a>
+impl<'a> core::fmt::Debug for millipede_core::proxy::ProxyResolveContext<'a>
+pub fn millipede_core::proxy::ProxyResolveContext<'a>::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl<'a> core::marker::Copy for millipede_core::proxy::ProxyResolveContext<'a>
+impl<'a> core::marker::Freeze for millipede_core::proxy::ProxyResolveContext<'a>
+impl<'a> core::marker::Send for millipede_core::proxy::ProxyResolveContext<'a>
+impl<'a> core::marker::Sync for millipede_core::proxy::ProxyResolveContext<'a>
+impl<'a> core::marker::Unpin for millipede_core::proxy::ProxyResolveContext<'a>
+impl<'a> core::marker::UnsafeUnpin for millipede_core::proxy::ProxyResolveContext<'a>
+impl<'a> core::panic::unwind_safe::RefUnwindSafe for millipede_core::proxy::ProxyResolveContext<'a>
+impl<'a> core::panic::unwind_safe::UnwindSafe for millipede_core::proxy::ProxyResolveContext<'a>
+pub struct millipede_core::prelude::ProxyRouteContext<'a>
+pub millipede_core::prelude::ProxyRouteContext::attempt: u32
+pub millipede_core::prelude::ProxyRouteContext::previous_profile_key: core::option::Option<&'a str>
+pub millipede_core::prelude::ProxyRouteContext::request: &'a millipede_core::request::Request
+impl<'a> millipede_core::proxy::ProxyRouteContext<'a>
+pub fn millipede_core::proxy::ProxyRouteContext<'a>::new(&'a millipede_core::request::Request, u32) -> Self
+pub fn millipede_core::proxy::ProxyRouteContext<'a>::previous_profile_key(self, &'a str) -> Self
+impl<'a> core::marker::Freeze for millipede_core::proxy::ProxyRouteContext<'a>
+impl<'a> core::marker::Send for millipede_core::proxy::ProxyRouteContext<'a>
+impl<'a> core::marker::Sync for millipede_core::proxy::ProxyRouteContext<'a>
+impl<'a> core::marker::Unpin for millipede_core::proxy::ProxyRouteContext<'a>
+impl<'a> core::marker::UnsafeUnpin for millipede_core::proxy::ProxyRouteContext<'a>
+impl<'a> core::panic::unwind_safe::RefUnwindSafe for millipede_core::proxy::ProxyRouteContext<'a>
+impl<'a> core::panic::unwind_safe::UnwindSafe for millipede_core::proxy::ProxyRouteContext<'a>
 #[non_exhaustive] pub struct millipede_core::prelude::ReclaimOptions
 pub millipede_core::prelude::ReclaimOptions::forefront: bool
 pub millipede_core::prelude::ReclaimOptions::increment_retry: bool
@@ -1729,6 +1874,122 @@ impl<C> core::marker::Unpin for millipede_core::router::Router<C>
 impl<C> core::marker::UnsafeUnpin for millipede_core::router::Router<C>
 impl<C> !core::panic::unwind_safe::RefUnwindSafe for millipede_core::router::Router<C>
 impl<C> !core::panic::unwind_safe::UnwindSafe for millipede_core::router::Router<C>
+pub struct millipede_core::prelude::Session
+impl millipede_core::session::Session
+pub fn millipede_core::session::Session::cookie_jar(&self) -> &alloc::sync::Arc<millipede_core::cookies::CookieJar>
+pub async fn millipede_core::session::Session::error_score(&self) -> f32
+pub fn millipede_core::session::Session::id(&self) -> &millipede_core::session::SessionId
+pub async fn millipede_core::session::Session::is_blocked(&self) -> bool
+pub fn millipede_core::session::Session::is_expired(&self) -> bool
+pub async fn millipede_core::session::Session::is_retired(&self) -> bool
+pub async fn millipede_core::session::Session::is_usable(&self) -> bool
+pub async fn millipede_core::session::Session::mark_bad(&self)
+pub async fn millipede_core::session::Session::mark_good(&self)
+pub fn millipede_core::session::Session::new(millipede_core::session::SessionConfig) -> Self
+pub async fn millipede_core::session::Session::record_usage(&self)
+pub async fn millipede_core::session::Session::retire(&self)
+pub fn millipede_core::session::Session::set_cookies_from_response(&self, &millipede_core::http_client::HttpResponse)
+pub async fn millipede_core::session::Session::update_user_data(&self, impl core::ops::function::FnOnce(&mut millipede_core::request::UserData))
+pub async fn millipede_core::session::Session::usage_count(&self) -> u32
+pub async fn millipede_core::session::Session::with_user_data<R>(&self, impl core::ops::function::FnOnce(&millipede_core::request::UserData) -> R) -> R
+impl core::fmt::Debug for millipede_core::session::Session
+pub fn millipede_core::session::Session::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl !core::marker::Freeze for millipede_core::session::Session
+impl core::marker::Send for millipede_core::session::Session
+impl core::marker::Sync for millipede_core::session::Session
+impl core::marker::Unpin for millipede_core::session::Session
+impl core::marker::UnsafeUnpin for millipede_core::session::Session
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::session::Session
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::session::Session
+#[non_exhaustive] pub struct millipede_core::prelude::SessionConfig
+pub millipede_core::prelude::SessionConfig::error_score_decrement_scaled: u32
+pub millipede_core::prelude::SessionConfig::max_age: core::time::Duration
+pub millipede_core::prelude::SessionConfig::max_error_score_scaled: u32
+pub millipede_core::prelude::SessionConfig::max_usage_count: u32
+impl millipede_core::session::SessionConfig
+pub fn millipede_core::session::SessionConfig::with_error_score_decrement_scaled(self, u32) -> Self
+pub fn millipede_core::session::SessionConfig::with_max_age(self, core::time::Duration) -> Self
+pub fn millipede_core::session::SessionConfig::with_max_error_score_scaled(self, u32) -> Self
+pub fn millipede_core::session::SessionConfig::with_max_usage_count(self, u32) -> Self
+impl core::clone::Clone for millipede_core::session::SessionConfig
+pub fn millipede_core::session::SessionConfig::clone(&self) -> millipede_core::session::SessionConfig
+impl core::default::Default for millipede_core::session::SessionConfig
+pub fn millipede_core::session::SessionConfig::default() -> Self
+impl core::fmt::Debug for millipede_core::session::SessionConfig
+pub fn millipede_core::session::SessionConfig::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::session::SessionConfig
+impl core::marker::Send for millipede_core::session::SessionConfig
+impl core::marker::Sync for millipede_core::session::SessionConfig
+impl core::marker::Unpin for millipede_core::session::SessionConfig
+impl core::marker::UnsafeUnpin for millipede_core::session::SessionConfig
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::session::SessionConfig
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::session::SessionConfig
+pub struct millipede_core::prelude::SessionId(_)
+impl millipede_core::session::SessionId
+pub fn millipede_core::session::SessionId::as_str(&self) -> &str
+pub fn millipede_core::session::SessionId::generate() -> Self
+impl core::clone::Clone for millipede_core::session::SessionId
+pub fn millipede_core::session::SessionId::clone(&self) -> millipede_core::session::SessionId
+impl core::cmp::Eq for millipede_core::session::SessionId
+impl core::cmp::PartialEq for millipede_core::session::SessionId
+pub fn millipede_core::session::SessionId::eq(&self, &millipede_core::session::SessionId) -> bool
+impl core::convert::From<alloc::string::String> for millipede_core::session::SessionId
+pub fn millipede_core::session::SessionId::from(alloc::string::String) -> Self
+impl core::fmt::Debug for millipede_core::session::SessionId
+pub fn millipede_core::session::SessionId::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::session::SessionId
+pub fn millipede_core::session::SessionId::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for millipede_core::session::SessionId
+pub fn millipede_core::session::SessionId::hash<__H: core::hash::Hasher>(&self, &mut __H)
+impl core::marker::StructuralPartialEq for millipede_core::session::SessionId
+impl serde_core::ser::Serialize for millipede_core::session::SessionId
+pub fn millipede_core::session::SessionId::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl<'de> serde_core::de::Deserialize<'de> for millipede_core::session::SessionId
+pub fn millipede_core::session::SessionId::deserialize<__D>(__D) -> core::result::Result<Self, <__D as serde_core::de::Deserializer>::Error> where __D: serde_core::de::Deserializer<'de>
+impl core::marker::Freeze for millipede_core::session::SessionId
+impl core::marker::Send for millipede_core::session::SessionId
+impl core::marker::Sync for millipede_core::session::SessionId
+impl core::marker::Unpin for millipede_core::session::SessionId
+impl core::marker::UnsafeUnpin for millipede_core::session::SessionId
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::session::SessionId
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::session::SessionId
+pub struct millipede_core::prelude::SessionPool
+impl millipede_core::session::SessionPool
+pub fn millipede_core::session::SessionPool::attach_persistence(&self, alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>)
+pub async fn millipede_core::session::SessionPool::get_session(&self, core::option::Option<&millipede_core::session::SessionId>) -> alloc::sync::Arc<millipede_core::session::Session>
+pub fn millipede_core::session::SessionPool::new(millipede_core::session::SessionPoolOptions) -> Self
+pub async fn millipede_core::session::SessionPool::persist(&self) -> core::result::Result<(), millipede_core::errors::CrawlError>
+pub async fn millipede_core::session::SessionPool::restore(&self) -> core::result::Result<(), millipede_core::errors::CrawlError>
+pub async fn millipede_core::session::SessionPool::retire_session(&self, &millipede_core::session::SessionId)
+pub async fn millipede_core::session::SessionPool::session_count(&self) -> usize
+impl !core::marker::Freeze for millipede_core::session::SessionPool
+impl core::marker::Send for millipede_core::session::SessionPool
+impl core::marker::Sync for millipede_core::session::SessionPool
+impl core::marker::Unpin for millipede_core::session::SessionPool
+impl core::marker::UnsafeUnpin for millipede_core::session::SessionPool
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::session::SessionPool
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::session::SessionPool
+#[non_exhaustive] pub struct millipede_core::prelude::SessionPoolOptions
+pub millipede_core::prelude::SessionPoolOptions::max_pool_size: usize
+pub millipede_core::prelude::SessionPoolOptions::persist_state_key: alloc::string::String
+pub millipede_core::prelude::SessionPoolOptions::session_config: millipede_core::session::SessionConfig
+impl millipede_core::session::SessionPoolOptions
+pub fn millipede_core::session::SessionPoolOptions::with_max_pool_size(self, usize) -> Self
+pub fn millipede_core::session::SessionPoolOptions::with_persist_state_key(self, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_core::session::SessionPoolOptions::with_session_config(self, millipede_core::session::SessionConfig) -> Self
+impl core::clone::Clone for millipede_core::session::SessionPoolOptions
+pub fn millipede_core::session::SessionPoolOptions::clone(&self) -> millipede_core::session::SessionPoolOptions
+impl core::default::Default for millipede_core::session::SessionPoolOptions
+pub fn millipede_core::session::SessionPoolOptions::default() -> Self
+impl core::fmt::Debug for millipede_core::session::SessionPoolOptions
+pub fn millipede_core::session::SessionPoolOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::session::SessionPoolOptions
+impl core::marker::Send for millipede_core::session::SessionPoolOptions
+impl core::marker::Sync for millipede_core::session::SessionPoolOptions
+impl core::marker::Unpin for millipede_core::session::SessionPoolOptions
+impl core::marker::UnsafeUnpin for millipede_core::session::SessionPoolOptions
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::session::SessionPoolOptions
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::session::SessionPoolOptions
 pub struct millipede_core::prelude::StatisticsHandle
 impl millipede_core::statistics::StatisticsHandle
 pub fn millipede_core::statistics::StatisticsHandle::finalize(&self) -> millipede_core::statistics::FinalStatistics
@@ -1785,6 +2046,26 @@ impl core::marker::Unpin for millipede_core::statistics::StatisticsSnapshot
 impl core::marker::UnsafeUnpin for millipede_core::statistics::StatisticsSnapshot
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::statistics::StatisticsSnapshot
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::statistics::StatisticsSnapshot
+pub struct millipede_core::prelude::StorageHandle
+impl millipede_core::storage::StorageHandle
+pub fn millipede_core::storage::StorageHandle::client(&self) -> &alloc::sync::Arc<dyn millipede_core::storage::StorageClient>
+pub fn millipede_core::storage::StorageHandle::dataset(&self) -> &alloc::sync::Arc<dyn millipede_core::storage::Dataset>
+pub async fn millipede_core::storage::StorageHandle::dataset_named(&self, &str) -> millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::Dataset>>
+pub fn millipede_core::storage::StorageHandle::key_value_store(&self) -> &alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>
+pub async fn millipede_core::storage::StorageHandle::kvs_named(&self, &str) -> millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>>
+pub fn millipede_core::storage::StorageHandle::new(alloc::sync::Arc<dyn millipede_core::storage::StorageClient>, alloc::sync::Arc<dyn millipede_core::storage::Dataset>, alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>, alloc::sync::Arc<dyn millipede_core::storage::RequestQueue>) -> Self
+pub fn millipede_core::storage::StorageHandle::request_queue(&self) -> &alloc::sync::Arc<dyn millipede_core::storage::RequestQueue>
+impl core::clone::Clone for millipede_core::storage::StorageHandle
+pub fn millipede_core::storage::StorageHandle::clone(&self) -> millipede_core::storage::StorageHandle
+impl core::fmt::Debug for millipede_core::storage::StorageHandle
+pub fn millipede_core::storage::StorageHandle::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::StorageHandle
+impl core::marker::Send for millipede_core::storage::StorageHandle
+impl core::marker::Sync for millipede_core::storage::StorageHandle
+impl core::marker::Unpin for millipede_core::storage::StorageHandle
+impl core::marker::UnsafeUnpin for millipede_core::storage::StorageHandle
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::StorageHandle
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::storage::StorageHandle
 #[non_exhaustive] pub struct millipede_core::prelude::StreamingResponse
 pub millipede_core::prelude::StreamingResponse::body: futures_core::stream::BoxStream<'static, core::result::Result<bytes::bytes::Bytes, millipede_core::http_client::HttpClientError>>
 pub millipede_core::prelude::StreamingResponse::headers: http::header::map::HeaderMap
@@ -1827,6 +2108,7 @@ impl core::marker::Unpin for millipede_core::request::UserData
 impl core::marker::UnsafeUnpin for millipede_core::request::UserData
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::request::UserData
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::request::UserData
+pub const millipede_core::prelude::SESSION_POOL_PERSIST_KEY: &str
 pub const millipede_core::prelude::STATISTICS_PERSIST_KEY: &str
 pub trait millipede_core::prelude::CrawlerKind: core::marker::Send + core::marker::Sync + 'static
 pub type millipede_core::prelude::CrawlerKind::Context: core::marker::Send + core::clone::Clone + 'static
@@ -1924,6 +2206,10 @@ pub trait millipede_core::prelude::Middleware<C>: core::marker::Send + core::mar
 pub fn millipede_core::prelude::Middleware::run(&self, C) -> futures_core::future::BoxFuture<'static, core::result::Result<C, millipede_core::errors::CrawlError>>
 impl<C, F, Fut> millipede_core::handler::Middleware<C> for F where F: core::ops::function::Fn(C) -> Fut + core::marker::Send + core::marker::Sync + 'static, Fut: core::future::future::Future<Output = core::result::Result<C, millipede_core::errors::CrawlError>> + core::marker::Send + 'static
 pub fn F::run(&self, C) -> futures_core::future::BoxFuture<'static, core::result::Result<C, millipede_core::errors::CrawlError>>
+pub trait millipede_core::prelude::ProxyResolver: core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_core::prelude::ProxyResolver::resolve<'life0, 'life1, 'async_trait>(&'life0 self, millipede_core::proxy::ProxyResolveContext<'life1>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<core::option::Option<url::Url>, millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub trait millipede_core::prelude::ProxyStrategy: core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_core::prelude::ProxyStrategy::route(&self, &millipede_core::proxy::ProxyRouteContext<'_>) -> millipede_core::proxy::ProxyKind
 pub trait millipede_core::prelude::RequestHandler<C>: core::marker::Send + core::marker::Sync + 'static
 pub fn millipede_core::prelude::RequestHandler::handle(&self, C) -> futures_core::future::BoxFuture<'static, core::result::Result<(), millipede_core::errors::CrawlError>>
 impl<C, F, Fut> millipede_core::handler::RequestHandler<C> for F where F: core::ops::function::Fn(C) -> Fut + core::marker::Send + core::marker::Sync + 'static, Fut: core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'static
@@ -1952,6 +2238,156 @@ pub type millipede_core::prelude::EventStream = tokio::sync::broadcast::Receiver
 pub type millipede_core::prelude::QueueOpInfo = millipede_core::storage::ProcessedRequest
 pub type millipede_core::prelude::ResultStream = tokio::sync::broadcast::Receiver<millipede_core::events::HandledRequest>
 pub type millipede_core::prelude::StorageResult<T> = core::result::Result<T, millipede_core::storage::StorageError>
+pub mod millipede_core::proxy
+#[non_exhaustive] pub enum millipede_core::proxy::ProxyKind
+pub millipede_core::proxy::ProxyKind::Custom(alloc::string::String)
+pub millipede_core::proxy::ProxyKind::Default
+pub millipede_core::proxy::ProxyKind::MediaAsset
+impl core::clone::Clone for millipede_core::proxy::ProxyKind
+pub fn millipede_core::proxy::ProxyKind::clone(&self) -> millipede_core::proxy::ProxyKind
+impl core::cmp::Eq for millipede_core::proxy::ProxyKind
+impl core::cmp::PartialEq for millipede_core::proxy::ProxyKind
+pub fn millipede_core::proxy::ProxyKind::eq(&self, &millipede_core::proxy::ProxyKind) -> bool
+impl core::default::Default for millipede_core::proxy::ProxyKind
+pub fn millipede_core::proxy::ProxyKind::default() -> millipede_core::proxy::ProxyKind
+impl core::fmt::Debug for millipede_core::proxy::ProxyKind
+pub fn millipede_core::proxy::ProxyKind::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for millipede_core::proxy::ProxyKind
+pub fn millipede_core::proxy::ProxyKind::hash<__H: core::hash::Hasher>(&self, &mut __H)
+impl core::marker::StructuralPartialEq for millipede_core::proxy::ProxyKind
+impl core::marker::Freeze for millipede_core::proxy::ProxyKind
+impl core::marker::Send for millipede_core::proxy::ProxyKind
+impl core::marker::Sync for millipede_core::proxy::ProxyKind
+impl core::marker::Unpin for millipede_core::proxy::ProxyKind
+impl core::marker::UnsafeUnpin for millipede_core::proxy::ProxyKind
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::proxy::ProxyKind
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::proxy::ProxyKind
+pub enum millipede_core::proxy::RotationStrategy
+pub millipede_core::proxy::RotationStrategy::Random
+pub millipede_core::proxy::RotationStrategy::RoundRobin
+impl core::clone::Clone for millipede_core::proxy::RotationStrategy
+pub fn millipede_core::proxy::RotationStrategy::clone(&self) -> millipede_core::proxy::RotationStrategy
+impl core::cmp::Eq for millipede_core::proxy::RotationStrategy
+impl core::cmp::PartialEq for millipede_core::proxy::RotationStrategy
+pub fn millipede_core::proxy::RotationStrategy::eq(&self, &millipede_core::proxy::RotationStrategy) -> bool
+impl core::default::Default for millipede_core::proxy::RotationStrategy
+pub fn millipede_core::proxy::RotationStrategy::default() -> millipede_core::proxy::RotationStrategy
+impl core::fmt::Debug for millipede_core::proxy::RotationStrategy
+pub fn millipede_core::proxy::RotationStrategy::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for millipede_core::proxy::RotationStrategy
+impl core::marker::StructuralPartialEq for millipede_core::proxy::RotationStrategy
+impl core::marker::Freeze for millipede_core::proxy::RotationStrategy
+impl core::marker::Send for millipede_core::proxy::RotationStrategy
+impl core::marker::Sync for millipede_core::proxy::RotationStrategy
+impl core::marker::Unpin for millipede_core::proxy::RotationStrategy
+impl core::marker::UnsafeUnpin for millipede_core::proxy::RotationStrategy
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::proxy::RotationStrategy
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::proxy::RotationStrategy
+pub struct millipede_core::proxy::ProxyBuckets
+impl millipede_core::proxy::ProxyBuckets
+pub fn millipede_core::proxy::ProxyBuckets::for_kind(&self, &millipede_core::proxy::ProxyKind) -> core::option::Option<&millipede_core::proxy::ProxyConfiguration>
+pub fn millipede_core::proxy::ProxyBuckets::new() -> Self
+pub fn millipede_core::proxy::ProxyBuckets::with_custom(self, impl core::convert::Into<alloc::string::String>, millipede_core::proxy::ProxyConfiguration) -> Self
+pub fn millipede_core::proxy::ProxyBuckets::with_default(self, millipede_core::proxy::ProxyConfiguration) -> Self
+pub fn millipede_core::proxy::ProxyBuckets::with_media(self, millipede_core::proxy::ProxyConfiguration) -> Self
+impl core::default::Default for millipede_core::proxy::ProxyBuckets
+pub fn millipede_core::proxy::ProxyBuckets::default() -> millipede_core::proxy::ProxyBuckets
+impl core::fmt::Debug for millipede_core::proxy::ProxyBuckets
+pub fn millipede_core::proxy::ProxyBuckets::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl !core::marker::Freeze for millipede_core::proxy::ProxyBuckets
+impl core::marker::Send for millipede_core::proxy::ProxyBuckets
+impl core::marker::Sync for millipede_core::proxy::ProxyBuckets
+impl core::marker::Unpin for millipede_core::proxy::ProxyBuckets
+impl core::marker::UnsafeUnpin for millipede_core::proxy::ProxyBuckets
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::proxy::ProxyBuckets
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::proxy::ProxyBuckets
+pub struct millipede_core::proxy::ProxyConfiguration
+impl millipede_core::proxy::ProxyConfiguration
+pub fn millipede_core::proxy::ProxyConfiguration::custom<R: millipede_core::proxy::ProxyResolver>(R) -> Self
+pub async fn millipede_core::proxy::ProxyConfiguration::new_proxy_info(&self, millipede_core::proxy::ProxyResolveContext<'_>) -> core::result::Result<core::option::Option<millipede_core::proxy::ProxyInfo>, millipede_core::errors::CrawlError>
+pub async fn millipede_core::proxy::ProxyConfiguration::new_url(&self, millipede_core::proxy::ProxyResolveContext<'_>) -> core::result::Result<core::option::Option<url::Url>, millipede_core::errors::CrawlError>
+pub fn millipede_core::proxy::ProxyConfiguration::report_blocked(&self, &url::Url)
+pub fn millipede_core::proxy::ProxyConfiguration::report_success(&self, &url::Url)
+pub fn millipede_core::proxy::ProxyConfiguration::rotating(impl core::iter::traits::collect::IntoIterator<Item = url::Url>, millipede_core::proxy::RotationStrategy) -> Self
+pub fn millipede_core::proxy::ProxyConfiguration::round_robin(impl core::iter::traits::collect::IntoIterator<Item = url::Url>) -> Self
+pub fn millipede_core::proxy::ProxyConfiguration::tiered(alloc::vec::Vec<alloc::vec::Vec<core::option::Option<url::Url>>>) -> Self
+pub fn millipede_core::proxy::ProxyConfiguration::tiered_with_probe_interval(alloc::vec::Vec<alloc::vec::Vec<core::option::Option<url::Url>>>, u32) -> Self
+impl core::fmt::Debug for millipede_core::proxy::ProxyConfiguration
+pub fn millipede_core::proxy::ProxyConfiguration::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl !core::marker::Freeze for millipede_core::proxy::ProxyConfiguration
+impl core::marker::Send for millipede_core::proxy::ProxyConfiguration
+impl core::marker::Sync for millipede_core::proxy::ProxyConfiguration
+impl core::marker::Unpin for millipede_core::proxy::ProxyConfiguration
+impl core::marker::UnsafeUnpin for millipede_core::proxy::ProxyConfiguration
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::proxy::ProxyConfiguration
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::proxy::ProxyConfiguration
+#[non_exhaustive] pub struct millipede_core::proxy::ProxyInfo
+pub millipede_core::proxy::ProxyInfo::hostname: alloc::string::String
+pub millipede_core::proxy::ProxyInfo::password: core::option::Option<alloc::string::String>
+pub millipede_core::proxy::ProxyInfo::port: u16
+pub millipede_core::proxy::ProxyInfo::session_id: core::option::Option<millipede_core::session::SessionId>
+pub millipede_core::proxy::ProxyInfo::tier: core::option::Option<u8>
+pub millipede_core::proxy::ProxyInfo::url: url::Url
+pub millipede_core::proxy::ProxyInfo::username: core::option::Option<alloc::string::String>
+impl millipede_core::proxy::ProxyInfo
+pub fn millipede_core::proxy::ProxyInfo::from_url(url::Url) -> Self
+pub fn millipede_core::proxy::ProxyInfo::with_session_id(self, millipede_core::session::SessionId) -> Self
+pub fn millipede_core::proxy::ProxyInfo::with_tier(self, u8) -> Self
+impl core::clone::Clone for millipede_core::proxy::ProxyInfo
+pub fn millipede_core::proxy::ProxyInfo::clone(&self) -> millipede_core::proxy::ProxyInfo
+impl core::cmp::PartialEq for millipede_core::proxy::ProxyInfo
+pub fn millipede_core::proxy::ProxyInfo::eq(&self, &millipede_core::proxy::ProxyInfo) -> bool
+impl core::fmt::Debug for millipede_core::proxy::ProxyInfo
+pub fn millipede_core::proxy::ProxyInfo::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_core::proxy::ProxyInfo
+impl core::marker::Freeze for millipede_core::proxy::ProxyInfo
+impl core::marker::Send for millipede_core::proxy::ProxyInfo
+impl core::marker::Sync for millipede_core::proxy::ProxyInfo
+impl core::marker::Unpin for millipede_core::proxy::ProxyInfo
+impl core::marker::UnsafeUnpin for millipede_core::proxy::ProxyInfo
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::proxy::ProxyInfo
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::proxy::ProxyInfo
+pub struct millipede_core::proxy::ProxyResolveContext<'a>
+pub millipede_core::proxy::ProxyResolveContext::attempt: u32
+pub millipede_core::proxy::ProxyResolveContext::request: core::option::Option<&'a millipede_core::request::Request>
+pub millipede_core::proxy::ProxyResolveContext::session_id: core::option::Option<&'a millipede_core::session::SessionId>
+impl<'a> millipede_core::proxy::ProxyResolveContext<'a>
+pub fn millipede_core::proxy::ProxyResolveContext<'a>::attempt(self, u32) -> Self
+pub fn millipede_core::proxy::ProxyResolveContext<'a>::new() -> Self
+pub fn millipede_core::proxy::ProxyResolveContext<'a>::request(self, &'a millipede_core::request::Request) -> Self
+pub fn millipede_core::proxy::ProxyResolveContext<'a>::session_id(self, &'a millipede_core::session::SessionId) -> Self
+impl<'a> core::clone::Clone for millipede_core::proxy::ProxyResolveContext<'a>
+pub fn millipede_core::proxy::ProxyResolveContext<'a>::clone(&self) -> millipede_core::proxy::ProxyResolveContext<'a>
+impl<'a> core::default::Default for millipede_core::proxy::ProxyResolveContext<'a>
+pub fn millipede_core::proxy::ProxyResolveContext<'a>::default() -> millipede_core::proxy::ProxyResolveContext<'a>
+impl<'a> core::fmt::Debug for millipede_core::proxy::ProxyResolveContext<'a>
+pub fn millipede_core::proxy::ProxyResolveContext<'a>::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl<'a> core::marker::Copy for millipede_core::proxy::ProxyResolveContext<'a>
+impl<'a> core::marker::Freeze for millipede_core::proxy::ProxyResolveContext<'a>
+impl<'a> core::marker::Send for millipede_core::proxy::ProxyResolveContext<'a>
+impl<'a> core::marker::Sync for millipede_core::proxy::ProxyResolveContext<'a>
+impl<'a> core::marker::Unpin for millipede_core::proxy::ProxyResolveContext<'a>
+impl<'a> core::marker::UnsafeUnpin for millipede_core::proxy::ProxyResolveContext<'a>
+impl<'a> core::panic::unwind_safe::RefUnwindSafe for millipede_core::proxy::ProxyResolveContext<'a>
+impl<'a> core::panic::unwind_safe::UnwindSafe for millipede_core::proxy::ProxyResolveContext<'a>
+pub struct millipede_core::proxy::ProxyRouteContext<'a>
+pub millipede_core::proxy::ProxyRouteContext::attempt: u32
+pub millipede_core::proxy::ProxyRouteContext::previous_profile_key: core::option::Option<&'a str>
+pub millipede_core::proxy::ProxyRouteContext::request: &'a millipede_core::request::Request
+impl<'a> millipede_core::proxy::ProxyRouteContext<'a>
+pub fn millipede_core::proxy::ProxyRouteContext<'a>::new(&'a millipede_core::request::Request, u32) -> Self
+pub fn millipede_core::proxy::ProxyRouteContext<'a>::previous_profile_key(self, &'a str) -> Self
+impl<'a> core::marker::Freeze for millipede_core::proxy::ProxyRouteContext<'a>
+impl<'a> core::marker::Send for millipede_core::proxy::ProxyRouteContext<'a>
+impl<'a> core::marker::Sync for millipede_core::proxy::ProxyRouteContext<'a>
+impl<'a> core::marker::Unpin for millipede_core::proxy::ProxyRouteContext<'a>
+impl<'a> core::marker::UnsafeUnpin for millipede_core::proxy::ProxyRouteContext<'a>
+impl<'a> core::panic::unwind_safe::RefUnwindSafe for millipede_core::proxy::ProxyRouteContext<'a>
+impl<'a> core::panic::unwind_safe::UnwindSafe for millipede_core::proxy::ProxyRouteContext<'a>
+pub trait millipede_core::proxy::ProxyResolver: core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_core::proxy::ProxyResolver::resolve<'life0, 'life1, 'async_trait>(&'life0 self, millipede_core::proxy::ProxyResolveContext<'life1>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<core::option::Option<url::Url>, millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub trait millipede_core::proxy::ProxyStrategy: core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_core::proxy::ProxyStrategy::route(&self, &millipede_core::proxy::ProxyRouteContext<'_>) -> millipede_core::proxy::ProxyKind
 pub mod millipede_core::request
 pub use millipede_core::request::HeaderMap
 pub use millipede_core::request::Method
@@ -2217,6 +2653,124 @@ pub trait millipede_core::router::HasRequest
 pub fn millipede_core::router::HasRequest::request(&self) -> &millipede_core::request::Request
 impl millipede_core::router::HasRequest for millipede_core::crawler::BasicContext
 pub fn millipede_core::crawler::BasicContext::request(&self) -> &millipede_core::request::Request
+pub mod millipede_core::session
+pub struct millipede_core::session::Session
+impl millipede_core::session::Session
+pub fn millipede_core::session::Session::cookie_jar(&self) -> &alloc::sync::Arc<millipede_core::cookies::CookieJar>
+pub async fn millipede_core::session::Session::error_score(&self) -> f32
+pub fn millipede_core::session::Session::id(&self) -> &millipede_core::session::SessionId
+pub async fn millipede_core::session::Session::is_blocked(&self) -> bool
+pub fn millipede_core::session::Session::is_expired(&self) -> bool
+pub async fn millipede_core::session::Session::is_retired(&self) -> bool
+pub async fn millipede_core::session::Session::is_usable(&self) -> bool
+pub async fn millipede_core::session::Session::mark_bad(&self)
+pub async fn millipede_core::session::Session::mark_good(&self)
+pub fn millipede_core::session::Session::new(millipede_core::session::SessionConfig) -> Self
+pub async fn millipede_core::session::Session::record_usage(&self)
+pub async fn millipede_core::session::Session::retire(&self)
+pub fn millipede_core::session::Session::set_cookies_from_response(&self, &millipede_core::http_client::HttpResponse)
+pub async fn millipede_core::session::Session::update_user_data(&self, impl core::ops::function::FnOnce(&mut millipede_core::request::UserData))
+pub async fn millipede_core::session::Session::usage_count(&self) -> u32
+pub async fn millipede_core::session::Session::with_user_data<R>(&self, impl core::ops::function::FnOnce(&millipede_core::request::UserData) -> R) -> R
+impl core::fmt::Debug for millipede_core::session::Session
+pub fn millipede_core::session::Session::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl !core::marker::Freeze for millipede_core::session::Session
+impl core::marker::Send for millipede_core::session::Session
+impl core::marker::Sync for millipede_core::session::Session
+impl core::marker::Unpin for millipede_core::session::Session
+impl core::marker::UnsafeUnpin for millipede_core::session::Session
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::session::Session
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::session::Session
+#[non_exhaustive] pub struct millipede_core::session::SessionConfig
+pub millipede_core::session::SessionConfig::error_score_decrement_scaled: u32
+pub millipede_core::session::SessionConfig::max_age: core::time::Duration
+pub millipede_core::session::SessionConfig::max_error_score_scaled: u32
+pub millipede_core::session::SessionConfig::max_usage_count: u32
+impl millipede_core::session::SessionConfig
+pub fn millipede_core::session::SessionConfig::with_error_score_decrement_scaled(self, u32) -> Self
+pub fn millipede_core::session::SessionConfig::with_max_age(self, core::time::Duration) -> Self
+pub fn millipede_core::session::SessionConfig::with_max_error_score_scaled(self, u32) -> Self
+pub fn millipede_core::session::SessionConfig::with_max_usage_count(self, u32) -> Self
+impl core::clone::Clone for millipede_core::session::SessionConfig
+pub fn millipede_core::session::SessionConfig::clone(&self) -> millipede_core::session::SessionConfig
+impl core::default::Default for millipede_core::session::SessionConfig
+pub fn millipede_core::session::SessionConfig::default() -> Self
+impl core::fmt::Debug for millipede_core::session::SessionConfig
+pub fn millipede_core::session::SessionConfig::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::session::SessionConfig
+impl core::marker::Send for millipede_core::session::SessionConfig
+impl core::marker::Sync for millipede_core::session::SessionConfig
+impl core::marker::Unpin for millipede_core::session::SessionConfig
+impl core::marker::UnsafeUnpin for millipede_core::session::SessionConfig
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::session::SessionConfig
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::session::SessionConfig
+pub struct millipede_core::session::SessionId(_)
+impl millipede_core::session::SessionId
+pub fn millipede_core::session::SessionId::as_str(&self) -> &str
+pub fn millipede_core::session::SessionId::generate() -> Self
+impl core::clone::Clone for millipede_core::session::SessionId
+pub fn millipede_core::session::SessionId::clone(&self) -> millipede_core::session::SessionId
+impl core::cmp::Eq for millipede_core::session::SessionId
+impl core::cmp::PartialEq for millipede_core::session::SessionId
+pub fn millipede_core::session::SessionId::eq(&self, &millipede_core::session::SessionId) -> bool
+impl core::convert::From<alloc::string::String> for millipede_core::session::SessionId
+pub fn millipede_core::session::SessionId::from(alloc::string::String) -> Self
+impl core::fmt::Debug for millipede_core::session::SessionId
+pub fn millipede_core::session::SessionId::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::session::SessionId
+pub fn millipede_core::session::SessionId::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for millipede_core::session::SessionId
+pub fn millipede_core::session::SessionId::hash<__H: core::hash::Hasher>(&self, &mut __H)
+impl core::marker::StructuralPartialEq for millipede_core::session::SessionId
+impl serde_core::ser::Serialize for millipede_core::session::SessionId
+pub fn millipede_core::session::SessionId::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl<'de> serde_core::de::Deserialize<'de> for millipede_core::session::SessionId
+pub fn millipede_core::session::SessionId::deserialize<__D>(__D) -> core::result::Result<Self, <__D as serde_core::de::Deserializer>::Error> where __D: serde_core::de::Deserializer<'de>
+impl core::marker::Freeze for millipede_core::session::SessionId
+impl core::marker::Send for millipede_core::session::SessionId
+impl core::marker::Sync for millipede_core::session::SessionId
+impl core::marker::Unpin for millipede_core::session::SessionId
+impl core::marker::UnsafeUnpin for millipede_core::session::SessionId
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::session::SessionId
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::session::SessionId
+pub struct millipede_core::session::SessionPool
+impl millipede_core::session::SessionPool
+pub fn millipede_core::session::SessionPool::attach_persistence(&self, alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>)
+pub async fn millipede_core::session::SessionPool::get_session(&self, core::option::Option<&millipede_core::session::SessionId>) -> alloc::sync::Arc<millipede_core::session::Session>
+pub fn millipede_core::session::SessionPool::new(millipede_core::session::SessionPoolOptions) -> Self
+pub async fn millipede_core::session::SessionPool::persist(&self) -> core::result::Result<(), millipede_core::errors::CrawlError>
+pub async fn millipede_core::session::SessionPool::restore(&self) -> core::result::Result<(), millipede_core::errors::CrawlError>
+pub async fn millipede_core::session::SessionPool::retire_session(&self, &millipede_core::session::SessionId)
+pub async fn millipede_core::session::SessionPool::session_count(&self) -> usize
+impl !core::marker::Freeze for millipede_core::session::SessionPool
+impl core::marker::Send for millipede_core::session::SessionPool
+impl core::marker::Sync for millipede_core::session::SessionPool
+impl core::marker::Unpin for millipede_core::session::SessionPool
+impl core::marker::UnsafeUnpin for millipede_core::session::SessionPool
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::session::SessionPool
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::session::SessionPool
+#[non_exhaustive] pub struct millipede_core::session::SessionPoolOptions
+pub millipede_core::session::SessionPoolOptions::max_pool_size: usize
+pub millipede_core::session::SessionPoolOptions::persist_state_key: alloc::string::String
+pub millipede_core::session::SessionPoolOptions::session_config: millipede_core::session::SessionConfig
+impl millipede_core::session::SessionPoolOptions
+pub fn millipede_core::session::SessionPoolOptions::with_max_pool_size(self, usize) -> Self
+pub fn millipede_core::session::SessionPoolOptions::with_persist_state_key(self, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_core::session::SessionPoolOptions::with_session_config(self, millipede_core::session::SessionConfig) -> Self
+impl core::clone::Clone for millipede_core::session::SessionPoolOptions
+pub fn millipede_core::session::SessionPoolOptions::clone(&self) -> millipede_core::session::SessionPoolOptions
+impl core::default::Default for millipede_core::session::SessionPoolOptions
+pub fn millipede_core::session::SessionPoolOptions::default() -> Self
+impl core::fmt::Debug for millipede_core::session::SessionPoolOptions
+pub fn millipede_core::session::SessionPoolOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::session::SessionPoolOptions
+impl core::marker::Send for millipede_core::session::SessionPoolOptions
+impl core::marker::Sync for millipede_core::session::SessionPoolOptions
+impl core::marker::Unpin for millipede_core::session::SessionPoolOptions
+impl core::marker::UnsafeUnpin for millipede_core::session::SessionPoolOptions
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::session::SessionPoolOptions
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::session::SessionPoolOptions
+pub const millipede_core::session::SESSION_POOL_PERSIST_KEY: &str
 pub mod millipede_core::statistics
 pub struct millipede_core::statistics::FinalStatistics
 pub millipede_core::statistics::FinalStatistics::crawler_runtime: core::time::Duration
@@ -2589,6 +3143,26 @@ impl core::marker::Unpin for millipede_core::storage::ReclaimOptions
 impl core::marker::UnsafeUnpin for millipede_core::storage::ReclaimOptions
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::ReclaimOptions
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::ReclaimOptions
+pub struct millipede_core::storage::StorageHandle
+impl millipede_core::storage::StorageHandle
+pub fn millipede_core::storage::StorageHandle::client(&self) -> &alloc::sync::Arc<dyn millipede_core::storage::StorageClient>
+pub fn millipede_core::storage::StorageHandle::dataset(&self) -> &alloc::sync::Arc<dyn millipede_core::storage::Dataset>
+pub async fn millipede_core::storage::StorageHandle::dataset_named(&self, &str) -> millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::Dataset>>
+pub fn millipede_core::storage::StorageHandle::key_value_store(&self) -> &alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>
+pub async fn millipede_core::storage::StorageHandle::kvs_named(&self, &str) -> millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>>
+pub fn millipede_core::storage::StorageHandle::new(alloc::sync::Arc<dyn millipede_core::storage::StorageClient>, alloc::sync::Arc<dyn millipede_core::storage::Dataset>, alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>, alloc::sync::Arc<dyn millipede_core::storage::RequestQueue>) -> Self
+pub fn millipede_core::storage::StorageHandle::request_queue(&self) -> &alloc::sync::Arc<dyn millipede_core::storage::RequestQueue>
+impl core::clone::Clone for millipede_core::storage::StorageHandle
+pub fn millipede_core::storage::StorageHandle::clone(&self) -> millipede_core::storage::StorageHandle
+impl core::fmt::Debug for millipede_core::storage::StorageHandle
+pub fn millipede_core::storage::StorageHandle::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::storage::StorageHandle
+impl core::marker::Send for millipede_core::storage::StorageHandle
+impl core::marker::Sync for millipede_core::storage::StorageHandle
+impl core::marker::Unpin for millipede_core::storage::StorageHandle
+impl core::marker::UnsafeUnpin for millipede_core::storage::StorageHandle
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::StorageHandle
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::storage::StorageHandle
 pub trait millipede_core::storage::Dataset: core::marker::Send + core::marker::Sync
 pub fn millipede_core::storage::Dataset::export_csv<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 std::path::Path) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
 pub fn millipede_core::storage::Dataset::export_json<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 std::path::Path) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
