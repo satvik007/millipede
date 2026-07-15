@@ -1,6 +1,12 @@
 #![doc = include_str!("../README.md")]
 
-/// Commonly used items from this crate.
-///
-/// Empty until this crate's first real types land (see `docs/ROADMAP.md`).
-pub mod prelude {}
+mod client;
+mod coalesce;
+
+pub use client::{ReqwestClient, ReqwestClientOptions};
+pub use coalesce::CoalescingClient;
+
+/// Commonly used HTTP client types.
+pub mod prelude {
+    pub use crate::{CoalescingClient, ReqwestClient, ReqwestClientOptions};
+}

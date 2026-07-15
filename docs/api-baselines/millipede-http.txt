@@ -1,2 +1,110 @@
 pub mod millipede_http
 pub mod millipede_http::prelude
+pub struct millipede_http::prelude::CoalescingClient
+impl millipede_http::CoalescingClient
+pub fn millipede_http::CoalescingClient::new(alloc::sync::Arc<dyn millipede_core::http_client::HttpClient>) -> Self
+impl core::fmt::Debug for millipede_http::CoalescingClient
+pub fn millipede_http::CoalescingClient::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl millipede_core::http_client::HttpClient for millipede_http::CoalescingClient
+pub fn millipede_http::CoalescingClient::send<'life0, 'async_trait>(&'life0 self, millipede_core::http_client::HttpRequest) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<millipede_core::http_client::HttpResponse, millipede_core::http_client::HttpClientError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_http::CoalescingClient::stream<'life0, 'async_trait>(&'life0 self, millipede_core::http_client::HttpRequest) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<millipede_core::http_client::StreamingResponse, millipede_core::http_client::HttpClientError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+impl !core::marker::Freeze for millipede_http::CoalescingClient
+impl core::marker::Send for millipede_http::CoalescingClient
+impl core::marker::Sync for millipede_http::CoalescingClient
+impl core::marker::Unpin for millipede_http::CoalescingClient
+impl core::marker::UnsafeUnpin for millipede_http::CoalescingClient
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_http::CoalescingClient
+impl !core::panic::unwind_safe::UnwindSafe for millipede_http::CoalescingClient
+pub struct millipede_http::prelude::ReqwestClient
+impl millipede_http::ReqwestClient
+pub fn millipede_http::ReqwestClient::new() -> core::result::Result<Self, millipede_core::http_client::HttpClientError>
+pub fn millipede_http::ReqwestClient::with_options(millipede_http::ReqwestClientOptions) -> core::result::Result<Self, millipede_core::http_client::HttpClientError>
+impl core::fmt::Debug for millipede_http::ReqwestClient
+pub fn millipede_http::ReqwestClient::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl millipede_core::http_client::HttpClient for millipede_http::ReqwestClient
+pub fn millipede_http::ReqwestClient::send<'life0, 'async_trait>(&'life0 self, millipede_core::http_client::HttpRequest) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<millipede_core::http_client::HttpResponse, millipede_core::http_client::HttpClientError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_http::ReqwestClient::stream<'life0, 'async_trait>(&'life0 self, millipede_core::http_client::HttpRequest) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<millipede_core::http_client::StreamingResponse, millipede_core::http_client::HttpClientError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+impl !core::marker::Freeze for millipede_http::ReqwestClient
+impl core::marker::Send for millipede_http::ReqwestClient
+impl core::marker::Sync for millipede_http::ReqwestClient
+impl core::marker::Unpin for millipede_http::ReqwestClient
+impl core::marker::UnsafeUnpin for millipede_http::ReqwestClient
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_http::ReqwestClient
+impl core::panic::unwind_safe::UnwindSafe for millipede_http::ReqwestClient
+#[non_exhaustive] pub struct millipede_http::prelude::ReqwestClientOptions
+pub millipede_http::prelude::ReqwestClientOptions::connect_timeout: core::time::Duration
+pub millipede_http::prelude::ReqwestClientOptions::default_timeout: core::time::Duration
+pub millipede_http::prelude::ReqwestClientOptions::default_user_agent: core::option::Option<alloc::string::String>
+pub millipede_http::prelude::ReqwestClientOptions::max_cached_clients: usize
+impl millipede_http::ReqwestClientOptions
+pub fn millipede_http::ReqwestClientOptions::with_connect_timeout(self, core::time::Duration) -> Self
+pub fn millipede_http::ReqwestClientOptions::with_default_timeout(self, core::time::Duration) -> Self
+pub fn millipede_http::ReqwestClientOptions::with_default_user_agent(self, core::option::Option<alloc::string::String>) -> Self
+pub fn millipede_http::ReqwestClientOptions::with_max_cached_clients(self, usize) -> Self
+impl core::clone::Clone for millipede_http::ReqwestClientOptions
+pub fn millipede_http::ReqwestClientOptions::clone(&self) -> millipede_http::ReqwestClientOptions
+impl core::default::Default for millipede_http::ReqwestClientOptions
+pub fn millipede_http::ReqwestClientOptions::default() -> Self
+impl core::fmt::Debug for millipede_http::ReqwestClientOptions
+pub fn millipede_http::ReqwestClientOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_http::ReqwestClientOptions
+impl core::marker::Send for millipede_http::ReqwestClientOptions
+impl core::marker::Sync for millipede_http::ReqwestClientOptions
+impl core::marker::Unpin for millipede_http::ReqwestClientOptions
+impl core::marker::UnsafeUnpin for millipede_http::ReqwestClientOptions
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_http::ReqwestClientOptions
+impl core::panic::unwind_safe::UnwindSafe for millipede_http::ReqwestClientOptions
+pub struct millipede_http::CoalescingClient
+impl millipede_http::CoalescingClient
+pub fn millipede_http::CoalescingClient::new(alloc::sync::Arc<dyn millipede_core::http_client::HttpClient>) -> Self
+impl core::fmt::Debug for millipede_http::CoalescingClient
+pub fn millipede_http::CoalescingClient::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl millipede_core::http_client::HttpClient for millipede_http::CoalescingClient
+pub fn millipede_http::CoalescingClient::send<'life0, 'async_trait>(&'life0 self, millipede_core::http_client::HttpRequest) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<millipede_core::http_client::HttpResponse, millipede_core::http_client::HttpClientError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_http::CoalescingClient::stream<'life0, 'async_trait>(&'life0 self, millipede_core::http_client::HttpRequest) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<millipede_core::http_client::StreamingResponse, millipede_core::http_client::HttpClientError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+impl !core::marker::Freeze for millipede_http::CoalescingClient
+impl core::marker::Send for millipede_http::CoalescingClient
+impl core::marker::Sync for millipede_http::CoalescingClient
+impl core::marker::Unpin for millipede_http::CoalescingClient
+impl core::marker::UnsafeUnpin for millipede_http::CoalescingClient
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_http::CoalescingClient
+impl !core::panic::unwind_safe::UnwindSafe for millipede_http::CoalescingClient
+pub struct millipede_http::ReqwestClient
+impl millipede_http::ReqwestClient
+pub fn millipede_http::ReqwestClient::new() -> core::result::Result<Self, millipede_core::http_client::HttpClientError>
+pub fn millipede_http::ReqwestClient::with_options(millipede_http::ReqwestClientOptions) -> core::result::Result<Self, millipede_core::http_client::HttpClientError>
+impl core::fmt::Debug for millipede_http::ReqwestClient
+pub fn millipede_http::ReqwestClient::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl millipede_core::http_client::HttpClient for millipede_http::ReqwestClient
+pub fn millipede_http::ReqwestClient::send<'life0, 'async_trait>(&'life0 self, millipede_core::http_client::HttpRequest) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<millipede_core::http_client::HttpResponse, millipede_core::http_client::HttpClientError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_http::ReqwestClient::stream<'life0, 'async_trait>(&'life0 self, millipede_core::http_client::HttpRequest) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<millipede_core::http_client::StreamingResponse, millipede_core::http_client::HttpClientError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+impl !core::marker::Freeze for millipede_http::ReqwestClient
+impl core::marker::Send for millipede_http::ReqwestClient
+impl core::marker::Sync for millipede_http::ReqwestClient
+impl core::marker::Unpin for millipede_http::ReqwestClient
+impl core::marker::UnsafeUnpin for millipede_http::ReqwestClient
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_http::ReqwestClient
+impl core::panic::unwind_safe::UnwindSafe for millipede_http::ReqwestClient
+#[non_exhaustive] pub struct millipede_http::ReqwestClientOptions
+pub millipede_http::ReqwestClientOptions::connect_timeout: core::time::Duration
+pub millipede_http::ReqwestClientOptions::default_timeout: core::time::Duration
+pub millipede_http::ReqwestClientOptions::default_user_agent: core::option::Option<alloc::string::String>
+pub millipede_http::ReqwestClientOptions::max_cached_clients: usize
+impl millipede_http::ReqwestClientOptions
+pub fn millipede_http::ReqwestClientOptions::with_connect_timeout(self, core::time::Duration) -> Self
+pub fn millipede_http::ReqwestClientOptions::with_default_timeout(self, core::time::Duration) -> Self
+pub fn millipede_http::ReqwestClientOptions::with_default_user_agent(self, core::option::Option<alloc::string::String>) -> Self
+pub fn millipede_http::ReqwestClientOptions::with_max_cached_clients(self, usize) -> Self
+impl core::clone::Clone for millipede_http::ReqwestClientOptions
+pub fn millipede_http::ReqwestClientOptions::clone(&self) -> millipede_http::ReqwestClientOptions
+impl core::default::Default for millipede_http::ReqwestClientOptions
+pub fn millipede_http::ReqwestClientOptions::default() -> Self
+impl core::fmt::Debug for millipede_http::ReqwestClientOptions
+pub fn millipede_http::ReqwestClientOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_http::ReqwestClientOptions
+impl core::marker::Send for millipede_http::ReqwestClientOptions
+impl core::marker::Sync for millipede_http::ReqwestClientOptions
+impl core::marker::Unpin for millipede_http::ReqwestClientOptions
+impl core::marker::UnsafeUnpin for millipede_http::ReqwestClientOptions
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_http::ReqwestClientOptions
+impl core::panic::unwind_safe::UnwindSafe for millipede_http::ReqwestClientOptions
