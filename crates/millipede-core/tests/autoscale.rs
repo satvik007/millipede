@@ -1,8 +1,10 @@
 //! Public autoscaling API integration tests.
 
 use millipede_core::autoscale::{
-    AimdController, LoadSignal, LoadSnapshot, ScaleDecision, Snapshotter, SnapshotterOptions,
-    SystemStatus, SystemStatusOptions,
+    AimdController, ClientLoadSignal, CpuLoadSignal, CpuLoadSignalOptions, LoadSignal,
+    LoadSnapshot, MemoryLoadSignal, MemoryLoadSignalOptions, ScaleDecision, Snapshotter,
+    SnapshotterOptions, SystemStatus, SystemStatusOptions, TokioRuntimeLoadSignal,
+    TokioRuntimeLoadSignalOptions,
 };
 use proptest::prelude::*;
 use std::{
@@ -312,4 +314,84 @@ async fn system_status_ordering_is_monotonic_with_signal_direction() {
     };
     assert!(result_for(down) <= result_for(hold));
     assert!(result_for(hold) <= result_for(up));
+}
+
+#[tokio::test(start_paused = true)]
+async fn client_signal_drives_scale_down_then_recovers() {
+    let signal = Arc::new(ClientLoadSignal::new());
+    let handle = signal.handle();
+    let snapshotter = Snapshotter::new(SnapshotterOptions {
+        signals: vec![signal],
+        window: Duration::from_secs(5),
+    });
+    let status = SystemStatus::new(SystemStatusOptions { min_samples: 1 });
+
+    handle.record_rate_limited();
+    assert_eq!(
+        status.evaluate(&snapshotter, 0.9, Instant::now()),
+        ScaleDecision::ScaleDown
+    );
+
+    tokio::time::advance(Duration::from_secs(6)).await;
+    assert_eq!(
+        status.evaluate(&snapshotter, 0.9, Instant::now()),
+        ScaleDecision::Hold
+    );
+}
+
+#[tokio::test(start_paused = true)]
+async fn cpu_and_memory_signals_lifecycle() {
+    let cpu = CpuLoadSignal::new(CpuLoadSignalOptions {
+        sample_interval: Duration::ZERO,
+        ..CpuLoadSignalOptions::default()
+    });
+    let memory = MemoryLoadSignal::new(MemoryLoadSignalOptions {
+        sample_interval: Duration::ZERO,
+        ..MemoryLoadSignalOptions::default()
+    });
+
+    cpu.start().await.unwrap();
+    memory.start().await.unwrap();
+    tokio::task::yield_now().await;
+    tokio::time::advance(Duration::from_secs(1)).await;
+    for _ in 0..3 {
+        tokio::task::yield_now().await;
+    }
+
+    assert!(!cpu.sample(Duration::from_secs(60)).is_empty());
+    assert!(!memory.sample(Duration::from_secs(60)).is_empty());
+    tokio::time::timeout(Duration::from_secs(5), cpu.stop())
+        .await
+        .unwrap()
+        .unwrap();
+    tokio::time::timeout(Duration::from_secs(5), memory.stop())
+        .await
+        .unwrap()
+        .unwrap();
+    cpu.stop().await.unwrap();
+    memory.stop().await.unwrap();
+
+    // Cancellation tokens are one-shot, so starting after stop is an intentional no-op.
+    cpu.start().await.unwrap();
+    memory.start().await.unwrap();
+}
+
+#[tokio::test(start_paused = true)]
+async fn tokio_runtime_signal_healthy_under_paused_clock() {
+    let signal = TokioRuntimeLoadSignal::new(TokioRuntimeLoadSignalOptions {
+        max_lag: Duration::from_millis(50),
+        sample_interval: Duration::ZERO,
+    });
+    assert!(signal.overload_threshold().is_finite());
+    signal.start().await.unwrap();
+    tokio::task::yield_now().await;
+    for _ in 0..4 {
+        tokio::time::advance(Duration::from_millis(1)).await;
+        tokio::task::yield_now().await;
+    }
+
+    let samples = signal.sample(Duration::from_secs(60));
+    assert!(!samples.is_empty());
+    assert!(samples.iter().all(|sample| !sample.overloaded));
+    signal.stop().await.unwrap();
 }

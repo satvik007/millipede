@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use std::{collections::HashMap, sync::Mutex, time::Duration};
 use tokio::time::Instant;
 
@@ -105,7 +103,11 @@ impl DomainLimiter {
                 .unwrap_or(Duration::MAX)
                 .min(Duration::from_secs(5 * 60));
             state.penalty = penalty;
-            let baseline = state.next_allowed.unwrap_or(now).max(now);
+            let baseline = state
+                .last_reserved
+                .map(|last_reserved| last_reserved + self.same_domain_delay.max(state.floor))
+                .unwrap_or_else(|| state.next_allowed.unwrap_or(now))
+                .max(now);
             state.next_allowed = Some(baseline + penalty);
         } else if status.is_some() {
             state.consecutive_429s = 0;
@@ -232,6 +234,35 @@ mod tests {
     }
 
     #[tokio::test(start_paused = true)]
+    async fn domain_limiter_replaces_reserved_429_penalty_when_it_increases() {
+        let base = Duration::from_millis(200);
+        let limiter = DomainLimiter::new(base);
+        let now = Instant::now();
+        assert_eq!(limiter.reserve_slot("example.com", now), Duration::ZERO);
+        limiter.note_response(
+            "example.com",
+            Some(http::StatusCode::TOO_MANY_REQUESTS),
+            None,
+            now,
+        );
+
+        let wait = limiter.reserve_slot("example.com", now);
+        tokio::time::advance(wait).await;
+        let now = Instant::now();
+        limiter.note_response(
+            "example.com",
+            Some(http::StatusCode::TOO_MANY_REQUESTS),
+            None,
+            now,
+        );
+
+        assert_eq!(
+            limiter.reserve_slot("example.com", now),
+            base + Duration::from_secs(2)
+        );
+    }
+
+    #[tokio::test(start_paused = true)]
     async fn domain_limiter_set_delay_floor_applies_to_the_next_reservation() {
         let limiter = DomainLimiter::new(Duration::ZERO);
         let now = Instant::now();
@@ -291,6 +322,40 @@ mod tests {
         assert_eq!(
             states["example.com"].next_allowed.unwrap() - next_allowed,
             Duration::from_secs(5 * 60)
+        );
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn unrelated_host_unaffected_by_sustained_429_storm() {
+        let limiter = DomainLimiter::new(Duration::from_millis(50));
+        let mut waits = Vec::new();
+
+        for _ in 0..50 {
+            let now = Instant::now();
+            limiter.note_response(
+                "storm.example",
+                Some(http::StatusCode::TOO_MANY_REQUESTS),
+                None,
+                now,
+            );
+            waits.push(limiter.reserve_slot("calm.example", now));
+            tokio::time::advance(Duration::from_millis(60)).await;
+        }
+
+        assert!(waits.iter().all(|wait| *wait <= Duration::from_millis(10)));
+    }
+
+    #[test]
+    fn task_and_domain_limiters_share_no_state() {
+        let now = Instant::now();
+        let task_limiter = TaskRateLimiter::new(1);
+        assert_eq!(task_limiter.try_acquire(now), Ok(()));
+        assert!(task_limiter.try_acquire(now).is_err());
+
+        let domain_limiter = DomainLimiter::new(Duration::ZERO);
+        assert_eq!(
+            domain_limiter.reserve_slot("any.example", now),
+            Duration::ZERO
         );
     }
 }

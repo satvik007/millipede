@@ -68,9 +68,10 @@ mod util;
 /// Commonly used items from this crate.
 pub mod prelude {
     pub use crate::autoscale::{
-        AimdController, AutoscaleMode, AutoscaledPool, AutoscaledPoolOptions, LoadSignal,
-        LoadSnapshot, ScaleDecision, Snapshotter, SnapshotterOptions, SystemStatus,
-        SystemStatusOptions,
+        AimdController, AutoscaleMode, AutoscaledPool, AutoscaledPoolOptions, ClientLoadSignal,
+        ClientLoadSignalHandle, CpuLoadSignal, CpuLoadSignalOptions, LoadSignal, LoadSnapshot,
+        MemoryLoadSignal, MemoryLoadSignalOptions, ScaleDecision, Snapshotter, SnapshotterOptions,
+        SystemStatus, SystemStatusOptions, TokioRuntimeLoadSignal, TokioRuntimeLoadSignalOptions,
     };
     pub use crate::config::{Configuration, ConfigurationBuilder, LogLevel};
     pub use crate::cookies::{CookieJar, CookieJarError};

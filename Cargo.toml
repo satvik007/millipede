@@ -29,6 +29,7 @@ wiremock = "=0.6.4"
 console-subscriber = "0.4"
 proptest = "1"
 tempfile = "3"
+sysinfo = { version = "0.36", default-features = false, features = ["system"] }
 
 [workspace.lints.rust]
 unsafe_code = "deny"

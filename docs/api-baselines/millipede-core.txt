@@ -93,6 +93,72 @@ impl core::marker::Unpin for millipede_core::autoscale::AutoscaledPoolOptions
 impl core::marker::UnsafeUnpin for millipede_core::autoscale::AutoscaledPoolOptions
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::AutoscaledPoolOptions
 impl !core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::AutoscaledPoolOptions
+pub struct millipede_core::autoscale::ClientLoadSignal
+impl millipede_core::autoscale::ClientLoadSignal
+pub fn millipede_core::autoscale::ClientLoadSignal::handle(&self) -> millipede_core::autoscale::ClientLoadSignalHandle
+pub fn millipede_core::autoscale::ClientLoadSignal::new() -> Self
+impl core::default::Default for millipede_core::autoscale::ClientLoadSignal
+pub fn millipede_core::autoscale::ClientLoadSignal::default() -> Self
+impl millipede_core::autoscale::LoadSignal for millipede_core::autoscale::ClientLoadSignal
+pub fn millipede_core::autoscale::ClientLoadSignal::name(&self) -> &str
+pub fn millipede_core::autoscale::ClientLoadSignal::overload_threshold(&self) -> f32
+pub fn millipede_core::autoscale::ClientLoadSignal::sample(&self, core::time::Duration) -> alloc::vec::Vec<millipede_core::autoscale::LoadSnapshot>
+pub fn millipede_core::autoscale::ClientLoadSignal::start<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::autoscale::ClientLoadSignal::stop<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+impl core::marker::Freeze for millipede_core::autoscale::ClientLoadSignal
+impl core::marker::Send for millipede_core::autoscale::ClientLoadSignal
+impl core::marker::Sync for millipede_core::autoscale::ClientLoadSignal
+impl core::marker::Unpin for millipede_core::autoscale::ClientLoadSignal
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::ClientLoadSignal
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::ClientLoadSignal
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::ClientLoadSignal
+pub struct millipede_core::autoscale::ClientLoadSignalHandle
+impl millipede_core::autoscale::ClientLoadSignalHandle
+pub fn millipede_core::autoscale::ClientLoadSignalHandle::record_healthy(&self)
+pub fn millipede_core::autoscale::ClientLoadSignalHandle::record_rate_limited(&self)
+impl core::clone::Clone for millipede_core::autoscale::ClientLoadSignalHandle
+pub fn millipede_core::autoscale::ClientLoadSignalHandle::clone(&self) -> millipede_core::autoscale::ClientLoadSignalHandle
+impl core::marker::Freeze for millipede_core::autoscale::ClientLoadSignalHandle
+impl core::marker::Send for millipede_core::autoscale::ClientLoadSignalHandle
+impl core::marker::Sync for millipede_core::autoscale::ClientLoadSignalHandle
+impl core::marker::Unpin for millipede_core::autoscale::ClientLoadSignalHandle
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::ClientLoadSignalHandle
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::ClientLoadSignalHandle
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::ClientLoadSignalHandle
+pub struct millipede_core::autoscale::CpuLoadSignal
+impl millipede_core::autoscale::CpuLoadSignal
+pub fn millipede_core::autoscale::CpuLoadSignal::new(millipede_core::autoscale::CpuLoadSignalOptions) -> Self
+impl core::default::Default for millipede_core::autoscale::CpuLoadSignal
+pub fn millipede_core::autoscale::CpuLoadSignal::default() -> Self
+impl millipede_core::autoscale::LoadSignal for millipede_core::autoscale::CpuLoadSignal
+pub fn millipede_core::autoscale::CpuLoadSignal::name(&self) -> &str
+pub fn millipede_core::autoscale::CpuLoadSignal::overload_threshold(&self) -> f32
+pub fn millipede_core::autoscale::CpuLoadSignal::sample(&self, core::time::Duration) -> alloc::vec::Vec<millipede_core::autoscale::LoadSnapshot>
+pub fn millipede_core::autoscale::CpuLoadSignal::start<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::autoscale::CpuLoadSignal::stop<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+impl !core::marker::Freeze for millipede_core::autoscale::CpuLoadSignal
+impl core::marker::Send for millipede_core::autoscale::CpuLoadSignal
+impl core::marker::Sync for millipede_core::autoscale::CpuLoadSignal
+impl core::marker::Unpin for millipede_core::autoscale::CpuLoadSignal
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::CpuLoadSignal
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::CpuLoadSignal
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::CpuLoadSignal
+pub struct millipede_core::autoscale::CpuLoadSignalOptions
+pub millipede_core::autoscale::CpuLoadSignalOptions::max_used_cpu_ratio: f32
+pub millipede_core::autoscale::CpuLoadSignalOptions::sample_interval: core::time::Duration
+impl core::clone::Clone for millipede_core::autoscale::CpuLoadSignalOptions
+pub fn millipede_core::autoscale::CpuLoadSignalOptions::clone(&self) -> millipede_core::autoscale::CpuLoadSignalOptions
+impl core::default::Default for millipede_core::autoscale::CpuLoadSignalOptions
+pub fn millipede_core::autoscale::CpuLoadSignalOptions::default() -> Self
+impl core::fmt::Debug for millipede_core::autoscale::CpuLoadSignalOptions
+pub fn millipede_core::autoscale::CpuLoadSignalOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::autoscale::CpuLoadSignalOptions
+impl core::marker::Send for millipede_core::autoscale::CpuLoadSignalOptions
+impl core::marker::Sync for millipede_core::autoscale::CpuLoadSignalOptions
+impl core::marker::Unpin for millipede_core::autoscale::CpuLoadSignalOptions
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::CpuLoadSignalOptions
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::CpuLoadSignalOptions
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::CpuLoadSignalOptions
 pub struct millipede_core::autoscale::LoadSnapshot
 pub millipede_core::autoscale::LoadSnapshot::at: tokio::time::instant::Instant
 pub millipede_core::autoscale::LoadSnapshot::overloaded: bool
@@ -112,6 +178,41 @@ impl core::marker::Unpin for millipede_core::autoscale::LoadSnapshot
 impl core::marker::UnsafeUnpin for millipede_core::autoscale::LoadSnapshot
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::LoadSnapshot
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::LoadSnapshot
+pub struct millipede_core::autoscale::MemoryLoadSignal
+impl millipede_core::autoscale::MemoryLoadSignal
+pub fn millipede_core::autoscale::MemoryLoadSignal::new(millipede_core::autoscale::MemoryLoadSignalOptions) -> Self
+impl core::default::Default for millipede_core::autoscale::MemoryLoadSignal
+pub fn millipede_core::autoscale::MemoryLoadSignal::default() -> Self
+impl millipede_core::autoscale::LoadSignal for millipede_core::autoscale::MemoryLoadSignal
+pub fn millipede_core::autoscale::MemoryLoadSignal::name(&self) -> &str
+pub fn millipede_core::autoscale::MemoryLoadSignal::overload_threshold(&self) -> f32
+pub fn millipede_core::autoscale::MemoryLoadSignal::sample(&self, core::time::Duration) -> alloc::vec::Vec<millipede_core::autoscale::LoadSnapshot>
+pub fn millipede_core::autoscale::MemoryLoadSignal::start<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::autoscale::MemoryLoadSignal::stop<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+impl !core::marker::Freeze for millipede_core::autoscale::MemoryLoadSignal
+impl core::marker::Send for millipede_core::autoscale::MemoryLoadSignal
+impl core::marker::Sync for millipede_core::autoscale::MemoryLoadSignal
+impl core::marker::Unpin for millipede_core::autoscale::MemoryLoadSignal
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::MemoryLoadSignal
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::MemoryLoadSignal
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::MemoryLoadSignal
+pub struct millipede_core::autoscale::MemoryLoadSignalOptions
+pub millipede_core::autoscale::MemoryLoadSignalOptions::max_used_memory_ratio: f32
+pub millipede_core::autoscale::MemoryLoadSignalOptions::memory_bytes: core::option::Option<u64>
+pub millipede_core::autoscale::MemoryLoadSignalOptions::sample_interval: core::time::Duration
+impl core::clone::Clone for millipede_core::autoscale::MemoryLoadSignalOptions
+pub fn millipede_core::autoscale::MemoryLoadSignalOptions::clone(&self) -> millipede_core::autoscale::MemoryLoadSignalOptions
+impl core::default::Default for millipede_core::autoscale::MemoryLoadSignalOptions
+pub fn millipede_core::autoscale::MemoryLoadSignalOptions::default() -> Self
+impl core::fmt::Debug for millipede_core::autoscale::MemoryLoadSignalOptions
+pub fn millipede_core::autoscale::MemoryLoadSignalOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::autoscale::MemoryLoadSignalOptions
+impl core::marker::Send for millipede_core::autoscale::MemoryLoadSignalOptions
+impl core::marker::Sync for millipede_core::autoscale::MemoryLoadSignalOptions
+impl core::marker::Unpin for millipede_core::autoscale::MemoryLoadSignalOptions
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::MemoryLoadSignalOptions
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::MemoryLoadSignalOptions
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::MemoryLoadSignalOptions
 pub struct millipede_core::autoscale::Snapshotter
 impl millipede_core::autoscale::Snapshotter
 pub fn millipede_core::autoscale::Snapshotter::new(millipede_core::autoscale::SnapshotterOptions) -> Self
@@ -168,12 +269,70 @@ impl core::marker::Unpin for millipede_core::autoscale::SystemStatusOptions
 impl core::marker::UnsafeUnpin for millipede_core::autoscale::SystemStatusOptions
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::SystemStatusOptions
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::SystemStatusOptions
+pub struct millipede_core::autoscale::TokioRuntimeLoadSignal
+impl millipede_core::autoscale::TokioRuntimeLoadSignal
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::new(millipede_core::autoscale::TokioRuntimeLoadSignalOptions) -> Self
+impl core::default::Default for millipede_core::autoscale::TokioRuntimeLoadSignal
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::default() -> Self
+impl millipede_core::autoscale::LoadSignal for millipede_core::autoscale::TokioRuntimeLoadSignal
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::name(&self) -> &str
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::overload_threshold(&self) -> f32
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::sample(&self, core::time::Duration) -> alloc::vec::Vec<millipede_core::autoscale::LoadSnapshot>
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::start<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::stop<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+impl !core::marker::Freeze for millipede_core::autoscale::TokioRuntimeLoadSignal
+impl core::marker::Send for millipede_core::autoscale::TokioRuntimeLoadSignal
+impl core::marker::Sync for millipede_core::autoscale::TokioRuntimeLoadSignal
+impl core::marker::Unpin for millipede_core::autoscale::TokioRuntimeLoadSignal
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::TokioRuntimeLoadSignal
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::TokioRuntimeLoadSignal
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::TokioRuntimeLoadSignal
+pub struct millipede_core::autoscale::TokioRuntimeLoadSignalOptions
+pub millipede_core::autoscale::TokioRuntimeLoadSignalOptions::max_lag: core::time::Duration
+pub millipede_core::autoscale::TokioRuntimeLoadSignalOptions::sample_interval: core::time::Duration
+impl core::clone::Clone for millipede_core::autoscale::TokioRuntimeLoadSignalOptions
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignalOptions::clone(&self) -> millipede_core::autoscale::TokioRuntimeLoadSignalOptions
+impl core::default::Default for millipede_core::autoscale::TokioRuntimeLoadSignalOptions
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignalOptions::default() -> Self
+impl core::fmt::Debug for millipede_core::autoscale::TokioRuntimeLoadSignalOptions
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignalOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::autoscale::TokioRuntimeLoadSignalOptions
+impl core::marker::Send for millipede_core::autoscale::TokioRuntimeLoadSignalOptions
+impl core::marker::Sync for millipede_core::autoscale::TokioRuntimeLoadSignalOptions
+impl core::marker::Unpin for millipede_core::autoscale::TokioRuntimeLoadSignalOptions
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::TokioRuntimeLoadSignalOptions
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::TokioRuntimeLoadSignalOptions
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::TokioRuntimeLoadSignalOptions
 pub trait millipede_core::autoscale::LoadSignal: core::marker::Send + core::marker::Sync + 'static
 pub fn millipede_core::autoscale::LoadSignal::name(&self) -> &str
 pub fn millipede_core::autoscale::LoadSignal::overload_threshold(&self) -> f32
 pub fn millipede_core::autoscale::LoadSignal::sample(&self, core::time::Duration) -> alloc::vec::Vec<millipede_core::autoscale::LoadSnapshot>
 pub fn millipede_core::autoscale::LoadSignal::start<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
 pub fn millipede_core::autoscale::LoadSignal::stop<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+impl millipede_core::autoscale::LoadSignal for millipede_core::autoscale::ClientLoadSignal
+pub fn millipede_core::autoscale::ClientLoadSignal::name(&self) -> &str
+pub fn millipede_core::autoscale::ClientLoadSignal::overload_threshold(&self) -> f32
+pub fn millipede_core::autoscale::ClientLoadSignal::sample(&self, core::time::Duration) -> alloc::vec::Vec<millipede_core::autoscale::LoadSnapshot>
+pub fn millipede_core::autoscale::ClientLoadSignal::start<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::autoscale::ClientLoadSignal::stop<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+impl millipede_core::autoscale::LoadSignal for millipede_core::autoscale::CpuLoadSignal
+pub fn millipede_core::autoscale::CpuLoadSignal::name(&self) -> &str
+pub fn millipede_core::autoscale::CpuLoadSignal::overload_threshold(&self) -> f32
+pub fn millipede_core::autoscale::CpuLoadSignal::sample(&self, core::time::Duration) -> alloc::vec::Vec<millipede_core::autoscale::LoadSnapshot>
+pub fn millipede_core::autoscale::CpuLoadSignal::start<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::autoscale::CpuLoadSignal::stop<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+impl millipede_core::autoscale::LoadSignal for millipede_core::autoscale::MemoryLoadSignal
+pub fn millipede_core::autoscale::MemoryLoadSignal::name(&self) -> &str
+pub fn millipede_core::autoscale::MemoryLoadSignal::overload_threshold(&self) -> f32
+pub fn millipede_core::autoscale::MemoryLoadSignal::sample(&self, core::time::Duration) -> alloc::vec::Vec<millipede_core::autoscale::LoadSnapshot>
+pub fn millipede_core::autoscale::MemoryLoadSignal::start<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::autoscale::MemoryLoadSignal::stop<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+impl millipede_core::autoscale::LoadSignal for millipede_core::autoscale::TokioRuntimeLoadSignal
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::name(&self) -> &str
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::overload_threshold(&self) -> f32
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::sample(&self, core::time::Duration) -> alloc::vec::Vec<millipede_core::autoscale::LoadSnapshot>
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::start<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::stop<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
 pub mod millipede_core::config
 pub enum millipede_core::config::ConfigError
 pub millipede_core::config::ConfigError::InvalidEnvVar
@@ -1715,6 +1874,38 @@ impl core::marker::Unpin for millipede_core::storage::BatchAddHandle
 impl core::marker::UnsafeUnpin for millipede_core::storage::BatchAddHandle
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::BatchAddHandle
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::BatchAddHandle
+pub struct millipede_core::prelude::ClientLoadSignal
+impl millipede_core::autoscale::ClientLoadSignal
+pub fn millipede_core::autoscale::ClientLoadSignal::handle(&self) -> millipede_core::autoscale::ClientLoadSignalHandle
+pub fn millipede_core::autoscale::ClientLoadSignal::new() -> Self
+impl core::default::Default for millipede_core::autoscale::ClientLoadSignal
+pub fn millipede_core::autoscale::ClientLoadSignal::default() -> Self
+impl millipede_core::autoscale::LoadSignal for millipede_core::autoscale::ClientLoadSignal
+pub fn millipede_core::autoscale::ClientLoadSignal::name(&self) -> &str
+pub fn millipede_core::autoscale::ClientLoadSignal::overload_threshold(&self) -> f32
+pub fn millipede_core::autoscale::ClientLoadSignal::sample(&self, core::time::Duration) -> alloc::vec::Vec<millipede_core::autoscale::LoadSnapshot>
+pub fn millipede_core::autoscale::ClientLoadSignal::start<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::autoscale::ClientLoadSignal::stop<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+impl core::marker::Freeze for millipede_core::autoscale::ClientLoadSignal
+impl core::marker::Send for millipede_core::autoscale::ClientLoadSignal
+impl core::marker::Sync for millipede_core::autoscale::ClientLoadSignal
+impl core::marker::Unpin for millipede_core::autoscale::ClientLoadSignal
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::ClientLoadSignal
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::ClientLoadSignal
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::ClientLoadSignal
+pub struct millipede_core::prelude::ClientLoadSignalHandle
+impl millipede_core::autoscale::ClientLoadSignalHandle
+pub fn millipede_core::autoscale::ClientLoadSignalHandle::record_healthy(&self)
+pub fn millipede_core::autoscale::ClientLoadSignalHandle::record_rate_limited(&self)
+impl core::clone::Clone for millipede_core::autoscale::ClientLoadSignalHandle
+pub fn millipede_core::autoscale::ClientLoadSignalHandle::clone(&self) -> millipede_core::autoscale::ClientLoadSignalHandle
+impl core::marker::Freeze for millipede_core::autoscale::ClientLoadSignalHandle
+impl core::marker::Send for millipede_core::autoscale::ClientLoadSignalHandle
+impl core::marker::Sync for millipede_core::autoscale::ClientLoadSignalHandle
+impl core::marker::Unpin for millipede_core::autoscale::ClientLoadSignalHandle
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::ClientLoadSignalHandle
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::ClientLoadSignalHandle
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::ClientLoadSignalHandle
 pub struct millipede_core::prelude::Configuration
 impl millipede_core::config::Configuration
 pub fn millipede_core::config::Configuration::available_memory_ratio(&self) -> core::option::Option<f32>
@@ -1788,6 +1979,40 @@ impl core::marker::Unpin for millipede_core::cookies::CookieJar
 impl core::marker::UnsafeUnpin for millipede_core::cookies::CookieJar
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::cookies::CookieJar
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::cookies::CookieJar
+pub struct millipede_core::prelude::CpuLoadSignal
+impl millipede_core::autoscale::CpuLoadSignal
+pub fn millipede_core::autoscale::CpuLoadSignal::new(millipede_core::autoscale::CpuLoadSignalOptions) -> Self
+impl core::default::Default for millipede_core::autoscale::CpuLoadSignal
+pub fn millipede_core::autoscale::CpuLoadSignal::default() -> Self
+impl millipede_core::autoscale::LoadSignal for millipede_core::autoscale::CpuLoadSignal
+pub fn millipede_core::autoscale::CpuLoadSignal::name(&self) -> &str
+pub fn millipede_core::autoscale::CpuLoadSignal::overload_threshold(&self) -> f32
+pub fn millipede_core::autoscale::CpuLoadSignal::sample(&self, core::time::Duration) -> alloc::vec::Vec<millipede_core::autoscale::LoadSnapshot>
+pub fn millipede_core::autoscale::CpuLoadSignal::start<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::autoscale::CpuLoadSignal::stop<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+impl !core::marker::Freeze for millipede_core::autoscale::CpuLoadSignal
+impl core::marker::Send for millipede_core::autoscale::CpuLoadSignal
+impl core::marker::Sync for millipede_core::autoscale::CpuLoadSignal
+impl core::marker::Unpin for millipede_core::autoscale::CpuLoadSignal
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::CpuLoadSignal
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::CpuLoadSignal
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::CpuLoadSignal
+pub struct millipede_core::prelude::CpuLoadSignalOptions
+pub millipede_core::prelude::CpuLoadSignalOptions::max_used_cpu_ratio: f32
+pub millipede_core::prelude::CpuLoadSignalOptions::sample_interval: core::time::Duration
+impl core::clone::Clone for millipede_core::autoscale::CpuLoadSignalOptions
+pub fn millipede_core::autoscale::CpuLoadSignalOptions::clone(&self) -> millipede_core::autoscale::CpuLoadSignalOptions
+impl core::default::Default for millipede_core::autoscale::CpuLoadSignalOptions
+pub fn millipede_core::autoscale::CpuLoadSignalOptions::default() -> Self
+impl core::fmt::Debug for millipede_core::autoscale::CpuLoadSignalOptions
+pub fn millipede_core::autoscale::CpuLoadSignalOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::autoscale::CpuLoadSignalOptions
+impl core::marker::Send for millipede_core::autoscale::CpuLoadSignalOptions
+impl core::marker::Sync for millipede_core::autoscale::CpuLoadSignalOptions
+impl core::marker::Unpin for millipede_core::autoscale::CpuLoadSignalOptions
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::CpuLoadSignalOptions
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::CpuLoadSignalOptions
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::CpuLoadSignalOptions
 pub struct millipede_core::prelude::Crawler<K: millipede_core::crawler::CrawlerKind>
 impl<K: millipede_core::crawler::CrawlerKind> millipede_core::crawler::Crawler<K>
 pub fn millipede_core::crawler::Crawler<K>::abort(&self)
@@ -2233,6 +2458,41 @@ impl core::marker::Unpin for millipede_core::autoscale::LoadSnapshot
 impl core::marker::UnsafeUnpin for millipede_core::autoscale::LoadSnapshot
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::LoadSnapshot
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::LoadSnapshot
+pub struct millipede_core::prelude::MemoryLoadSignal
+impl millipede_core::autoscale::MemoryLoadSignal
+pub fn millipede_core::autoscale::MemoryLoadSignal::new(millipede_core::autoscale::MemoryLoadSignalOptions) -> Self
+impl core::default::Default for millipede_core::autoscale::MemoryLoadSignal
+pub fn millipede_core::autoscale::MemoryLoadSignal::default() -> Self
+impl millipede_core::autoscale::LoadSignal for millipede_core::autoscale::MemoryLoadSignal
+pub fn millipede_core::autoscale::MemoryLoadSignal::name(&self) -> &str
+pub fn millipede_core::autoscale::MemoryLoadSignal::overload_threshold(&self) -> f32
+pub fn millipede_core::autoscale::MemoryLoadSignal::sample(&self, core::time::Duration) -> alloc::vec::Vec<millipede_core::autoscale::LoadSnapshot>
+pub fn millipede_core::autoscale::MemoryLoadSignal::start<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::autoscale::MemoryLoadSignal::stop<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+impl !core::marker::Freeze for millipede_core::autoscale::MemoryLoadSignal
+impl core::marker::Send for millipede_core::autoscale::MemoryLoadSignal
+impl core::marker::Sync for millipede_core::autoscale::MemoryLoadSignal
+impl core::marker::Unpin for millipede_core::autoscale::MemoryLoadSignal
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::MemoryLoadSignal
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::MemoryLoadSignal
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::MemoryLoadSignal
+pub struct millipede_core::prelude::MemoryLoadSignalOptions
+pub millipede_core::prelude::MemoryLoadSignalOptions::max_used_memory_ratio: f32
+pub millipede_core::prelude::MemoryLoadSignalOptions::memory_bytes: core::option::Option<u64>
+pub millipede_core::prelude::MemoryLoadSignalOptions::sample_interval: core::time::Duration
+impl core::clone::Clone for millipede_core::autoscale::MemoryLoadSignalOptions
+pub fn millipede_core::autoscale::MemoryLoadSignalOptions::clone(&self) -> millipede_core::autoscale::MemoryLoadSignalOptions
+impl core::default::Default for millipede_core::autoscale::MemoryLoadSignalOptions
+pub fn millipede_core::autoscale::MemoryLoadSignalOptions::default() -> Self
+impl core::fmt::Debug for millipede_core::autoscale::MemoryLoadSignalOptions
+pub fn millipede_core::autoscale::MemoryLoadSignalOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::autoscale::MemoryLoadSignalOptions
+impl core::marker::Send for millipede_core::autoscale::MemoryLoadSignalOptions
+impl core::marker::Sync for millipede_core::autoscale::MemoryLoadSignalOptions
+impl core::marker::Unpin for millipede_core::autoscale::MemoryLoadSignalOptions
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::MemoryLoadSignalOptions
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::MemoryLoadSignalOptions
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::MemoryLoadSignalOptions
 pub struct millipede_core::prelude::Page<T>
 pub millipede_core::prelude::Page::items: alloc::vec::Vec<T>
 pub millipede_core::prelude::Page::limit: core::option::Option<u64>
@@ -2831,6 +3091,40 @@ impl core::marker::Unpin for millipede_core::autoscale::SystemStatusOptions
 impl core::marker::UnsafeUnpin for millipede_core::autoscale::SystemStatusOptions
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::SystemStatusOptions
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::SystemStatusOptions
+pub struct millipede_core::prelude::TokioRuntimeLoadSignal
+impl millipede_core::autoscale::TokioRuntimeLoadSignal
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::new(millipede_core::autoscale::TokioRuntimeLoadSignalOptions) -> Self
+impl core::default::Default for millipede_core::autoscale::TokioRuntimeLoadSignal
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::default() -> Self
+impl millipede_core::autoscale::LoadSignal for millipede_core::autoscale::TokioRuntimeLoadSignal
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::name(&self) -> &str
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::overload_threshold(&self) -> f32
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::sample(&self, core::time::Duration) -> alloc::vec::Vec<millipede_core::autoscale::LoadSnapshot>
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::start<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::stop<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+impl !core::marker::Freeze for millipede_core::autoscale::TokioRuntimeLoadSignal
+impl core::marker::Send for millipede_core::autoscale::TokioRuntimeLoadSignal
+impl core::marker::Sync for millipede_core::autoscale::TokioRuntimeLoadSignal
+impl core::marker::Unpin for millipede_core::autoscale::TokioRuntimeLoadSignal
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::TokioRuntimeLoadSignal
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::TokioRuntimeLoadSignal
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::TokioRuntimeLoadSignal
+pub struct millipede_core::prelude::TokioRuntimeLoadSignalOptions
+pub millipede_core::prelude::TokioRuntimeLoadSignalOptions::max_lag: core::time::Duration
+pub millipede_core::prelude::TokioRuntimeLoadSignalOptions::sample_interval: core::time::Duration
+impl core::clone::Clone for millipede_core::autoscale::TokioRuntimeLoadSignalOptions
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignalOptions::clone(&self) -> millipede_core::autoscale::TokioRuntimeLoadSignalOptions
+impl core::default::Default for millipede_core::autoscale::TokioRuntimeLoadSignalOptions
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignalOptions::default() -> Self
+impl core::fmt::Debug for millipede_core::autoscale::TokioRuntimeLoadSignalOptions
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignalOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::autoscale::TokioRuntimeLoadSignalOptions
+impl core::marker::Send for millipede_core::autoscale::TokioRuntimeLoadSignalOptions
+impl core::marker::Sync for millipede_core::autoscale::TokioRuntimeLoadSignalOptions
+impl core::marker::Unpin for millipede_core::autoscale::TokioRuntimeLoadSignalOptions
+impl core::marker::UnsafeUnpin for millipede_core::autoscale::TokioRuntimeLoadSignalOptions
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::TokioRuntimeLoadSignalOptions
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::TokioRuntimeLoadSignalOptions
 pub struct millipede_core::prelude::UserData(pub serde_json::map::Map<alloc::string::String, serde_json::value::Value>)
 impl millipede_core::request::UserData
 pub fn millipede_core::request::UserData::get(&self, &str) -> core::option::Option<&serde_json::value::Value>
@@ -2959,6 +3253,30 @@ pub fn millipede_core::prelude::LoadSignal::overload_threshold(&self) -> f32
 pub fn millipede_core::prelude::LoadSignal::sample(&self, core::time::Duration) -> alloc::vec::Vec<millipede_core::autoscale::LoadSnapshot>
 pub fn millipede_core::prelude::LoadSignal::start<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
 pub fn millipede_core::prelude::LoadSignal::stop<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+impl millipede_core::autoscale::LoadSignal for millipede_core::autoscale::ClientLoadSignal
+pub fn millipede_core::autoscale::ClientLoadSignal::name(&self) -> &str
+pub fn millipede_core::autoscale::ClientLoadSignal::overload_threshold(&self) -> f32
+pub fn millipede_core::autoscale::ClientLoadSignal::sample(&self, core::time::Duration) -> alloc::vec::Vec<millipede_core::autoscale::LoadSnapshot>
+pub fn millipede_core::autoscale::ClientLoadSignal::start<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::autoscale::ClientLoadSignal::stop<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+impl millipede_core::autoscale::LoadSignal for millipede_core::autoscale::CpuLoadSignal
+pub fn millipede_core::autoscale::CpuLoadSignal::name(&self) -> &str
+pub fn millipede_core::autoscale::CpuLoadSignal::overload_threshold(&self) -> f32
+pub fn millipede_core::autoscale::CpuLoadSignal::sample(&self, core::time::Duration) -> alloc::vec::Vec<millipede_core::autoscale::LoadSnapshot>
+pub fn millipede_core::autoscale::CpuLoadSignal::start<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::autoscale::CpuLoadSignal::stop<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+impl millipede_core::autoscale::LoadSignal for millipede_core::autoscale::MemoryLoadSignal
+pub fn millipede_core::autoscale::MemoryLoadSignal::name(&self) -> &str
+pub fn millipede_core::autoscale::MemoryLoadSignal::overload_threshold(&self) -> f32
+pub fn millipede_core::autoscale::MemoryLoadSignal::sample(&self, core::time::Duration) -> alloc::vec::Vec<millipede_core::autoscale::LoadSnapshot>
+pub fn millipede_core::autoscale::MemoryLoadSignal::start<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::autoscale::MemoryLoadSignal::stop<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+impl millipede_core::autoscale::LoadSignal for millipede_core::autoscale::TokioRuntimeLoadSignal
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::name(&self) -> &str
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::overload_threshold(&self) -> f32
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::sample(&self, core::time::Duration) -> alloc::vec::Vec<millipede_core::autoscale::LoadSnapshot>
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::start<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::stop<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
 pub trait millipede_core::prelude::Middleware<C>: core::marker::Send + core::marker::Sync + 'static
 pub fn millipede_core::prelude::Middleware::run(&self, C) -> futures_core::future::BoxFuture<'static, core::result::Result<C, millipede_core::errors::CrawlError>>
 impl<C, F, Fut> millipede_core::handler::Middleware<C> for F where F: core::ops::function::Fn(C) -> Fut + core::marker::Send + core::marker::Sync + 'static, Fut: core::future::future::Future<Output = core::result::Result<C, millipede_core::errors::CrawlError>> + core::marker::Send + 'static

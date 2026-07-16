@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use super::{
     AimdController, ScaleDecision, Snapshotter, SnapshotterOptions, SystemStatus,
     SystemStatusOptions,
@@ -32,13 +30,13 @@ pub struct AutoscaledPoolOptions {
     pub scale_down_step_ratio: f32,
     /// Mean healthy-history ratio required to scale up.
     pub desired_utilization_ratio: f32,
-    /// Task timeout retained for INTERFACE §13 parity; Phase 4 uses handler timeout instead.
+    /// Optional deadline applied to each dispatched request attempt.
     pub task_timeout: Option<Duration>,
     /// Optional global task-start budget per minute.
     pub max_tasks_per_minute: Option<u32>,
     /// Minimum delay between reservations for the same host.
     pub same_domain_delay: Duration,
-    /// Suggested interval at which an engine should reconsider dispatching work.
+    /// Dispatcher fallback tick for reconsidering whether more work can run.
     pub maybe_run_interval: Duration,
     /// Interval between load-signal scaling decisions.
     pub autoscale_interval: Duration,
@@ -386,6 +384,87 @@ mod tests {
                 ScaleDecision::ScaleUp => prop_assert!(result >= current),
                 ScaleDecision::ScaleDown => prop_assert!(result <= current),
                 ScaleDecision::Hold => prop_assert_eq!(result, current),
+            }
+        }
+
+        #[test]
+        fn desired_concurrency_tracks_signal_direction_and_stays_bounded(
+            readings in proptest::collection::vec(any::<bool>(), 1..200),
+            min in 1_usize..20,
+            width in 0_usize..50,
+            up in 0.01_f32..=1.0,
+            down in 0.01_f32..=1.0,
+        ) {
+            struct FakeSignal {
+                samples: Vec<LoadSnapshot>,
+            }
+
+            #[async_trait::async_trait]
+            impl LoadSignal for FakeSignal {
+                fn name(&self) -> &str {
+                    "property"
+                }
+
+                fn overload_threshold(&self) -> f32 {
+                    1.0
+                }
+
+                fn sample(&self, _window: Duration) -> Vec<LoadSnapshot> {
+                    self.samples.clone()
+                }
+            }
+
+            let runtime = tokio::runtime::Builder::new_current_thread()
+                .enable_time()
+                .build()
+                .unwrap();
+            let transitions = runtime.block_on(async {
+                let now = Instant::now();
+                let max = min + width;
+                let mut desired = min + width / 2;
+                let mut transitions = Vec::with_capacity(readings.len());
+
+                for index in 0..readings.len() {
+                    let prefix = &readings[..=index];
+                    let samples = prefix
+                        .iter()
+                        .enumerate()
+                        .map(|(sample_index, overloaded)| LoadSnapshot {
+                            at: now
+                                - Duration::from_millis(
+                                    (prefix.len() - sample_index) as u64,
+                                ),
+                            overloaded: *overloaded,
+                        })
+                        .collect();
+                    let snapshotter = Snapshotter::new(SnapshotterOptions {
+                        signals: vec![Arc::new(FakeSignal { samples })],
+                        window: Duration::from_secs(1),
+                    });
+                    let decision = SystemStatus::new(SystemStatusOptions { min_samples: 1 })
+                        .evaluate(&snapshotter, 0.9, now);
+                    let next = apply_scale_decision(
+                        desired,
+                        decision,
+                        min,
+                        max,
+                        up,
+                        down,
+                    );
+                    transitions.push((readings[index], desired, next));
+                    desired = next;
+                }
+
+                transitions
+            });
+
+            for (overloaded, desired, next) in transitions {
+                prop_assert!((min..=min + width).contains(&next));
+                if overloaded {
+                    prop_assert!(next <= desired);
+                } else {
+                    prop_assert!(next >= desired);
+                }
             }
         }
     }
