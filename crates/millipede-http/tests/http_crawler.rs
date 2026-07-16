@@ -1,6 +1,9 @@
 //! End-to-end tests for the HTTP crawler kind.
 
-use std::sync::{Arc, Mutex};
+use std::{
+    sync::{Arc, Mutex},
+    time::{Duration, Instant},
+};
 
 use http::StatusCode;
 use millipede_core::{
@@ -17,12 +20,29 @@ use millipede_http::{HttpContext, HttpKind};
 use millipede_storage_memory::MemoryStorageClient;
 use url::Url;
 use wiremock::{
-    Mock, MockServer, ResponseTemplate,
+    Mock, MockServer, Respond, ResponseTemplate,
     matchers::{any, header, path},
 };
 
 fn url(server: &MockServer, path: &str) -> Url {
     Url::parse(&format!("{}{path}", server.uri())).expect("mock URL must parse")
+}
+
+#[derive(Clone)]
+struct RetryOnceResponder {
+    arrivals: Arc<Mutex<Vec<Instant>>>,
+}
+
+impl Respond for RetryOnceResponder {
+    fn respond(&self, _request: &wiremock::Request) -> ResponseTemplate {
+        let mut arrivals = self.arrivals.lock().expect("arrivals mutex poisoned");
+        arrivals.push(Instant::now());
+        if arrivals.len() == 1 {
+            ResponseTemplate::new(429).insert_header("Retry-After", "3")
+        } else {
+            ResponseTemplate::new(200)
+        }
+    }
 }
 
 #[tokio::test]
@@ -141,6 +161,67 @@ async fn roadmap_status_matrix() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(stats.requests_finished, 1);
     assert_eq!(terminal.request.session_rotation_count, 1);
     assert_eq!(terminal.request.retry_count, 0);
+    Ok(())
+}
+
+#[tokio::test]
+async fn retry_after_reaches_failed_request_handler() -> Result<(), Box<dyn std::error::Error>> {
+    let server = MockServer::start().await;
+    Mock::given(path("/limited"))
+        .respond_with(ResponseTemplate::new(429).insert_header("Retry-After", "3"))
+        .mount(&server)
+        .await;
+    let captured = Arc::new(Mutex::new(None));
+    let crawler = Crawler::builder(HttpKind::builder().build()?)
+        .max_request_retries(0)
+        .request_handler(|_: HttpContext| async { Ok(()) })
+        .failed_request_handler({
+            let captured = Arc::clone(&captured);
+            move |ctx: FailedRequestContext| {
+                let captured = Arc::clone(&captured);
+                async move {
+                    *captured.lock().expect("captured mutex poisoned") = ctx.error.retry_after();
+                    Ok(())
+                }
+            }
+        })
+        .storage_client(Arc::new(MemoryStorageClient::new()))
+        .build()
+        .await?;
+
+    let stats = crawler.run([url(&server, "/limited")]).await?;
+
+    assert_eq!(
+        *captured.lock().expect("captured mutex poisoned"),
+        Some(Duration::from_secs(3))
+    );
+    assert_eq!(stats.requests_failed, 1);
+    Ok(())
+}
+
+#[tokio::test]
+async fn retry_after_delays_the_retry_end_to_end() -> Result<(), Box<dyn std::error::Error>> {
+    let server = MockServer::start().await;
+    let arrivals = Arc::new(Mutex::new(Vec::new()));
+    Mock::given(path("/limited"))
+        .respond_with(RetryOnceResponder {
+            arrivals: Arc::clone(&arrivals),
+        })
+        .mount(&server)
+        .await;
+    let crawler = Crawler::builder(HttpKind::builder().build()?)
+        .max_request_retries(2)
+        .request_handler(|_: HttpContext| async { Ok(()) })
+        .storage_client(Arc::new(MemoryStorageClient::new()))
+        .build()
+        .await?;
+
+    let stats = crawler.run([url(&server, "/limited")]).await?;
+
+    let arrivals = arrivals.lock().expect("arrivals mutex poisoned");
+    assert_eq!(arrivals.len(), 2);
+    assert!(arrivals[1].duration_since(arrivals[0]) >= Duration::from_secs(3));
+    assert_eq!(stats.requests_finished, 1);
     Ok(())
 }
 

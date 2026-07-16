@@ -33,6 +33,37 @@ use millipede_core::{
 
 use crate::{CoalescingClient, ReqwestClient};
 
+/// Parses `Retry-After`, capped at ten minutes as the header-trust ceiling.
+///
+/// The core-side 429 penalty has its own separate five-minute cap.
+fn parse_retry_after(headers: &http::HeaderMap, now: time::OffsetDateTime) -> Option<Duration> {
+    const MAX_RETRY_AFTER: Duration = Duration::from_secs(600);
+
+    let value = headers
+        .get(http::header::RETRY_AFTER)?
+        .to_str()
+        .ok()?
+        .trim();
+    if !value.is_empty() && value.bytes().all(|byte| byte.is_ascii_digit()) {
+        let seconds = value.parse::<u64>().unwrap_or(u64::MAX);
+        return Some(Duration::from_secs(seconds.min(MAX_RETRY_AFTER.as_secs())));
+    }
+
+    let date_value = if let Some(prefix) = value.strip_suffix(" GMT") {
+        format!("{prefix} +0000")
+    } else {
+        value.to_owned()
+    };
+    let date =
+        time::OffsetDateTime::parse(&date_value, &time::format_description::well_known::Rfc2822)
+            .ok()?;
+    if date <= now {
+        return Some(Duration::ZERO);
+    }
+    let duration = Duration::try_from(date - now).ok()?;
+    Some(duration.min(MAX_RETRY_AFTER))
+}
+
 /// Per-request context produced by [`HttpKind`].
 ///
 /// This intentionally differs from INTERFACE §4.2 in two ways. The response is an
@@ -157,10 +188,18 @@ impl HttpKind {
     async fn classify_status(
         &self,
         status: StatusCode,
+        retry_after: Option<Duration>,
         session: Option<&Arc<Session>>,
         proxy: Option<&ProxyConfiguration>,
         target: &url::Url,
     ) -> Result<(), CrawlError> {
+        let status_error = |status: StatusCode| {
+            let error = HttpStatusError::new(status);
+            match retry_after {
+                Some(duration) => error.with_retry_after(duration),
+                None => error,
+            }
+        };
         let code = status.as_u16();
         if self.session_status_codes.contains(&code) {
             if let Some(session) = session {
@@ -169,15 +208,15 @@ impl HttpKind {
             if let Some(proxy) = proxy {
                 proxy.report_blocked(target);
             }
-            return Err(CrawlError::session(HttpStatusError::new(status)));
+            return Err(CrawlError::session(status_error(status)));
         }
         if self.retry_status_codes.contains(&code)
             || (self.retry_server_errors && status.is_server_error())
         {
-            return Err(CrawlError::retry(HttpStatusError::new(status)));
+            return Err(CrawlError::retry(status_error(status)));
         }
         if !status.is_success() && !status.is_redirection() {
-            return Err(CrawlError::non_retryable(HttpStatusError::new(status)));
+            return Err(CrawlError::non_retryable(status_error(status)));
         }
         if let Some(session) = session {
             session.mark_good().await;
@@ -469,8 +508,10 @@ impl CrawlerKind for HttpKind {
                 .send(http_request)
                 .await
                 .map_err(Self::classify_client_error)?;
+            let retry_after = parse_retry_after(&response.headers, time::OffsetDateTime::now_utc());
             self.classify_status(
                 response.status,
+                retry_after,
                 session.as_ref(),
                 proxy_cfg,
                 &env.request.url,
@@ -558,16 +599,106 @@ mod tests {
             StatusCode::from_u16(700).expect("nonstandard status must parse"),
         ] {
             let error = kind
-                .classify_status(status, None, None, &target)
+                .classify_status(status, None, None, None, &target)
                 .await
                 .expect_err("non-2xx/3xx status must fail");
             assert!(matches!(error, CrawlError::NonRetryable(_)));
         }
 
         for status in [StatusCode::OK, StatusCode::FOUND] {
-            kind.classify_status(status, None, None, &target)
+            kind.classify_status(status, None, None, None, &target)
                 .await
                 .expect("2xx/3xx status must succeed");
         }
+    }
+
+    #[test]
+    fn retry_after_delta_seconds() {
+        let headers = http::HeaderMap::from_iter([(
+            http::header::RETRY_AFTER,
+            HeaderValue::from_static("120"),
+        )]);
+
+        assert_eq!(
+            parse_retry_after(&headers, time::OffsetDateTime::UNIX_EPOCH),
+            Some(Duration::from_secs(120))
+        );
+    }
+
+    #[test]
+    fn retry_after_overflow_is_capped() {
+        let headers = http::HeaderMap::from_iter([(
+            http::header::RETRY_AFTER,
+            HeaderValue::from_static("9999999999999999999999999999999999999999"),
+        )]);
+
+        assert_eq!(
+            parse_retry_after(&headers, time::OffsetDateTime::UNIX_EPOCH),
+            Some(Duration::from_secs(600))
+        );
+    }
+
+    #[test]
+    fn retry_after_http_date() {
+        let now = time::OffsetDateTime::from_unix_timestamp(1_700_000_000)
+            .expect("fixed timestamp must be valid");
+        let formatted = (now + time::Duration::seconds(90))
+            .format(&time::format_description::well_known::Rfc2822)
+            .expect("HTTP date must format");
+        let value = formatted
+            .strip_suffix(" +0000")
+            .map(|prefix| format!("{prefix} GMT"))
+            .expect("UTC RFC 2822 date must have a numeric zone");
+        let mut headers = http::HeaderMap::new();
+        headers.insert(
+            http::header::RETRY_AFTER,
+            HeaderValue::from_str(&value).expect("HTTP date must be a header value"),
+        );
+
+        let parsed = parse_retry_after(&headers, now).expect("HTTP date must parse");
+        assert!(parsed.abs_diff(Duration::from_secs(90)) <= Duration::from_secs(1));
+    }
+
+    #[test]
+    fn retry_after_past_date_is_zero() {
+        let now = time::OffsetDateTime::from_unix_timestamp(1_700_000_000)
+            .expect("fixed timestamp must be valid");
+        let formatted = (now - time::Duration::seconds(90))
+            .format(&time::format_description::well_known::Rfc2822)
+            .expect("HTTP date must format");
+        let value = formatted
+            .strip_suffix(" +0000")
+            .map(|prefix| format!("{prefix} GMT"))
+            .expect("UTC RFC 2822 date must have a numeric zone");
+        let mut headers = http::HeaderMap::new();
+        headers.insert(
+            http::header::RETRY_AFTER,
+            HeaderValue::from_str(&value).expect("HTTP date must be a header value"),
+        );
+
+        assert_eq!(parse_retry_after(&headers, now), Some(Duration::ZERO));
+    }
+
+    #[test]
+    fn retry_after_garbage_is_ignored() {
+        for value in [
+            HeaderValue::from_static("soon"),
+            HeaderValue::from_static(""),
+            HeaderValue::from_bytes(b"\xff").expect("opaque header bytes must be accepted"),
+        ] {
+            let headers = http::HeaderMap::from_iter([(http::header::RETRY_AFTER, value)]);
+            assert_eq!(
+                parse_retry_after(&headers, time::OffsetDateTime::UNIX_EPOCH),
+                None
+            );
+        }
+    }
+
+    #[test]
+    fn retry_after_absent_is_ignored() {
+        assert_eq!(
+            parse_retry_after(&http::HeaderMap::new(), time::OffsetDateTime::UNIX_EPOCH),
+            None
+        );
     }
 }
