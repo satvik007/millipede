@@ -1,6 +1,7 @@
 //! Crawl errors and their retry semantics.
 
 use crate::request::{Method, RequestBuildError};
+use std::time::Duration;
 
 /// An error produced while processing a crawl request.
 #[derive(Debug, thiserror::Error)]
@@ -79,6 +80,25 @@ impl CrawlError {
                 .map(|status| status.status)
         })
     }
+
+    /// Returns a Retry-After duration carried anywhere in the underlying error chain.
+    pub fn retry_after(&self) -> Option<Duration> {
+        let source = match self {
+            Self::Retry(error)
+            | Self::Session(error)
+            | Self::ForceRetry(error)
+            | Self::NonRetryable(error)
+            | Self::Critical(error) => error,
+            Self::AntiBotDetected { source, .. } => source,
+            Self::MissingRoute { .. } => return None,
+        };
+        source.chain().find_map(|error| {
+            error
+                .downcast_ref::<crate::http_client::HttpStatusError>()
+                .and_then(|status| status.retry_after)
+        })
+    }
+
     /// Creates a retryable error that counts against the retry limit.
     pub fn retry<E: Into<anyhow::Error>>(error: E) -> Self {
         Self::Retry(error.into())
@@ -206,6 +226,43 @@ mod tests {
             CrawlError::retry(wrapped).http_status(),
             Some(StatusCode::BAD_GATEWAY)
         );
+    }
+
+    #[test]
+    fn retry_after_extracted_through_chain() {
+        let retry_after = Duration::from_secs(2);
+        let direct = CrawlError::retry(
+            crate::http_client::HttpStatusError::new(StatusCode::TOO_MANY_REQUESTS)
+                .with_retry_after(retry_after),
+        );
+        assert_eq!(direct.retry_after(), Some(retry_after));
+
+        let plain = CrawlError::retry(crate::http_client::HttpStatusError::new(
+            StatusCode::TOO_MANY_REQUESTS,
+        ));
+        assert_eq!(plain.retry_after(), None);
+
+        let wrapped = anyhow::Error::new(
+            crate::http_client::HttpStatusError::new(StatusCode::TOO_MANY_REQUESTS)
+                .with_retry_after(retry_after),
+        )
+        .context("fetch failed");
+        assert_eq!(CrawlError::retry(wrapped).retry_after(), Some(retry_after));
+    }
+
+    #[test]
+    fn retry_after_is_none_for_missing_route_and_anti_bot() {
+        let missing_route = CrawlError::MissingRoute {
+            label: None,
+            method: Method::GET,
+        };
+        let anti_bot = CrawlError::AntiBotDetected {
+            tech: AntiBotTech::Cloudflare,
+            source: anyhow::anyhow!("challenge"),
+        };
+
+        assert_eq!(missing_route.retry_after(), None);
+        assert_eq!(anti_bot.retry_after(), None);
     }
 
     #[test]

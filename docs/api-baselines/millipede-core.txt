@@ -317,6 +317,7 @@ impl core::panic::unwind_safe::UnwindSafe for millipede_core::cookies::CookieJar
 pub mod millipede_core::crawler
 pub enum millipede_core::crawler::CrawlerBuildError
 pub millipede_core::crawler::CrawlerBuildError::Config(millipede_core::config::ConfigError)
+pub millipede_core::crawler::CrawlerBuildError::InvalidConcurrencyBounds
 pub millipede_core::crawler::CrawlerBuildError::MissingRequestHandler
 pub millipede_core::crawler::CrawlerBuildError::MissingStorage
 pub millipede_core::crawler::CrawlerBuildError::Storage(millipede_core::storage::StorageError)
@@ -373,6 +374,23 @@ impl core::marker::Unpin for millipede_core::crawler::AttemptObservation
 impl core::marker::UnsafeUnpin for millipede_core::crawler::AttemptObservation
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::crawler::AttemptObservation
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::crawler::AttemptObservation
+#[non_exhaustive] pub struct millipede_core::crawler::AutoscalerSnapshot
+pub millipede_core::crawler::AutoscalerSnapshot::desired_concurrency: usize
+pub millipede_core::crawler::AutoscalerSnapshot::is_fixed: bool
+pub millipede_core::crawler::AutoscalerSnapshot::max_concurrency: usize
+pub millipede_core::crawler::AutoscalerSnapshot::min_concurrency: usize
+impl core::clone::Clone for millipede_core::crawler::AutoscalerSnapshot
+pub fn millipede_core::crawler::AutoscalerSnapshot::clone(&self) -> millipede_core::crawler::AutoscalerSnapshot
+impl core::fmt::Debug for millipede_core::crawler::AutoscalerSnapshot
+pub fn millipede_core::crawler::AutoscalerSnapshot::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for millipede_core::crawler::AutoscalerSnapshot
+impl core::marker::Freeze for millipede_core::crawler::AutoscalerSnapshot
+impl core::marker::Send for millipede_core::crawler::AutoscalerSnapshot
+impl core::marker::Sync for millipede_core::crawler::AutoscalerSnapshot
+impl core::marker::Unpin for millipede_core::crawler::AutoscalerSnapshot
+impl core::marker::UnsafeUnpin for millipede_core::crawler::AutoscalerSnapshot
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::crawler::AutoscalerSnapshot
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::crawler::AutoscalerSnapshot
 #[non_exhaustive] pub struct millipede_core::crawler::BasicContext
 pub millipede_core::crawler::BasicContext::crawler: millipede_core::crawler::CrawlerHandle
 pub millipede_core::crawler::BasicContext::request: alloc::sync::Arc<millipede_core::request::Request>
@@ -417,6 +435,7 @@ pub struct millipede_core::crawler::Crawler<K: millipede_core::crawler::CrawlerK
 impl<K: millipede_core::crawler::CrawlerKind> millipede_core::crawler::Crawler<K>
 pub fn millipede_core::crawler::Crawler<K>::abort(&self)
 pub async fn millipede_core::crawler::Crawler<K>::add_requests(&self, impl core::iter::traits::collect::IntoIterator<Item = millipede_core::request::Request> + core::marker::Send) -> core::result::Result<(), millipede_core::errors::CrawlError>
+pub fn millipede_core::crawler::Crawler<K>::autoscaler_snapshot(&self) -> millipede_core::crawler::AutoscalerSnapshot
 pub fn millipede_core::crawler::Crawler<K>::builder(K) -> millipede_core::crawler::CrawlerBuilder<K>
 pub fn millipede_core::crawler::Crawler<K>::events(&self) -> millipede_core::events::EventStream
 pub fn millipede_core::crawler::Crawler<K>::handle(&self) -> millipede_core::crawler::CrawlerHandle
@@ -433,18 +452,24 @@ impl<K> !core::panic::unwind_safe::RefUnwindSafe for millipede_core::crawler::Cr
 impl<K> !core::panic::unwind_safe::UnwindSafe for millipede_core::crawler::Crawler<K>
 pub struct millipede_core::crawler::CrawlerBuilder<K: millipede_core::crawler::CrawlerKind>
 impl<K: millipede_core::crawler::CrawlerKind> millipede_core::crawler::CrawlerBuilder<K>
+pub fn millipede_core::crawler::CrawlerBuilder<K>::autoscale_mode(self, millipede_core::autoscale::AutoscaleMode) -> Self
+pub fn millipede_core::crawler::CrawlerBuilder<K>::autoscaled_pool_options(self, millipede_core::autoscale::AutoscaledPoolOptions) -> Self
 pub async fn millipede_core::crawler::CrawlerBuilder<K>::build(self) -> core::result::Result<millipede_core::crawler::Crawler<K>, millipede_core::crawler::CrawlerBuildError>
 pub fn millipede_core::crawler::CrawlerBuilder<K>::configuration(self, millipede_core::config::Configuration) -> Self
+pub fn millipede_core::crawler::CrawlerBuilder<K>::desired_concurrency(self, usize) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::failed_request_handler<H: millipede_core::handler::FailedRequestHandler>(self, H) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::internal_operation_timeout(self, core::time::Duration) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::max_concurrency(self, usize) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::max_request_retries(self, u32) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::max_session_rotations(self, u32) -> Self
+pub fn millipede_core::crawler::CrawlerBuilder<K>::max_tasks_per_minute(self, u32) -> Self
+pub fn millipede_core::crawler::CrawlerBuilder<K>::min_concurrency(self, usize) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::new(K) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::request_handler<H: millipede_core::handler::RequestHandler<<K as millipede_core::crawler::CrawlerKind>::Context>>(self, H) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::request_handler_timeout(self, core::time::Duration) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::results_capacity(self, usize) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::retry_strategy<S: millipede_core::retry_strategy::RetryStrategy>(self, S) -> Self
+pub fn millipede_core::crawler::CrawlerBuilder<K>::same_domain_delay(self, core::time::Duration) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::storage_client(self, alloc::sync::Arc<dyn millipede_core::storage::StorageClient>) -> Self
 impl<K> core::marker::Freeze for millipede_core::crawler::CrawlerBuilder<K> where K: core::marker::Freeze
 impl<K> core::marker::Send for millipede_core::crawler::CrawlerBuilder<K>
@@ -474,6 +499,7 @@ impl millipede_core::crawler::CrawlerHandle
 pub fn millipede_core::crawler::CrawlerHandle::abort(&self)
 pub async fn millipede_core::crawler::CrawlerHandle::add_requests(&self, impl core::iter::traits::collect::IntoIterator<Item = millipede_core::request::Request> + core::marker::Send) -> core::result::Result<millipede_core::storage::BatchAddHandle, millipede_core::errors::CrawlError>
 pub async fn millipede_core::crawler::CrawlerHandle::add_requests_with_options(&self, impl core::iter::traits::collect::IntoIterator<Item = millipede_core::request::Request> + core::marker::Send, millipede_core::storage::AddOptions) -> core::result::Result<millipede_core::storage::BatchAddHandle, millipede_core::errors::CrawlError>
+pub fn millipede_core::crawler::CrawlerHandle::autoscaler_snapshot(&self) -> core::option::Option<millipede_core::crawler::AutoscalerSnapshot>
 pub fn millipede_core::crawler::CrawlerHandle::events(&self) -> core::option::Option<millipede_core::events::EventStream>
 pub fn millipede_core::crawler::CrawlerHandle::results(&self) -> core::option::Option<millipede_core::events::ResultStream>
 pub fn millipede_core::crawler::CrawlerHandle::stats(&self) -> core::option::Option<millipede_core::statistics::StatisticsSnapshot>
@@ -686,6 +712,7 @@ pub fn millipede_core::errors::CrawlError::is_critical(&self) -> bool
 pub fn millipede_core::errors::CrawlError::is_retryable(&self) -> bool
 pub fn millipede_core::errors::CrawlError::non_retryable<E: core::convert::Into<anyhow::Error>>(E) -> Self
 pub fn millipede_core::errors::CrawlError::retry<E: core::convert::Into<anyhow::Error>>(E) -> Self
+pub fn millipede_core::errors::CrawlError::retry_after(&self) -> core::option::Option<core::time::Duration>
 pub fn millipede_core::errors::CrawlError::rotates_session(&self) -> bool
 pub fn millipede_core::errors::CrawlError::session<E: core::convert::Into<anyhow::Error>>(E) -> Self
 impl core::convert::From<core::io::error::Error> for millipede_core::errors::CrawlError
@@ -926,9 +953,11 @@ impl core::marker::UnsafeUnpin for millipede_core::http_client::HttpResponse
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::http_client::HttpResponse
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::http_client::HttpResponse
 pub struct millipede_core::http_client::HttpStatusError
+pub millipede_core::http_client::HttpStatusError::retry_after: core::option::Option<core::time::Duration>
 pub millipede_core::http_client::HttpStatusError::status: http::status::StatusCode
 impl millipede_core::http_client::HttpStatusError
 pub fn millipede_core::http_client::HttpStatusError::new(http::status::StatusCode) -> Self
+pub fn millipede_core::http_client::HttpStatusError::with_retry_after(self, core::time::Duration) -> Self
 impl core::clone::Clone for millipede_core::http_client::HttpStatusError
 pub fn millipede_core::http_client::HttpStatusError::clone(&self) -> millipede_core::http_client::HttpStatusError
 impl core::cmp::Eq for millipede_core::http_client::HttpStatusError
@@ -1049,6 +1078,7 @@ pub fn millipede_core::errors::CrawlError::is_critical(&self) -> bool
 pub fn millipede_core::errors::CrawlError::is_retryable(&self) -> bool
 pub fn millipede_core::errors::CrawlError::non_retryable<E: core::convert::Into<anyhow::Error>>(E) -> Self
 pub fn millipede_core::errors::CrawlError::retry<E: core::convert::Into<anyhow::Error>>(E) -> Self
+pub fn millipede_core::errors::CrawlError::retry_after(&self) -> core::option::Option<core::time::Duration>
 pub fn millipede_core::errors::CrawlError::rotates_session(&self) -> bool
 pub fn millipede_core::errors::CrawlError::session<E: core::convert::Into<anyhow::Error>>(E) -> Self
 impl core::convert::From<core::io::error::Error> for millipede_core::errors::CrawlError
@@ -1074,6 +1104,7 @@ impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::errors::CrawlEr
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::errors::CrawlError
 pub enum millipede_core::prelude::CrawlerBuildError
 pub millipede_core::prelude::CrawlerBuildError::Config(millipede_core::config::ConfigError)
+pub millipede_core::prelude::CrawlerBuildError::InvalidConcurrencyBounds
 pub millipede_core::prelude::CrawlerBuildError::MissingRequestHandler
 pub millipede_core::prelude::CrawlerBuildError::MissingStorage
 pub millipede_core::prelude::CrawlerBuildError::Storage(millipede_core::storage::StorageError)
@@ -1612,6 +1643,23 @@ impl core::marker::Unpin for millipede_core::autoscale::AutoscaledPoolOptions
 impl core::marker::UnsafeUnpin for millipede_core::autoscale::AutoscaledPoolOptions
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::AutoscaledPoolOptions
 impl !core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::AutoscaledPoolOptions
+#[non_exhaustive] pub struct millipede_core::prelude::AutoscalerSnapshot
+pub millipede_core::prelude::AutoscalerSnapshot::desired_concurrency: usize
+pub millipede_core::prelude::AutoscalerSnapshot::is_fixed: bool
+pub millipede_core::prelude::AutoscalerSnapshot::max_concurrency: usize
+pub millipede_core::prelude::AutoscalerSnapshot::min_concurrency: usize
+impl core::clone::Clone for millipede_core::crawler::AutoscalerSnapshot
+pub fn millipede_core::crawler::AutoscalerSnapshot::clone(&self) -> millipede_core::crawler::AutoscalerSnapshot
+impl core::fmt::Debug for millipede_core::crawler::AutoscalerSnapshot
+pub fn millipede_core::crawler::AutoscalerSnapshot::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for millipede_core::crawler::AutoscalerSnapshot
+impl core::marker::Freeze for millipede_core::crawler::AutoscalerSnapshot
+impl core::marker::Send for millipede_core::crawler::AutoscalerSnapshot
+impl core::marker::Sync for millipede_core::crawler::AutoscalerSnapshot
+impl core::marker::Unpin for millipede_core::crawler::AutoscalerSnapshot
+impl core::marker::UnsafeUnpin for millipede_core::crawler::AutoscalerSnapshot
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::crawler::AutoscalerSnapshot
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::crawler::AutoscalerSnapshot
 #[non_exhaustive] pub struct millipede_core::prelude::BasicContext
 pub millipede_core::prelude::BasicContext::crawler: millipede_core::crawler::CrawlerHandle
 pub millipede_core::prelude::BasicContext::request: alloc::sync::Arc<millipede_core::request::Request>
@@ -1744,6 +1792,7 @@ pub struct millipede_core::prelude::Crawler<K: millipede_core::crawler::CrawlerK
 impl<K: millipede_core::crawler::CrawlerKind> millipede_core::crawler::Crawler<K>
 pub fn millipede_core::crawler::Crawler<K>::abort(&self)
 pub async fn millipede_core::crawler::Crawler<K>::add_requests(&self, impl core::iter::traits::collect::IntoIterator<Item = millipede_core::request::Request> + core::marker::Send) -> core::result::Result<(), millipede_core::errors::CrawlError>
+pub fn millipede_core::crawler::Crawler<K>::autoscaler_snapshot(&self) -> millipede_core::crawler::AutoscalerSnapshot
 pub fn millipede_core::crawler::Crawler<K>::builder(K) -> millipede_core::crawler::CrawlerBuilder<K>
 pub fn millipede_core::crawler::Crawler<K>::events(&self) -> millipede_core::events::EventStream
 pub fn millipede_core::crawler::Crawler<K>::handle(&self) -> millipede_core::crawler::CrawlerHandle
@@ -1760,18 +1809,24 @@ impl<K> !core::panic::unwind_safe::RefUnwindSafe for millipede_core::crawler::Cr
 impl<K> !core::panic::unwind_safe::UnwindSafe for millipede_core::crawler::Crawler<K>
 pub struct millipede_core::prelude::CrawlerBuilder<K: millipede_core::crawler::CrawlerKind>
 impl<K: millipede_core::crawler::CrawlerKind> millipede_core::crawler::CrawlerBuilder<K>
+pub fn millipede_core::crawler::CrawlerBuilder<K>::autoscale_mode(self, millipede_core::autoscale::AutoscaleMode) -> Self
+pub fn millipede_core::crawler::CrawlerBuilder<K>::autoscaled_pool_options(self, millipede_core::autoscale::AutoscaledPoolOptions) -> Self
 pub async fn millipede_core::crawler::CrawlerBuilder<K>::build(self) -> core::result::Result<millipede_core::crawler::Crawler<K>, millipede_core::crawler::CrawlerBuildError>
 pub fn millipede_core::crawler::CrawlerBuilder<K>::configuration(self, millipede_core::config::Configuration) -> Self
+pub fn millipede_core::crawler::CrawlerBuilder<K>::desired_concurrency(self, usize) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::failed_request_handler<H: millipede_core::handler::FailedRequestHandler>(self, H) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::internal_operation_timeout(self, core::time::Duration) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::max_concurrency(self, usize) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::max_request_retries(self, u32) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::max_session_rotations(self, u32) -> Self
+pub fn millipede_core::crawler::CrawlerBuilder<K>::max_tasks_per_minute(self, u32) -> Self
+pub fn millipede_core::crawler::CrawlerBuilder<K>::min_concurrency(self, usize) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::new(K) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::request_handler<H: millipede_core::handler::RequestHandler<<K as millipede_core::crawler::CrawlerKind>::Context>>(self, H) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::request_handler_timeout(self, core::time::Duration) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::results_capacity(self, usize) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::retry_strategy<S: millipede_core::retry_strategy::RetryStrategy>(self, S) -> Self
+pub fn millipede_core::crawler::CrawlerBuilder<K>::same_domain_delay(self, core::time::Duration) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::storage_client(self, alloc::sync::Arc<dyn millipede_core::storage::StorageClient>) -> Self
 impl<K> core::marker::Freeze for millipede_core::crawler::CrawlerBuilder<K> where K: core::marker::Freeze
 impl<K> core::marker::Send for millipede_core::crawler::CrawlerBuilder<K>
@@ -1801,6 +1856,7 @@ impl millipede_core::crawler::CrawlerHandle
 pub fn millipede_core::crawler::CrawlerHandle::abort(&self)
 pub async fn millipede_core::crawler::CrawlerHandle::add_requests(&self, impl core::iter::traits::collect::IntoIterator<Item = millipede_core::request::Request> + core::marker::Send) -> core::result::Result<millipede_core::storage::BatchAddHandle, millipede_core::errors::CrawlError>
 pub async fn millipede_core::crawler::CrawlerHandle::add_requests_with_options(&self, impl core::iter::traits::collect::IntoIterator<Item = millipede_core::request::Request> + core::marker::Send, millipede_core::storage::AddOptions) -> core::result::Result<millipede_core::storage::BatchAddHandle, millipede_core::errors::CrawlError>
+pub fn millipede_core::crawler::CrawlerHandle::autoscaler_snapshot(&self) -> core::option::Option<millipede_core::crawler::AutoscalerSnapshot>
 pub fn millipede_core::crawler::CrawlerHandle::events(&self) -> core::option::Option<millipede_core::events::EventStream>
 pub fn millipede_core::crawler::CrawlerHandle::results(&self) -> core::option::Option<millipede_core::events::ResultStream>
 pub fn millipede_core::crawler::CrawlerHandle::stats(&self) -> core::option::Option<millipede_core::statistics::StatisticsSnapshot>
@@ -2021,9 +2077,11 @@ impl core::marker::UnsafeUnpin for millipede_core::http_client::HttpResponse
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::http_client::HttpResponse
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::http_client::HttpResponse
 pub struct millipede_core::prelude::HttpStatusError
+pub millipede_core::prelude::HttpStatusError::retry_after: core::option::Option<core::time::Duration>
 pub millipede_core::prelude::HttpStatusError::status: http::status::StatusCode
 impl millipede_core::http_client::HttpStatusError
 pub fn millipede_core::http_client::HttpStatusError::new(http::status::StatusCode) -> Self
+pub fn millipede_core::http_client::HttpStatusError::with_retry_after(self, core::time::Duration) -> Self
 impl core::clone::Clone for millipede_core::http_client::HttpStatusError
 pub fn millipede_core::http_client::HttpStatusError::clone(&self) -> millipede_core::http_client::HttpStatusError
 impl core::cmp::Eq for millipede_core::http_client::HttpStatusError

@@ -1,12 +1,14 @@
 //! Integration tests for backend-independent HTTP client abstractions.
 
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
 
 use bytes::Bytes;
 use futures_util::{StreamExt, stream};
 use http::{HeaderMap, StatusCode};
 use millipede_core::{
-    http_client::{HttpClient, HttpClientError, HttpRequest, HttpResponse, StreamingResponse},
+    http_client::{
+        HttpClient, HttpClientError, HttpRequest, HttpResponse, HttpStatusError, StreamingResponse,
+    },
     request::{Method, Request, RequestBody},
 };
 use url::Url;
@@ -88,4 +90,12 @@ async fn streaming_response_collects_chunks() {
 
     let chunks: Vec<Bytes> = response.body.map(Result::unwrap).collect().await;
     assert_eq!(chunks.concat(), b"hello world");
+}
+
+#[test]
+fn http_status_error_carries_retry_after() {
+    let retry_after = Duration::from_secs(2);
+    let error = HttpStatusError::new(StatusCode::TOO_MANY_REQUESTS).with_retry_after(retry_after);
+    assert_eq!(error.status, StatusCode::TOO_MANY_REQUESTS);
+    assert_eq!(error.retry_after, Some(retry_after));
 }

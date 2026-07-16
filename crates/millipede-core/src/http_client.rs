@@ -28,12 +28,23 @@ use crate::{
 pub struct HttpStatusError {
     /// The response status.
     pub status: StatusCode,
+    /// Parsed Retry-After response header, when the response carried one.
+    pub retry_after: Option<Duration>,
 }
 
 impl HttpStatusError {
     /// Creates a status carrier.
     pub fn new(status: StatusCode) -> Self {
-        Self { status }
+        Self {
+            status,
+            retry_after: None,
+        }
+    }
+
+    /// Attaches a parsed Retry-After duration.
+    pub fn with_retry_after(mut self, retry_after: Duration) -> Self {
+        self.retry_after = Some(retry_after);
+        self
     }
 }
 

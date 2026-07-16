@@ -75,9 +75,9 @@ pub mod prelude {
     pub use crate::config::{Configuration, ConfigurationBuilder, LogLevel};
     pub use crate::cookies::{CookieJar, CookieJarError};
     pub use crate::crawler::{
-        AttemptObservation, BasicContext, BasicCrawler, BasicKind, Crawler, CrawlerBuildError,
-        CrawlerBuilder, CrawlerEnv, CrawlerHandle, CrawlerKind, IntoStartRequest,
-        IntoStartRequests, RequestEnv, RequestOutcome, RequestPrep,
+        AttemptObservation, AutoscalerSnapshot, BasicContext, BasicCrawler, BasicKind, Crawler,
+        CrawlerBuildError, CrawlerBuilder, CrawlerEnv, CrawlerHandle, CrawlerKind,
+        IntoStartRequest, IntoStartRequests, RequestEnv, RequestOutcome, RequestPrep,
     };
     pub use crate::enqueue::{
         EnqueueLinker, EnqueueLinksOptions, EnqueueResult, SkipReason, SkippedUrl,

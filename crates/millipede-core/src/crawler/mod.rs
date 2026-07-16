@@ -10,6 +10,7 @@ pub use builder::{CrawlerBuildError, CrawlerBuilder};
 pub use start::{IntoStartRequest, IntoStartRequests};
 
 use crate::{
+    autoscale::AutoscaledPool,
     config::Configuration,
     errors::CrawlError,
     events::{EventBus, EventStream, HandledRequest, ResultStream},
@@ -124,6 +125,10 @@ impl<K: CrawlerKind> Crawler<K> {
     pub fn stats(&self) -> StatisticsHandle {
         self.shared.stats.clone()
     }
+    /// Returns a snapshot of the concurrency scaler.
+    pub fn autoscaler_snapshot(&self) -> AutoscalerSnapshot {
+        AutoscalerSnapshot::from_pool(&self.shared.pool)
+    }
     /// Signals a graceful drain.
     pub fn stop(&self) {
         self.handle().stop();
@@ -143,6 +148,7 @@ pub(crate) struct CrawlerShared {
     pub(crate) cancel: tokio_util::sync::CancellationToken,
     pub(crate) notify: tokio::sync::Notify,
     pub(crate) internal_operation_timeout: Duration,
+    pub(crate) pool: Arc<AutoscaledPool>,
 }
 
 impl CrawlerShared {
@@ -156,6 +162,7 @@ impl CrawlerShared {
         events: EventBus,
         results_capacity: usize,
         internal_operation_timeout: Duration,
+        pool: Arc<AutoscaledPool>,
     ) -> Self {
         debug_assert!(results_capacity >= 1);
         let (results_tx, _) = tokio::sync::broadcast::channel(results_capacity);
@@ -168,6 +175,32 @@ impl CrawlerShared {
             cancel: tokio_util::sync::CancellationToken::new(),
             notify: tokio::sync::Notify::new(),
             internal_operation_timeout,
+            pool,
+        }
+    }
+}
+
+/// A point-in-time view of a crawler's concurrency scaler.
+#[non_exhaustive]
+#[derive(Debug, Clone, Copy)]
+pub struct AutoscalerSnapshot {
+    /// Concurrency currently requested by the selected scaling mode.
+    pub desired_concurrency: usize,
+    /// Effective minimum concurrency.
+    pub min_concurrency: usize,
+    /// Effective maximum concurrency.
+    pub max_concurrency: usize,
+    /// Whether concurrency is explicitly fixed.
+    pub is_fixed: bool,
+}
+
+impl AutoscalerSnapshot {
+    fn from_pool(pool: &AutoscaledPool) -> Self {
+        Self {
+            desired_concurrency: pool.desired_concurrency(),
+            min_concurrency: pool.min_concurrency(),
+            max_concurrency: pool.max_concurrency(),
+            is_fixed: pool.is_fixed(),
         }
     }
 }
@@ -227,6 +260,13 @@ impl CrawlerHandle {
     /// Returns a snapshot of live crawl statistics while the crawler exists.
     pub fn stats(&self) -> Option<StatisticsSnapshot> {
         self.inner.upgrade().map(|shared| shared.stats.snapshot())
+    }
+
+    /// Returns a snapshot of the concurrency scaler while the crawler exists.
+    pub fn autoscaler_snapshot(&self) -> Option<AutoscalerSnapshot> {
+        self.inner
+            .upgrade()
+            .map(|shared| AutoscalerSnapshot::from_pool(&shared.pool))
     }
 
     /// Subscribes to control-plane crawler events while the crawler exists.
@@ -508,6 +548,12 @@ mod tests {
             EventBus::default(),
             8,
             Duration::from_secs(1),
+            Arc::new(AutoscaledPool::new(
+                crate::autoscale::AutoscaledPoolOptions {
+                    fixed_concurrency: Some(8),
+                    ..Default::default()
+                },
+            )),
         ))
     }
 
@@ -527,6 +573,9 @@ mod tests {
         assert_eq!(batch.wait().await.unwrap().processed.len(), 2);
         assert_eq!(queue.pending_count().await.unwrap(), 1);
         assert!(handle.stats().is_some());
+        let autoscaler = handle.autoscaler_snapshot().unwrap();
+        assert_eq!(autoscaler.desired_concurrency, 8);
+        assert!(autoscaler.is_fixed);
         assert!(handle.events().is_some());
         assert!(handle.results().is_some());
         assert_eq!(format!("{handle:?}"), "CrawlerHandle { alive: true }");
@@ -534,6 +583,7 @@ mod tests {
         drop(shared);
         assert!(handle.add_requests(Vec::new()).await.is_err());
         assert!(handle.stats().is_none());
+        assert!(handle.autoscaler_snapshot().is_none());
         assert_eq!(format!("{handle:?}"), "CrawlerHandle { alive: false }");
     }
 

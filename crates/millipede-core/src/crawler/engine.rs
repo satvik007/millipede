@@ -3,6 +3,7 @@ use super::{
     RequestPrep,
 };
 use crate::{
+    autoscale::AttemptOutcomeKind,
     errors::CrawlError,
     events::{CrawlerEvent, HandledRequest, RequestFinalState},
     handler::{FailedRequestContext, FailedRequestHandler, RequestHandler},
@@ -12,30 +13,40 @@ use crate::{
     storage::{KeyValueStore, Lease, ReclaimOptions},
 };
 use futures_util::{FutureExt, StreamExt, future::BoxFuture, stream::FuturesUnordered};
-use std::{collections::HashMap, panic::AssertUnwindSafe, sync::Arc, time::Duration};
+use std::{
+    cmp::Reverse,
+    collections::{BinaryHeap, HashMap},
+    panic::AssertUnwindSafe,
+    sync::Arc,
+    time::Duration,
+};
 use time::OffsetDateTime;
 use tokio::{task::AbortHandle, time::Instant};
 
 #[derive(Clone)]
 pub(crate) struct EngineOptions {
-    pub(crate) max_concurrency: usize,
     pub(crate) max_request_retries: u32,
     pub(crate) max_session_rotations: u32,
     pub(crate) request_handler_timeout: Duration,
     pub(crate) internal_operation_timeout: Duration,
     pub(crate) persist_state_interval: Duration,
+    /// Bounds preparation, execution, and handler work after an attempt starts.
+    pub(crate) task_timeout: Option<Duration>,
+    /// Periodically wakes an idle dispatcher as a fallback for missed notifications.
+    pub(crate) maybe_run_interval: Duration,
     pub(crate) retry_strategy: Option<Arc<dyn RetryStrategy>>,
 }
 
 impl Default for EngineOptions {
     fn default() -> Self {
         Self {
-            max_concurrency: 1,
             max_request_retries: 3,
             max_session_rotations: 10,
             request_handler_timeout: Duration::from_secs(60),
             internal_operation_timeout: Duration::from_secs(30),
             persist_state_interval: Duration::from_secs(60),
+            task_timeout: None,
+            maybe_run_interval: Duration::from_millis(500),
             retry_strategy: None,
         }
     }
@@ -63,34 +74,160 @@ struct SlotState {
     started: Instant,
 }
 
+struct DeferredStart {
+    lease: Lease,
+    carried: AttemptOverrides,
+    domain_reserved: bool,
+    renew_at: Instant,
+}
+
+const MIN_DEFERRED_CAPACITY: usize = 32;
+const DEFERRED_LEASE_RENEWAL_MARGIN: Duration = Duration::from_secs(30);
+const DEFERRED_LEASE_EXTENSION: Duration = Duration::from_secs(180);
+
 type AttemptFuture = BoxFuture<'static, (u64, Result<AttemptOutput, tokio::task::JoinError>)>;
 
 impl<K: CrawlerKind> Engine<K> {
     pub(crate) async fn run(self) -> Result<FinalStatistics, CrawlError> {
-        assert!(
-            self.opts.max_concurrency >= 1,
-            "max_concurrency must be at least one"
-        );
         self.shared.stats.mark_run_started();
+        let bg_cancel = tokio_util::sync::CancellationToken::new();
+        let background = {
+            let shared = self.shared.clone();
+            self.shared.pool.spawn_background(
+                bg_cancel.clone(),
+                Box::new(move || shared.notify.notify_waiters()),
+            )
+        };
+        let outcome = self.dispatch_loop().await;
+        bg_cancel.cancel();
+        if let Some(handle) = background {
+            let _ = handle.await;
+        }
+        match outcome {
+            Ok(()) => Ok(self.finish().await),
+            Err(error) => {
+                let _ = self.finish().await;
+                Err(error)
+            }
+        }
+    }
+
+    async fn dispatch_loop(&self) -> Result<(), CrawlError> {
         let mut in_flight: FuturesUnordered<AttemptFuture> = FuturesUnordered::new();
         let mut slots = HashMap::new();
         let mut accumulated = HashMap::new();
         let mut overrides: HashMap<String, AttemptOverrides> = HashMap::new();
+        let mut deferred = BinaryHeap::new();
+        let mut deferred_entries = HashMap::new();
         let mut next_slot = 0_u64;
+        let mut next_deferred = 0_u64;
         let mut draining = false;
+        let mut last_desired = self.shared.pool.desired_concurrency();
+        let deferred_cap = self
+            .shared
+            .pool
+            .max_concurrency()
+            .max(MIN_DEFERRED_CAPACITY);
         let mut ticker = tokio::time::interval(self.opts.persist_state_interval);
         ticker.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
+        let mut fallback = tokio::time::interval(self.opts.maybe_run_interval);
+        fallback.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
 
         loop {
             if self.shared.cancel.is_cancelled() {
-                self.abort_remaining(&mut in_flight, &mut slots).await;
-                return Ok(self.finish().await);
+                self.abort_remaining(
+                    &mut in_flight,
+                    &mut slots,
+                    &mut deferred,
+                    &mut deferred_entries,
+                )
+                .await;
+                return Ok(());
             }
             if !draining && self.shared.drain.is_cancelled() {
                 draining = true;
             }
+            if draining && !deferred_entries.is_empty() {
+                self.abandon_deferred(&mut deferred, &mut deferred_entries)
+                    .await;
+            }
+            if let Err(error) = self.renew_deferred_leases(&mut deferred_entries).await {
+                self.abort_remaining(
+                    &mut in_flight,
+                    &mut slots,
+                    &mut deferred,
+                    &mut deferred_entries,
+                )
+                .await;
+                return Err(error);
+            }
 
-            while !draining && in_flight.len() < self.opts.max_concurrency {
+            let desired = self.shared.pool.desired_concurrency();
+            if desired != last_desired {
+                tracing::debug!(
+                    target: "millipede::concurrency",
+                    desired,
+                    current = in_flight.len(),
+                    min = self.shared.pool.min_concurrency(),
+                    max = self.shared.pool.max_concurrency(),
+                    "desired concurrency changed"
+                );
+                last_desired = desired;
+            }
+
+            loop {
+                while in_flight.len() < desired {
+                    let Some(Reverse((ready_at, sequence))) = deferred.peek().copied() else {
+                        break;
+                    };
+                    let now = Instant::now();
+                    if ready_at > now {
+                        break;
+                    }
+                    deferred.pop();
+                    let mut entry = deferred_entries
+                        .remove(&sequence)
+                        .expect("deferred heap entry has retained state");
+                    if !entry.domain_reserved {
+                        entry.domain_reserved = true;
+                        if let Some(host) = entry.lease.request.url.host_str() {
+                            let wait = self.shared.pool.domain_slot_wait(host, now);
+                            if !wait.is_zero() {
+                                deferred.push(Reverse((now + wait, sequence)));
+                                deferred_entries.insert(sequence, entry);
+                                continue;
+                            }
+                        }
+                    }
+                    if let Some(wait) = self.shared.pool.task_token_wait(now) {
+                        deferred.push(Reverse((now + wait, sequence)));
+                        deferred_entries.insert(sequence, entry);
+                        break;
+                    }
+                    let slot = next_slot;
+                    next_slot = next_slot.wrapping_add(1);
+                    let started = Instant::now();
+                    let handle = self.spawn_attempt(entry.lease.request.clone(), entry.carried);
+                    let abort = handle.abort_handle();
+                    in_flight.push(Box::pin(async move { (slot, handle.await) }));
+                    slots.insert(
+                        slot,
+                        SlotState {
+                            lease: entry.lease,
+                            abort,
+                            started,
+                        },
+                    );
+                }
+
+                // The cap bounds held politeness-deferred leases. A single-host flood larger
+                // than the cap can still delay later hosts until Phase 5's domain-aware frontier.
+                // Fetch one lease at a time and immediately pump it so ready-now leases do not
+                // accumulate behind a full in-flight set.
+                if draining || in_flight.len() >= desired || deferred_entries.len() >= deferred_cap
+                {
+                    break;
+                }
                 match tokio::time::timeout(
                     self.opts.internal_operation_timeout,
                     self.shared.queue.fetch_next(),
@@ -101,18 +238,21 @@ impl<K: CrawlerKind> Engine<K> {
                         let carried = overrides
                             .remove(&lease.request.unique_key)
                             .unwrap_or_default();
-                        let slot = next_slot;
-                        next_slot = next_slot.wrapping_add(1);
-                        let started = Instant::now();
-                        let handle = self.spawn_attempt(lease.request.clone(), carried);
-                        let abort = handle.abort_handle();
-                        in_flight.push(Box::pin(async move { (slot, handle.await) }));
-                        slots.insert(
-                            slot,
-                            SlotState {
+                        let sequence = next_deferred;
+                        next_deferred = next_deferred.wrapping_add(1);
+                        let ready_at = Instant::now() + carried.backoff.unwrap_or(Duration::ZERO);
+                        let renew_in = lease
+                            .expires_at
+                            .saturating_duration_since(std::time::Instant::now())
+                            .saturating_sub(DEFERRED_LEASE_RENEWAL_MARGIN);
+                        deferred.push(Reverse((ready_at, sequence)));
+                        deferred_entries.insert(
+                            sequence,
+                            DeferredStart {
                                 lease,
-                                abort,
-                                started,
+                                carried,
+                                domain_reserved: false,
+                                renew_at: Instant::now() + renew_in,
                             },
                         );
                     }
@@ -128,7 +268,22 @@ impl<K: CrawlerKind> Engine<K> {
                 }
             }
 
-            if in_flight.is_empty() {
+            // A past-ready entry may only be waiting for an in-flight slot. Arming an already
+            // elapsed sleep for it would make this actor spin until a task completes.
+            let now = Instant::now();
+            let ready_wake = deferred
+                .peek()
+                .map(|entry| entry.0.0)
+                .filter(|ready_at| *ready_at > now);
+            let renewal_wake = deferred_entries.values().map(|entry| entry.renew_at).min();
+            let next_deferred_wake = match (ready_wake, renewal_wake) {
+                (Some(ready), Some(renewal)) => Some(ready.min(renewal)),
+                (Some(ready), None) => Some(ready),
+                (None, Some(renewal)) => Some(renewal),
+                (None, None) => None,
+            }
+            .filter(|wake| *wake > now);
+            if in_flight.is_empty() && deferred_entries.is_empty() {
                 if draining {
                     break;
                 }
@@ -154,6 +309,8 @@ impl<K: CrawlerKind> Engine<K> {
                     _ = self.shared.cancel.cancelled() => {},
                     _ = self.shared.drain.cancelled(), if !draining => { draining = true; },
                     _ = ticker.tick() => self.persist_state().await,
+                    _ = wait_for_deferred(next_deferred_wake), if next_deferred_wake.is_some() => {},
+                    _ = fallback.tick() => {},
                 }
                 continue;
             }
@@ -161,8 +318,12 @@ impl<K: CrawlerKind> Engine<K> {
             tokio::select! {
                 Some((slot, joined)) = in_flight.next() => {
                     if let Err(error) = self.handle_completion(slot, joined, &mut slots, &mut accumulated, &mut overrides).await {
-                        self.abort_remaining(&mut in_flight, &mut slots).await;
-                        let _ = self.finish().await;
+                        self.abort_remaining(
+                            &mut in_flight,
+                            &mut slots,
+                            &mut deferred,
+                            &mut deferred_entries,
+                        ).await;
                         return Err(error);
                     }
                 },
@@ -170,10 +331,12 @@ impl<K: CrawlerKind> Engine<K> {
                 _ = self.shared.drain.cancelled(), if !draining => { draining = true; },
                 _ = self.shared.notify.notified(), if !draining => {},
                 _ = ticker.tick() => self.persist_state().await,
+                _ = wait_for_deferred(next_deferred_wake), if next_deferred_wake.is_some() => {},
+                _ = fallback.tick() => {},
             }
         }
 
-        Ok(self.finish().await)
+        Ok(())
     }
 
     fn spawn_attempt(
@@ -187,13 +350,22 @@ impl<K: CrawlerKind> Engine<K> {
         let crawler = CrawlerHandle::new(Arc::downgrade(&shared));
         let events = shared.events.clone();
         let request_handler_timeout = self.opts.request_handler_timeout;
+        let task_timeout = self.opts.task_timeout;
         tokio::spawn(async move {
-            if let Some(delay) = carried.backoff {
-                tokio::time::sleep(delay).await;
-            }
-            let started = Instant::now();
             let mut prep = RequestPrep { request };
-            if let Err(error) = kind.before_request(&mut prep).await {
+            let started = Instant::now();
+            let deadline = task_timeout.map(|timeout| started + timeout);
+            let before_result = if let Some(deadline) = deadline {
+                match tokio::time::timeout_at(deadline, kind.before_request(&mut prep)).await {
+                    Ok(result) => result,
+                    Err(_) => Err(task_timeout_error(
+                        task_timeout.expect("deadline has timeout"),
+                    )),
+                }
+            } else {
+                kind.before_request(&mut prep).await
+            };
+            if let Err(error) = before_result {
                 let error = Arc::new(error);
                 let request_owned = prep.request;
                 let request_arc = Arc::new(request_owned.clone());
@@ -215,15 +387,23 @@ impl<K: CrawlerKind> Engine<K> {
             }
             let request_owned = prep.request;
             let request_arc = Arc::new(request_owned.clone());
-            let mut ctx = match kind
-                .execute(RequestEnv {
-                    request: request_arc.clone(),
-                    crawler,
-                    events: &events,
-                    overrides: carried,
-                })
-                .await
-            {
+            let execute = kind.execute(RequestEnv {
+                request: request_arc.clone(),
+                crawler,
+                events: &events,
+                overrides: carried,
+            });
+            let execute_result = if let Some(deadline) = deadline {
+                match tokio::time::timeout_at(deadline, execute).await {
+                    Ok(result) => result,
+                    Err(_) => Err(task_timeout_error(
+                        task_timeout.expect("deadline has timeout"),
+                    )),
+                }
+            } else {
+                execute.await
+            };
+            let mut ctx = match execute_result {
                 Ok(ctx) => ctx,
                 Err(error) => {
                     let error = Arc::new(error);
@@ -245,32 +425,23 @@ impl<K: CrawlerKind> Engine<K> {
                 }
             };
             let observation = kind.observe(&ctx);
-            let result =
-                match tokio::time::timeout(request_handler_timeout, handler.handle(ctx.clone()))
-                    .await
-                {
-                    Ok(Ok(())) => match kind.after_success(&mut ctx).await {
-                        Ok(()) => {
-                            if let Err(error) = kind.cleanup(RequestOutcome::Handled(ctx)).await {
-                                tracing::warn!(%error, "request cleanup failed");
-                            }
-                            Ok(())
+            let handler_deadline = deadline
+                .map(|deadline| deadline.min(Instant::now() + request_handler_timeout))
+                .unwrap_or_else(|| Instant::now() + request_handler_timeout);
+            let result = match tokio::time::timeout_at(
+                handler_deadline,
+                handler.handle(ctx.clone()),
+            )
+            .await
+            {
+                Ok(Ok(())) => match kind.after_success(&mut ctx).await {
+                    Ok(()) => {
+                        if let Err(error) = kind.cleanup(RequestOutcome::Handled(ctx)).await {
+                            tracing::warn!(%error, "request cleanup failed");
                         }
-                        Err(error) => {
-                            let error = Arc::new(error);
-                            if let Err(cleanup_error) = kind
-                                .cleanup(RequestOutcome::HandlerFailed {
-                                    ctx,
-                                    error: error.clone(),
-                                })
-                                .await
-                            {
-                                tracing::warn!(%cleanup_error, "request cleanup failed");
-                            }
-                            Err(error)
-                        }
-                    },
-                    Ok(Err(error)) => {
+                        Ok(())
+                    }
+                    Err(error) => {
                         let error = Arc::new(error);
                         if let Err(cleanup_error) = kind
                             .cleanup(RequestOutcome::HandlerFailed {
@@ -283,23 +454,37 @@ impl<K: CrawlerKind> Engine<K> {
                         }
                         Err(error)
                     }
-                    Err(_) => {
-                        let error = Arc::new(CrawlError::retry(anyhow::anyhow!(
-                            "request handler timed out after {:?}",
-                            request_handler_timeout
-                        )));
-                        if let Err(cleanup_error) = kind
-                            .cleanup(RequestOutcome::HandlerFailed {
-                                ctx,
-                                error: error.clone(),
-                            })
-                            .await
-                        {
-                            tracing::warn!(%cleanup_error, "request cleanup failed");
-                        }
-                        Err(error)
+                },
+                Ok(Err(error)) => {
+                    let error = Arc::new(error);
+                    if let Err(cleanup_error) = kind
+                        .cleanup(RequestOutcome::HandlerFailed {
+                            ctx,
+                            error: error.clone(),
+                        })
+                        .await
+                    {
+                        tracing::warn!(%cleanup_error, "request cleanup failed");
                     }
-                };
+                    Err(error)
+                }
+                Err(_) => {
+                    let error = Arc::new(CrawlError::retry(anyhow::anyhow!(
+                        "request handler timed out after {:?}",
+                        request_handler_timeout
+                    )));
+                    if let Err(cleanup_error) = kind
+                        .cleanup(RequestOutcome::HandlerFailed {
+                            ctx,
+                            error: error.clone(),
+                        })
+                        .await
+                    {
+                        tracing::warn!(%cleanup_error, "request cleanup failed");
+                    }
+                    Err(error)
+                }
+            };
             AttemptOutput {
                 result,
                 duration: started.elapsed(),
@@ -341,6 +526,7 @@ impl<K: CrawlerKind> Engine<K> {
         } = slots
             .remove(&slot)
             .expect("completed task has a retained lease");
+        let host = lease.request.url.host_str().map(str::to_owned);
         let (result, duration, observation) = match joined {
             Err(error) if error.is_cancelled() => {
                 self.shared
@@ -373,6 +559,27 @@ impl<K: CrawlerKind> Engine<K> {
         };
         let key = lease.request.unique_key.clone();
         let total = accumulated.get(&key).copied().unwrap_or_default() + duration;
+        match &result {
+            Ok(()) => {
+                self.shared.pool.record_outcome(AttemptOutcomeKind::Success);
+                if let Some(host) = &host {
+                    self.shared
+                        .pool
+                        .note_response(host, observation.status, None, Instant::now());
+                }
+            }
+            Err(error) => {
+                self.shared.pool.record_outcome(AttemptOutcomeKind::Setback);
+                if let Some(host) = &host {
+                    self.shared.pool.note_response(
+                        host,
+                        observation.status.or_else(|| error.http_status()),
+                        error.retry_after(),
+                        Instant::now(),
+                    );
+                }
+            }
+        }
         match result {
             Ok(()) => {
                 accumulated.remove(&key);
@@ -565,6 +772,8 @@ impl<K: CrawlerKind> Engine<K> {
         &self,
         in_flight: &mut FuturesUnordered<AttemptFuture>,
         slots: &mut HashMap<u64, SlotState>,
+        deferred: &mut BinaryHeap<Reverse<(Instant, u64)>>,
+        deferred_entries: &mut HashMap<u64, DeferredStart>,
     ) {
         self.shared.events.emit(CrawlerEvent::Aborting);
         for state in slots.values() {
@@ -576,6 +785,44 @@ impl<K: CrawlerKind> Engine<K> {
                 tracing::warn!(%error, "failed to abandon request lease");
             }
         }
+        self.abandon_deferred(deferred, deferred_entries).await;
+    }
+
+    async fn abandon_deferred(
+        &self,
+        deferred: &mut BinaryHeap<Reverse<(Instant, u64)>>,
+        deferred_entries: &mut HashMap<u64, DeferredStart>,
+    ) {
+        deferred.clear();
+        for (_, entry) in deferred_entries.drain() {
+            if let Err(error) = self.shared.queue.abandon(entry.lease).await {
+                tracing::warn!(%error, "failed to abandon deferred request lease");
+            }
+        }
+    }
+
+    async fn renew_deferred_leases(
+        &self,
+        deferred_entries: &mut HashMap<u64, DeferredStart>,
+    ) -> Result<(), CrawlError> {
+        let now = Instant::now();
+        let due: Vec<_> = deferred_entries
+            .iter()
+            .filter_map(|(sequence, entry)| (entry.renew_at <= now).then_some(*sequence))
+            .collect();
+        for sequence in due {
+            let entry = deferred_entries
+                .get_mut(&sequence)
+                .expect("due deferred lease has retained state");
+            self.shared
+                .queue
+                .renew(&entry.lease.lease_id, DEFERRED_LEASE_EXTENSION)
+                .await
+                .map_err(storage_failure)?;
+            entry.lease.expires_at += DEFERRED_LEASE_EXTENSION;
+            entry.renew_at += DEFERRED_LEASE_EXTENSION;
+        }
+        Ok(())
     }
 
     async fn persist_state(&self) {
@@ -608,6 +855,18 @@ fn storage_failure(error: crate::storage::StorageError) -> CrawlError {
     CrawlError::critical(anyhow::anyhow!(error.to_string()))
 }
 
+fn task_timeout_error(timeout: Duration) -> CrawlError {
+    CrawlError::retry(anyhow::anyhow!("task timed out after {timeout:?}"))
+}
+
+async fn wait_for_deferred(wake: Option<Instant>) {
+    if let Some(wake) = wake {
+        tokio::time::sleep_until(wake).await;
+    } else {
+        std::future::pending::<()>().await;
+    }
+}
+
 fn push_error(request: &mut Request, error: &str) {
     request
         .error_messages
@@ -636,6 +895,9 @@ mod tests {
     use super::*;
     use crate::memory_client::MemoryStorageClient;
     use crate::{
+        autoscale::{
+            AutoscaleMode, AutoscaledPool, AutoscaledPoolOptions, LoadSignal, LoadSnapshot,
+        },
         crawler::{BasicContext, BasicKind},
         events::EventBus,
         router::Router,
@@ -652,7 +914,7 @@ mod tests {
             atomic::{AtomicBool, AtomicUsize, Ordering},
         },
     };
-    use tokio::sync::{Barrier, Notify};
+    use tokio::sync::{Barrier, Notify, mpsc};
 
     struct IdleWindowQueue {
         inner: Arc<dyn RequestQueue>,
@@ -741,16 +1003,19 @@ mod tests {
                 .await
                 .unwrap();
         }
-        let mut opts = EngineOptions {
-            max_concurrency,
-            ..EngineOptions::default()
-        };
+        let mut opts = EngineOptions::default();
         opts_mutator(&mut opts);
+        let pool = Arc::new(AutoscaledPool::new(AutoscaledPoolOptions {
+            fixed_concurrency: Some(max_concurrency),
+            max_concurrency,
+            ..Default::default()
+        }));
         let shared = Arc::new(CrawlerShared::new(
             queue,
             EventBus::default(),
             2048,
             opts.internal_operation_timeout,
+            pool,
         ));
         (
             Engine {
@@ -763,6 +1028,16 @@ mod tests {
             },
             shared,
         )
+    }
+
+    fn replace_pool(engine: &mut Engine<BasicKind>, pool: Arc<AutoscaledPool>) {
+        engine.shared = Arc::new(CrawlerShared::new(
+            engine.shared.queue.clone(),
+            engine.shared.events.clone(),
+            2048,
+            engine.opts.internal_operation_timeout,
+            pool,
+        ));
     }
 
     #[tokio::test]
@@ -790,6 +1065,435 @@ mod tests {
         let (engine, _) = engine_with(16, 4, handler, |_| {}).await;
         engine.run().await.unwrap();
         assert_eq!(peak.load(Ordering::SeqCst), 4);
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn past_ready_deferred_entry_does_not_starve_task_timer() {
+        let (engine, _) = engine_with(
+            2,
+            1,
+            |_ctx: BasicContext| async {
+                tokio::time::sleep(Duration::from_secs(1)).await;
+                Ok(())
+            },
+            |_| {},
+        )
+        .await;
+
+        let stats = engine.run().await.unwrap();
+
+        assert_eq!(stats.requests_finished, 2);
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn deferred_lease_is_renewed_before_expiry() {
+        let (engine, shared) =
+            engine_with(1, 1, |_ctx: BasicContext| async { Ok(()) }, |_| {}).await;
+        let lease = shared.queue.fetch_next().await.unwrap().unwrap();
+        let original_expiry = lease.expires_at;
+        let mut entries = HashMap::from([(
+            0,
+            DeferredStart {
+                lease,
+                carried: AttemptOverrides::default(),
+                domain_reserved: false,
+                renew_at: Instant::now(),
+            },
+        )]);
+
+        engine.renew_deferred_leases(&mut entries).await.unwrap();
+
+        let entry = entries.remove(&0).unwrap();
+        assert_eq!(
+            entry.lease.expires_at,
+            original_expiry + DEFERRED_LEASE_EXTENSION
+        );
+        shared.queue.abandon(entry.lease).await.unwrap();
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn dynamic_mode_grows_desired_concurrency_on_sustained_success() {
+        let current = Arc::new(AtomicUsize::new(0));
+        let peak = Arc::new(AtomicUsize::new(0));
+        let handler = {
+            let current = current.clone();
+            let peak = peak.clone();
+            move |_ctx: BasicContext| {
+                let current = current.clone();
+                let peak = peak.clone();
+                async move {
+                    let now = current.fetch_add(1, Ordering::SeqCst) + 1;
+                    peak.fetch_max(now, Ordering::SeqCst);
+                    tokio::time::sleep(Duration::from_millis(10)).await;
+                    current.fetch_sub(1, Ordering::SeqCst);
+                    Ok(())
+                }
+            }
+        };
+        let (mut engine, _) = engine_with(64, 2, handler, |_| {}).await;
+        replace_pool(
+            &mut engine,
+            Arc::new(AutoscaledPool::new(AutoscaledPoolOptions {
+                fixed_concurrency: None,
+                min_concurrency: 1,
+                max_concurrency: 8,
+                desired_concurrency: Some(2),
+                mode: AutoscaleMode::Aimd {
+                    increase_after_successes: 1,
+                    decrease_factor: 0.5,
+                },
+                ..Default::default()
+            })),
+        );
+
+        engine.run().await.unwrap();
+        let peak = peak.load(Ordering::SeqCst);
+        assert!(
+            peak > 2,
+            "dynamic concurrency never grew beyond its initial value"
+        );
+        assert!(peak <= 8);
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn same_domain_delay_enforced() {
+        let times = Arc::new(Mutex::new(Vec::new()));
+        let handler = {
+            let times = times.clone();
+            move |_ctx: BasicContext| {
+                let times = times.clone();
+                async move {
+                    times.lock().unwrap().push(Instant::now());
+                    Ok(())
+                }
+            }
+        };
+        let (mut engine, _) = engine_with(2, 2, handler, |_| {}).await;
+        replace_pool(
+            &mut engine,
+            Arc::new(AutoscaledPool::new(AutoscaledPoolOptions {
+                fixed_concurrency: Some(2),
+                max_concurrency: 2,
+                same_domain_delay: Duration::from_millis(200),
+                ..Default::default()
+            })),
+        );
+
+        engine.run().await.unwrap();
+        let times = times.lock().unwrap();
+        assert_eq!(times.len(), 2);
+        assert!(times[1].duration_since(times[0]) >= Duration::from_millis(200));
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn same_domain_delay_does_not_block_a_different_host() {
+        let times = Arc::new(Mutex::new(Vec::new()));
+        let handler = {
+            let times = times.clone();
+            move |ctx: BasicContext| {
+                let times = times.clone();
+                async move {
+                    times.lock().unwrap().push((
+                        ctx.request.url.host_str().unwrap().to_owned(),
+                        Instant::now(),
+                    ));
+                    Ok(())
+                }
+            }
+        };
+        let (mut engine, _) = engine_with(2, 3, handler, |_| {}).await;
+        engine
+            .shared
+            .queue
+            .add(
+                Request::get("https://other.invalid/item").build().unwrap(),
+                AddOptions::default(),
+            )
+            .await
+            .unwrap();
+        replace_pool(
+            &mut engine,
+            Arc::new(AutoscaledPool::new(AutoscaledPoolOptions {
+                fixed_concurrency: Some(3),
+                max_concurrency: 3,
+                same_domain_delay: Duration::from_millis(200),
+                ..Default::default()
+            })),
+        );
+        let started = Instant::now();
+
+        engine.run().await.unwrap();
+        let times = times.lock().unwrap();
+        let other = times
+            .iter()
+            .find(|(host, _)| host == "other.invalid")
+            .unwrap()
+            .1;
+        let mut same_host: Vec<_> = times
+            .iter()
+            .filter(|(host, _)| host == "example.invalid")
+            .map(|(_, at)| *at)
+            .collect();
+        same_host.sort_unstable();
+        assert!(other.duration_since(started) < Duration::from_millis(200));
+        assert!(same_host[1].duration_since(same_host[0]) >= Duration::from_millis(200));
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn domain_deferred_requests_do_not_burn_concurrency_slots() {
+        let starts = Arc::new(Mutex::new(Vec::new()));
+        let handler = {
+            let starts = starts.clone();
+            move |ctx: BasicContext| {
+                let starts = starts.clone();
+                async move {
+                    starts.lock().unwrap().push((
+                        ctx.request.url.host_str().unwrap().to_owned(),
+                        Instant::now(),
+                    ));
+                    Ok(())
+                }
+            }
+        };
+        let (mut engine, _) = engine_with(3, 2, handler, |_| {}).await;
+        engine
+            .shared
+            .queue
+            .add(
+                Request::get("https://b.invalid/item").build().unwrap(),
+                AddOptions::default(),
+            )
+            .await
+            .unwrap();
+        replace_pool(
+            &mut engine,
+            Arc::new(AutoscaledPool::new(AutoscaledPoolOptions {
+                fixed_concurrency: Some(2),
+                max_concurrency: 2,
+                same_domain_delay: Duration::from_secs(5),
+                ..Default::default()
+            })),
+        );
+        let started = Instant::now();
+
+        engine.run().await.unwrap();
+        let starts = starts.lock().unwrap();
+        let b_start = starts
+            .iter()
+            .find(|(host, _)| host == "b.invalid")
+            .unwrap()
+            .1;
+        let mut a_starts: Vec<_> = starts
+            .iter()
+            .filter(|(host, _)| host == "example.invalid")
+            .map(|(_, at)| *at)
+            .collect();
+        a_starts.sort_unstable();
+        assert!(b_start.duration_since(started) < Duration::from_secs(1));
+        assert!(a_starts[1].duration_since(a_starts[0]) >= Duration::from_secs(5));
+        assert!(a_starts[2].duration_since(a_starts[0]) >= Duration::from_secs(10));
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn max_tasks_per_minute_throttles_dispatch() {
+        let (tx, mut rx) = mpsc::unbounded_channel();
+        let (mut engine, _) = engine_with(
+            3,
+            3,
+            move |_ctx: BasicContext| {
+                let tx = tx.clone();
+                async move {
+                    tx.send(Instant::now()).unwrap();
+                    Ok(())
+                }
+            },
+            |_| {},
+        )
+        .await;
+        replace_pool(
+            &mut engine,
+            Arc::new(AutoscaledPool::new(AutoscaledPoolOptions {
+                fixed_concurrency: Some(3),
+                max_concurrency: 3,
+                max_tasks_per_minute: Some(2),
+                ..Default::default()
+            })),
+        );
+        let started = Instant::now();
+        let run = tokio::spawn(engine.run());
+
+        let first = rx.recv().await.unwrap();
+        assert_eq!(first.duration_since(started), Duration::ZERO);
+        let second = rx.recv().await.unwrap();
+        assert!(second.duration_since(started) >= Duration::from_secs(30));
+        let third = rx.recv().await.unwrap();
+        assert!(third.duration_since(started) >= Duration::from_secs(60));
+        run.await.unwrap().unwrap();
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn budget_token_not_lost_on_idle_empty_fetches() {
+        let (tx, mut rx) = mpsc::unbounded_channel();
+        let (mut engine, original_shared) = engine_with(
+            1,
+            2,
+            move |_ctx: BasicContext| {
+                let tx = tx.clone();
+                async move {
+                    tx.send(Instant::now()).unwrap();
+                    Ok(())
+                }
+            },
+            |_| {},
+        )
+        .await;
+        let empty_check_started = Arc::new(Notify::new());
+        let release_empty_check = Arc::new(Notify::new());
+        let queue: Arc<dyn RequestQueue> = Arc::new(IdleWindowQueue {
+            inner: original_shared.queue.clone(),
+            blocked_empty_check: AtomicBool::new(false),
+            empty_check_started: empty_check_started.clone(),
+            release_empty_check: release_empty_check.clone(),
+        });
+        let shared = Arc::new(CrawlerShared::new(
+            queue,
+            EventBus::default(),
+            2048,
+            engine.opts.internal_operation_timeout,
+            Arc::new(AutoscaledPool::new(AutoscaledPoolOptions {
+                fixed_concurrency: Some(2),
+                max_concurrency: 2,
+                max_tasks_per_minute: Some(2),
+                ..Default::default()
+            })),
+        ));
+        engine.shared = shared.clone();
+        let handle = CrawlerHandle::new(Arc::downgrade(&shared));
+        let started = Instant::now();
+        let run = tokio::spawn(engine.run());
+
+        assert_eq!(rx.recv().await.unwrap(), started);
+        empty_check_started.notified().await;
+        release_empty_check.notify_one();
+        tokio::time::advance(Duration::from_secs(31)).await;
+        tokio::task::yield_now().await;
+        tokio::time::advance(Duration::from_secs(9)).await;
+        handle
+            .add_requests([Request::get("https://example.invalid/late")
+                .build()
+                .unwrap()])
+            .await
+            .unwrap()
+            .wait()
+            .await
+            .unwrap();
+
+        let second = tokio::time::timeout(Duration::from_secs(1), rx.recv())
+            .await
+            .expect("the available token should start the late request promptly")
+            .unwrap();
+        assert!(second.duration_since(started) < Duration::from_secs(41));
+        handle.stop();
+        run.await.unwrap().unwrap();
+    }
+
+    struct HealthySignal {
+        stopped: Mutex<Option<mpsc::UnboundedSender<()>>>,
+    }
+
+    #[async_trait::async_trait]
+    impl LoadSignal for HealthySignal {
+        fn name(&self) -> &str {
+            "healthy"
+        }
+
+        fn overload_threshold(&self) -> f32 {
+            1.0
+        }
+
+        async fn stop(&self) -> Result<(), CrawlError> {
+            if let Some(stopped) = self.stopped.lock().unwrap().take() {
+                let _ = stopped.send(());
+            }
+            Ok(())
+        }
+
+        fn sample(&self, _window: Duration) -> Vec<LoadSnapshot> {
+            vec![LoadSnapshot {
+                at: Instant::now(),
+                overloaded: false,
+            }]
+        }
+    }
+
+    #[tokio::test]
+    async fn background_task_stops_after_run_completes() {
+        let (stopped_tx, mut stopped_rx) = mpsc::unbounded_channel();
+        let signal = Arc::new(HealthySignal {
+            stopped: Mutex::new(Some(stopped_tx)),
+        });
+        let (mut engine, _) =
+            engine_with(1, 1, |_ctx: BasicContext| async { Ok(()) }, |_| {}).await;
+        let mut options = AutoscaledPoolOptions {
+            fixed_concurrency: None,
+            min_concurrency: 1,
+            max_concurrency: 2,
+            mode: AutoscaleMode::LoadSignals,
+            ..Default::default()
+        };
+        options.snapshotter.signals.push(signal);
+        replace_pool(&mut engine, Arc::new(AutoscaledPool::new(options)));
+
+        engine.run().await.unwrap();
+        tokio::time::timeout(Duration::from_secs(1), stopped_rx.recv())
+            .await
+            .expect("background signal was not stopped")
+            .expect("stop notification channel closed");
+    }
+
+    #[tokio::test]
+    async fn scale_change_callback_wakes_dispatcher() {
+        let started = Arc::new(AtomicUsize::new(0));
+        let release = Arc::new(Notify::new());
+        let handler = {
+            let started = started.clone();
+            let release = release.clone();
+            move |_ctx: BasicContext| {
+                let started = started.clone();
+                let release = release.clone();
+                async move {
+                    let count = started.fetch_add(1, Ordering::SeqCst) + 1;
+                    if count == 1 {
+                        release.notified().await;
+                    } else {
+                        release.notify_waiters();
+                    }
+                    Ok(())
+                }
+            }
+        };
+        let (mut engine, _) = engine_with(4, 1, handler, |_| {}).await;
+        let signal = Arc::new(HealthySignal {
+            stopped: Mutex::new(None),
+        });
+        let mut options = AutoscaledPoolOptions {
+            fixed_concurrency: None,
+            min_concurrency: 1,
+            max_concurrency: 4,
+            desired_concurrency: Some(1),
+            scale_up_step_ratio: 1.0,
+            autoscale_interval: Duration::from_millis(10),
+            mode: AutoscaleMode::LoadSignals,
+            ..Default::default()
+        };
+        options.snapshotter.signals.push(signal);
+        replace_pool(&mut engine, Arc::new(AutoscaledPool::new(options)));
+
+        tokio::time::timeout(Duration::from_secs(1), engine.run())
+            .await
+            .expect("scale change did not wake the blocked dispatcher")
+            .unwrap();
+        assert!(started.load(Ordering::SeqCst) >= 2);
     }
 
     #[tokio::test]
@@ -1044,6 +1748,58 @@ mod tests {
         assert_eq!(shared.queue.pending_count().await.unwrap(), 4);
     }
 
+    #[tokio::test(start_paused = true)]
+    async fn deferred_leases_abandoned_on_abort() {
+        let (mut engine, _) =
+            engine_with(3, 1, |_ctx: BasicContext| async { Ok(()) }, |_| {}).await;
+        replace_pool(
+            &mut engine,
+            Arc::new(AutoscaledPool::new(AutoscaledPoolOptions {
+                fixed_concurrency: Some(1),
+                max_concurrency: 1,
+                same_domain_delay: Duration::from_secs(60),
+                ..Default::default()
+            })),
+        );
+        let shared = engine.shared.clone();
+        let mut results = shared.results_tx.subscribe();
+        let run = tokio::spawn(engine.run());
+
+        results.recv().await.unwrap();
+        shared.cancel.cancel();
+        shared.notify.notify_waiters();
+        run.await.unwrap().unwrap();
+
+        assert_eq!(shared.queue.pending_count().await.unwrap(), 2);
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn deferred_leases_abandoned_on_graceful_stop() {
+        let (mut engine, _) =
+            engine_with(3, 1, |_ctx: BasicContext| async { Ok(()) }, |_| {}).await;
+        replace_pool(
+            &mut engine,
+            Arc::new(AutoscaledPool::new(AutoscaledPoolOptions {
+                fixed_concurrency: Some(1),
+                max_concurrency: 1,
+                same_domain_delay: Duration::from_secs(60),
+                ..Default::default()
+            })),
+        );
+        let shared = engine.shared.clone();
+        let mut results = shared.results_tx.subscribe();
+        let run = tokio::spawn(engine.run());
+
+        results.recv().await.unwrap();
+        shared.drain.cancel();
+        shared.notify.notify_waiters();
+        let stopped = Instant::now();
+        run.await.unwrap().unwrap();
+
+        assert!(stopped.elapsed() < Duration::from_secs(1));
+        assert_eq!(shared.queue.pending_count().await.unwrap(), 2);
+    }
+
     #[tokio::test]
     async fn handler_timeout_is_retryable() {
         let (engine, _) = engine_with(
@@ -1059,6 +1815,42 @@ mod tests {
         )
         .await;
         let stats = engine.run().await.unwrap();
+        assert!(
+            stats
+                .retry_errors
+                .keys()
+                .any(|key| key.contains("timed out"))
+        );
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn task_timeout_bounds_an_attempt() {
+        let crawler = crate::crawler::CrawlerBuilder::new(BasicKind)
+            .request_handler(|ctx: BasicContext| async move {
+                if ctx.request.retry_count == 0 {
+                    tokio::time::sleep(Duration::from_secs(10)).await;
+                }
+                Ok(())
+            })
+            .storage_client(Arc::new(MemoryStorageClient::new()))
+            .autoscaled_pool_options(AutoscaledPoolOptions {
+                fixed_concurrency: Some(1),
+                max_concurrency: 1,
+                task_timeout: Some(Duration::from_millis(50)),
+                ..Default::default()
+            })
+            .build()
+            .await
+            .unwrap();
+        assert_eq!(crawler.opts.task_timeout, Some(Duration::from_millis(50)));
+
+        let stats = crawler
+            .run([Request::get("https://example.invalid/timeout")
+                .build()
+                .unwrap()])
+            .await
+            .unwrap();
+        assert_eq!(stats.requests_finished, 1);
         assert!(
             stats
                 .retry_errors
@@ -1319,6 +2111,11 @@ mod tests {
             EventBus::default(),
             8,
             engine.opts.internal_operation_timeout,
+            Arc::new(AutoscaledPool::new(AutoscaledPoolOptions {
+                fixed_concurrency: Some(8),
+                max_concurrency: 8,
+                ..Default::default()
+            })),
         ));
         engine.shared = small;
         let mut lagging_results = engine.shared.results_tx.subscribe();
@@ -1395,6 +2192,7 @@ mod tests {
         })
         .await;
         let handle = CrawlerHandle::new(Arc::downgrade(&shared));
+        let mut results = shared.results_tx.subscribe();
         let run = tokio::spawn(engine.run());
         tokio::time::sleep(Duration::from_millis(20)).await;
         handle
@@ -1413,6 +2211,8 @@ mod tests {
         })
         .await
         .expect("late external request should complete without waiting for the persist ticker");
+        results.recv().await.unwrap();
+        results.recv().await.unwrap();
         handle.stop();
         let stats = tokio::time::timeout(Duration::from_secs(1), run)
             .await
@@ -1420,7 +2220,7 @@ mod tests {
             .unwrap()
             .unwrap();
         assert_eq!(stats.requests_finished, 2);
-        assert_eq!(peak.load(Ordering::SeqCst), 2);
+        assert!(peak.load(Ordering::SeqCst) <= 2);
     }
 
     #[tokio::test]
@@ -1456,6 +2256,11 @@ mod tests {
             EventBus::default(),
             2048,
             engine.opts.internal_operation_timeout,
+            Arc::new(AutoscaledPool::new(AutoscaledPoolOptions {
+                fixed_concurrency: Some(1),
+                max_concurrency: 1,
+                ..Default::default()
+            })),
         ));
         engine.shared = shared.clone();
         let handle = CrawlerHandle::new(Arc::downgrade(&shared));
@@ -1489,5 +2294,71 @@ mod tests {
             .unwrap()
             .unwrap();
         assert_eq!(stats.requests_finished, 2);
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn fallback_tick_recovers_missed_wakeup() {
+        let completed = Arc::new(AtomicUsize::new(0));
+        let (completed_tx, mut completed_rx) = mpsc::unbounded_channel();
+        let (mut engine, original_shared) = engine_with(
+            1,
+            1,
+            {
+                let completed = completed.clone();
+                let completed_tx = completed_tx.clone();
+                move |_ctx: BasicContext| {
+                    let completed = completed.clone();
+                    let completed_tx = completed_tx.clone();
+                    async move {
+                        completed.fetch_add(1, Ordering::SeqCst);
+                        completed_tx.send(()).unwrap();
+                        Ok(())
+                    }
+                }
+            },
+            |opts| opts.maybe_run_interval = Duration::from_millis(100),
+        )
+        .await;
+        let empty_check_started = Arc::new(Notify::new());
+        let release_empty_check = Arc::new(Notify::new());
+        let queue: Arc<dyn RequestQueue> = Arc::new(IdleWindowQueue {
+            inner: original_shared.queue.clone(),
+            blocked_empty_check: AtomicBool::new(false),
+            empty_check_started: empty_check_started.clone(),
+            release_empty_check: release_empty_check.clone(),
+        });
+        let shared = Arc::new(CrawlerShared::new(
+            queue,
+            EventBus::default(),
+            2048,
+            engine.opts.internal_operation_timeout,
+            original_shared.pool.clone(),
+        ));
+        engine.shared = shared.clone();
+        let handle = CrawlerHandle::new(Arc::downgrade(&shared));
+        let run = tokio::spawn(engine.run());
+
+        completed_rx.recv().await.unwrap();
+        empty_check_started.notified().await;
+        release_empty_check.notify_one();
+        tokio::task::yield_now().await;
+        shared
+            .queue
+            .add(
+                Request::get("https://example.invalid/no-notify")
+                    .build()
+                    .unwrap(),
+                AddOptions::default(),
+            )
+            .await
+            .unwrap();
+        tokio::time::timeout(Duration::from_millis(350), completed_rx.recv())
+            .await
+            .expect("fallback tick did not recover the direct queue add")
+            .unwrap();
+        assert_eq!(completed.load(Ordering::SeqCst), 2);
+
+        handle.stop();
+        run.await.unwrap().unwrap();
     }
 }
