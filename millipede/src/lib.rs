@@ -18,12 +18,18 @@ pub use millipede_storage_fs as storage_fs;
 pub use millipede_storage_memory as storage_memory;
 
 /// Curated public API for ergonomic `millipede::Type` imports.
+pub use millipede_core::autoscale::{
+    AimdController, AutoscaleMode, AutoscaledPool, AutoscaledPoolOptions, ClientLoadSignal,
+    ClientLoadSignalHandle, CpuLoadSignal, CpuLoadSignalOptions, LoadSignal, LoadSnapshot,
+    MemoryLoadSignal, MemoryLoadSignalOptions, ScaleDecision, Snapshotter, SnapshotterOptions,
+    SystemStatus, SystemStatusOptions, TokioRuntimeLoadSignal, TokioRuntimeLoadSignalOptions,
+};
 pub use millipede_core::config::{Configuration, ConfigurationBuilder, LogLevel};
 pub use millipede_core::cookies::{CookieJar, CookieJarError};
 pub use millipede_core::crawler::{
-    AttemptObservation, BasicContext, BasicCrawler, BasicKind, Crawler, CrawlerBuildError,
-    CrawlerBuilder, CrawlerEnv, CrawlerHandle, CrawlerKind, IntoStartRequest, IntoStartRequests,
-    RequestEnv, RequestOutcome, RequestPrep,
+    AttemptObservation, AutoscalerSnapshot, BasicContext, BasicCrawler, BasicKind, Crawler,
+    CrawlerBuildError, CrawlerBuilder, CrawlerEnv, CrawlerHandle, CrawlerKind, IntoStartRequest,
+    IntoStartRequests, RequestEnv, RequestOutcome, RequestPrep,
 };
 pub use millipede_core::enqueue::{
     EnqueueLinker, EnqueueLinksOptions, EnqueueResult, SkipReason, SkippedUrl,

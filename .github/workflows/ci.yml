@@ -59,6 +59,7 @@ jobs:
       - run: cargo run -p millipede --example phase0_hello
       - run: cargo run -p millipede --example phase1_queue_demo
       - run: cargo run -p millipede --example basic_engine
+      - run: cargo run -p millipede --example autoscale_demo
 
   doc:
     name: rustdoc (${{ matrix.os }})

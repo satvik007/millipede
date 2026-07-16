@@ -54,3 +54,8 @@ required-features = ["storage-memory"]
 name = "http_crawl"
 path = "../examples/http_crawl.rs"
 required-features = ["http", "storage-memory"]
+
+[[example]]
+name = "autoscale_demo"
+path = "../examples/autoscale_demo.rs"
+required-features = ["http", "storage-memory"]
