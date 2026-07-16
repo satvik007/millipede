@@ -30,6 +30,14 @@ console-subscriber = "0.4"
 proptest = "1"
 tempfile = "3"
 sysinfo = { version = "0.36", default-features = false, features = ["system"] }
+globset = "0.4"
+regex = "1"
+psl = "2"
+quick-xml = "0.37"
+flate2 = "1"
+scraper = { version = "0.24", features = ["atomic"] }
+criterion = "0.5"
+lol_html = "=2.8.1"
 
 [workspace.lints.rust]
 unsafe_code = "deny"

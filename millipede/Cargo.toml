@@ -25,6 +25,10 @@ millipede-fingerprint = { path = "../crates/millipede-fingerprint", version = "0
 anyhow = { workspace = true }
 tokio = { workspace = true }
 wiremock = { workspace = true }
+millipede-storage-fs = { path = "../crates/millipede-storage-fs" }
+tempfile = { workspace = true }
+serde_json = { workspace = true }
+url = { workspace = true }
 
 [features]
 default = ["http", "html", "storage-memory"]

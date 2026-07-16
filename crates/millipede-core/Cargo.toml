@@ -27,6 +27,11 @@ futures-util = { workspace = true }
 tracing = { workspace = true }
 cookie_store = { workspace = true }
 sysinfo = { workspace = true }
+globset = { workspace = true }
+regex = { workspace = true }
+psl = { workspace = true }
+quick-xml = { workspace = true }
+flate2 = { workspace = true }
 
 [dev-dependencies]
 proptest = { workspace = true }
