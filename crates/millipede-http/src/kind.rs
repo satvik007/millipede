@@ -146,7 +146,7 @@ impl fmt::Debug for HttpContext {
 /// ```
 pub struct HttpKind {
     client: Arc<dyn HttpClient>,
-    sessions: Option<Arc<SessionPool>>,
+    sessions: SessionMode,
     proxies: ProxyBuckets,
     proxy_strategy: Option<Arc<dyn ProxyStrategy>>,
     user_agents: Vec<String>,
@@ -160,6 +160,12 @@ pub struct HttpKind {
     persist_task: Mutex<Option<tokio::task::JoinHandle<()>>>,
 }
 
+enum SessionMode {
+    Disabled,
+    Owned(Arc<SessionPool>),
+    Shared(Arc<SessionPool>),
+}
+
 impl HttpKind {
     /// Starts configuring an HTTP crawler kind.
     pub fn builder() -> HttpKindBuilder {
@@ -169,6 +175,13 @@ impl HttpKind {
     /// Creates an HTTP kind with all defaults.
     pub fn new() -> Result<Self, HttpClientError> {
         Self::builder().build()
+    }
+
+    fn session_pool(&self) -> Option<&Arc<SessionPool>> {
+        match &self.sessions {
+            SessionMode::Owned(pool) | SessionMode::Shared(pool) => Some(pool),
+            SessionMode::Disabled => None,
+        }
     }
 
     fn classify_client_error(error: HttpClientError) -> CrawlError {
@@ -233,6 +246,7 @@ pub struct HttpKindBuilder {
     http_client: Option<Arc<dyn HttpClient>>,
     coalesce_in_flight: bool,
     session_pool: Option<SessionPoolOptions>,
+    shared_session_pool: Option<Arc<SessionPool>>,
     proxies: ProxyBuckets,
     proxy_strategy: Option<Arc<dyn ProxyStrategy>>,
     user_agents: Vec<String>,
@@ -249,6 +263,7 @@ impl Default for HttpKindBuilder {
             http_client: None,
             coalesce_in_flight: false,
             session_pool: Some(SessionPoolOptions::default()),
+            shared_session_pool: None,
             proxies: ProxyBuckets::default(),
             proxy_strategy: None,
             user_agents: vec!["millipede/0.1 (+https://github.com/satvik007/millipede)".to_owned()],
@@ -277,6 +292,16 @@ impl HttpKindBuilder {
     /// Enables sessions with the supplied pool options.
     pub fn session_pool(mut self, options: SessionPoolOptions) -> Self {
         self.session_pool = Some(options);
+        self
+    }
+
+    /// Uses an existing session pool without managing its persistence lifecycle.
+    ///
+    /// With a shared pool, the component that owns the sharing (for example, the Phase 6 smart
+    /// kind) attaches persistence exactly once. Otherwise, two kinds would double-restore and
+    /// double-persist the same pool.
+    pub fn shared_session_pool(mut self, pool: Arc<SessionPool>) -> Self {
+        self.shared_session_pool = Some(pool);
         self
     }
 
@@ -357,11 +382,16 @@ impl HttpKindBuilder {
         } else {
             client
         };
+        let sessions = if let Some(pool) = self.shared_session_pool {
+            SessionMode::Shared(pool)
+        } else if let Some(options) = self.session_pool {
+            SessionMode::Owned(Arc::new(SessionPool::new(options)))
+        } else {
+            SessionMode::Disabled
+        };
         Ok(HttpKind {
             client,
-            sessions: self
-                .session_pool
-                .map(|options| Arc::new(SessionPool::new(options))),
+            sessions,
             proxies: self.proxies,
             proxy_strategy: self.proxy_strategy,
             user_agents: self.user_agents,
@@ -404,7 +434,7 @@ impl CrawlerKind for HttpKind {
                 .storage
                 .set(StorageHandle::new(client, dataset, kvs.clone(), queue));
 
-            if let Some(pool) = &self.sessions {
+            if let SessionMode::Owned(pool) = &self.sessions {
                 pool.attach_persistence(kvs);
                 pool.restore().await?;
                 let pool = Arc::clone(pool);
@@ -437,7 +467,7 @@ impl CrawlerKind for HttpKind {
         env: RequestEnv<'a>,
     ) -> BoxFuture<'a, Result<Self::Context, CrawlError>> {
         Box::pin(async move {
-            let session = if let Some(pool) = &self.sessions {
+            let session = if let Some(pool) = self.session_pool() {
                 Some(pool.get_session(None).await)
             } else {
                 None
@@ -569,7 +599,7 @@ impl CrawlerKind for HttpKind {
             {
                 task.abort();
             }
-            if let Some(pool) = &self.sessions {
+            if let SessionMode::Owned(pool) = &self.sessions {
                 if let Err(error) = pool.persist().await {
                     tracing::warn!(%error, "final session pool persistence failed");
                 }

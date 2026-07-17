@@ -12,6 +12,7 @@ use millipede_core::{
     errors::CrawlError,
     handler::FailedRequestContext,
     http_client::{HttpClient, HttpClientError, HttpRequest, HttpResponse, StreamingResponse},
+    session::{SessionPool, SessionPoolOptions},
     storage::{DatasetExt, ListOptions, StorageClient},
 };
 use millipede_html::{HtmlContext, HtmlError, HtmlKind};
@@ -19,6 +20,7 @@ use millipede_storage_memory::MemoryStorageClient;
 use scraper::Selector;
 use serde_json::json;
 use url::Url;
+use wiremock::{Mock, MockServer, ResponseTemplate, matchers::path};
 
 fn url(path: &str) -> Url {
     Url::parse(&format!("https://example.test{path}")).expect("test URL must parse")
@@ -319,5 +321,38 @@ async fn cloning_context_shares_parsed_document() -> Result<(), Box<dyn std::err
 
     assert_eq!(stats.requests_finished, 1);
     assert!(*shared.lock().expect("shared mutex poisoned"));
+    Ok(())
+}
+
+#[tokio::test]
+async fn shared_session_pool_reaches_http_layer() -> Result<(), Box<dyn std::error::Error>> {
+    let server = MockServer::start().await;
+    Mock::given(path("/page"))
+        .respond_with(
+            ResponseTemplate::new(200)
+                .insert_header("Set-Cookie", "shared=1; Path=/")
+                .set_body_raw("<html><body>shared pool</body></html>", "text/html"),
+        )
+        .mount(&server)
+        .await;
+    let pool = Arc::new(SessionPool::new(
+        SessionPoolOptions::default().with_max_pool_size(1),
+    ));
+    let crawler = Crawler::builder(
+        HtmlKind::builder()
+            .shared_session_pool(pool.clone())
+            .build()?,
+    )
+    .request_handler(|_: HtmlContext| async { Ok(()) })
+    .storage_client(Arc::new(MemoryStorageClient::new()))
+    .build()
+    .await?;
+
+    crawler
+        .run([Url::parse(&format!("{}/page", server.uri()))?])
+        .await?;
+
+    let session = pool.get_session(None).await;
+    assert!(session.cookie_jar().cookie_count() > 0);
     Ok(())
 }

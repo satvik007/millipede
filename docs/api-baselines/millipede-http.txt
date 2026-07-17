@@ -69,6 +69,7 @@ pub fn millipede_http::HttpKindBuilder::retry_server_errors(self, bool) -> Self
 pub fn millipede_http::HttpKindBuilder::retry_status_codes(self, impl core::iter::traits::collect::IntoIterator<Item = u16>) -> Self
 pub fn millipede_http::HttpKindBuilder::session_pool(self, millipede_core::session::SessionPoolOptions) -> Self
 pub fn millipede_http::HttpKindBuilder::session_status_codes(self, impl core::iter::traits::collect::IntoIterator<Item = u16>) -> Self
+pub fn millipede_http::HttpKindBuilder::shared_session_pool(self, alloc::sync::Arc<millipede_core::session::SessionPool>) -> Self
 pub fn millipede_http::HttpKindBuilder::user_agents<I, U>(self, I) -> Self where I: core::iter::traits::collect::IntoIterator<Item = U>, U: core::convert::Into<alloc::string::String>
 impl core::default::Default for millipede_http::HttpKindBuilder
 pub fn millipede_http::HttpKindBuilder::default() -> Self
@@ -188,6 +189,7 @@ pub fn millipede_http::HttpKindBuilder::retry_server_errors(self, bool) -> Self
 pub fn millipede_http::HttpKindBuilder::retry_status_codes(self, impl core::iter::traits::collect::IntoIterator<Item = u16>) -> Self
 pub fn millipede_http::HttpKindBuilder::session_pool(self, millipede_core::session::SessionPoolOptions) -> Self
 pub fn millipede_http::HttpKindBuilder::session_status_codes(self, impl core::iter::traits::collect::IntoIterator<Item = u16>) -> Self
+pub fn millipede_http::HttpKindBuilder::shared_session_pool(self, alloc::sync::Arc<millipede_core::session::SessionPool>) -> Self
 pub fn millipede_http::HttpKindBuilder::user_agents<I, U>(self, I) -> Self where I: core::iter::traits::collect::IntoIterator<Item = U>, U: core::convert::Into<alloc::string::String>
 impl core::default::Default for millipede_http::HttpKindBuilder
 pub fn millipede_http::HttpKindBuilder::default() -> Self

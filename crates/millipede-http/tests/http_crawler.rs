@@ -13,7 +13,7 @@ use millipede_core::{
     proxy::{ProxyBuckets, ProxyConfiguration, ProxyKind, ProxyRouteContext, ProxyStrategy},
     request::Request,
     retry_strategy::{AttemptOutcome, RetryDirective, RetryStrategy},
-    session::{SESSION_POOL_PERSIST_KEY, SessionPoolOptions},
+    session::{SESSION_POOL_PERSIST_KEY, SessionPool, SessionPoolOptions},
     storage::StorageClient,
 };
 use millipede_http::{HttpContext, HttpKind};
@@ -394,6 +394,39 @@ async fn stop_persists_default_session_pool() -> Result<(), Box<dyn std::error::
     let state: serde_json::Value = serde_json::from_slice(&persisted.value)?;
     assert_eq!(state["sessions"].as_array().map(Vec::len), Some(1));
     assert_eq!(state["sessions"][0]["usage_count"], 1);
+    Ok(())
+}
+
+#[tokio::test]
+async fn shared_session_pool_is_used_but_not_persisted() -> Result<(), Box<dyn std::error::Error>> {
+    let server = MockServer::start().await;
+    Mock::given(path("/page"))
+        .respond_with(ResponseTemplate::new(200).insert_header("Set-Cookie", "shared=1; Path=/"))
+        .mount(&server)
+        .await;
+    let configuration = Configuration::builder().build()?;
+    let default_kvs_id = configuration.default_key_value_store_id().to_owned();
+    let storage = Arc::new(MemoryStorageClient::new());
+    let pool = Arc::new(SessionPool::new(
+        SessionPoolOptions::default().with_max_pool_size(1),
+    ));
+    let crawler = Crawler::builder(
+        HttpKind::builder()
+            .shared_session_pool(pool.clone())
+            .build()?,
+    )
+    .request_handler(|_: HttpContext| async { Ok(()) })
+    .configuration(configuration)
+    .storage_client(storage.clone())
+    .build()
+    .await?;
+
+    crawler.run([url(&server, "/page")]).await?;
+
+    let session = pool.get_session(None).await;
+    assert!(session.cookie_jar().cookie_count() > 0);
+    let kvs = storage.open_key_value_store(Some(&default_kvs_id)).await?;
+    assert!(kvs.get_bytes(SESSION_POOL_PERSIST_KEY).await?.is_none());
     Ok(())
 }
 

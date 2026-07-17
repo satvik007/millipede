@@ -16,7 +16,7 @@ use millipede_core::{
     proxy::{ProxyBuckets, ProxyConfiguration, ProxyInfo, ProxyStrategy},
     request::Request,
     router::HasRequest,
-    session::{Session, SessionPoolOptions},
+    session::{Session, SessionPool, SessionPoolOptions},
     storage::StorageHandle,
 };
 use millipede_http::{HttpContext, HttpKind, HttpKindBuilder};
@@ -231,6 +231,12 @@ impl HtmlKindBuilder {
     /// Enables sessions with the supplied pool options.
     pub fn session_pool(mut self, options: SessionPoolOptions) -> Self {
         self.http = self.http.session_pool(options);
+        self
+    }
+
+    /// Uses an existing session pool without managing its persistence lifecycle.
+    pub fn shared_session_pool(mut self, pool: Arc<SessionPool>) -> Self {
+        self.http = self.http.shared_session_pool(pool);
         self
     }
 
