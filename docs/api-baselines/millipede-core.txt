@@ -615,6 +615,7 @@ pub fn millipede_core::crawler::CrawlerBuilder<K>::autoscale_mode(self, milliped
 pub fn millipede_core::crawler::CrawlerBuilder<K>::autoscaled_pool_options(self, millipede_core::autoscale::AutoscaledPoolOptions) -> Self
 pub async fn millipede_core::crawler::CrawlerBuilder<K>::build(self) -> core::result::Result<millipede_core::crawler::Crawler<K>, millipede_core::crawler::CrawlerBuildError>
 pub fn millipede_core::crawler::CrawlerBuilder<K>::configuration(self, millipede_core::config::Configuration) -> Self
+pub fn millipede_core::crawler::CrawlerBuilder<K>::crawl_policy(self, millipede_core::link_extraction::CrawlPolicy) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::desired_concurrency(self, usize) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::failed_request_handler<H: millipede_core::handler::FailedRequestHandler>(self, H) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::internal_operation_timeout(self, core::time::Duration) -> Self
@@ -659,7 +660,9 @@ pub fn millipede_core::crawler::CrawlerHandle::abort(&self)
 pub async fn millipede_core::crawler::CrawlerHandle::add_requests(&self, impl core::iter::traits::collect::IntoIterator<Item = millipede_core::request::Request> + core::marker::Send) -> core::result::Result<millipede_core::storage::BatchAddHandle, millipede_core::errors::CrawlError>
 pub async fn millipede_core::crawler::CrawlerHandle::add_requests_with_options(&self, impl core::iter::traits::collect::IntoIterator<Item = millipede_core::request::Request> + core::marker::Send, millipede_core::storage::AddOptions) -> core::result::Result<millipede_core::storage::BatchAddHandle, millipede_core::errors::CrawlError>
 pub fn millipede_core::crawler::CrawlerHandle::autoscaler_snapshot(&self) -> core::option::Option<millipede_core::crawler::AutoscalerSnapshot>
+pub fn millipede_core::crawler::CrawlerHandle::crawl_policy(&self) -> core::option::Option<alloc::sync::Arc<millipede_core::link_extraction::CrawlPolicy>>
 pub fn millipede_core::crawler::CrawlerHandle::events(&self) -> core::option::Option<millipede_core::events::EventStream>
+pub fn millipede_core::crawler::CrawlerHandle::request_queue(&self) -> core::option::Option<alloc::sync::Arc<dyn millipede_core::storage::RequestQueue>>
 pub fn millipede_core::crawler::CrawlerHandle::results(&self) -> core::option::Option<millipede_core::events::ResultStream>
 pub fn millipede_core::crawler::CrawlerHandle::stats(&self) -> core::option::Option<millipede_core::statistics::StatisticsSnapshot>
 pub fn millipede_core::crawler::CrawlerHandle::stop(&self)
@@ -743,7 +746,17 @@ pub type millipede_core::crawler::BasicCrawler = millipede_core::crawler::Crawle
 pub mod millipede_core::enqueue
 #[non_exhaustive] pub enum millipede_core::enqueue::SkipReason
 pub millipede_core::enqueue::SkipReason::DuplicateUniqueKey
+pub millipede_core::enqueue::SkipReason::GlobExcluded
 pub millipede_core::enqueue::SkipReason::InvalidUrl
+pub millipede_core::enqueue::SkipReason::MaxDepthExceeded
+pub millipede_core::enqueue::SkipReason::MaxDepthExceeded::depth: u32
+pub millipede_core::enqueue::SkipReason::MaxDepthExceeded::limit: u32
+pub millipede_core::enqueue::SkipReason::MaxRequestsReached
+pub millipede_core::enqueue::SkipReason::MaxRequestsReached::limit: u64
+pub millipede_core::enqueue::SkipReason::RegexExcluded
+pub millipede_core::enqueue::SkipReason::StrategyExcluded
+pub millipede_core::enqueue::SkipReason::TransformRejected
+pub millipede_core::enqueue::SkipReason::TransformRejected::reason: alloc::string::String
 impl core::clone::Clone for millipede_core::enqueue::SkipReason
 pub fn millipede_core::enqueue::SkipReason::clone(&self) -> millipede_core::enqueue::SkipReason
 impl core::cmp::Eq for millipede_core::enqueue::SkipReason
@@ -763,9 +776,14 @@ impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::enqueue::SkipRe
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::enqueue::SkipReason
 pub struct millipede_core::enqueue::EnqueueLinker
 impl millipede_core::enqueue::EnqueueLinker
+pub async fn millipede_core::enqueue::EnqueueLinker::all(&self) -> core::result::Result<millipede_core::enqueue::EnqueueResult, millipede_core::errors::CrawlError>
 pub fn millipede_core::enqueue::EnqueueLinker::new(millipede_core::crawler::CrawlerHandle, &millipede_core::request::Request) -> Self
 pub fn millipede_core::enqueue::EnqueueLinker::options(&self) -> millipede_core::enqueue::EnqueueLinksOptions<'_>
+pub async fn millipede_core::enqueue::EnqueueLinker::same_domain(&self) -> core::result::Result<millipede_core::enqueue::EnqueueResult, millipede_core::errors::CrawlError>
+pub async fn millipede_core::enqueue::EnqueueLinker::same_hostname(&self) -> core::result::Result<millipede_core::enqueue::EnqueueResult, millipede_core::errors::CrawlError>
+pub async fn millipede_core::enqueue::EnqueueLinker::same_origin(&self) -> core::result::Result<millipede_core::enqueue::EnqueueResult, millipede_core::errors::CrawlError>
 pub async fn millipede_core::enqueue::EnqueueLinker::urls(&self, impl core::iter::traits::collect::IntoIterator<Item = url::Url>) -> core::result::Result<millipede_core::enqueue::EnqueueResult, millipede_core::errors::CrawlError>
+pub fn millipede_core::enqueue::EnqueueLinker::with_extractor(millipede_core::crawler::CrawlerHandle, &millipede_core::request::Request, alloc::sync::Arc<dyn millipede_core::link_extraction::LinkExtractor>) -> Self
 impl core::clone::Clone for millipede_core::enqueue::EnqueueLinker
 pub fn millipede_core::enqueue::EnqueueLinker::clone(&self) -> millipede_core::enqueue::EnqueueLinker
 impl core::fmt::Debug for millipede_core::enqueue::EnqueueLinker
@@ -780,11 +798,17 @@ impl !core::panic::unwind_safe::UnwindSafe for millipede_core::enqueue::EnqueueL
 pub struct millipede_core::enqueue::EnqueueLinksOptions<'a>
 impl<'a> millipede_core::enqueue::EnqueueLinksOptions<'a>
 pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::base_url(self, url::Url) -> Self
+pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::exclude<P: core::convert::Into<millipede_core::link_extraction::UrlPattern>>(self, impl core::iter::traits::collect::IntoIterator<Item = P>) -> Self
 pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::forefront(self, bool) -> Self
+pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::globs<G: core::convert::Into<millipede_core::link_extraction::GlobPattern>>(self, impl core::iter::traits::collect::IntoIterator<Item = G>) -> Self
 pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::label(self, impl core::convert::Into<alloc::string::String>) -> Self
 pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::limit(self, usize) -> Self
 pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::raw_urls<S: core::convert::Into<alloc::string::String>>(self, impl core::iter::traits::collect::IntoIterator<Item = S>) -> Self
+pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::regex(self, impl core::iter::traits::collect::IntoIterator<Item = regex::regex::string::Regex>) -> Self
+pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::selector(self, impl core::convert::Into<alloc::string::String>) -> Self
 pub async fn millipede_core::enqueue::EnqueueLinksOptions<'a>::send(self) -> core::result::Result<millipede_core::enqueue::EnqueueResult, millipede_core::errors::CrawlError>
+pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::strategy(self, millipede_core::link_extraction::EnqueueStrategy) -> Self
+pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::transform<F>(self, F) -> Self where F: for<'r> core::ops::function::Fn(&'r mut millipede_core::request::Request) -> futures_core::future::BoxFuture<'r, millipede_core::link_extraction::TransformResult> + core::marker::Send + core::marker::Sync + 'static
 pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::urls(self, impl core::iter::traits::collect::IntoIterator<Item = url::Url>) -> Self
 pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::user_data(self, millipede_core::request::UserData) -> Self
 impl<'a> core::marker::Freeze for millipede_core::enqueue::EnqueueLinksOptions<'a>
@@ -1765,7 +1789,17 @@ impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::retry_strategy:
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::retry_strategy::SessionRetryAction
 #[non_exhaustive] pub enum millipede_core::prelude::SkipReason
 pub millipede_core::prelude::SkipReason::DuplicateUniqueKey
+pub millipede_core::prelude::SkipReason::GlobExcluded
 pub millipede_core::prelude::SkipReason::InvalidUrl
+pub millipede_core::prelude::SkipReason::MaxDepthExceeded
+pub millipede_core::prelude::SkipReason::MaxDepthExceeded::depth: u32
+pub millipede_core::prelude::SkipReason::MaxDepthExceeded::limit: u32
+pub millipede_core::prelude::SkipReason::MaxRequestsReached
+pub millipede_core::prelude::SkipReason::MaxRequestsReached::limit: u64
+pub millipede_core::prelude::SkipReason::RegexExcluded
+pub millipede_core::prelude::SkipReason::StrategyExcluded
+pub millipede_core::prelude::SkipReason::TransformRejected
+pub millipede_core::prelude::SkipReason::TransformRejected::reason: alloc::string::String
 impl core::clone::Clone for millipede_core::enqueue::SkipReason
 pub fn millipede_core::enqueue::SkipReason::clone(&self) -> millipede_core::enqueue::SkipReason
 impl core::cmp::Eq for millipede_core::enqueue::SkipReason
@@ -2200,6 +2234,7 @@ pub fn millipede_core::crawler::CrawlerBuilder<K>::autoscale_mode(self, milliped
 pub fn millipede_core::crawler::CrawlerBuilder<K>::autoscaled_pool_options(self, millipede_core::autoscale::AutoscaledPoolOptions) -> Self
 pub async fn millipede_core::crawler::CrawlerBuilder<K>::build(self) -> core::result::Result<millipede_core::crawler::Crawler<K>, millipede_core::crawler::CrawlerBuildError>
 pub fn millipede_core::crawler::CrawlerBuilder<K>::configuration(self, millipede_core::config::Configuration) -> Self
+pub fn millipede_core::crawler::CrawlerBuilder<K>::crawl_policy(self, millipede_core::link_extraction::CrawlPolicy) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::desired_concurrency(self, usize) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::failed_request_handler<H: millipede_core::handler::FailedRequestHandler>(self, H) -> Self
 pub fn millipede_core::crawler::CrawlerBuilder<K>::internal_operation_timeout(self, core::time::Duration) -> Self
@@ -2244,7 +2279,9 @@ pub fn millipede_core::crawler::CrawlerHandle::abort(&self)
 pub async fn millipede_core::crawler::CrawlerHandle::add_requests(&self, impl core::iter::traits::collect::IntoIterator<Item = millipede_core::request::Request> + core::marker::Send) -> core::result::Result<millipede_core::storage::BatchAddHandle, millipede_core::errors::CrawlError>
 pub async fn millipede_core::crawler::CrawlerHandle::add_requests_with_options(&self, impl core::iter::traits::collect::IntoIterator<Item = millipede_core::request::Request> + core::marker::Send, millipede_core::storage::AddOptions) -> core::result::Result<millipede_core::storage::BatchAddHandle, millipede_core::errors::CrawlError>
 pub fn millipede_core::crawler::CrawlerHandle::autoscaler_snapshot(&self) -> core::option::Option<millipede_core::crawler::AutoscalerSnapshot>
+pub fn millipede_core::crawler::CrawlerHandle::crawl_policy(&self) -> core::option::Option<alloc::sync::Arc<millipede_core::link_extraction::CrawlPolicy>>
 pub fn millipede_core::crawler::CrawlerHandle::events(&self) -> core::option::Option<millipede_core::events::EventStream>
+pub fn millipede_core::crawler::CrawlerHandle::request_queue(&self) -> core::option::Option<alloc::sync::Arc<dyn millipede_core::storage::RequestQueue>>
 pub fn millipede_core::crawler::CrawlerHandle::results(&self) -> core::option::Option<millipede_core::events::ResultStream>
 pub fn millipede_core::crawler::CrawlerHandle::stats(&self) -> core::option::Option<millipede_core::statistics::StatisticsSnapshot>
 pub fn millipede_core::crawler::CrawlerHandle::stop(&self)
@@ -2279,9 +2316,14 @@ impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::Datase
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::DatasetInfo
 pub struct millipede_core::prelude::EnqueueLinker
 impl millipede_core::enqueue::EnqueueLinker
+pub async fn millipede_core::enqueue::EnqueueLinker::all(&self) -> core::result::Result<millipede_core::enqueue::EnqueueResult, millipede_core::errors::CrawlError>
 pub fn millipede_core::enqueue::EnqueueLinker::new(millipede_core::crawler::CrawlerHandle, &millipede_core::request::Request) -> Self
 pub fn millipede_core::enqueue::EnqueueLinker::options(&self) -> millipede_core::enqueue::EnqueueLinksOptions<'_>
+pub async fn millipede_core::enqueue::EnqueueLinker::same_domain(&self) -> core::result::Result<millipede_core::enqueue::EnqueueResult, millipede_core::errors::CrawlError>
+pub async fn millipede_core::enqueue::EnqueueLinker::same_hostname(&self) -> core::result::Result<millipede_core::enqueue::EnqueueResult, millipede_core::errors::CrawlError>
+pub async fn millipede_core::enqueue::EnqueueLinker::same_origin(&self) -> core::result::Result<millipede_core::enqueue::EnqueueResult, millipede_core::errors::CrawlError>
 pub async fn millipede_core::enqueue::EnqueueLinker::urls(&self, impl core::iter::traits::collect::IntoIterator<Item = url::Url>) -> core::result::Result<millipede_core::enqueue::EnqueueResult, millipede_core::errors::CrawlError>
+pub fn millipede_core::enqueue::EnqueueLinker::with_extractor(millipede_core::crawler::CrawlerHandle, &millipede_core::request::Request, alloc::sync::Arc<dyn millipede_core::link_extraction::LinkExtractor>) -> Self
 impl core::clone::Clone for millipede_core::enqueue::EnqueueLinker
 pub fn millipede_core::enqueue::EnqueueLinker::clone(&self) -> millipede_core::enqueue::EnqueueLinker
 impl core::fmt::Debug for millipede_core::enqueue::EnqueueLinker
@@ -2296,11 +2338,17 @@ impl !core::panic::unwind_safe::UnwindSafe for millipede_core::enqueue::EnqueueL
 pub struct millipede_core::prelude::EnqueueLinksOptions<'a>
 impl<'a> millipede_core::enqueue::EnqueueLinksOptions<'a>
 pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::base_url(self, url::Url) -> Self
+pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::exclude<P: core::convert::Into<millipede_core::link_extraction::UrlPattern>>(self, impl core::iter::traits::collect::IntoIterator<Item = P>) -> Self
 pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::forefront(self, bool) -> Self
+pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::globs<G: core::convert::Into<millipede_core::link_extraction::GlobPattern>>(self, impl core::iter::traits::collect::IntoIterator<Item = G>) -> Self
 pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::label(self, impl core::convert::Into<alloc::string::String>) -> Self
 pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::limit(self, usize) -> Self
 pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::raw_urls<S: core::convert::Into<alloc::string::String>>(self, impl core::iter::traits::collect::IntoIterator<Item = S>) -> Self
+pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::regex(self, impl core::iter::traits::collect::IntoIterator<Item = regex::regex::string::Regex>) -> Self
+pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::selector(self, impl core::convert::Into<alloc::string::String>) -> Self
 pub async fn millipede_core::enqueue::EnqueueLinksOptions<'a>::send(self) -> core::result::Result<millipede_core::enqueue::EnqueueResult, millipede_core::errors::CrawlError>
+pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::strategy(self, millipede_core::link_extraction::EnqueueStrategy) -> Self
+pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::transform<F>(self, F) -> Self where F: for<'r> core::ops::function::Fn(&'r mut millipede_core::request::Request) -> futures_core::future::BoxFuture<'r, millipede_core::link_extraction::TransformResult> + core::marker::Send + core::marker::Sync + 'static
 pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::urls(self, impl core::iter::traits::collect::IntoIterator<Item = url::Url>) -> Self
 pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::user_data(self, millipede_core::request::UserData) -> Self
 impl<'a> core::marker::Freeze for millipede_core::enqueue::EnqueueLinksOptions<'a>

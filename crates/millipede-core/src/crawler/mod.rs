@@ -15,6 +15,7 @@ use crate::{
     errors::CrawlError,
     events::{EventBus, EventStream, HandledRequest, ResultStream},
     handler::{FailedRequestHandler, RequestHandler},
+    link_extraction::CrawlPolicy,
     request::Request,
     statistics::{FinalStatistics, StatisticsHandle, StatisticsSnapshot},
     storage::{AddOptions, BatchAddHandle, RequestQueue, RequestSource},
@@ -24,7 +25,7 @@ use std::{
     fmt,
     sync::{
         Arc, Weak,
-        atomic::{AtomicBool, Ordering},
+        atomic::{AtomicBool, AtomicU64, Ordering},
     },
     time::Duration,
 };
@@ -149,6 +150,9 @@ pub(crate) struct CrawlerShared {
     pub(crate) notify: tokio::sync::Notify,
     pub(crate) internal_operation_timeout: Duration,
     pub(crate) pool: Arc<AutoscaledPool>,
+    enqueue_admission: Arc<tokio::sync::Mutex<()>>,
+    enqueue_admissions: Arc<AtomicU64>,
+    crawl_policy: Option<Arc<CrawlPolicy>>,
 }
 
 impl CrawlerShared {
@@ -176,7 +180,39 @@ impl CrawlerShared {
             notify: tokio::sync::Notify::new(),
             internal_operation_timeout,
             pool,
+            enqueue_admission: Arc::new(tokio::sync::Mutex::new(())),
+            enqueue_admissions: Arc::new(AtomicU64::new(0)),
+            crawl_policy: None,
         }
+    }
+
+    pub(crate) fn new_with_policy(
+        queue: Arc<dyn RequestQueue>,
+        events: EventBus,
+        results_capacity: usize,
+        internal_operation_timeout: Duration,
+        pool: Arc<AutoscaledPool>,
+        crawl_policy: Option<Arc<CrawlPolicy>>,
+    ) -> Self {
+        let mut shared = Self::new(
+            queue,
+            events,
+            results_capacity,
+            internal_operation_timeout,
+            pool,
+        );
+        shared.crawl_policy = crawl_policy;
+        shared
+    }
+
+    /// Returns the crawler's request queue.
+    pub fn request_queue(&self) -> &Arc<dyn RequestQueue> {
+        &self.queue
+    }
+
+    /// Returns the configured crawl policy, when one was supplied.
+    pub fn crawl_policy(&self) -> Option<&Arc<CrawlPolicy>> {
+        self.crawl_policy.as_ref()
     }
 }
 
@@ -209,6 +245,25 @@ impl AutoscalerSnapshot {
 #[derive(Clone)]
 pub struct CrawlerHandle {
     inner: Weak<CrawlerShared>,
+}
+
+pub(crate) struct EnqueueAdmissionReservation {
+    admissions: Arc<AtomicU64>,
+    committed: bool,
+}
+
+impl EnqueueAdmissionReservation {
+    pub(crate) fn commit(mut self) {
+        self.committed = true;
+    }
+}
+
+impl Drop for EnqueueAdmissionReservation {
+    fn drop(&mut self) {
+        if !self.committed {
+            self.admissions.fetch_sub(1, Ordering::SeqCst);
+        }
+    }
 }
 
 impl fmt::Debug for CrawlerHandle {
@@ -257,6 +312,41 @@ impl CrawlerHandle {
         Ok(handle)
     }
 
+    pub(crate) async fn lock_enqueue_admission(
+        &self,
+    ) -> Result<tokio::sync::OwnedMutexGuard<()>, CrawlError> {
+        let shared = self.inner.upgrade().ok_or_else(|| {
+            CrawlError::non_retryable(anyhow::anyhow!("crawler is no longer running"))
+        })?;
+        Ok(shared.enqueue_admission.clone().lock_owned().await)
+    }
+
+    pub(crate) fn synchronize_enqueue_admissions(
+        &self,
+        observed_queue_count: u64,
+    ) -> Result<u64, CrawlError> {
+        let shared = self.inner.upgrade().ok_or_else(|| {
+            CrawlError::non_retryable(anyhow::anyhow!("crawler is no longer running"))
+        })?;
+        let previous = shared
+            .enqueue_admissions
+            .fetch_max(observed_queue_count, Ordering::SeqCst);
+        Ok(previous.max(observed_queue_count))
+    }
+
+    pub(crate) fn reserve_enqueue_admission(
+        &self,
+    ) -> Result<EnqueueAdmissionReservation, CrawlError> {
+        let shared = self.inner.upgrade().ok_or_else(|| {
+            CrawlError::non_retryable(anyhow::anyhow!("crawler is no longer running"))
+        })?;
+        shared.enqueue_admissions.fetch_add(1, Ordering::SeqCst);
+        Ok(EnqueueAdmissionReservation {
+            admissions: shared.enqueue_admissions.clone(),
+            committed: false,
+        })
+    }
+
     /// Returns a snapshot of live crawl statistics while the crawler exists.
     pub fn stats(&self) -> Option<StatisticsSnapshot> {
         self.inner.upgrade().map(|shared| shared.stats.snapshot())
@@ -279,6 +369,20 @@ impl CrawlerHandle {
         self.inner
             .upgrade()
             .map(|shared| shared.results_tx.subscribe())
+    }
+
+    /// Returns the crawler's request queue while the crawler exists.
+    pub fn request_queue(&self) -> Option<Arc<dyn RequestQueue>> {
+        self.inner
+            .upgrade()
+            .map(|shared| shared.request_queue().clone())
+    }
+
+    /// Returns the configured crawl policy while the crawler exists.
+    pub fn crawl_policy(&self) -> Option<Arc<CrawlPolicy>> {
+        self.inner
+            .upgrade()
+            .and_then(|shared| shared.crawl_policy().cloned())
     }
 
     /// Requests a graceful stop that finishes in-flight work and fetches no more requests.

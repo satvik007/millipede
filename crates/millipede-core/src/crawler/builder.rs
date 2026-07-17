@@ -5,6 +5,7 @@ use crate::{
     autoscale::{AutoscaleMode, AutoscaledPool, AutoscaledPoolOptions},
     config::{ConfigError, Configuration},
     handler::{FailedRequestHandler, RequestHandler},
+    link_extraction::CrawlPolicy,
     storage::{KeyValueStore, StorageClient, StorageError},
 };
 use std::{sync::Arc, time::Duration};
@@ -53,6 +54,7 @@ pub struct CrawlerBuilder<K: CrawlerKind> {
     storage_client: Option<Arc<dyn StorageClient>>,
     results_capacity: usize,
     retry_strategy: Option<Arc<dyn crate::retry_strategy::RetryStrategy>>,
+    crawl_policy: Option<Arc<CrawlPolicy>>,
 }
 
 impl<K: CrawlerKind> CrawlerBuilder<K> {
@@ -75,6 +77,7 @@ impl<K: CrawlerKind> CrawlerBuilder<K> {
             storage_client: None,
             results_capacity: 1024,
             retry_strategy: None,
+            crawl_policy: None,
         }
     }
 
@@ -179,6 +182,12 @@ impl<K: CrawlerKind> CrawlerBuilder<K> {
         self
     }
 
+    /// Sets the long-lived link admission and crawl-limit policy.
+    pub fn crawl_policy(mut self, policy: CrawlPolicy) -> Self {
+        self.crawl_policy = Some(Arc::new(policy));
+        self
+    }
+
     /// Builds the crawler and opens its configured storage objects.
     ///
     /// The default [`Configuration`] purges all data managed by the selected storage client before
@@ -230,14 +239,19 @@ impl<K: CrawlerKind> CrawlerBuilder<K> {
             task_timeout,
             maybe_run_interval,
             retry_strategy: self.retry_strategy,
+            max_requests_per_crawl: self
+                .crawl_policy
+                .as_ref()
+                .and_then(|policy| policy.max_requests_per_crawl),
         };
         let pool = Arc::new(AutoscaledPool::new(self.autoscaled_pool));
-        let shared = Arc::new(CrawlerShared::new(
+        let shared = Arc::new(CrawlerShared::new_with_policy(
             queue,
             config.events().clone(),
             self.results_capacity,
             self.internal_operation_timeout,
             pool,
+            self.crawl_policy,
         ));
         Ok(Crawler {
             kind: Arc::new(self.kind),

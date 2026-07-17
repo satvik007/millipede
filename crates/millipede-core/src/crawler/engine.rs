@@ -35,6 +35,8 @@ pub(crate) struct EngineOptions {
     /// Periodically wakes an idle dispatcher as a fallback for missed notifications.
     pub(crate) maybe_run_interval: Duration,
     pub(crate) retry_strategy: Option<Arc<dyn RetryStrategy>>,
+    /// Stops scheduling new work after this many successful terminal requests.
+    pub(crate) max_requests_per_crawl: Option<u64>,
 }
 
 impl Default for EngineOptions {
@@ -48,6 +50,7 @@ impl Default for EngineOptions {
             task_timeout: None,
             maybe_run_interval: Duration::from_millis(500),
             retry_strategy: None,
+            max_requests_per_crawl: None,
         }
     }
 }
@@ -147,6 +150,21 @@ impl<K: CrawlerKind> Engine<K> {
             if !draining && self.shared.drain.is_cancelled() {
                 draining = true;
             }
+            if !draining {
+                if let Some(limit) = self.opts.max_requests_per_crawl {
+                    if self.shared.stats.snapshot().requests_finished >= limit {
+                        tracing::info!(
+                            limit,
+                            "maximum requests per crawl reached; draining in-flight requests"
+                        );
+                        // Use the same cancellation path as `Crawler::stop()` so leased and
+                        // in-flight work drains normally while no further requests are fetched.
+                        self.shared.drain.cancel();
+                        self.shared.notify.notify_waiters();
+                        draining = true;
+                    }
+                }
+            }
             if draining && !deferred_entries.is_empty() {
                 self.abandon_deferred(&mut deferred, &mut deferred_entries)
                     .await;
@@ -224,7 +242,20 @@ impl<K: CrawlerKind> Engine<K> {
                 // than the cap can still delay later hosts until Phase 5's domain-aware frontier.
                 // Fetch one lease at a time and immediately pump it so ready-now leases do not
                 // accumulate behind a full in-flight set.
-                if draining || in_flight.len() >= desired || deferred_entries.len() >= deferred_cap
+                let request_limit_reserved =
+                    self.opts.max_requests_per_crawl.is_some_and(|limit| {
+                        self.shared
+                            .stats
+                            .snapshot()
+                            .requests_finished
+                            .saturating_add(in_flight.len() as u64)
+                            .saturating_add(deferred_entries.len() as u64)
+                            >= limit
+                    });
+                if draining
+                    || request_limit_reserved
+                    || in_flight.len() >= desired
+                    || deferred_entries.len() >= deferred_cap
                 {
                     break;
                 }
