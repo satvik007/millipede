@@ -1,4 +1,44 @@
 pub mod millipede_core
+pub mod millipede_core::antibot
+#[non_exhaustive] pub struct millipede_core::antibot::AntiBotSignals<'a>
+pub millipede_core::antibot::AntiBotSignals::body: &'a [u8]
+pub millipede_core::antibot::AntiBotSignals::final_url: &'a url::Url
+pub millipede_core::antibot::AntiBotSignals::headers: &'a http::header::map::HeaderMap
+pub millipede_core::antibot::AntiBotSignals::status: http::status::StatusCode
+impl<'a> millipede_core::antibot::AntiBotSignals<'a>
+pub fn millipede_core::antibot::AntiBotSignals<'a>::new(http::status::StatusCode, &'a http::header::map::HeaderMap, &'a [u8], &'a url::Url) -> Self
+impl<'a> core::marker::Freeze for millipede_core::antibot::AntiBotSignals<'a>
+impl<'a> core::marker::Send for millipede_core::antibot::AntiBotSignals<'a>
+impl<'a> core::marker::Sync for millipede_core::antibot::AntiBotSignals<'a>
+impl<'a> core::marker::Unpin for millipede_core::antibot::AntiBotSignals<'a>
+impl<'a> core::marker::UnsafeUnpin for millipede_core::antibot::AntiBotSignals<'a>
+impl<'a> core::panic::unwind_safe::RefUnwindSafe for millipede_core::antibot::AntiBotSignals<'a>
+impl<'a> core::panic::unwind_safe::UnwindSafe for millipede_core::antibot::AntiBotSignals<'a>
+pub struct millipede_core::antibot::DefaultAntiBotDetector
+impl millipede_core::antibot::DefaultAntiBotDetector
+pub const millipede_core::antibot::DefaultAntiBotDetector::DEFAULT_INSPECTION_LIMIT: usize
+pub fn millipede_core::antibot::DefaultAntiBotDetector::new() -> Self
+pub fn millipede_core::antibot::DefaultAntiBotDetector::with_custom_marker(self, impl core::convert::Into<alloc::string::String>, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_core::antibot::DefaultAntiBotDetector::with_inspection_limit(self, usize) -> Self
+impl core::clone::Clone for millipede_core::antibot::DefaultAntiBotDetector
+pub fn millipede_core::antibot::DefaultAntiBotDetector::clone(&self) -> millipede_core::antibot::DefaultAntiBotDetector
+impl core::default::Default for millipede_core::antibot::DefaultAntiBotDetector
+pub fn millipede_core::antibot::DefaultAntiBotDetector::default() -> Self
+impl core::fmt::Debug for millipede_core::antibot::DefaultAntiBotDetector
+pub fn millipede_core::antibot::DefaultAntiBotDetector::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl millipede_core::antibot::AntiBotDetector for millipede_core::antibot::DefaultAntiBotDetector
+pub fn millipede_core::antibot::DefaultAntiBotDetector::detect(&self, &millipede_core::antibot::AntiBotSignals<'_>) -> core::option::Option<millipede_core::errors::AntiBotTech>
+impl core::marker::Freeze for millipede_core::antibot::DefaultAntiBotDetector
+impl core::marker::Send for millipede_core::antibot::DefaultAntiBotDetector
+impl core::marker::Sync for millipede_core::antibot::DefaultAntiBotDetector
+impl core::marker::Unpin for millipede_core::antibot::DefaultAntiBotDetector
+impl core::marker::UnsafeUnpin for millipede_core::antibot::DefaultAntiBotDetector
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::antibot::DefaultAntiBotDetector
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::antibot::DefaultAntiBotDetector
+pub trait millipede_core::antibot::AntiBotDetector: core::marker::Send + core::marker::Sync + core::fmt::Debug + 'static
+pub fn millipede_core::antibot::AntiBotDetector::detect(&self, &millipede_core::antibot::AntiBotSignals<'_>) -> core::option::Option<millipede_core::errors::AntiBotTech>
+impl millipede_core::antibot::AntiBotDetector for millipede_core::antibot::DefaultAntiBotDetector
+pub fn millipede_core::antibot::DefaultAntiBotDetector::detect(&self, &millipede_core::antibot::AntiBotSignals<'_>) -> core::option::Option<millipede_core::errors::AntiBotTech>
 pub mod millipede_core::autoscale
 pub enum millipede_core::autoscale::AutoscaleMode
 pub millipede_core::autoscale::AutoscaleMode::Aimd
@@ -2042,6 +2082,20 @@ impl core::marker::Unpin for millipede_core::autoscale::AimdController
 impl core::marker::UnsafeUnpin for millipede_core::autoscale::AimdController
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::AimdController
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::AimdController
+#[non_exhaustive] pub struct millipede_core::prelude::AntiBotSignals<'a>
+pub millipede_core::prelude::AntiBotSignals::body: &'a [u8]
+pub millipede_core::prelude::AntiBotSignals::final_url: &'a url::Url
+pub millipede_core::prelude::AntiBotSignals::headers: &'a http::header::map::HeaderMap
+pub millipede_core::prelude::AntiBotSignals::status: http::status::StatusCode
+impl<'a> millipede_core::antibot::AntiBotSignals<'a>
+pub fn millipede_core::antibot::AntiBotSignals<'a>::new(http::status::StatusCode, &'a http::header::map::HeaderMap, &'a [u8], &'a url::Url) -> Self
+impl<'a> core::marker::Freeze for millipede_core::antibot::AntiBotSignals<'a>
+impl<'a> core::marker::Send for millipede_core::antibot::AntiBotSignals<'a>
+impl<'a> core::marker::Sync for millipede_core::antibot::AntiBotSignals<'a>
+impl<'a> core::marker::Unpin for millipede_core::antibot::AntiBotSignals<'a>
+impl<'a> core::marker::UnsafeUnpin for millipede_core::antibot::AntiBotSignals<'a>
+impl<'a> core::panic::unwind_safe::RefUnwindSafe for millipede_core::antibot::AntiBotSignals<'a>
+impl<'a> core::panic::unwind_safe::UnwindSafe for millipede_core::antibot::AntiBotSignals<'a>
 #[non_exhaustive] pub struct millipede_core::prelude::AttemptObservation
 pub millipede_core::prelude::AttemptObservation::loaded_url: core::option::Option<url::Url>
 pub millipede_core::prelude::AttemptObservation::proxy_info: core::option::Option<millipede_core::proxy::ProxyInfo>
@@ -2525,6 +2579,27 @@ impl core::marker::Unpin for millipede_core::storage::DatasetInfo
 impl core::marker::UnsafeUnpin for millipede_core::storage::DatasetInfo
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::DatasetInfo
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::DatasetInfo
+pub struct millipede_core::prelude::DefaultAntiBotDetector
+impl millipede_core::antibot::DefaultAntiBotDetector
+pub const millipede_core::antibot::DefaultAntiBotDetector::DEFAULT_INSPECTION_LIMIT: usize
+pub fn millipede_core::antibot::DefaultAntiBotDetector::new() -> Self
+pub fn millipede_core::antibot::DefaultAntiBotDetector::with_custom_marker(self, impl core::convert::Into<alloc::string::String>, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_core::antibot::DefaultAntiBotDetector::with_inspection_limit(self, usize) -> Self
+impl core::clone::Clone for millipede_core::antibot::DefaultAntiBotDetector
+pub fn millipede_core::antibot::DefaultAntiBotDetector::clone(&self) -> millipede_core::antibot::DefaultAntiBotDetector
+impl core::default::Default for millipede_core::antibot::DefaultAntiBotDetector
+pub fn millipede_core::antibot::DefaultAntiBotDetector::default() -> Self
+impl core::fmt::Debug for millipede_core::antibot::DefaultAntiBotDetector
+pub fn millipede_core::antibot::DefaultAntiBotDetector::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl millipede_core::antibot::AntiBotDetector for millipede_core::antibot::DefaultAntiBotDetector
+pub fn millipede_core::antibot::DefaultAntiBotDetector::detect(&self, &millipede_core::antibot::AntiBotSignals<'_>) -> core::option::Option<millipede_core::errors::AntiBotTech>
+impl core::marker::Freeze for millipede_core::antibot::DefaultAntiBotDetector
+impl core::marker::Send for millipede_core::antibot::DefaultAntiBotDetector
+impl core::marker::Sync for millipede_core::antibot::DefaultAntiBotDetector
+impl core::marker::Unpin for millipede_core::antibot::DefaultAntiBotDetector
+impl core::marker::UnsafeUnpin for millipede_core::antibot::DefaultAntiBotDetector
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::antibot::DefaultAntiBotDetector
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::antibot::DefaultAntiBotDetector
 pub struct millipede_core::prelude::EnqueueLinker
 impl millipede_core::enqueue::EnqueueLinker
 pub async fn millipede_core::enqueue::EnqueueLinker::all(&self) -> core::result::Result<millipede_core::enqueue::EnqueueResult, millipede_core::errors::CrawlError>
@@ -3710,6 +3785,10 @@ impl core::panic::unwind_safe::UnwindSafe for millipede_core::request::UserData
 pub const millipede_core::prelude::SESSION_POOL_PERSIST_KEY: &str
 pub const millipede_core::prelude::SITEMAP_STATE_KEY: &str
 pub const millipede_core::prelude::STATISTICS_PERSIST_KEY: &str
+pub trait millipede_core::prelude::AntiBotDetector: core::marker::Send + core::marker::Sync + core::fmt::Debug + 'static
+pub fn millipede_core::prelude::AntiBotDetector::detect(&self, &millipede_core::antibot::AntiBotSignals<'_>) -> core::option::Option<millipede_core::errors::AntiBotTech>
+impl millipede_core::antibot::AntiBotDetector for millipede_core::antibot::DefaultAntiBotDetector
+pub fn millipede_core::antibot::DefaultAntiBotDetector::detect(&self, &millipede_core::antibot::AntiBotSignals<'_>) -> core::option::Option<millipede_core::errors::AntiBotTech>
 pub trait millipede_core::prelude::CrawlerKind: core::marker::Send + core::marker::Sync + 'static
 pub type millipede_core::prelude::CrawlerKind::Context: core::marker::Send + core::clone::Clone + 'static
 pub fn millipede_core::prelude::CrawlerKind::after_success<'a>(&'a self, &'a mut Self::Context) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>

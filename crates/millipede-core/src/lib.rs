@@ -30,6 +30,8 @@ use kvs::MemoryKeyValueStore;
 #[cfg(test)]
 use queue::MemoryRequestQueue;
 
+/// Content-based anti-bot and web application firewall detection.
+pub mod antibot;
 /// Autoscaling: dynamic concurrency, load signals, and rate limiting.
 pub mod autoscale;
 /// Crawler configuration and environment resolution.
@@ -71,6 +73,7 @@ mod util;
 
 /// Commonly used items from this crate.
 pub mod prelude {
+    pub use crate::antibot::{AntiBotDetector, AntiBotSignals, DefaultAntiBotDetector};
     pub use crate::autoscale::{
         AimdController, AutoscaleMode, AutoscaledPool, AutoscaledPoolOptions, ClientLoadSignal,
         ClientLoadSignalHandle, CpuLoadSignal, CpuLoadSignalOptions, LoadSignal, LoadSnapshot,
