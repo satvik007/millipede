@@ -85,6 +85,18 @@ impl core::marker::Unpin for millipede_html::HtmlKindBuilder
 impl core::marker::UnsafeUnpin for millipede_html::HtmlKindBuilder
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_html::HtmlKindBuilder
 impl !core::panic::unwind_safe::UnwindSafe for millipede_html::HtmlKindBuilder
+pub struct millipede_html::HtmlLinkExtractor
+impl millipede_html::HtmlLinkExtractor
+pub fn millipede_html::HtmlLinkExtractor::new(alloc::sync::Arc<scraper::html::Html>, url::Url) -> Self
+impl millipede_core::link_extraction::LinkExtractor for millipede_html::HtmlLinkExtractor
+pub fn millipede_html::HtmlLinkExtractor::extract(&self, core::option::Option<&str>) -> core::result::Result<alloc::vec::Vec<millipede_core::link_extraction::ExtractedLink>, millipede_core::errors::CrawlError>
+impl core::marker::Freeze for millipede_html::HtmlLinkExtractor
+impl core::marker::Send for millipede_html::HtmlLinkExtractor
+impl core::marker::Sync for millipede_html::HtmlLinkExtractor
+impl core::marker::Unpin for millipede_html::HtmlLinkExtractor
+impl core::marker::UnsafeUnpin for millipede_html::HtmlLinkExtractor
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_html::HtmlLinkExtractor
+impl core::panic::unwind_safe::UnwindSafe for millipede_html::HtmlLinkExtractor
 pub struct millipede_html::SynchronizedHtml
 impl millipede_html::SynchronizedHtml
 pub fn millipede_html::SynchronizedHtml::select<T, F>(&self, &scraper::selector::Selector, F) -> alloc::vec::Vec<T> where F: for<'a> core::ops::function::FnMut(scraper::element_ref::ElementRef<'a>) -> T

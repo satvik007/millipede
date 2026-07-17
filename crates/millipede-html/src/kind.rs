@@ -21,6 +21,8 @@ use millipede_core::{
 };
 use millipede_http::{HttpContext, HttpKind, HttpKindBuilder};
 
+use crate::HtmlLinkExtractor;
+
 /// A parsed HTML document with the synchronization required for shared handler access.
 ///
 /// This is an explicit deviation from `INTERFACE.md` §4.2 and the Phase 5 roadmap, which specify
@@ -48,9 +50,9 @@ pub struct SynchronizedHtml {
 }
 
 impl SynchronizedHtml {
-    fn parse_document(document: &str) -> Self {
+    pub(crate) fn from_html(html: scraper::Html) -> Self {
         Self {
-            html: Mutex::new(scraper::Html::parse_document(document)),
+            html: Mutex::new(html),
         }
     }
 
@@ -333,16 +335,24 @@ impl CrawlerKind for HtmlKind {
                 }
             }
 
-            // Parse once for handler queries; Phase 5 benchmarks may choose a separate streaming
-            // extractor for engine-owned link discovery without changing this handler API.
-            let html = Arc::new(SynchronizedHtml::parse_document(&http_ctx.response.text()));
+            let html = Arc::new(SynchronizedHtml::from_html(scraper::Html::parse_document(
+                &http_ctx.response.text(),
+            )));
+            let enqueue = EnqueueLinker::with_extractor(
+                http_ctx.crawler.clone(),
+                &http_ctx.request,
+                Arc::new(HtmlLinkExtractor::from_synchronized(
+                    Arc::clone(&html),
+                    http_ctx.response.url.clone(),
+                )),
+            );
             Ok(HtmlContext {
                 request: http_ctx.request.clone(),
                 response: http_ctx.response.clone(),
                 html,
                 session: http_ctx.session.clone(),
                 proxy_info: http_ctx.proxy_info.clone(),
-                enqueue: http_ctx.enqueue.clone(),
+                enqueue,
                 storage: http_ctx.storage.clone(),
                 crawler: http_ctx.crawler.clone(),
                 http: http_ctx,
