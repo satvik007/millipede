@@ -11,7 +11,10 @@ use millipede_browser::{
     GotoOptions, LaunchContext, ScreenshotOptions, SmartContext, SmartKind,
 };
 use millipede_core::{
-    cookies::Cookie, crawler::Crawler, session::SessionPoolOptions, storage::StorageClient,
+    cookies::Cookie,
+    crawler::Crawler,
+    http_client::{HttpClient, HttpClientError, HttpRequest, HttpResponse, StreamingResponse},
+    storage::StorageClient,
 };
 use millipede_storage_memory::MemoryStorageClient;
 use wiremock::{
@@ -36,6 +39,38 @@ struct FakeProvider {
 }
 
 struct FakeBrowser;
+
+struct ShellCookieClient;
+
+#[async_trait::async_trait]
+impl HttpClient for ShellCookieClient {
+    async fn send(&self, request: HttpRequest) -> Result<HttpResponse, HttpClientError> {
+        let mut headers = http::HeaderMap::new();
+        headers.insert(
+            http::header::CONTENT_TYPE,
+            http::HeaderValue::from_static("text/html"),
+        );
+        headers.insert(
+            http::header::SET_COOKIE,
+            http::HeaderValue::from_static("s=1; Path=/"),
+        );
+        if let Some(cookie_jar) = &request.cookie_jar {
+            cookie_jar.store_response_cookies(&request.url, &headers);
+        }
+        Ok(HttpResponse::new(
+            request.url,
+            http::StatusCode::OK,
+            headers,
+            bytes::Bytes::from_static(SHELL_HTML.as_bytes()),
+        ))
+    }
+
+    async fn stream(&self, _request: HttpRequest) -> Result<StreamingResponse, HttpClientError> {
+        Err(HttpClientError::other(anyhow::anyhow!(
+            "streaming is not used by this test"
+        )))
+    }
+}
 
 #[derive(Clone)]
 struct FakePage {
@@ -416,20 +451,9 @@ async fn custom_detector_required_selector() {
 #[tokio::test]
 async fn shared_cookie_state_across_paths() {
     tokio::time::timeout(Duration::from_secs(30), async {
-        let server = MockServer::start().await;
-        Mock::given(method("GET"))
-            .and(path("/static"))
-            .respond_with(
-                ResponseTemplate::new(200)
-                    .insert_header("Set-Cookie", "s=1; Path=/")
-                    .set_body_raw(STATIC_HTML, "text/html"),
-            )
-            .mount(&server)
-            .await;
-        mount_shell(&server).await;
         let provider = FakeProvider::default();
         let kind = SmartKind::builder(provider.clone())
-            .session_pool(SessionPoolOptions::default().with_max_pool_size(1))
+            .html_kind(millipede_html::HtmlKind::builder().http_client(Arc::new(ShellCookieClient)))
             .build()
             .unwrap();
         let crawler = Crawler::builder(kind)
@@ -440,10 +464,13 @@ async fn shared_cookie_state_across_paths() {
             .build()
             .await
             .unwrap();
-        crawler
-            .run([url(&server, "/static"), url(&server, "/shell")])
-            .await
-            .unwrap();
+        let target = "https://example.com/shell";
+        let crawl_stats = crawler.run([target]).await.unwrap();
+        assert_eq!(crawl_stats.requests_finished, 1);
+        assert_eq!(
+            provider.stats.lock().unwrap().gotos,
+            vec![(1, target.to_owned())]
+        );
         let stats = provider.stats.lock().unwrap();
         assert!(stats.set_cookie_calls.iter().any(|(_, cookies)| {
             cookies

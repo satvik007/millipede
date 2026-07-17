@@ -177,6 +177,63 @@ impl<P: BrowserProvider> BrowserKind<P> {
         }
         Ok(())
     }
+
+    pub(crate) async fn execute_with_session(
+        &self,
+        env: RequestEnv<'_>,
+        session: Option<Arc<Session>>,
+    ) -> Result<BrowserContext, CrawlError> {
+        let mut page_opts = PageOpts::new();
+        if let Some(session) = &session {
+            page_opts = page_opts.session(Arc::clone(session));
+        }
+        let page = self
+            .pool
+            .new_page(page_opts)
+            .await
+            .map_err(BrowserError::classify)?;
+        let response = match page.goto(&env.request.url, self.goto.clone()).await {
+            Ok(response) => response,
+            Err(error) => {
+                self.close_after_error(&page, "navigation error").await;
+                return Err(error.classify());
+            }
+        };
+        if let Some(status) = response.as_ref().and_then(|response| response.status) {
+            if let Err(error) = self.classify_status(status, session.as_ref()).await {
+                self.close_after_error(&page, "HTTP status error").await;
+                return Err(error);
+            }
+        } else if let Some(session) = &session {
+            session.mark_good().await;
+        }
+        let storage = match self.storage.get().cloned() {
+            Some(storage) => storage,
+            None => {
+                self.close_after_error(&page, "storage initialization error")
+                    .await;
+                return Err(CrawlError::critical(anyhow!(
+                    "BrowserKind::execute before start"
+                )));
+            }
+        };
+        let enqueue = EnqueueLinker::with_extractor(
+            env.crawler.clone(),
+            &env.request,
+            Arc::new(BrowserLinkExtractor { page: page.clone() }),
+        );
+        Ok(BrowserContext {
+            request: env.request.clone(),
+            proxy_info: page.proxy_info().cloned(),
+            page,
+            response,
+            session,
+            enqueue,
+            storage,
+            send_request: self.send_request.clone(),
+            crawler: env.crawler,
+        })
+    }
 }
 
 /// Configures a [`BrowserKind`].
@@ -406,56 +463,7 @@ impl<P: BrowserProvider> CrawlerKind for BrowserKind<P> {
             } else {
                 None
             };
-            let mut page_opts = PageOpts::new();
-            if let Some(session) = &session {
-                page_opts = page_opts.session(Arc::clone(session));
-            }
-            let page = self
-                .pool
-                .new_page(page_opts)
-                .await
-                .map_err(BrowserError::classify)?;
-            let response = match page.goto(&env.request.url, self.goto.clone()).await {
-                Ok(response) => response,
-                Err(error) => {
-                    self.close_after_error(&page, "navigation error").await;
-                    return Err(error.classify());
-                }
-            };
-            if let Some(status) = response.as_ref().and_then(|response| response.status) {
-                if let Err(error) = self.classify_status(status, session.as_ref()).await {
-                    self.close_after_error(&page, "HTTP status error").await;
-                    return Err(error);
-                }
-            } else if let Some(session) = &session {
-                session.mark_good().await;
-            }
-            let storage = match self.storage.get().cloned() {
-                Some(storage) => storage,
-                None => {
-                    self.close_after_error(&page, "storage initialization error")
-                        .await;
-                    return Err(CrawlError::critical(anyhow!(
-                        "BrowserKind::execute before start"
-                    )));
-                }
-            };
-            let enqueue = EnqueueLinker::with_extractor(
-                env.crawler.clone(),
-                &env.request,
-                Arc::new(BrowserLinkExtractor { page: page.clone() }),
-            );
-            Ok(BrowserContext {
-                request: env.request.clone(),
-                proxy_info: page.proxy_info().cloned(),
-                page,
-                response,
-                session,
-                enqueue,
-                storage,
-                send_request: self.send_request.clone(),
-                crawler: env.crawler,
-            })
+            self.execute_with_session(env, session).await
         })
     }
 

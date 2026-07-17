@@ -306,6 +306,10 @@ impl<P: BrowserProvider> CrawlerKind for SmartKind<P> {
                 false
             };
             if sticky_promoted {
+                // Sticky and error-path promotions intentionally use a fresh
+                // session (`execute` re-checks out): there is no successful HTTP
+                // attempt whose session state is worth carrying over. Only the
+                // success-path promotion below reuses the HTTP attempt's session.
                 return self.browser.execute(env).await.map(SmartContext::Browser);
             }
 
@@ -322,7 +326,10 @@ impl<P: BrowserProvider> CrawlerKind for SmartKind<P> {
                     if let Some(reason) = self.detector.should_promote(&snapshot) {
                         tracing::info!(%reason, url = %env.request.url, "promoting request to browser");
                         self.record_promoted_host(host);
-                        self.browser.execute(env).await.map(SmartContext::Browser)
+                        self.browser
+                            .execute_with_session(env, html_ctx.session.clone())
+                            .await
+                            .map(SmartContext::Browser)
                     } else {
                         Ok(SmartContext::Http(html_ctx))
                     }

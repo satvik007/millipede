@@ -1,11 +1,19 @@
 //! Real-Chrome end-to-end smoke tests for `BrowserCrawler`.
 
-use std::{path::PathBuf, sync::Arc, time::Duration};
+use std::{
+    collections::HashMap,
+    path::PathBuf,
+    sync::{Arc, Mutex},
+    time::Duration,
+};
 
 use anyhow::{Context, Result};
-use millipede_browser::{BrowserContext, BrowserCrawler, BrowserKind};
+use millipede_browser::{
+    BrowserContext, BrowserCrawler, BrowserError, BrowserKind, BrowserProvider, LaunchContext,
+};
 use millipede_browser_chromiumoxide::{
-    ChromiumLaunchOptions, ChromiumoxideProvider, discovery::find_browser,
+    ChromiumBrowser, ChromiumLaunchOptions, ChromiumPage, ChromiumoxideProvider,
+    discovery::find_browser,
 };
 use millipede_core::{
     request::Request,
@@ -21,6 +29,70 @@ use wiremock::{
 };
 
 static BROWSER_TEST_LOCK: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
+
+#[derive(Default)]
+struct TrackingStats {
+    next_browser_id: u64,
+    pages_per_browser: HashMap<u64, usize>,
+    closed_browsers: Vec<u64>,
+}
+
+#[derive(Clone, Default)]
+struct TrackingProvider {
+    stats: Arc<Mutex<TrackingStats>>,
+}
+
+struct TrackingBrowser {
+    id: u64,
+    inner: ChromiumBrowser,
+}
+
+#[async_trait::async_trait]
+impl BrowserProvider for TrackingProvider {
+    type Browser = TrackingBrowser;
+    type Page = ChromiumPage;
+    type LaunchOptions = ChromiumLaunchOptions;
+
+    async fn launch(
+        &self,
+        options: Self::LaunchOptions,
+        context: &LaunchContext,
+    ) -> Result<Self::Browser, BrowserError> {
+        let inner = ChromiumoxideProvider.launch(options, context).await?;
+        let id = {
+            let mut stats = self.stats.lock().unwrap_or_else(|error| error.into_inner());
+            stats.next_browser_id += 1;
+            stats.next_browser_id
+        };
+        Ok(TrackingBrowser { id, inner })
+    }
+
+    async fn new_page(&self, browser: &Self::Browser) -> Result<Self::Page, BrowserError> {
+        let page = ChromiumoxideProvider.new_page(&browser.inner).await?;
+        *self
+            .stats
+            .lock()
+            .unwrap_or_else(|error| error.into_inner())
+            .pages_per_browser
+            .entry(browser.id)
+            .or_default() += 1;
+        Ok(page)
+    }
+
+    async fn close_page(&self, page: Self::Page) -> Result<(), BrowserError> {
+        ChromiumoxideProvider.close_page(page).await
+    }
+
+    async fn close_browser(&self, browser: Self::Browser) -> Result<(), BrowserError> {
+        ChromiumoxideProvider.close_browser(browser.inner).await?;
+        self.stats
+            .lock()
+            .unwrap_or_else(|error| error.into_inner())
+            .closed_browsers
+            .push(browser.id);
+        Ok(())
+    }
+}
 
 fn require_browser() -> Option<PathBuf> {
     if let Ok(configured) = std::env::var("MILLIPEDE_CHROME") {
@@ -241,7 +313,9 @@ async fn pool_limits_hold_with_real_browser() -> Result<()> {
     let Some(executable) = require_browser() else {
         return Ok(());
     };
-    let kind = BrowserKind::builder(ChromiumoxideProvider)
+    let provider = TrackingProvider::default();
+    let tracking_stats = Arc::clone(&provider.stats);
+    let kind = BrowserKind::builder(provider)
         .launch_options(launch_options(executable))
         .max_open_pages_per_browser(1)
         .retire_browser_after_page_count(2)
@@ -269,6 +343,30 @@ async fn pool_limits_hold_with_real_browser() -> Result<()> {
         };
         assert_eq!(stats.requests_finished, 4);
         assert_eq!(stats.requests_failed, 0);
+        let tracking = tracking_stats
+            .lock()
+            .unwrap_or_else(|error| error.into_inner());
+        // >= rather than ==: a transient navigation failure that succeeds on retry
+        // opens an extra page while requests_finished/failed stay 4/0.
+        assert!(tracking.pages_per_browser.values().sum::<usize>() >= 4);
+        assert!(
+            tracking.pages_per_browser.len() >= 2,
+            "retirement after two pages should require at least two browser instances: {:?}",
+            tracking.pages_per_browser
+        );
+        assert!(
+            tracking
+                .pages_per_browser
+                .values()
+                .all(|page_count| *page_count <= 2),
+            "a browser exceeded retire_browser_after_page_count: {:?}",
+            tracking.pages_per_browser
+        );
+        assert_eq!(
+            tracking.closed_browsers.len() as u64,
+            tracking.next_browser_id,
+            "crawler shutdown did not close every launched browser"
+        );
         Ok(())
     }
     .await;

@@ -31,9 +31,12 @@ struct FakeBehavior {
 
 #[derive(Default)]
 struct FakeStats {
+    browsers_launched: usize,
     pages_created: usize,
     pages_closed: usize,
     browsers_closed: usize,
+    page_browser_ids: Vec<u64>,
+    closed_browser_ids: Vec<u64>,
     open_pages: i64,
     gotos: Vec<String>,
     set_cookie_calls: Vec<(u64, Vec<Cookie>)>,
@@ -54,7 +57,9 @@ impl FakeProvider {
     }
 }
 
-struct FakeBrowser;
+struct FakeBrowser {
+    id: u64,
+}
 
 #[derive(Clone)]
 struct FakePage {
@@ -169,14 +174,20 @@ impl BrowserProvider for FakeProvider {
         _opts: Self::LaunchOptions,
         _ctx: &LaunchContext,
     ) -> Result<Self::Browser, BrowserError> {
-        Ok(FakeBrowser)
+        let id = {
+            let mut stats = self.stats.lock().unwrap_or_else(|error| error.into_inner());
+            stats.browsers_launched += 1;
+            stats.browsers_launched as u64
+        };
+        Ok(FakeBrowser { id })
     }
 
-    async fn new_page(&self, _browser: &Self::Browser) -> Result<Self::Page, BrowserError> {
+    async fn new_page(&self, browser: &Self::Browser) -> Result<Self::Page, BrowserError> {
         let serial = {
             let mut stats = self.stats.lock().unwrap_or_else(|error| error.into_inner());
             stats.pages_created += 1;
             stats.open_pages += 1;
+            stats.page_browser_ids.push(browser.id);
             stats.pages_created as u64
         };
         Ok(FakePage {
@@ -194,11 +205,10 @@ impl BrowserProvider for FakeProvider {
         Ok(())
     }
 
-    async fn close_browser(&self, _browser: Self::Browser) -> Result<(), BrowserError> {
-        self.stats
-            .lock()
-            .unwrap_or_else(|error| error.into_inner())
-            .browsers_closed += 1;
+    async fn close_browser(&self, browser: Self::Browser) -> Result<(), BrowserError> {
+        let mut stats = self.stats.lock().unwrap_or_else(|error| error.into_inner());
+        stats.browsers_closed += 1;
+        stats.closed_browser_ids.push(browser.id);
         Ok(())
     }
 }
@@ -262,6 +272,49 @@ async fn browser_crawler_crawls_and_enqueues_dom_links() {
             .unwrap_or_else(|error| error.into_inner());
         assert_eq!(fake.gotos.len(), 3);
         assert_eq!(fake.pages_closed, 3);
+    })
+    .await
+    .unwrap();
+}
+
+#[tokio::test]
+async fn engine_retires_browser_after_configured_page_count() {
+    tokio::time::timeout(Duration::from_secs(30), async {
+        let provider = FakeProvider::new(HashMap::new());
+        let browser_kind = BrowserKind::builder(provider.clone())
+            .max_open_pages_per_browser(1)
+            .retire_browser_after_page_count(2)
+            .build()
+            .unwrap();
+        let crawler = Crawler::builder(browser_kind)
+            .storage_client(storage())
+            .max_concurrency(1)
+            .request_handler(|_ctx: BrowserContext| async { Ok(()) })
+            .build()
+            .await
+            .unwrap();
+
+        let stats = crawler
+            .run([
+                "https://example.com/1",
+                "https://example.com/2",
+                "https://example.com/3",
+                "https://example.com/4",
+                "https://example.com/5",
+            ])
+            .await
+            .unwrap();
+
+        assert_eq!(stats.requests_finished, 5);
+        let fake = provider
+            .stats
+            .lock()
+            .unwrap_or_else(|error| error.into_inner());
+        assert_eq!(fake.browsers_launched, 3);
+        assert_eq!(fake.page_browser_ids, vec![1, 1, 2, 2, 3]);
+        assert_eq!(fake.closed_browser_ids, vec![1, 2, 3]);
+        assert_eq!(fake.pages_closed, 5);
+        assert_eq!(fake.open_pages, 0);
     })
     .await
     .unwrap();
