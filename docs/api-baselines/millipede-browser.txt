@@ -192,6 +192,69 @@ pub fn millipede_browser::page::BrowserPage::screenshot<'life0, 'async_trait>(&'
 pub fn millipede_browser::page::BrowserPage::set_cookies<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 [millipede_core::cookies::Cookie]) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
 pub fn millipede_browser::page::BrowserPage::set_extra_headers<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 http::header::map::HeaderMap) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
 pub fn millipede_browser::page::BrowserPage::wait_for_selector<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 str, core::time::Duration) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub mod millipede_browser::pool
+pub struct millipede_browser::pool::BrowserPool<P: millipede_browser::provider::BrowserProvider>
+impl<P: millipede_browser::provider::BrowserProvider> millipede_browser::pool::BrowserPool<P>
+pub fn millipede_browser::pool::BrowserPool<P>::new(P, millipede_browser::pool::BrowserPoolOptions<<P as millipede_browser::provider::BrowserProvider>::LaunchOptions>) -> Self
+pub async fn millipede_browser::pool::BrowserPool<P>::new_page(&self, millipede_browser::page::PageOpts) -> core::result::Result<millipede_browser::pool::PageHandle, millipede_browser::error::BrowserError>
+pub async fn millipede_browser::pool::BrowserPool<P>::shutdown(&self) -> core::result::Result<(), millipede_browser::error::BrowserError>
+impl<P: millipede_browser::provider::BrowserProvider> core::clone::Clone for millipede_browser::pool::BrowserPool<P>
+pub fn millipede_browser::pool::BrowserPool<P>::clone(&self) -> Self
+impl<P> core::marker::Freeze for millipede_browser::pool::BrowserPool<P>
+impl<P> core::marker::Send for millipede_browser::pool::BrowserPool<P>
+impl<P> core::marker::Sync for millipede_browser::pool::BrowserPool<P>
+impl<P> core::marker::Unpin for millipede_browser::pool::BrowserPool<P>
+impl<P> core::marker::UnsafeUnpin for millipede_browser::pool::BrowserPool<P>
+impl<P> !core::panic::unwind_safe::RefUnwindSafe for millipede_browser::pool::BrowserPool<P>
+impl<P> !core::panic::unwind_safe::UnwindSafe for millipede_browser::pool::BrowserPool<P>
+#[non_exhaustive] pub struct millipede_browser::pool::BrowserPoolOptions<L>
+pub millipede_browser::pool::BrowserPoolOptions::hooks: millipede_browser::hooks::BrowserHooks
+pub millipede_browser::pool::BrowserPoolOptions::launch_options: L
+pub millipede_browser::pool::BrowserPoolOptions::max_browsers: core::option::Option<usize>
+pub millipede_browser::pool::BrowserPoolOptions::max_open_pages_per_browser: usize
+pub millipede_browser::pool::BrowserPoolOptions::page_acquire_timeout: core::time::Duration
+pub millipede_browser::pool::BrowserPoolOptions::proxy: core::option::Option<millipede_core::proxy::ProxyConfiguration>
+pub millipede_browser::pool::BrowserPoolOptions::retire_browser_after_page_count: u64
+impl<L: core::default::Default> millipede_browser::pool::BrowserPoolOptions<L>
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::new() -> Self
+impl<L> millipede_browser::pool::BrowserPoolOptions<L>
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::hooks(self, millipede_browser::hooks::BrowserHooks) -> Self
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::launch_options(self, L) -> Self
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::max_browsers(self, core::option::Option<usize>) -> Self
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::max_open_pages_per_browser(self, usize) -> Self
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::page_acquire_timeout(self, core::time::Duration) -> Self
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::proxy(self, core::option::Option<millipede_core::proxy::ProxyConfiguration>) -> Self
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::retire_browser_after_page_count(self, u64) -> Self
+impl<L: core::default::Default> core::default::Default for millipede_browser::pool::BrowserPoolOptions<L>
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::default() -> Self
+impl<L> core::fmt::Debug for millipede_browser::pool::BrowserPoolOptions<L>
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl<L> !core::marker::Freeze for millipede_browser::pool::BrowserPoolOptions<L>
+impl<L> core::marker::Send for millipede_browser::pool::BrowserPoolOptions<L> where L: core::marker::Send
+impl<L> core::marker::Sync for millipede_browser::pool::BrowserPoolOptions<L> where L: core::marker::Sync
+impl<L> core::marker::Unpin for millipede_browser::pool::BrowserPoolOptions<L> where L: core::marker::Unpin
+impl<L> core::marker::UnsafeUnpin for millipede_browser::pool::BrowserPoolOptions<L> where L: core::marker::UnsafeUnpin
+impl<L> !core::panic::unwind_safe::RefUnwindSafe for millipede_browser::pool::BrowserPoolOptions<L>
+impl<L> !core::panic::unwind_safe::UnwindSafe for millipede_browser::pool::BrowserPoolOptions<L>
+pub struct millipede_browser::pool::PageHandle
+impl millipede_browser::pool::PageHandle
+pub async fn millipede_browser::pool::PageHandle::close(&self) -> core::result::Result<(), millipede_browser::error::BrowserError>
+pub fn millipede_browser::pool::PageHandle::id(&self) -> millipede_browser::page::PageId
+pub fn millipede_browser::pool::PageHandle::proxy_info(&self) -> core::option::Option<&millipede_core::proxy::ProxyInfo>
+impl core::clone::Clone for millipede_browser::pool::PageHandle
+pub fn millipede_browser::pool::PageHandle::clone(&self) -> millipede_browser::pool::PageHandle
+impl core::fmt::Debug for millipede_browser::pool::PageHandle
+pub fn millipede_browser::pool::PageHandle::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::ops::deref::Deref for millipede_browser::pool::PageHandle
+pub type millipede_browser::pool::PageHandle::Target = dyn millipede_browser::page::BrowserPage
+pub fn millipede_browser::pool::PageHandle::deref(&self) -> &Self::Target
+impl core::marker::Freeze for millipede_browser::pool::PageHandle
+impl core::marker::Send for millipede_browser::pool::PageHandle
+impl core::marker::Sync for millipede_browser::pool::PageHandle
+impl core::marker::Unpin for millipede_browser::pool::PageHandle
+impl core::marker::UnsafeUnpin for millipede_browser::pool::PageHandle
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_browser::pool::PageHandle
+impl !core::panic::unwind_safe::UnwindSafe for millipede_browser::pool::PageHandle
 pub mod millipede_browser::prelude
 #[non_exhaustive] pub enum millipede_browser::prelude::BrowserError
 pub millipede_browser::prelude::BrowserError::BrowserNotFound
@@ -276,6 +339,49 @@ impl core::marker::Unpin for millipede_browser::hooks::BrowserHooks
 impl core::marker::UnsafeUnpin for millipede_browser::hooks::BrowserHooks
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_browser::hooks::BrowserHooks
 impl !core::panic::unwind_safe::UnwindSafe for millipede_browser::hooks::BrowserHooks
+pub struct millipede_browser::prelude::BrowserPool<P: millipede_browser::provider::BrowserProvider>
+impl<P: millipede_browser::provider::BrowserProvider> millipede_browser::pool::BrowserPool<P>
+pub fn millipede_browser::pool::BrowserPool<P>::new(P, millipede_browser::pool::BrowserPoolOptions<<P as millipede_browser::provider::BrowserProvider>::LaunchOptions>) -> Self
+pub async fn millipede_browser::pool::BrowserPool<P>::new_page(&self, millipede_browser::page::PageOpts) -> core::result::Result<millipede_browser::pool::PageHandle, millipede_browser::error::BrowserError>
+pub async fn millipede_browser::pool::BrowserPool<P>::shutdown(&self) -> core::result::Result<(), millipede_browser::error::BrowserError>
+impl<P: millipede_browser::provider::BrowserProvider> core::clone::Clone for millipede_browser::pool::BrowserPool<P>
+pub fn millipede_browser::pool::BrowserPool<P>::clone(&self) -> Self
+impl<P> core::marker::Freeze for millipede_browser::pool::BrowserPool<P>
+impl<P> core::marker::Send for millipede_browser::pool::BrowserPool<P>
+impl<P> core::marker::Sync for millipede_browser::pool::BrowserPool<P>
+impl<P> core::marker::Unpin for millipede_browser::pool::BrowserPool<P>
+impl<P> core::marker::UnsafeUnpin for millipede_browser::pool::BrowserPool<P>
+impl<P> !core::panic::unwind_safe::RefUnwindSafe for millipede_browser::pool::BrowserPool<P>
+impl<P> !core::panic::unwind_safe::UnwindSafe for millipede_browser::pool::BrowserPool<P>
+#[non_exhaustive] pub struct millipede_browser::prelude::BrowserPoolOptions<L>
+pub millipede_browser::prelude::BrowserPoolOptions::hooks: millipede_browser::hooks::BrowserHooks
+pub millipede_browser::prelude::BrowserPoolOptions::launch_options: L
+pub millipede_browser::prelude::BrowserPoolOptions::max_browsers: core::option::Option<usize>
+pub millipede_browser::prelude::BrowserPoolOptions::max_open_pages_per_browser: usize
+pub millipede_browser::prelude::BrowserPoolOptions::page_acquire_timeout: core::time::Duration
+pub millipede_browser::prelude::BrowserPoolOptions::proxy: core::option::Option<millipede_core::proxy::ProxyConfiguration>
+pub millipede_browser::prelude::BrowserPoolOptions::retire_browser_after_page_count: u64
+impl<L: core::default::Default> millipede_browser::pool::BrowserPoolOptions<L>
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::new() -> Self
+impl<L> millipede_browser::pool::BrowserPoolOptions<L>
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::hooks(self, millipede_browser::hooks::BrowserHooks) -> Self
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::launch_options(self, L) -> Self
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::max_browsers(self, core::option::Option<usize>) -> Self
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::max_open_pages_per_browser(self, usize) -> Self
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::page_acquire_timeout(self, core::time::Duration) -> Self
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::proxy(self, core::option::Option<millipede_core::proxy::ProxyConfiguration>) -> Self
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::retire_browser_after_page_count(self, u64) -> Self
+impl<L: core::default::Default> core::default::Default for millipede_browser::pool::BrowserPoolOptions<L>
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::default() -> Self
+impl<L> core::fmt::Debug for millipede_browser::pool::BrowserPoolOptions<L>
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl<L> !core::marker::Freeze for millipede_browser::pool::BrowserPoolOptions<L>
+impl<L> core::marker::Send for millipede_browser::pool::BrowserPoolOptions<L> where L: core::marker::Send
+impl<L> core::marker::Sync for millipede_browser::pool::BrowserPoolOptions<L> where L: core::marker::Sync
+impl<L> core::marker::Unpin for millipede_browser::pool::BrowserPoolOptions<L> where L: core::marker::Unpin
+impl<L> core::marker::UnsafeUnpin for millipede_browser::pool::BrowserPoolOptions<L> where L: core::marker::UnsafeUnpin
+impl<L> !core::panic::unwind_safe::RefUnwindSafe for millipede_browser::pool::BrowserPoolOptions<L>
+impl<L> !core::panic::unwind_safe::UnwindSafe for millipede_browser::pool::BrowserPoolOptions<L>
 #[non_exhaustive] pub struct millipede_browser::prelude::BrowserResponse
 pub millipede_browser::prelude::BrowserResponse::headers: http::header::map::HeaderMap
 pub millipede_browser::prelude::BrowserResponse::status: core::option::Option<http::status::StatusCode>
@@ -332,6 +438,25 @@ impl core::marker::Unpin for millipede_browser::provider::LaunchContext
 impl core::marker::UnsafeUnpin for millipede_browser::provider::LaunchContext
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_browser::provider::LaunchContext
 impl core::panic::unwind_safe::UnwindSafe for millipede_browser::provider::LaunchContext
+pub struct millipede_browser::prelude::PageHandle
+impl millipede_browser::pool::PageHandle
+pub async fn millipede_browser::pool::PageHandle::close(&self) -> core::result::Result<(), millipede_browser::error::BrowserError>
+pub fn millipede_browser::pool::PageHandle::id(&self) -> millipede_browser::page::PageId
+pub fn millipede_browser::pool::PageHandle::proxy_info(&self) -> core::option::Option<&millipede_core::proxy::ProxyInfo>
+impl core::clone::Clone for millipede_browser::pool::PageHandle
+pub fn millipede_browser::pool::PageHandle::clone(&self) -> millipede_browser::pool::PageHandle
+impl core::fmt::Debug for millipede_browser::pool::PageHandle
+pub fn millipede_browser::pool::PageHandle::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::ops::deref::Deref for millipede_browser::pool::PageHandle
+pub type millipede_browser::pool::PageHandle::Target = dyn millipede_browser::page::BrowserPage
+pub fn millipede_browser::pool::PageHandle::deref(&self) -> &Self::Target
+impl core::marker::Freeze for millipede_browser::pool::PageHandle
+impl core::marker::Send for millipede_browser::pool::PageHandle
+impl core::marker::Sync for millipede_browser::pool::PageHandle
+impl core::marker::Unpin for millipede_browser::pool::PageHandle
+impl core::marker::UnsafeUnpin for millipede_browser::pool::PageHandle
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_browser::pool::PageHandle
+impl !core::panic::unwind_safe::UnwindSafe for millipede_browser::pool::PageHandle
 pub struct millipede_browser::prelude::PageId(_)
 impl core::clone::Clone for millipede_browser::page::PageId
 pub fn millipede_browser::page::PageId::clone(&self) -> millipede_browser::page::PageId
@@ -523,6 +648,49 @@ impl core::marker::Unpin for millipede_browser::hooks::BrowserHooks
 impl core::marker::UnsafeUnpin for millipede_browser::hooks::BrowserHooks
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_browser::hooks::BrowserHooks
 impl !core::panic::unwind_safe::UnwindSafe for millipede_browser::hooks::BrowserHooks
+pub struct millipede_browser::BrowserPool<P: millipede_browser::provider::BrowserProvider>
+impl<P: millipede_browser::provider::BrowserProvider> millipede_browser::pool::BrowserPool<P>
+pub fn millipede_browser::pool::BrowserPool<P>::new(P, millipede_browser::pool::BrowserPoolOptions<<P as millipede_browser::provider::BrowserProvider>::LaunchOptions>) -> Self
+pub async fn millipede_browser::pool::BrowserPool<P>::new_page(&self, millipede_browser::page::PageOpts) -> core::result::Result<millipede_browser::pool::PageHandle, millipede_browser::error::BrowserError>
+pub async fn millipede_browser::pool::BrowserPool<P>::shutdown(&self) -> core::result::Result<(), millipede_browser::error::BrowserError>
+impl<P: millipede_browser::provider::BrowserProvider> core::clone::Clone for millipede_browser::pool::BrowserPool<P>
+pub fn millipede_browser::pool::BrowserPool<P>::clone(&self) -> Self
+impl<P> core::marker::Freeze for millipede_browser::pool::BrowserPool<P>
+impl<P> core::marker::Send for millipede_browser::pool::BrowserPool<P>
+impl<P> core::marker::Sync for millipede_browser::pool::BrowserPool<P>
+impl<P> core::marker::Unpin for millipede_browser::pool::BrowserPool<P>
+impl<P> core::marker::UnsafeUnpin for millipede_browser::pool::BrowserPool<P>
+impl<P> !core::panic::unwind_safe::RefUnwindSafe for millipede_browser::pool::BrowserPool<P>
+impl<P> !core::panic::unwind_safe::UnwindSafe for millipede_browser::pool::BrowserPool<P>
+#[non_exhaustive] pub struct millipede_browser::BrowserPoolOptions<L>
+pub millipede_browser::BrowserPoolOptions::hooks: millipede_browser::hooks::BrowserHooks
+pub millipede_browser::BrowserPoolOptions::launch_options: L
+pub millipede_browser::BrowserPoolOptions::max_browsers: core::option::Option<usize>
+pub millipede_browser::BrowserPoolOptions::max_open_pages_per_browser: usize
+pub millipede_browser::BrowserPoolOptions::page_acquire_timeout: core::time::Duration
+pub millipede_browser::BrowserPoolOptions::proxy: core::option::Option<millipede_core::proxy::ProxyConfiguration>
+pub millipede_browser::BrowserPoolOptions::retire_browser_after_page_count: u64
+impl<L: core::default::Default> millipede_browser::pool::BrowserPoolOptions<L>
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::new() -> Self
+impl<L> millipede_browser::pool::BrowserPoolOptions<L>
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::hooks(self, millipede_browser::hooks::BrowserHooks) -> Self
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::launch_options(self, L) -> Self
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::max_browsers(self, core::option::Option<usize>) -> Self
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::max_open_pages_per_browser(self, usize) -> Self
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::page_acquire_timeout(self, core::time::Duration) -> Self
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::proxy(self, core::option::Option<millipede_core::proxy::ProxyConfiguration>) -> Self
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::retire_browser_after_page_count(self, u64) -> Self
+impl<L: core::default::Default> core::default::Default for millipede_browser::pool::BrowserPoolOptions<L>
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::default() -> Self
+impl<L> core::fmt::Debug for millipede_browser::pool::BrowserPoolOptions<L>
+pub fn millipede_browser::pool::BrowserPoolOptions<L>::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl<L> !core::marker::Freeze for millipede_browser::pool::BrowserPoolOptions<L>
+impl<L> core::marker::Send for millipede_browser::pool::BrowserPoolOptions<L> where L: core::marker::Send
+impl<L> core::marker::Sync for millipede_browser::pool::BrowserPoolOptions<L> where L: core::marker::Sync
+impl<L> core::marker::Unpin for millipede_browser::pool::BrowserPoolOptions<L> where L: core::marker::Unpin
+impl<L> core::marker::UnsafeUnpin for millipede_browser::pool::BrowserPoolOptions<L> where L: core::marker::UnsafeUnpin
+impl<L> !core::panic::unwind_safe::RefUnwindSafe for millipede_browser::pool::BrowserPoolOptions<L>
+impl<L> !core::panic::unwind_safe::UnwindSafe for millipede_browser::pool::BrowserPoolOptions<L>
 #[non_exhaustive] pub struct millipede_browser::BrowserResponse
 pub millipede_browser::BrowserResponse::headers: http::header::map::HeaderMap
 pub millipede_browser::BrowserResponse::status: core::option::Option<http::status::StatusCode>
@@ -579,6 +747,25 @@ impl core::marker::Unpin for millipede_browser::provider::LaunchContext
 impl core::marker::UnsafeUnpin for millipede_browser::provider::LaunchContext
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_browser::provider::LaunchContext
 impl core::panic::unwind_safe::UnwindSafe for millipede_browser::provider::LaunchContext
+pub struct millipede_browser::PageHandle
+impl millipede_browser::pool::PageHandle
+pub async fn millipede_browser::pool::PageHandle::close(&self) -> core::result::Result<(), millipede_browser::error::BrowserError>
+pub fn millipede_browser::pool::PageHandle::id(&self) -> millipede_browser::page::PageId
+pub fn millipede_browser::pool::PageHandle::proxy_info(&self) -> core::option::Option<&millipede_core::proxy::ProxyInfo>
+impl core::clone::Clone for millipede_browser::pool::PageHandle
+pub fn millipede_browser::pool::PageHandle::clone(&self) -> millipede_browser::pool::PageHandle
+impl core::fmt::Debug for millipede_browser::pool::PageHandle
+pub fn millipede_browser::pool::PageHandle::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::ops::deref::Deref for millipede_browser::pool::PageHandle
+pub type millipede_browser::pool::PageHandle::Target = dyn millipede_browser::page::BrowserPage
+pub fn millipede_browser::pool::PageHandle::deref(&self) -> &Self::Target
+impl core::marker::Freeze for millipede_browser::pool::PageHandle
+impl core::marker::Send for millipede_browser::pool::PageHandle
+impl core::marker::Sync for millipede_browser::pool::PageHandle
+impl core::marker::Unpin for millipede_browser::pool::PageHandle
+impl core::marker::UnsafeUnpin for millipede_browser::pool::PageHandle
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_browser::pool::PageHandle
+impl !core::panic::unwind_safe::UnwindSafe for millipede_browser::pool::PageHandle
 pub struct millipede_browser::PageId(_)
 impl core::clone::Clone for millipede_browser::page::PageId
 pub fn millipede_browser::page::PageId::clone(&self) -> millipede_browser::page::PageId
