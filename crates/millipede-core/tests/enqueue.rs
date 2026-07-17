@@ -42,6 +42,35 @@ fn storage() -> Arc<dyn StorageClient> {
 }
 
 #[tokio::test]
+async fn explicit_urls_bypass_default_hostname_strategy() -> Result<(), Box<dyn std::error::Error>>
+{
+    let crawler = Crawler::builder(BasicKind)
+        .storage_client(storage())
+        .request_handler(|_: BasicContext| async { Ok(()) })
+        .build()
+        .await?;
+    let parent = Request::get("https://parent.example/root").build()?;
+    let external = Url::parse("https://external.example/selected")?;
+
+    let result = EnqueueLinker::new(crawler.handle(), &parent)
+        .urls([external.clone()])
+        .await?;
+
+    assert_eq!(result.added_count(), 1);
+    assert!(result.skipped.is_empty());
+    let queue = crawler
+        .handle()
+        .request_queue()
+        .expect("crawler queue should remain available");
+    let lease = queue
+        .fetch_next()
+        .await?
+        .expect("external URL was enqueued");
+    assert_eq!(lease.request.url, external);
+    Ok(())
+}
+
+#[tokio::test]
 async fn queue_duplicates_report_resolved_url_and_invoke_callback()
 -> Result<(), Box<dyn std::error::Error>> {
     use millipede_core::link_extraction::CrawlPolicy;

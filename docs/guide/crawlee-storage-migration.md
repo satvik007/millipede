@@ -3,8 +3,8 @@
 Millipede's file-system backend is designed to open the `./storage` directory from a Crawlee
 project. Point `FsStorageClient::new` at that directory to inspect existing datasets or use it as
 the storage backend for a re-crawl. Datasets and key-value stores use compatible layouts.
-Request-queue files written by Millipede are Crawlee-shaped, but pre-existing queues written by
-Crawlee cannot currently be resumed by Millipede.
+Authentic Crawlee request-queue envelopes can be opened, resumed, and deduplicated, including
+records that do not contain Millipede's legacy `json` extension field.
 
 ## 1. Back up first
 
@@ -46,15 +46,11 @@ Key-value extensions map as follows:
 Each request file uses a Crawlee-shaped JSON envelope. Its public fields are `id`, `url`,
 `uniqueKey`, `method`, `retryCount`, and `orderNo`; `orderNo: null` means handled. Millipede also
 writes a `json` field containing the complete serialized Millipede request. On restart, Millipede
-uses `orderNo` and `json` to reconstruct the queue. Crawlee queue metadata beyond these compatible
+prefers that field when present for lossless round-tripping of Millipede-only request state. When
+it is absent, Millipede reconstructs a request from Crawlee's public envelope fields, including
+headers, payload, user data, retry state, and queue order. Crawlee metadata beyond the mapped
 fields is not preserved byte-for-byte, so do not treat the directory as a lossless archive of
 Crawlee's private queue internals.
-
-An authentic queue envelope written by Crawlee does not contain Millipede's `json` field. Such a
-record cannot currently be reconstructed as a Millipede request and is skipped as unreadable when
-the queue is opened. Consequently, existing Crawlee-authored request queues are not imported for
-resume or deduplication; this compatibility currently applies only to request files authored by
-Millipede.
 
 ## 3. Resuming a queue
 
@@ -63,8 +59,8 @@ flight when the previous process crashed is pending again and will be re-crawled
 `orderNo` is `null` remain handled, and queue deduplication continues to use `uniqueKey` so they are
 not accepted as new work.
 
-These resume semantics apply to queues previously written by Millipede. They do not apply to a
-pre-existing Crawlee-authored request queue, whose records are skipped as described above.
+These resume and deduplication semantics apply to both Millipede-authored files and authentic
+Crawlee envelopes without the legacy `json` field.
 
 This favors recovery over assuming that interrupted handler work completed. Handlers that perform
 external side effects should therefore remain idempotent.

@@ -1,6 +1,6 @@
 use std::{
     fmt,
-    sync::{Arc, Mutex},
+    sync::{Arc, Mutex, MutexGuard},
     time::Duration,
 };
 
@@ -25,13 +25,10 @@ use crate::HtmlLinkExtractor;
 
 /// A parsed HTML document with the synchronization required for shared handler access.
 ///
-/// This is an explicit deviation from `INTERFACE.md` §4.2 and the Phase 5 roadmap, which specify
-/// `Arc<scraper::Html>`. In scraper 0.24.0, the `atomic` feature makes `scraper::Html` `Send`, but
-/// not `Sync`: `scraper/src/node.rs` stores element `id` and `classes` caches in
-/// `std::cell::OnceCell` and populates them through `&self`; scraper's atomic-gated
-/// `html_is_send` test consequently asserts only `Send`. Tendril 0.4.3 likewise provides an
-/// `unsafe impl Send` for atomic tendrils, not `Sync`. The specifications need amending before
-/// this synchronization boundary can be considered ratified.
+/// Scraper 0.24's `atomic` feature makes [`scraper::Html`] `Send`, but not `Sync`:
+/// `scraper::node::Element` populates `std::cell::OnceCell` caches through shared references, and
+/// atomic tendrils implement `Send` but not `Sync`. Consequently, `Arc<scraper::Html>` is not
+/// `Send` and cannot be stored directly in a crawler context that moves between Tokio workers.
 ///
 /// This type owns the required mutex rather than exposing a guard to handlers. Its query methods
 /// require owned results, so the lock is always released before a handler can reach an `.await`
@@ -65,8 +62,21 @@ impl SynchronizedHtml {
     ///
     /// Panics if an earlier query callback panicked while holding the document lock.
     pub fn with_html<R>(&self, query: impl FnOnce(&scraper::Html) -> R) -> R {
-        let html = self.html.lock().expect("HTML document mutex poisoned");
+        let html = self.lock();
         query(&html)
+    }
+
+    /// Locks the document and exposes the complete [`scraper::Html`] API through dereferencing.
+    ///
+    /// Prefer [`Self::with_html`], [`Self::select`], or [`Self::select_first`] when an owned result
+    /// is sufficient. A guard must be dropped before an `.await` point so another handler does not
+    /// block an executor thread waiting for the synchronous mutex.
+    ///
+    /// # Panics
+    ///
+    /// Panics if an earlier query panicked while holding the document lock.
+    pub fn lock(&self) -> MutexGuard<'_, scraper::Html> {
+        self.html.lock().expect("HTML document mutex poisoned")
     }
 
     /// Maps every element matching `selector` to an owned value.
@@ -101,7 +111,7 @@ impl fmt::Debug for SynchronizedHtml {
 
 /// Per-request context produced by [`HtmlKind`].
 ///
-/// This intentionally differs from INTERFACE §4.2 in three ways. The response is an
+/// This intentionally differs from the design sketch in INTERFACE §4.2 in two ways. The response is an
 /// `Arc<HttpResponse>` because [`CrawlerKind::Context`] must be a cheap aliasing clone and the
 /// engine clones a context for each attempt. The HTML field uses [`SynchronizedHtml`] because
 /// `scraper::Html` is not `Sync`, as detailed on that type. The proposed `log: Log` field is
@@ -114,16 +124,10 @@ pub struct HtmlContext {
     pub request: Arc<Request>,
     /// Final buffered response, shared cheaply across context clones.
     pub response: Arc<HttpResponse>,
-    /// Parsed HTML document with guard-free query helpers, shared cheaply across context clones.
+    /// Parsed HTML document, shared cheaply and synchronized across context clones.
     ///
-    /// **Unratified API drift:** `INTERFACE.md` §4.2 specifies `Arc<scraper::Html>` here, assuming
-    /// scraper's `atomic` feature makes `scraper::Html: Sync`. This does not hold for scraper
-    /// 0.24.0 and tendril 0.4.3 as resolved by this workspace: scraper's element caches use
-    /// `std::cell::OnceCell`, and atomic tendrils implement `Send` but not `Sync`. Consequently,
-    /// `Arc<scraper::Html>` is not `Send` and cannot satisfy [`CrawlerKind::Context`]. This
-    /// synchronization boundary requires an `INTERFACE.md` amendment or ADR before dependent
-    /// Phase 5 work such as selector-based enqueue extraction and the `scrape_books` example
-    /// proceeds.
+    /// The owned query helpers cover common operations, while [`SynchronizedHtml::lock`] exposes
+    /// the complete [`scraper::Html`] API behind a dereferencing guard.
     pub html: Arc<SynchronizedHtml>,
     /// Session used for this attempt, if sessions are enabled.
     pub session: Option<Arc<Session>>,
@@ -409,5 +413,19 @@ mod tests {
         assert_send_sync::<SynchronizedHtml>();
         assert_send_sync::<Arc<SynchronizedHtml>>();
         assert_ctx::<HtmlContext>();
+    }
+
+    #[test]
+    fn lock_guard_exposes_the_complete_scraper_api() {
+        let html =
+            SynchronizedHtml::from_html(scraper::Html::parse_document("<title>Phase 5</title>"));
+        let selector = scraper::Selector::parse("title").expect("valid selector");
+        let guard = html.lock();
+        let title = guard
+            .select(&selector)
+            .next()
+            .map(|element| element.text().collect::<String>());
+
+        assert_eq!(title.as_deref(), Some("Phase 5"));
     }
 }

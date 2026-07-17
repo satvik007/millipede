@@ -245,7 +245,7 @@ pub type HtmlCrawler = Crawler<HtmlKind>;
 pub struct HtmlContext {
     pub request: Arc<Request>,
     pub response: HttpResponse,
-    pub html: Arc<SynchronizedHtml>,   // synchronized parsed DOM, shareable across spawned tasks
+    pub html: Arc<SynchronizedHtml>,   // synchronized DOM; lock guard derefs to scraper::Html
     pub session: Option<Arc<Session>>,
     pub proxy_info: Option<ProxyInfo>,
     pub enqueue: EnqueueLinker,
@@ -275,6 +275,13 @@ pub struct BrowserContext {
     pub log: Log,
 }
 ```
+
+`Arc<scraper::Html>` cannot satisfy the engine contract with scraper 0.24. Its `atomic` feature
+makes `Html` `Send`, but element `OnceCell` caches and atomic tendrils leave it `!Sync`; therefore
+`Arc<scraper::Html>` is not `Send`. `SynchronizedHtml` owns the document behind a mutex. Its owned
+query helpers keep guards out of async code, and `lock()` returns a dereferencing guard when a
+handler needs the complete `scraper::Html` API. This synchronization boundary is ratified by
+ADR-0005 and compile-time positive and negative trait guards.
 
 Why three concrete `Context`s rather than one widening trait? Each carries different *owned* state (parsed HTML, browser page), and downstream code wants to pattern-match or call concrete methods on it. Trying to express this with a single trait would force `Box<dyn Any>` for the parsed body or a sum type — both worse than three structs.
 
@@ -372,10 +379,10 @@ This is the only handler shape. No `this`-bound callbacks, no shared mutable clo
 ```rust
 // Example
 crawler.request_handler(|ctx: HtmlContext| async move {
-    let title = ctx.html.select(&Selector::parse("title").unwrap())
-                       .next()
-                       .map(|el| el.text().collect::<String>())
-                       .unwrap_or_default();
+    let title_selector = Selector::parse("title").unwrap();
+    let title = ctx.html
+        .select_first(&title_selector, |el| el.text().collect::<String>())
+        .unwrap_or_default();
     ctx.storage.dataset().push(serde_json::json!({
         "url": ctx.request.url.to_string(),
         "title": title,
@@ -550,7 +557,7 @@ pub struct EnqueueResult {
 pub struct EnqueueLinksOptions<'a> { /* fluent builder */ }
 impl<'a> EnqueueLinksOptions<'a> {
     pub fn selector(self, css: impl Into<String>) -> Self;       // HtmlContext / BrowserContext
-    pub fn strategy(self, s: EnqueueStrategy) -> Self;           // overrides policy.strategy
+    pub fn strategy(self, s: EnqueueStrategy) -> Self;           // extracted/raw links only
     pub fn globs<G: Into<GlobPattern>>(self, g: impl IntoIterator<Item = G>) -> Self;
     pub fn regex(self, patterns: impl IntoIterator<Item = Regex>) -> Self;
     pub fn exclude<P: Into<UrlPattern>>(self, p: impl IntoIterator<Item = P>) -> Self;
@@ -579,7 +586,7 @@ pub enum TransformResult {
 Inside `EnqueueLinker::send()` (in order, short-circuiting on first reject):
 
 1. Extract candidate URLs (via `selector` or `<a href>` walk).
-2. Apply `EnqueueStrategy` (same-domain/hostname/origin filter).
+2. Apply `EnqueueStrategy` (same-domain/hostname/origin filter) to discovered and raw-link candidates. Explicit `Url` values passed to `.urls()` are caller-selected and bypass relationship filtering, preserving the URLs-only API's original behavior.
 3. Apply `globs` / `regex` includes and `exclude` patterns.
 4. For each surviving URL, build a `Request` with `crawl_depth = parent.depth + 1`.
 5. Check `policy.max_crawl_depth` — if exceeded, emit `SkipReason::MaxDepthExceeded`.
@@ -595,7 +602,7 @@ Inside `EnqueueLinker::send()` (in order, short-circuiting on first reject):
 
 For `HttpContext` (no DOM), only `EnqueueLinker::urls(...)` is available; selector-based extraction returns a compile-time error because the extractor is `None`.
 
-Implementation note: `HtmlContext` exposes `Arc<SynchronizedHtml>` for ergonomic synchronized handler queries over the parsed `scraper::Html`, but the engine is not required to use `scraper` for its own link-discovery pass. Phase 5 benchmarks `scraper` against a streaming `lol_html` extractor with precompiled selectors; if streaming extraction materially reduces memory or latency, `EnqueueLinker` uses it internally while preserving the public synchronized handler API.
+Implementation note: `HtmlContext` exposes `Arc<SynchronizedHtml>` for ergonomic synchronized handler queries over the parsed `scraper::Html`. Common helpers return owned values; `lock()` exposes every `scraper::Html` method through `MutexGuard` dereferencing and must be dropped before `.await`. The engine is not required to use `scraper` for its own link-discovery pass. Phase 5 benchmarks `scraper` against a streaming `lol_html` extractor with precompiled selectors; if streaming extraction materially reduces memory or latency, `EnqueueLinker` uses it internally while preserving the public synchronized handler API.
 
 ---
 
@@ -1507,8 +1514,8 @@ async fn main() -> anyhow::Result<()> {
         })
         .route_method("detail", Method::GET, |ctx: HtmlContext| async move {
             let sel = scraper::Selector::parse("h1").unwrap();
-            let title = ctx.html.select(&sel).next()
-                .map(|el| el.text().collect::<String>())
+            let title = ctx.html
+                .select_first(&sel, |el| el.text().collect::<String>())
                 .unwrap_or_default();
             ctx.storage.dataset().push(&serde_json::json!({
                 "url": ctx.request.url,
@@ -1585,7 +1592,7 @@ These map directly onto Crawlee's options and are wired into the engine, not sur
 - ✅ **Async-trait policy.** Object-safe traits (`StorageClient`, `Dataset`, `KeyValueStore`, `RequestQueue`, `HttpClient`, `ProxyResolver`, `BrowserPage`, `SkippedHandler`) use `#[async_trait]`. Internal generic traits and `RequestHandler<C>` use native async fn or boxed-future returns. Decision documented per-crate in an ADR.
 - ✅ **Result streaming shape.** Resolved in §4.3 and §15: `run()` returns final stats, `results()` exposes completed-request snapshots, and `events()` remains the control-plane feed. We do not make `run()` return a stream because the owned handler context is consumed and browser resources may already be cleaned up.
 - ✅ **Cookie jar concretion.** Resolved at Phase 3 (ADR-0002): custom `CookieJar` newtype over `cookie_store::CookieStore` behind `std::sync::Mutex`; `reqwest_cookie_store` rejected (would pull `reqwest` into `millipede-core`; manual redirect handling for `redirect_chain` makes reqwest's cookie layer unused; per-request jars cannot ride a per-client cookie provider).
-- ✅ **`scraper` ergonomics and engine extraction path.** Resolved at Phase 5 (ADR-0005): `selectors!` `OnceLock` macro shipped in `millipede-html`; `EnqueueLinker` extracts over the pre-parsed `Arc<millipede_html::SynchronizedHtml>`, whose synchronized query helpers access the wrapped `scraper::Html`; no `ctx.selectors` registry; `lol_html` not adopted.
+- ✅ **`scraper` ergonomics and engine extraction path.** Resolved at Phase 5 (ADR-0005): `selectors!` `OnceLock` macro shipped in `millipede-html`; `EnqueueLinker` extracts over the pre-parsed `Arc<millipede_html::SynchronizedHtml>`, whose owned query helpers and dereferencing lock guard provide synchronized access to the wrapped `scraper::Html`; no `ctx.selectors` registry; `lol_html` not adopted. Direct `Arc<scraper::Html>` is unsound for the `Send` context contract because scraper 0.24's `Html` is not `Sync`.
 
 **Still open:**
 

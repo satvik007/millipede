@@ -341,6 +341,99 @@ async fn opens_crawlee_camel_case_fixture_without_state_cache() {
 }
 
 #[tokio::test]
+async fn authentic_crawlee_fixture_opens_resumes_reads_and_dedupes() {
+    let root = tempfile::tempdir().unwrap();
+    let requests_path = root.path().join("request_queues/crawlee/requests");
+    std::fs::create_dir_all(&requests_path).unwrap();
+    let pending_url = "https://example.com/from-crawlee";
+    let handled_url = "https://example.com/already-handled";
+    std::fs::write(
+        requests_path.join("crawleePending.json"),
+        serde_json::to_vec_pretty(&json!({
+            "id": "crawleePending",
+            "url": pending_url,
+            "uniqueKey": "crawlee-pending-key",
+            "method": "POST",
+            "headers": { "content-type": "text/plain", "x-source": "crawlee" },
+            "payload": "fixture body",
+            "userData": { "label": "imported", "source": "fixture" },
+            "retryCount": 2,
+            "noRetry": true,
+            "orderNo": 17
+        }))
+        .unwrap(),
+    )
+    .unwrap();
+    std::fs::write(
+        requests_path.join("crawleeHandled.json"),
+        serde_json::to_vec_pretty(&json!({
+            "id": "crawleeHandled",
+            "url": handled_url,
+            "uniqueKey": handled_url,
+            "method": "GET",
+            "retryCount": 0,
+            "orderNo": null
+        }))
+        .unwrap(),
+    )
+    .unwrap();
+
+    let first_client = FsStorageClient::new(root.path());
+    let first = first_client
+        .open_request_queue(Some("crawlee"))
+        .await
+        .unwrap();
+    assert_eq!(first.pending_count().await.unwrap(), 1);
+    assert_eq!(first.handled_count().await.unwrap(), 1);
+    let first_lease = first.fetch_next().await.unwrap().unwrap();
+    assert_eq!(first_lease.request.id.to_string(), "crawleePending");
+    assert_eq!(first_lease.request.url.as_str(), pending_url);
+    assert_eq!(first_lease.request.unique_key, "crawlee-pending-key");
+    assert_eq!(first_lease.request.method.as_str(), "POST");
+    assert_eq!(first_lease.request.headers["x-source"], "crawlee");
+    assert_eq!(
+        first_lease.request.body,
+        Some(millipede_core::request::RequestBody::Bytes(
+            b"fixture body".to_vec()
+        ))
+    );
+    assert_eq!(first_lease.request.retry_count, 2);
+    assert!(first_lease.request.no_retry);
+    assert_eq!(first_lease.request.label.as_deref(), Some("imported"));
+    assert_eq!(
+        first_lease
+            .request
+            .user_data
+            .get("source")
+            .and_then(|value| value.as_str()),
+        Some("fixture")
+    );
+    drop(first_lease);
+    drop(first);
+    drop(first_client);
+
+    let resumed = queue(&root, "crawlee").await;
+    let resumed_lease = resumed.fetch_next().await.unwrap().unwrap();
+    assert_eq!(resumed_lease.request.url.as_str(), pending_url);
+    resumed.mark_handled(resumed_lease).await.unwrap();
+    drop(resumed);
+
+    let reopened = queue(&root, "crawlee").await;
+    assert_eq!(reopened.pending_count().await.unwrap(), 0);
+    assert_eq!(reopened.handled_count().await.unwrap(), 2);
+    let pending_duplicate = Request::get(pending_url)
+        .unique_key("crawlee-pending-key")
+        .build()
+        .unwrap();
+    for request in [pending_duplicate, req(handled_url)] {
+        let duplicate = reopened.add(request, AddOptions::default()).await.unwrap();
+        assert!(duplicate.was_already_present);
+        assert!(duplicate.was_already_handled);
+    }
+    assert!(reopened.is_finished().await.unwrap());
+}
+
+#[tokio::test]
 async fn accepts_a_bare_serialized_request_fixture() {
     let root = tempfile::tempdir().unwrap();
     let requests_path = root.path().join("request_queues/bare/requests");

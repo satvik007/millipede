@@ -176,9 +176,13 @@ async fn selector_glob_and_base_href_find_exact_products() -> Result<(), Box<dyn
         .storage_client(Arc::new(MemoryStorageClient::new()))
         .build()
         .await?;
-    crawler
+    let stats = crawler
         .run([url(&server, "/categories/1"), url(&server, "/categories/2")])
         .await?;
+    // The classless /products/selector-hidden link matches the products glob but not the
+    // `a.product` selector and has no mock route; a selector-ignoring regression would enqueue
+    // it and surface here as a failed request rather than in `seen`.
+    assert_eq!(stats.requests_failed, 0);
 
     let mut seen = seen.lock().expect("seen mutex poisoned").clone();
     seen.sort();

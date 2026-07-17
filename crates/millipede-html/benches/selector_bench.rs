@@ -21,13 +21,6 @@ use millipede_html::{HtmlContext, HtmlKind, SynchronizedHtml};
 use millipede_storage_memory::MemoryStorageClient;
 use url::Url;
 
-// The benchmark's `Html` storage type is the synchronized facade used by `HtmlContext`. Keeping
-// this architecture-level alias makes the original Send + Sync guard state exactly what the
-// crawler requires, without falsely asserting that upstream `scraper::Html` itself is `Sync`.
-mod scraper {
-    pub type Html = millipede_html::SynchronizedHtml;
-}
-
 const DETAIL_SELECTOR: &str = "a.detail[href]";
 const LINK_COUNT: usize = 200;
 
@@ -39,8 +32,9 @@ fn assert_send<T: Send>() {}
 fn assert_send_sync<T: Send + Sync>() {}
 fn assert_context_bounds<T: Send + Clone + 'static>() {}
 
+// `RawHtml` (upstream `scraper::Html`) is deliberately guarded as `Send` only: it is `!Sync`
+// (ADR-0005), which is why `HtmlContext` stores the `Send + Sync` `SynchronizedHtml` facade.
 fn compile_time_guards() {
-    assert_send_sync::<scraper::Html>();
     assert_send::<RawHtml>();
     assert_send_sync::<millipede_html::SynchronizedHtml>();
     assert_context_bounds::<Arc<millipede_html::SynchronizedHtml>>();

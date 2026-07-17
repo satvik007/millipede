@@ -4,16 +4,14 @@
 [`HtmlContext`](https://docs.rs/millipede-html/latest/millipede_html/struct.HtmlContext.html) with
 the final HTTP response and a shared
 [`SynchronizedHtml`](https://docs.rs/millipede-html/latest/millipede_html/struct.SynchronizedHtml.html)
-with guard-free CSS selector helpers.
+with owned CSS selector helpers and a dereferencing lock guard for the complete `scraper::Html`
+API.
 
-> **Unratified API drift:** `INTERFACE.md` §4.2 specifies `Arc<scraper::Html>` for
-> `HtmlContext::html`, assuming scraper's `atomic` feature makes `scraper::Html: Sync`. This does
-> not hold for scraper 0.24.0 and tendril 0.4.3 as resolved in this workspace. Scraper's element
-> caches use `std::cell::OnceCell`, while atomic tendrils implement `Send` but not `Sync`, so
-> `Arc<scraper::Html>` is not `Send` and cannot satisfy the crawler context bound. `SynchronizedHtml`
-> is the minimum safe synchronization boundary; this deviation requires an `INTERFACE.md`
-> amendment or ADR before dependent Phase 5 work such as selector-based enqueue extraction and
-> the `scrape_books` example proceeds.
+Scraper 0.24's `atomic` feature makes `scraper::Html` `Send`, but not `Sync`: its element caches use
+`std::cell::OnceCell`, and atomic tendrils are not `Sync`. Therefore `Arc<scraper::Html>` is not
+`Send` and cannot satisfy Millipede's spawned-handler context contract. `SynchronizedHtml` is the
+ADR-0005 synchronization boundary; its `lock()` guard dereferences to `scraper::Html` when callers
+need APIs beyond the owned helpers and must be dropped before `.await`.
 
 ```no_run
 use std::sync::Arc;

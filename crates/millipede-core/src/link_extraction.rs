@@ -19,7 +19,11 @@ use regex::Regex;
 use std::{fmt, sync::Arc};
 use url::{Host, Url};
 
-/// Controls how closely an enqueued URL must relate to its parent URL.
+/// Controls how closely a discovered URL must relate to its parent URL.
+///
+/// The strategy applies to extractor and raw-link candidates. Explicit [`url::Url`] values passed
+/// through `EnqueueLinksOptions::urls` are caller-selected inputs and bypass relationship
+/// filtering.
 ///
 /// # Examples
 ///

@@ -17,6 +17,14 @@ The CTO rule is to ship the user-facing ergonomics whose cost lands closest to i
 
 The comparison point for engine extraction is the already-parsed document. `HtmlContext` pays for the scraper parse regardless and stores the result in `Arc<millipede_html::SynchronizedHtml>`, a synchronized wrapper around `scraper::Html` that exposes synchronous query helpers; parsing the same response again with a streaming extractor is additional marginal work.
 
+The wrapper is a soundness requirement, not an ergonomic preference. With scraper 0.24's
+`atomic` feature, `scraper::Html` is `Send` but not `Sync`: element `id` and `classes` caches are
+`std::cell::OnceCell` values populated through `&self`, and tendril's atomic representation has a
+`Send` implementation but no `Sync` implementation. Since `Arc<T>: Send` requires `T: Send +
+Sync`, `Arc<scraper::Html>` cannot be moved into the engine's `Send + 'static` handler future.
+Marking it `Sync` or marking a context containing it `Send` would permit unsynchronized concurrent
+cache mutation and would be unsound.
+
 ## Measurements
 
 `cargo bench -p millipede-html --bench selector_bench` was run with rustc 1.96.1 (`aarch64-apple-darwin`) on a 12-core Apple M2 Pro MacBook Pro with 32 GB RAM. At each approximate size, the deterministic in-bench corpus crosses product and category page kinds with `<base href>` present and absent, producing four documents per batch. Every document contains exactly 200 relative, root-relative, same-site absolute, and external links. Repeated nested `div` blocks scale the DOM with document size; only a final sub-block remainder is text-filled. The 1 MB group uses 20 Criterion samples. Extraction values are per four-document batch (800 links). Values below are Criterion's slope point estimates with the reported confidence interval in parentheses, except the flat-sampled 100 KB and 1 MB d1 cells, for which Criterion does not produce a slope and the mean estimate is reported. Median estimates were checked as a secondary sanity figure.
@@ -43,11 +51,16 @@ Ship the `selectors!` macro in `millipede-html`. It creates `OnceLock`-backed se
 
 Do not ship `ctx.selectors` or a `Selectors` registry. Dynamic selector strings are rare, and the warm registry lookup is over 40 times slower than the macro path while adding state and a permanent public API. Users with dynamic selectors can parse inline or maintain an application-local cache.
 
-Keep `EnqueueLinker` extraction on the pre-parsed scraper document held by `HtmlContext` as `Arc<millipede_html::SynchronizedHtml>`. The wrapper owns the `scraper::Html` behind synchronization and exposes synchronous query helpers. That is the real marginal cost after `HtmlContext` has paid for parsing; running `lol_html` over the bytes as well is a net loss. `lol_html` could matter for a hypothetical parse-free HTTP-side extraction path, but Phase 5 has no such path and does not change `HtmlContext`.
+Keep `EnqueueLinker` extraction on the pre-parsed scraper document held by `HtmlContext` as `Arc<millipede_html::SynchronizedHtml>`. The wrapper owns the `scraper::Html` behind a mutex, exposes owned synchronous query helpers, and provides `lock()` for complete scraper API compatibility through `MutexGuard`'s `Deref<Target = scraper::Html>`. The guard must be dropped before `.await`. That is the real marginal cost after `HtmlContext` has paid for parsing; running `lol_html` over the bytes as well is a net loss. `lol_html` could matter for a hypothetical parse-free HTTP-side extraction path, but Phase 5 has no such path and does not change `HtmlContext`.
 
 ## Consequences
 
 Handlers can declare selectors once with a small macro and use ordinary `scraper::Selector` references. Selector syntax remains validated lazily on first access, and an invalid literal panics with the selector and parser error. `scraper` is publicly re-exported from `millipede-html` so macro expansion through `$crate` works in downstream crates and handler code can use the same scraper types.
+
+Compile-time coverage asserts `Arc<SynchronizedHtml>: Send + Sync`, while a compile-fail guard
+asserts that `Arc<scraper::Html>: Send + Sync` remains rejected. Callers retain access to the full
+scraper document API through the synchronized dereferencing guard without inventing an unsafe
+auto-trait implementation.
 
 There is no Millipede-owned dynamic selector cache to configure, synchronize, document, or preserve for compatibility. Applications that genuinely need dynamic strings own that policy themselves.
 

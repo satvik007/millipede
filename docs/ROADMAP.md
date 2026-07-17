@@ -219,13 +219,13 @@ Highest risk in the entire roadmap (Codex #6). Budget 30% extra time. Plan a hal
 ### Scope
 The phase that makes Millipede usable for "real" scraping projects.
 
-- `millipede-html::HtmlCrawler` — wraps `HttpCrawler`, parses body with `scraper::Html`, exposes `HtmlContext`.
+- `millipede-html::HtmlCrawler` — wraps `HttpCrawler`, parses body with `scraper::Html`, exposes `HtmlContext::html` as `Arc<SynchronizedHtml>`. Scraper 0.24's `atomic` feature makes `Html` `Send` but not `Sync`, so the wrapper owns the document behind a mutex and exposes the full `scraper::Html` API through a dereferencing lock guard (ADR-0005).
 - `millipede-core::link_extraction` — link extractor over `scraper::Html`:
   - `<a href>` enumeration with selector override.
   - Glob/regex/exclude filtering via `globset` + `regex`.
   - Per-pattern overrides (method/headers/label/user_data).
   - `EnqueueStrategy` filter (same-origin/hostname/domain/all).
-- Streaming link-extraction spike: benchmark `scraper` full-document extraction against `lol_html` with precompiled selectors. If `lol_html` wins materially, use it internally for `EnqueueLinker` while preserving `HtmlContext::html: Arc<scraper::Html>`.
+- Streaming link-extraction spike: benchmark `scraper` full-document extraction against `lol_html` with precompiled selectors. If `lol_html` wins materially, use it internally for `EnqueueLinker` while preserving `HtmlContext::html: Arc<SynchronizedHtml>` and synchronized access to the underlying `scraper::Html`.
 - `EnqueueLinker` complete API (`.options().selector(…).strategy(…).send()`).
 - `Router` fully wired into all three context types.
 - `SitemapRequestList`: streams XML sitemap (gzip-aware), emits `Request`s lazily, persists progress.
@@ -241,11 +241,15 @@ The phase that makes Millipede usable for "real" scraping projects.
 - Verify same-domain strategy excludes external links.
 - Glob `**/products/*` includes only product URLs.
 - `transform` callback can mutate or reject requests.
+- Compile-time guards prove `Arc<SynchronizedHtml>: Send + Sync` and reject `Arc<scraper::Html>: Send + Sync`; a guard-access test exercises ordinary `scraper::Html` selectors.
+- Explicit cross-host `.urls()` candidates bypass the default hostname strategy, while extracted links remain strategy-filtered.
+- An authentic Crawlee request-queue envelope without Millipede's legacy `json` field opens, reads back, resumes, and deduplicates.
 - `FsStorageClient` survives crash mid-run (kill + restart picks up where it left off via persisted state).
 
 ### Exit Criteria
 - `examples/scrape_books.rs` (against [books.toscrape.com](https://books.toscrape.com), an OSS test site) — yes, this hits real network in `--ignored` tests; CI runs the local-mock version.
-- Migration note: a Crawlee user's `./storage/` directory can be opened by `FsStorageClient` and re-crawled.
+- `HtmlContext` exposes a sound, `Send + Sync` shared parsed DOM with full synchronized access to the `scraper::Html` API; direct `Arc<scraper::Html>` remains forbidden because scraper 0.24's `Html` is not `Sync`.
+- Migration note: a Crawlee user's `./storage/` directory, including authentic request envelopes without Millipede's legacy `json` extension, can be opened by `FsStorageClient` and re-crawled.
 
 ---
 

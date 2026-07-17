@@ -2,7 +2,7 @@
 
 use crate::layout::{is_temporary_file, temporary_suffix};
 use millipede_core::{
-    request::{Request, RequestId},
+    request::{Method, Request, RequestBody, RequestId, RequestState, UserData},
     storage::{
         AddOptions, BatchAddHandle, Lease, LeaseId, ProcessedRequest, QueueOpInfo, ReclaimOptions,
         RequestQueue, RequestSource, StorageError, StorageResult,
@@ -72,6 +72,93 @@ struct ReadEnvelope {
     #[serde(rename = "orderNo")]
     order_no: Option<i64>,
     json: Request,
+}
+
+#[derive(Deserialize)]
+struct CrawleeRequestEnvelope {
+    id: RequestId,
+    url: String,
+    #[serde(rename = "uniqueKey")]
+    unique_key: String,
+    #[serde(default = "default_method")]
+    method: String,
+    #[serde(default)]
+    headers: HashMap<String, String>,
+    #[serde(default)]
+    payload: Option<String>,
+    #[serde(default, rename = "userData")]
+    user_data: UserData,
+    #[serde(default, rename = "retryCount")]
+    retry_count: u32,
+    #[serde(default, rename = "sessionRotationCount")]
+    session_rotation_count: u32,
+    #[serde(default, rename = "maxRetries")]
+    max_retries: Option<u32>,
+    #[serde(default, rename = "noRetry")]
+    no_retry: bool,
+    #[serde(default, rename = "errorMessages")]
+    error_messages: Vec<String>,
+    #[serde(default, rename = "loadedUrl")]
+    loaded_url: Option<String>,
+    #[serde(default, rename = "handledAt", with = "time::serde::rfc3339::option")]
+    handled_at: Option<time::OffsetDateTime>,
+    #[serde(default, rename = "crawlDepth")]
+    crawl_depth: u32,
+    #[serde(default, rename = "skipNavigation")]
+    skip_navigation: bool,
+    #[serde(rename = "orderNo")]
+    order_no: Option<i64>,
+}
+
+fn default_method() -> String {
+    "GET".to_owned()
+}
+
+impl CrawleeRequestEnvelope {
+    fn into_request(self) -> Result<(Request, Option<i64>), serde_json::Error> {
+        let method = Method::from_bytes(self.method.as_bytes()).map_err(json_error)?;
+        let mut builder = Request::builder()
+            .url(self.url)
+            .method(method)
+            .unique_key(self.unique_key.clone())
+            .user_data(self.user_data.clone())
+            .crawl_depth(self.crawl_depth)
+            .no_retry(self.no_retry)
+            .skip_navigation(self.skip_navigation);
+        if let Some(payload) = self.payload {
+            builder = builder.body(RequestBody::Bytes(payload.into_bytes()));
+        }
+        if let Some(max_retries) = self.max_retries {
+            builder = builder.max_retries(max_retries);
+        }
+        for (name, value) in self.headers {
+            builder = builder.header(&name, &value);
+        }
+        if let Some(label) = self.user_data.get("label").and_then(|value| value.as_str()) {
+            builder = builder.label(label.to_owned());
+        }
+        let mut request = builder.build().map_err(json_error)?;
+        request.id = self.id;
+        request.unique_key = self.unique_key;
+        request.retry_count = self.retry_count;
+        request.session_rotation_count = self.session_rotation_count;
+        request.error_messages = self.error_messages;
+        request.handled_at = self.handled_at;
+        request.state = if self.order_no.is_some() {
+            RequestState::Unprocessed
+        } else {
+            RequestState::Done
+        };
+        request.loaded_url = self
+            .loaded_url
+            .map(|url| url.parse().map_err(json_error))
+            .transpose()?;
+        Ok((request, self.order_no))
+    }
+}
+
+fn json_error(error: impl fmt::Display) -> serde_json::Error {
+    <serde_json::Error as serde::de::Error>::custom(error)
 }
 
 #[derive(Serialize, Deserialize)]
@@ -553,6 +640,10 @@ fn decode_request(bytes: &[u8]) -> Result<(Request, Option<i64>, bool), serde_js
     if value.get("json").is_some() {
         let envelope: ReadEnvelope = serde_json::from_value(value)?;
         Ok((envelope.json, envelope.order_no, false))
+    } else if value.get("uniqueKey").is_some() || value.get("orderNo").is_some() {
+        let envelope: CrawleeRequestEnvelope = serde_json::from_value(value)?;
+        let (request, order_no) = envelope.into_request()?;
+        Ok((request, order_no, false))
     } else {
         let request = serde_json::from_value(value)?;
         Ok((request, None, true))

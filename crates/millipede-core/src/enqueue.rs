@@ -72,7 +72,11 @@ impl EnqueueLinker {
         EnqueueLinksOptions::new(self)
     }
 
-    /// Enqueues absolute URLs using default options.
+    /// Enqueues explicit absolute URLs using default options.
+    ///
+    /// Explicit URLs bypass [`EnqueueStrategy`] relationship filtering. Strategies constrain DOM
+    /// discovery; callers that already selected concrete URLs retain the URLs-only behavior that
+    /// predates extractor support.
     pub async fn urls(
         &self,
         urls: impl IntoIterator<Item = Url>,
@@ -185,7 +189,10 @@ impl<'a> EnqueueLinksOptions<'a> {
         }
     }
 
-    /// Extends the absolute URL candidates.
+    /// Extends the explicit absolute URL candidates.
+    ///
+    /// These candidates bypass enqueue-strategy relationship filtering, including the default
+    /// [`EnqueueStrategy::SameHostname`]. Other filters and crawl-policy limits still apply.
     pub fn urls(mut self, urls: impl IntoIterator<Item = Url>) -> Self {
         self.candidates
             .extend(urls.into_iter().map(UrlCandidate::Absolute));
@@ -292,14 +299,14 @@ impl<'a> EnqueueLinksOptions<'a> {
         let mut skipped = Vec::new();
         let mut candidates = Vec::with_capacity(self.candidates.len());
         for candidate in self.candidates {
-            let resolved = match candidate {
-                UrlCandidate::Absolute(url) => Ok(url),
+            let (resolved, apply_strategy) = match candidate {
+                UrlCandidate::Absolute(url) => (Ok(url), false),
                 UrlCandidate::Raw { url, base } => {
                     let base = base
                         .as_ref()
                         .or(self.base_url.as_ref())
                         .unwrap_or(&self.linker.parent_url);
-                    resolve_raw_url(base, &url).map_err(|_| url)
+                    (resolve_raw_url(base, &url).map_err(|_| url), true)
                 }
             };
             let url = match resolved {
@@ -310,7 +317,7 @@ impl<'a> EnqueueLinksOptions<'a> {
                 }
             };
             let url_text = url.to_string();
-            if !strategy_allows(strategy, &self.linker.parent_url, &url) {
+            if apply_strategy && !strategy_allows(strategy, &self.linker.parent_url, &url) {
                 report_skip(
                     &policy,
                     &mut skipped,
