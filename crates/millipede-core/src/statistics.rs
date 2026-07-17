@@ -206,7 +206,10 @@ impl StatisticsHandle {
         state.requests_failed += 1;
         state.record_duration(duration);
         state.record_terminal_retry_count(retry_count);
-        *state.errors.entry(capped_error_key(error_key)).or_default() += 1;
+        *state
+            .errors
+            .entry(normalize_error_key(error_key))
+            .or_default() += 1;
         state.recent_events.push_back((now, false));
         prune_window(&mut state, now, self.inner.window);
         drop(state);
@@ -220,7 +223,7 @@ impl StatisticsHandle {
         state.requests_retries += 1;
         *state
             .retry_errors
-            .entry(capped_error_key(error_key))
+            .entry(normalize_error_key(error_key))
             .or_default() += 1;
         prune_window(&mut state, now, self.inner.window);
         drop(state);
@@ -433,8 +436,52 @@ impl State {
     }
 }
 
-fn capped_error_key(error_key: &str) -> String {
-    error_key.chars().take(ERROR_KEY_MAX_CHARS).collect()
+fn normalize_error_key(error_key: &str) -> String {
+    let first_line = error_key.lines().next().unwrap_or(error_key);
+    let mut normalized = String::new();
+
+    for token in first_line.split_whitespace() {
+        if !normalized.is_empty() {
+            normalized.push(' ');
+        }
+
+        if token.starts_with("http://") || token.starts_with("https://") {
+            normalized.push_str("<url>");
+        } else if is_uuid_token(token) {
+            normalized.push_str("<uuid>");
+        } else {
+            let mut previous_was_digit = false;
+            for character in token.chars() {
+                if character.is_ascii_digit() {
+                    if !previous_was_digit {
+                        normalized.push('#');
+                    }
+                    previous_was_digit = true;
+                } else {
+                    normalized.push(character);
+                    previous_was_digit = false;
+                }
+            }
+        }
+    }
+
+    normalized.chars().take(ERROR_KEY_MAX_CHARS).collect()
+}
+
+fn is_uuid_token(token: &str) -> bool {
+    let expected_lengths = [8, 4, 4, 4, 12];
+    let mut parts = token.split('-');
+
+    for expected_length in expected_lengths {
+        let Some(part) = parts.next() else {
+            return false;
+        };
+        if part.len() != expected_length || !part.bytes().all(|byte| byte.is_ascii_hexdigit()) {
+            return false;
+        }
+    }
+
+    parts.next().is_none()
 }
 
 fn duration_average(total: Duration, count: u64) -> Duration {
@@ -486,6 +533,83 @@ mod tests {
         assert_eq!(snapshot.request_min_duration, Duration::from_millis(10));
         assert_eq!(snapshot.request_max_duration, Duration::from_millis(40));
         assert_eq!(snapshot.request_avg_duration, Duration::from_millis(25));
+    }
+
+    #[test]
+    fn normalize_error_key_collapses_digits() {
+        assert_eq!(
+            normalize_error_key("non-retryable: boom 42"),
+            "non-retryable: boom #"
+        );
+        assert_eq!(
+            normalize_error_key("non-retryable: boom 999"),
+            "non-retryable: boom #"
+        );
+        assert_eq!(
+            normalize_error_key("timeout after 5031ms"),
+            "timeout after #ms"
+        );
+    }
+
+    #[test]
+    fn normalize_error_key_masks_urls() {
+        assert_eq!(
+            normalize_error_key("non-retryable: fetch https://a.com/1 failed"),
+            "non-retryable: fetch <url> failed"
+        );
+        assert_eq!(
+            normalize_error_key("non-retryable: fetch https://b.com/2 failed"),
+            "non-retryable: fetch <url> failed"
+        );
+    }
+
+    #[test]
+    fn normalize_error_key_masks_uuid() {
+        assert_eq!(
+            normalize_error_key("session: id 550e8400-e29b-41d4-a716-446655440000 failed"),
+            "session: id <uuid> failed"
+        );
+    }
+
+    #[test]
+    fn normalize_error_key_only_first_line() {
+        assert_eq!(
+            normalize_error_key("retryable: boom\ncaused by: id 42"),
+            "retryable: boom"
+        );
+    }
+
+    #[tokio::test]
+    async fn similar_failures_group_into_one_bucket() {
+        let statistics = StatisticsHandle::new();
+        statistics.record_failed(
+            Duration::from_millis(10),
+            "non-retryable: fetch https://x/1 failed",
+            0,
+        );
+        statistics.record_failed(
+            Duration::from_millis(10),
+            "non-retryable: fetch https://y/2 failed",
+            0,
+        );
+
+        let snapshot = statistics.snapshot();
+        assert_eq!(snapshot.errors.len(), 1);
+        assert_eq!(snapshot.errors.values().next(), Some(&2));
+
+        statistics.record_failed(
+            Duration::from_millis(10),
+            "session: fetch https://z/3 failed",
+            0,
+        );
+        let snapshot = statistics.snapshot();
+        assert_eq!(snapshot.errors.len(), 2);
+        assert!(
+            snapshot
+                .errors
+                .contains_key("non-retryable: fetch <url> failed")
+        );
+        assert!(snapshot.errors.contains_key("session: fetch <url> failed"));
     }
 
     #[test]
