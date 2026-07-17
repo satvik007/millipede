@@ -12,4 +12,6 @@ pub use kvs::FsKeyValueStore;
 pub use queue::FsRequestQueue;
 
 /// Commonly used items from this crate.
-pub mod prelude {}
+pub mod prelude {
+    pub use crate::{FsDataset, FsKeyValueStore, FsRequestQueue, FsStorageClient};
+}

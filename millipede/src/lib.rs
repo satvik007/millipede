@@ -44,6 +44,10 @@ pub use millipede_core::handler::{
 pub use millipede_core::http_client::{
     HttpClient, HttpClientError, HttpRequest, HttpResponse, HttpStatusError, StreamingResponse,
 };
+pub use millipede_core::link_extraction::{
+    CrawlPolicy, EnqueueStrategy, ExtractedLink, GlobPattern, LinkExtractor, LinkPatternError,
+    SkippedHandler, TransformResult, UrlMatch, UrlPattern,
+};
 pub use millipede_core::proxy::{
     ProxyBuckets, ProxyConfiguration, ProxyInfo, ProxyKind, ProxyResolveContext, ProxyResolver,
     ProxyRouteContext, ProxyStrategy, RotationStrategy,
@@ -59,6 +63,10 @@ pub use millipede_core::router::{HasRequest, MethodFilter, Router};
 pub use millipede_core::session::{
     SESSION_POOL_PERSIST_KEY, Session, SessionConfig, SessionId, SessionPool, SessionPoolOptions,
 };
+pub use millipede_core::sitemap::{
+    RequestQueueWithSitemap, SITEMAP_STATE_KEY, SitemapEntry, SitemapRequestList,
+    SitemapRequestListBuilder,
+};
 pub use millipede_core::statistics::{
     FinalStatistics, STATISTICS_PERSIST_KEY, StatisticsHandle, StatisticsSnapshot,
 };
@@ -67,18 +75,24 @@ pub use millipede_core::storage::{
     ListOptions, ProcessedRequest, QueueOpInfo, ReclaimOptions, RequestQueue, RequestSource,
     StorageClient, StorageError, StorageHandle, StorageResult,
 };
+#[cfg(feature = "html")]
+pub use millipede_html::{
+    HtmlContext, HtmlCrawler, HtmlError, HtmlKind, HtmlKindBuilder, HtmlLinkExtractor,
+};
 #[cfg(feature = "http")]
 pub use millipede_http::{
     CoalescingClient, HttpContext, HttpCrawler, HttpKind, HttpKindBuilder, ReqwestClient,
     ReqwestClientOptions,
 };
+#[cfg(feature = "storage-fs")]
+pub use millipede_storage_fs::{FsRequestQueue, FsStorageClient};
 #[cfg(feature = "storage-memory")]
 pub use millipede_storage_memory::{MemoryQueuePolicy, MemoryRequestQueue, MemoryStorageClient};
 
 /// Commonly used items across all enabled Millipede crates.
 pub mod prelude {
-    // Some feature-gated sub-crate preludes remain empty until their phases land, so those glob
-    // re-exports would otherwise trip `unused_imports` under -D warnings.
+    // The browser, browser-chromiumoxide, and fingerprint preludes remain empty until their phases
+    // land, so those glob re-exports would otherwise trip `unused_imports` under -D warnings.
     #![allow(unused_imports)]
 
     pub use millipede_core::prelude::*;

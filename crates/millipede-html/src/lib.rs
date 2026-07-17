@@ -9,4 +9,11 @@ pub use kind::{HtmlContext, HtmlCrawler, HtmlError, HtmlKind, HtmlKindBuilder, S
 pub use scraper;
 
 /// Commonly used items from this crate.
-pub mod prelude {}
+///
+/// The [`selectors!`](crate::selectors) macro and [`scraper`] re-export live at
+/// the crate root.
+pub mod prelude {
+    pub use crate::{
+        HtmlContext, HtmlCrawler, HtmlError, HtmlKind, HtmlKindBuilder, HtmlLinkExtractor,
+    };
+}

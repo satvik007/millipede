@@ -1494,6 +1494,29 @@ impl core::marker::Unpin for millipede_core::events::CrawlerEvent
 impl core::marker::UnsafeUnpin for millipede_core::events::CrawlerEvent
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::events::CrawlerEvent
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::events::CrawlerEvent
+pub enum millipede_core::prelude::EnqueueStrategy
+pub millipede_core::prelude::EnqueueStrategy::All
+pub millipede_core::prelude::EnqueueStrategy::SameDomain
+pub millipede_core::prelude::EnqueueStrategy::SameHostname
+pub millipede_core::prelude::EnqueueStrategy::SameOrigin
+impl core::clone::Clone for millipede_core::link_extraction::EnqueueStrategy
+pub fn millipede_core::link_extraction::EnqueueStrategy::clone(&self) -> millipede_core::link_extraction::EnqueueStrategy
+impl core::cmp::Eq for millipede_core::link_extraction::EnqueueStrategy
+impl core::cmp::PartialEq for millipede_core::link_extraction::EnqueueStrategy
+pub fn millipede_core::link_extraction::EnqueueStrategy::eq(&self, &millipede_core::link_extraction::EnqueueStrategy) -> bool
+impl core::default::Default for millipede_core::link_extraction::EnqueueStrategy
+pub fn millipede_core::link_extraction::EnqueueStrategy::default() -> millipede_core::link_extraction::EnqueueStrategy
+impl core::fmt::Debug for millipede_core::link_extraction::EnqueueStrategy
+pub fn millipede_core::link_extraction::EnqueueStrategy::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for millipede_core::link_extraction::EnqueueStrategy
+impl core::marker::StructuralPartialEq for millipede_core::link_extraction::EnqueueStrategy
+impl core::marker::Freeze for millipede_core::link_extraction::EnqueueStrategy
+impl core::marker::Send for millipede_core::link_extraction::EnqueueStrategy
+impl core::marker::Sync for millipede_core::link_extraction::EnqueueStrategy
+impl core::marker::Unpin for millipede_core::link_extraction::EnqueueStrategy
+impl core::marker::UnsafeUnpin for millipede_core::link_extraction::EnqueueStrategy
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::link_extraction::EnqueueStrategy
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::link_extraction::EnqueueStrategy
 #[non_exhaustive] pub enum millipede_core::prelude::HttpClientError
 pub millipede_core::prelude::HttpClientError::Build(anyhow::Error)
 pub millipede_core::prelude::HttpClientError::Connect(anyhow::Error)
@@ -1527,6 +1550,23 @@ impl core::marker::Unpin for millipede_core::http_client::HttpClientError
 impl core::marker::UnsafeUnpin for millipede_core::http_client::HttpClientError
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::http_client::HttpClientError
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::http_client::HttpClientError
+pub enum millipede_core::prelude::LinkPatternError
+pub millipede_core::prelude::LinkPatternError::InvalidGlob
+pub millipede_core::prelude::LinkPatternError::InvalidGlob::pattern: alloc::string::String
+pub millipede_core::prelude::LinkPatternError::InvalidGlob::source: globset::Error
+impl core::error::Error for millipede_core::link_extraction::LinkPatternError
+pub fn millipede_core::link_extraction::LinkPatternError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for millipede_core::link_extraction::LinkPatternError
+pub fn millipede_core::link_extraction::LinkPatternError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::link_extraction::LinkPatternError
+pub fn millipede_core::link_extraction::LinkPatternError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::link_extraction::LinkPatternError
+impl core::marker::Send for millipede_core::link_extraction::LinkPatternError
+impl core::marker::Sync for millipede_core::link_extraction::LinkPatternError
+impl core::marker::Unpin for millipede_core::link_extraction::LinkPatternError
+impl core::marker::UnsafeUnpin for millipede_core::link_extraction::LinkPatternError
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::link_extraction::LinkPatternError
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::link_extraction::LinkPatternError
 pub enum millipede_core::prelude::LogLevel
 pub millipede_core::prelude::LogLevel::Debug
 pub millipede_core::prelude::LogLevel::Error
@@ -1846,6 +1886,39 @@ impl core::marker::Unpin for millipede_core::storage::StorageError
 impl core::marker::UnsafeUnpin for millipede_core::storage::StorageError
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::StorageError
 impl !core::panic::unwind_safe::UnwindSafe for millipede_core::storage::StorageError
+pub enum millipede_core::prelude::TransformResult
+pub millipede_core::prelude::TransformResult::Enqueue
+pub millipede_core::prelude::TransformResult::Skip
+pub millipede_core::prelude::TransformResult::Skip::reason: alloc::string::String
+impl core::fmt::Debug for millipede_core::link_extraction::TransformResult
+pub fn millipede_core::link_extraction::TransformResult::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::link_extraction::TransformResult
+impl core::marker::Send for millipede_core::link_extraction::TransformResult
+impl core::marker::Sync for millipede_core::link_extraction::TransformResult
+impl core::marker::Unpin for millipede_core::link_extraction::TransformResult
+impl core::marker::UnsafeUnpin for millipede_core::link_extraction::TransformResult
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::link_extraction::TransformResult
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::link_extraction::TransformResult
+pub enum millipede_core::prelude::UrlPattern
+pub millipede_core::prelude::UrlPattern::Glob(alloc::string::String)
+pub millipede_core::prelude::UrlPattern::Regex(regex::regex::string::Regex)
+impl core::clone::Clone for millipede_core::link_extraction::UrlPattern
+pub fn millipede_core::link_extraction::UrlPattern::clone(&self) -> millipede_core::link_extraction::UrlPattern
+impl core::convert::From<&str> for millipede_core::link_extraction::UrlPattern
+pub fn millipede_core::link_extraction::UrlPattern::from(&str) -> Self
+impl core::convert::From<alloc::string::String> for millipede_core::link_extraction::UrlPattern
+pub fn millipede_core::link_extraction::UrlPattern::from(alloc::string::String) -> Self
+impl core::convert::From<regex::regex::string::Regex> for millipede_core::link_extraction::UrlPattern
+pub fn millipede_core::link_extraction::UrlPattern::from(regex::regex::string::Regex) -> Self
+impl core::fmt::Debug for millipede_core::link_extraction::UrlPattern
+pub fn millipede_core::link_extraction::UrlPattern::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::link_extraction::UrlPattern
+impl core::marker::Send for millipede_core::link_extraction::UrlPattern
+impl core::marker::Sync for millipede_core::link_extraction::UrlPattern
+impl core::marker::Unpin for millipede_core::link_extraction::UrlPattern
+impl core::marker::UnsafeUnpin for millipede_core::link_extraction::UrlPattern
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::link_extraction::UrlPattern
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::link_extraction::UrlPattern
 #[non_exhaustive] pub struct millipede_core::prelude::AddOptions
 pub millipede_core::prelude::AddOptions::forefront: bool
 impl core::clone::Clone for millipede_core::storage::AddOptions
@@ -2210,6 +2283,28 @@ impl core::marker::Unpin for millipede_core::autoscale::CpuLoadSignalOptions
 impl core::marker::UnsafeUnpin for millipede_core::autoscale::CpuLoadSignalOptions
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::CpuLoadSignalOptions
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::CpuLoadSignalOptions
+#[non_exhaustive] pub struct millipede_core::prelude::CrawlPolicy
+pub millipede_core::prelude::CrawlPolicy::max_crawl_depth: core::option::Option<u32>
+pub millipede_core::prelude::CrawlPolicy::max_requests_per_crawl: core::option::Option<u64>
+pub millipede_core::prelude::CrawlPolicy::on_skipped: core::option::Option<alloc::sync::Arc<dyn millipede_core::link_extraction::SkippedHandler>>
+pub millipede_core::prelude::CrawlPolicy::strategy: millipede_core::link_extraction::EnqueueStrategy
+impl millipede_core::link_extraction::CrawlPolicy
+pub fn millipede_core::link_extraction::CrawlPolicy::max_crawl_depth(self, u32) -> Self
+pub fn millipede_core::link_extraction::CrawlPolicy::max_requests_per_crawl(self, u64) -> Self
+pub fn millipede_core::link_extraction::CrawlPolicy::new() -> Self
+pub fn millipede_core::link_extraction::CrawlPolicy::on_skipped<H: millipede_core::link_extraction::SkippedHandler>(self, H) -> Self
+pub fn millipede_core::link_extraction::CrawlPolicy::strategy(self, millipede_core::link_extraction::EnqueueStrategy) -> Self
+impl core::default::Default for millipede_core::link_extraction::CrawlPolicy
+pub fn millipede_core::link_extraction::CrawlPolicy::default() -> millipede_core::link_extraction::CrawlPolicy
+impl core::fmt::Debug for millipede_core::link_extraction::CrawlPolicy
+pub fn millipede_core::link_extraction::CrawlPolicy::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::link_extraction::CrawlPolicy
+impl core::marker::Send for millipede_core::link_extraction::CrawlPolicy
+impl core::marker::Sync for millipede_core::link_extraction::CrawlPolicy
+impl core::marker::Unpin for millipede_core::link_extraction::CrawlPolicy
+impl core::marker::UnsafeUnpin for millipede_core::link_extraction::CrawlPolicy
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::link_extraction::CrawlPolicy
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::link_extraction::CrawlPolicy
 pub struct millipede_core::prelude::Crawler<K: millipede_core::crawler::CrawlerKind>
 impl<K: millipede_core::crawler::CrawlerKind> millipede_core::crawler::Crawler<K>
 pub fn millipede_core::crawler::Crawler<K>::abort(&self)
@@ -2394,6 +2489,20 @@ impl core::marker::Unpin for millipede_core::events::EventBus
 impl core::marker::UnsafeUnpin for millipede_core::events::EventBus
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::events::EventBus
 impl !core::panic::unwind_safe::UnwindSafe for millipede_core::events::EventBus
+pub struct millipede_core::prelude::ExtractedLink
+pub millipede_core::prelude::ExtractedLink::base: core::option::Option<url::Url>
+pub millipede_core::prelude::ExtractedLink::url: alloc::string::String
+impl core::clone::Clone for millipede_core::link_extraction::ExtractedLink
+pub fn millipede_core::link_extraction::ExtractedLink::clone(&self) -> millipede_core::link_extraction::ExtractedLink
+impl core::fmt::Debug for millipede_core::link_extraction::ExtractedLink
+pub fn millipede_core::link_extraction::ExtractedLink::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::link_extraction::ExtractedLink
+impl core::marker::Send for millipede_core::link_extraction::ExtractedLink
+impl core::marker::Sync for millipede_core::link_extraction::ExtractedLink
+impl core::marker::Unpin for millipede_core::link_extraction::ExtractedLink
+impl core::marker::UnsafeUnpin for millipede_core::link_extraction::ExtractedLink
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::link_extraction::ExtractedLink
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::link_extraction::ExtractedLink
 #[non_exhaustive] pub struct millipede_core::prelude::FailedRequestContext
 pub millipede_core::prelude::FailedRequestContext::error: alloc::sync::Arc<millipede_core::errors::CrawlError>
 pub millipede_core::prelude::FailedRequestContext::request: alloc::sync::Arc<millipede_core::request::Request>
@@ -2443,6 +2552,26 @@ impl core::marker::Unpin for millipede_core::statistics::FinalStatistics
 impl core::marker::UnsafeUnpin for millipede_core::statistics::FinalStatistics
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::statistics::FinalStatistics
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::statistics::FinalStatistics
+pub struct millipede_core::prelude::GlobPattern
+impl core::clone::Clone for millipede_core::link_extraction::GlobPattern
+pub fn millipede_core::link_extraction::GlobPattern::clone(&self) -> millipede_core::link_extraction::GlobPattern
+impl core::convert::From<&str> for millipede_core::link_extraction::GlobPattern
+pub fn millipede_core::link_extraction::GlobPattern::from(&str) -> Self
+impl core::convert::From<alloc::string::String> for millipede_core::link_extraction::GlobPattern
+pub fn millipede_core::link_extraction::GlobPattern::from(alloc::string::String) -> Self
+impl core::convert::From<millipede_core::link_extraction::UrlMatch> for millipede_core::link_extraction::GlobPattern
+pub fn millipede_core::link_extraction::GlobPattern::from(millipede_core::link_extraction::UrlMatch) -> Self
+impl core::convert::From<regex::regex::string::Regex> for millipede_core::link_extraction::GlobPattern
+pub fn millipede_core::link_extraction::GlobPattern::from(regex::regex::string::Regex) -> Self
+impl core::fmt::Debug for millipede_core::link_extraction::GlobPattern
+pub fn millipede_core::link_extraction::GlobPattern::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::link_extraction::GlobPattern
+impl core::marker::Send for millipede_core::link_extraction::GlobPattern
+impl core::marker::Sync for millipede_core::link_extraction::GlobPattern
+impl core::marker::Unpin for millipede_core::link_extraction::GlobPattern
+impl core::marker::UnsafeUnpin for millipede_core::link_extraction::GlobPattern
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::link_extraction::GlobPattern
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::link_extraction::GlobPattern
 pub struct millipede_core::prelude::HandledRequest
 pub millipede_core::prelude::HandledRequest::duration: core::time::Duration
 pub millipede_core::prelude::HandledRequest::loaded_url: core::option::Option<url::Url>
@@ -2982,6 +3111,29 @@ impl core::marker::Unpin for millipede_core::crawler::RequestPrep
 impl core::marker::UnsafeUnpin for millipede_core::crawler::RequestPrep
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::crawler::RequestPrep
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::crawler::RequestPrep
+pub struct millipede_core::prelude::RequestQueueWithSitemap
+impl millipede_core::sitemap::RequestQueueWithSitemap
+pub fn millipede_core::sitemap::RequestQueueWithSitemap::batch_size(self, usize) -> Self
+pub fn millipede_core::sitemap::RequestQueueWithSitemap::new(alloc::sync::Arc<dyn millipede_core::storage::RequestQueue>, millipede_core::sitemap::SitemapRequestList) -> Self
+impl millipede_core::storage::RequestQueue for millipede_core::sitemap::RequestQueueWithSitemap
+pub fn millipede_core::sitemap::RequestQueueWithSitemap::abandon<'life0, 'async_trait>(&'life0 self, millipede_core::storage::Lease) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::sitemap::RequestQueueWithSitemap::add<'life0, 'async_trait>(&'life0 self, millipede_core::request::Request, millipede_core::storage::AddOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<millipede_core::storage::QueueOpInfo>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::sitemap::RequestQueueWithSitemap::add_batch<'life0, 'async_trait>(&'life0 self, alloc::vec::Vec<millipede_core::storage::RequestSource>, millipede_core::storage::AddOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<millipede_core::storage::BatchAddHandle>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::sitemap::RequestQueueWithSitemap::fetch_next<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<core::option::Option<millipede_core::storage::Lease>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::sitemap::RequestQueueWithSitemap::handled_count<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<u64>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::sitemap::RequestQueueWithSitemap::is_empty<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<bool>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::sitemap::RequestQueueWithSitemap::is_finished<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<bool>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::sitemap::RequestQueueWithSitemap::mark_handled<'life0, 'async_trait>(&'life0 self, millipede_core::storage::Lease) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::sitemap::RequestQueueWithSitemap::pending_count<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<u64>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::sitemap::RequestQueueWithSitemap::reclaim<'life0, 'async_trait>(&'life0 self, millipede_core::storage::Lease, millipede_core::storage::ReclaimOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_core::sitemap::RequestQueueWithSitemap::renew<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 millipede_core::storage::LeaseId, core::time::Duration) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+impl !core::marker::Freeze for millipede_core::sitemap::RequestQueueWithSitemap
+impl core::marker::Send for millipede_core::sitemap::RequestQueueWithSitemap
+impl core::marker::Sync for millipede_core::sitemap::RequestQueueWithSitemap
+impl core::marker::Unpin for millipede_core::sitemap::RequestQueueWithSitemap
+impl core::marker::UnsafeUnpin for millipede_core::sitemap::RequestQueueWithSitemap
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::sitemap::RequestQueueWithSitemap
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::sitemap::RequestQueueWithSitemap
 #[non_exhaustive] pub struct millipede_core::prelude::RetryDirective
 pub millipede_core::prelude::RetryDirective::backoff: core::option::Option<core::time::Duration>
 pub millipede_core::prelude::RetryDirective::proxy_kind: core::option::Option<millipede_core::proxy::ProxyKind>
@@ -3141,6 +3293,57 @@ impl core::marker::Unpin for millipede_core::session::SessionPoolOptions
 impl core::marker::UnsafeUnpin for millipede_core::session::SessionPoolOptions
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::session::SessionPoolOptions
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::session::SessionPoolOptions
+pub struct millipede_core::prelude::SitemapEntry
+pub millipede_core::prelude::SitemapEntry::changefreq: core::option::Option<alloc::string::String>
+pub millipede_core::prelude::SitemapEntry::lastmod: core::option::Option<alloc::string::String>
+pub millipede_core::prelude::SitemapEntry::loc: alloc::string::String
+pub millipede_core::prelude::SitemapEntry::priority: core::option::Option<f32>
+impl core::clone::Clone for millipede_core::sitemap::SitemapEntry
+pub fn millipede_core::sitemap::SitemapEntry::clone(&self) -> millipede_core::sitemap::SitemapEntry
+impl core::cmp::PartialEq for millipede_core::sitemap::SitemapEntry
+pub fn millipede_core::sitemap::SitemapEntry::eq(&self, &millipede_core::sitemap::SitemapEntry) -> bool
+impl core::fmt::Debug for millipede_core::sitemap::SitemapEntry
+pub fn millipede_core::sitemap::SitemapEntry::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_core::sitemap::SitemapEntry
+impl core::marker::Freeze for millipede_core::sitemap::SitemapEntry
+impl core::marker::Send for millipede_core::sitemap::SitemapEntry
+impl core::marker::Sync for millipede_core::sitemap::SitemapEntry
+impl core::marker::Unpin for millipede_core::sitemap::SitemapEntry
+impl core::marker::UnsafeUnpin for millipede_core::sitemap::SitemapEntry
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::sitemap::SitemapEntry
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::sitemap::SitemapEntry
+pub struct millipede_core::prelude::SitemapRequestList
+impl millipede_core::sitemap::SitemapRequestList
+pub async fn millipede_core::sitemap::SitemapRequestList::fetch_next(&self) -> core::result::Result<core::option::Option<millipede_core::request::Request>, millipede_core::errors::CrawlError>
+pub async fn millipede_core::sitemap::SitemapRequestList::is_finished(&self) -> bool
+pub async fn millipede_core::sitemap::SitemapRequestList::persist(&self) -> core::result::Result<(), millipede_core::errors::CrawlError>
+pub async fn millipede_core::sitemap::SitemapRequestList::processed_count(&self) -> u64
+impl !core::marker::Freeze for millipede_core::sitemap::SitemapRequestList
+impl core::marker::Send for millipede_core::sitemap::SitemapRequestList
+impl core::marker::Sync for millipede_core::sitemap::SitemapRequestList
+impl core::marker::Unpin for millipede_core::sitemap::SitemapRequestList
+impl core::marker::UnsafeUnpin for millipede_core::sitemap::SitemapRequestList
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::sitemap::SitemapRequestList
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::sitemap::SitemapRequestList
+pub struct millipede_core::prelude::SitemapRequestListBuilder
+impl millipede_core::sitemap::SitemapRequestListBuilder
+pub fn millipede_core::sitemap::SitemapRequestListBuilder::build(self) -> core::result::Result<millipede_core::sitemap::SitemapRequestList, millipede_core::errors::CrawlError>
+pub fn millipede_core::sitemap::SitemapRequestListBuilder::http_client(self, alloc::sync::Arc<dyn millipede_core::http_client::HttpClient>) -> Self
+pub fn millipede_core::sitemap::SitemapRequestListBuilder::label(self, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_core::sitemap::SitemapRequestListBuilder::limit(self, u64) -> Self
+pub fn millipede_core::sitemap::SitemapRequestListBuilder::persist(self, alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_core::sitemap::SitemapRequestListBuilder::sitemap_url(self, url::Url) -> Self
+pub fn millipede_core::sitemap::SitemapRequestListBuilder::sitemap_urls(self, impl core::iter::traits::collect::IntoIterator<Item = url::Url>) -> Self
+pub fn millipede_core::sitemap::SitemapRequestListBuilder::user_data(self, millipede_core::request::UserData) -> Self
+impl core::default::Default for millipede_core::sitemap::SitemapRequestListBuilder
+pub fn millipede_core::sitemap::SitemapRequestListBuilder::default() -> millipede_core::sitemap::SitemapRequestListBuilder
+impl core::marker::Freeze for millipede_core::sitemap::SitemapRequestListBuilder
+impl core::marker::Send for millipede_core::sitemap::SitemapRequestListBuilder
+impl core::marker::Sync for millipede_core::sitemap::SitemapRequestListBuilder
+impl core::marker::Unpin for millipede_core::sitemap::SitemapRequestListBuilder
+impl core::marker::UnsafeUnpin for millipede_core::sitemap::SitemapRequestListBuilder
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::sitemap::SitemapRequestListBuilder
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::sitemap::SitemapRequestListBuilder
 pub struct millipede_core::prelude::SkippedUrl
 pub millipede_core::prelude::SkippedUrl::reason: millipede_core::enqueue::SkipReason
 pub millipede_core::prelude::SkippedUrl::url: alloc::string::String
@@ -3337,6 +3540,31 @@ impl core::marker::Unpin for millipede_core::autoscale::TokioRuntimeLoadSignalOp
 impl core::marker::UnsafeUnpin for millipede_core::autoscale::TokioRuntimeLoadSignalOptions
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::TokioRuntimeLoadSignalOptions
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::TokioRuntimeLoadSignalOptions
+pub struct millipede_core::prelude::UrlMatch
+pub millipede_core::prelude::UrlMatch::headers: core::option::Option<http::header::map::HeaderMap>
+pub millipede_core::prelude::UrlMatch::label: core::option::Option<alloc::string::String>
+pub millipede_core::prelude::UrlMatch::method: core::option::Option<http::method::Method>
+pub millipede_core::prelude::UrlMatch::pattern: millipede_core::link_extraction::UrlPattern
+pub millipede_core::prelude::UrlMatch::user_data: core::option::Option<millipede_core::request::UserData>
+impl millipede_core::link_extraction::UrlMatch
+pub fn millipede_core::link_extraction::UrlMatch::headers(self, http::header::map::HeaderMap) -> Self
+pub fn millipede_core::link_extraction::UrlMatch::label(self, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_core::link_extraction::UrlMatch::method(self, http::method::Method) -> Self
+pub fn millipede_core::link_extraction::UrlMatch::new(impl core::convert::Into<millipede_core::link_extraction::UrlPattern>) -> Self
+pub fn millipede_core::link_extraction::UrlMatch::user_data(self, millipede_core::request::UserData) -> Self
+impl core::clone::Clone for millipede_core::link_extraction::UrlMatch
+pub fn millipede_core::link_extraction::UrlMatch::clone(&self) -> millipede_core::link_extraction::UrlMatch
+impl core::convert::From<millipede_core::link_extraction::UrlMatch> for millipede_core::link_extraction::GlobPattern
+pub fn millipede_core::link_extraction::GlobPattern::from(millipede_core::link_extraction::UrlMatch) -> Self
+impl core::fmt::Debug for millipede_core::link_extraction::UrlMatch
+pub fn millipede_core::link_extraction::UrlMatch::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::link_extraction::UrlMatch
+impl core::marker::Send for millipede_core::link_extraction::UrlMatch
+impl core::marker::Sync for millipede_core::link_extraction::UrlMatch
+impl core::marker::Unpin for millipede_core::link_extraction::UrlMatch
+impl core::marker::UnsafeUnpin for millipede_core::link_extraction::UrlMatch
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::link_extraction::UrlMatch
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::link_extraction::UrlMatch
 pub struct millipede_core::prelude::UserData(pub serde_json::map::Map<alloc::string::String, serde_json::value::Value>)
 impl millipede_core::request::UserData
 pub fn millipede_core::request::UserData::get(&self, &str) -> core::option::Option<&serde_json::value::Value>
@@ -3364,6 +3592,7 @@ impl core::marker::UnsafeUnpin for millipede_core::request::UserData
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::request::UserData
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::request::UserData
 pub const millipede_core::prelude::SESSION_POOL_PERSIST_KEY: &str
+pub const millipede_core::prelude::SITEMAP_STATE_KEY: &str
 pub const millipede_core::prelude::STATISTICS_PERSIST_KEY: &str
 pub trait millipede_core::prelude::CrawlerKind: core::marker::Send + core::marker::Sync + 'static
 pub type millipede_core::prelude::CrawlerKind::Context: core::marker::Send + core::clone::Clone + 'static
@@ -3459,6 +3688,8 @@ pub fn millipede_core::prelude::KeyValueStoreExt::set<'life0, 'life1, 'life2, 'a
 impl<K: millipede_core::storage::KeyValueStore + ?core::marker::Sized> millipede_core::storage::KeyValueStoreExt for K
 pub fn K::get<'life0, 'life1, 'async_trait, T>(&'life0 self, &'life1 str) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<core::option::Option<T>>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::de::DeserializeOwned + 'static, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
 pub fn K::set<'life0, 'life1, 'life2, 'async_trait, T>(&'life0 self, &'life1 str, &'life2 T) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::ser::Serialize + core::marker::Send + core::marker::Sync, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait, 'life2: 'async_trait
+pub trait millipede_core::prelude::LinkExtractor: core::marker::Send + core::marker::Sync
+pub fn millipede_core::prelude::LinkExtractor::extract(&self, core::option::Option<&str>) -> core::result::Result<alloc::vec::Vec<millipede_core::link_extraction::ExtractedLink>, millipede_core::errors::CrawlError>
 pub trait millipede_core::prelude::LoadSignal: core::marker::Send + core::marker::Sync + 'static
 pub fn millipede_core::prelude::LoadSignal::name(&self) -> &str
 pub fn millipede_core::prelude::LoadSignal::overload_threshold(&self) -> f32
@@ -3530,6 +3761,10 @@ pub fn millipede_core::sitemap::RequestQueueWithSitemap::renew<'life0, 'life1, '
 pub trait millipede_core::prelude::RetryStrategy: core::marker::Send + core::marker::Sync + 'static
 pub fn millipede_core::prelude::RetryStrategy::max_retries(&self) -> u32
 pub fn millipede_core::prelude::RetryStrategy::on_retry(&self, &millipede_core::retry_strategy::AttemptOutcome<'_>) -> millipede_core::retry_strategy::RetryDirective
+pub trait millipede_core::prelude::SkippedHandler: core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_core::prelude::SkippedHandler::on_skip(&self, &str, &millipede_core::enqueue::SkipReason)
+impl<F> millipede_core::link_extraction::SkippedHandler for F where F: core::ops::function::Fn(&str, &millipede_core::enqueue::SkipReason) + core::marker::Send + core::marker::Sync + 'static
+pub fn F::on_skip(&self, &str, &millipede_core::enqueue::SkipReason)
 pub trait millipede_core::prelude::StorageClient: core::marker::Send + core::marker::Sync + 'static
 pub fn millipede_core::prelude::StorageClient::open_dataset<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::Dataset>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
 pub fn millipede_core::prelude::StorageClient::open_key_value_store<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait

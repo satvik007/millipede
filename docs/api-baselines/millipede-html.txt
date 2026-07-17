@@ -1,6 +1,102 @@
 pub mod millipede_html
 pub use millipede_html::scraper
 pub mod millipede_html::prelude
+pub enum millipede_html::prelude::HtmlError
+pub millipede_html::prelude::HtmlError::UnsupportedContentType
+pub millipede_html::prelude::HtmlError::UnsupportedContentType::content_type: alloc::string::String
+impl core::error::Error for millipede_html::HtmlError
+impl core::fmt::Debug for millipede_html::HtmlError
+pub fn millipede_html::HtmlError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_html::HtmlError
+pub fn millipede_html::HtmlError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_html::HtmlError
+impl core::marker::Send for millipede_html::HtmlError
+impl core::marker::Sync for millipede_html::HtmlError
+impl core::marker::Unpin for millipede_html::HtmlError
+impl core::marker::UnsafeUnpin for millipede_html::HtmlError
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_html::HtmlError
+impl core::panic::unwind_safe::UnwindSafe for millipede_html::HtmlError
+#[non_exhaustive] pub struct millipede_html::prelude::HtmlContext
+pub millipede_html::prelude::HtmlContext::crawler: millipede_core::crawler::CrawlerHandle
+pub millipede_html::prelude::HtmlContext::enqueue: millipede_core::enqueue::EnqueueLinker
+pub millipede_html::prelude::HtmlContext::html: alloc::sync::Arc<millipede_html::SynchronizedHtml>
+pub millipede_html::prelude::HtmlContext::proxy_info: core::option::Option<millipede_core::proxy::ProxyInfo>
+pub millipede_html::prelude::HtmlContext::request: alloc::sync::Arc<millipede_core::request::Request>
+pub millipede_html::prelude::HtmlContext::response: alloc::sync::Arc<millipede_core::http_client::HttpResponse>
+pub millipede_html::prelude::HtmlContext::session: core::option::Option<alloc::sync::Arc<millipede_core::session::Session>>
+pub millipede_html::prelude::HtmlContext::storage: millipede_core::storage::handle::StorageHandle
+impl core::clone::Clone for millipede_html::HtmlContext
+pub fn millipede_html::HtmlContext::clone(&self) -> millipede_html::HtmlContext
+impl core::fmt::Debug for millipede_html::HtmlContext
+pub fn millipede_html::HtmlContext::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl millipede_core::router::HasRequest for millipede_html::HtmlContext
+pub fn millipede_html::HtmlContext::request(&self) -> &millipede_core::request::Request
+impl core::marker::Freeze for millipede_html::HtmlContext
+impl core::marker::Send for millipede_html::HtmlContext
+impl core::marker::Sync for millipede_html::HtmlContext
+impl core::marker::Unpin for millipede_html::HtmlContext
+impl core::marker::UnsafeUnpin for millipede_html::HtmlContext
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_html::HtmlContext
+impl !core::panic::unwind_safe::UnwindSafe for millipede_html::HtmlContext
+pub struct millipede_html::prelude::HtmlKind
+impl millipede_html::HtmlKind
+pub fn millipede_html::HtmlKind::builder() -> millipede_html::HtmlKindBuilder
+pub fn millipede_html::HtmlKind::from_http(millipede_http::kind::HttpKind) -> Self
+pub fn millipede_html::HtmlKind::new() -> core::result::Result<Self, millipede_core::http_client::HttpClientError>
+impl millipede_core::crawler::CrawlerKind for millipede_html::HtmlKind
+pub type millipede_html::HtmlKind::Context = millipede_html::HtmlContext
+pub fn millipede_html::HtmlKind::after_success<'a>(&'a self, &'a mut Self::Context) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_html::HtmlKind::before_request<'a>(&'a self, &'a mut millipede_core::crawler::RequestPrep) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_html::HtmlKind::cleanup(&self, millipede_core::crawler::RequestOutcome<Self::Context>) -> futures_core::future::BoxFuture<'_, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_html::HtmlKind::execute<'a>(&'a self, millipede_core::crawler::RequestEnv<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<Self::Context, millipede_core::errors::CrawlError>>
+pub fn millipede_html::HtmlKind::observe(&self, &Self::Context) -> millipede_core::crawler::AttemptObservation
+pub fn millipede_html::HtmlKind::start<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_html::HtmlKind::stop<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+impl !core::marker::Freeze for millipede_html::HtmlKind
+impl core::marker::Send for millipede_html::HtmlKind
+impl core::marker::Sync for millipede_html::HtmlKind
+impl core::marker::Unpin for millipede_html::HtmlKind
+impl core::marker::UnsafeUnpin for millipede_html::HtmlKind
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_html::HtmlKind
+impl !core::panic::unwind_safe::UnwindSafe for millipede_html::HtmlKind
+pub struct millipede_html::prelude::HtmlKindBuilder
+impl millipede_html::HtmlKindBuilder
+pub fn millipede_html::HtmlKindBuilder::build(self) -> core::result::Result<millipede_html::HtmlKind, millipede_core::http_client::HttpClientError>
+pub fn millipede_html::HtmlKindBuilder::coalesce_in_flight(self, bool) -> Self
+pub fn millipede_html::HtmlKindBuilder::disable_sessions(self) -> Self
+pub fn millipede_html::HtmlKindBuilder::http_client(self, alloc::sync::Arc<dyn millipede_core::http_client::HttpClient>) -> Self
+pub fn millipede_html::HtmlKindBuilder::max_redirects(self, u32) -> Self
+pub fn millipede_html::HtmlKindBuilder::proxy(self, millipede_core::proxy::ProxyConfiguration) -> Self
+pub fn millipede_html::HtmlKindBuilder::proxy_buckets(self, millipede_core::proxy::ProxyBuckets) -> Self
+pub fn millipede_html::HtmlKindBuilder::proxy_strategy<S: millipede_core::proxy::ProxyStrategy>(self, S) -> Self
+pub fn millipede_html::HtmlKindBuilder::request_timeout(self, core::time::Duration) -> Self
+pub fn millipede_html::HtmlKindBuilder::retry_server_errors(self, bool) -> Self
+pub fn millipede_html::HtmlKindBuilder::retry_status_codes(self, impl core::iter::traits::collect::IntoIterator<Item = u16>) -> Self
+pub fn millipede_html::HtmlKindBuilder::session_pool(self, millipede_core::session::SessionPoolOptions) -> Self
+pub fn millipede_html::HtmlKindBuilder::session_status_codes(self, impl core::iter::traits::collect::IntoIterator<Item = u16>) -> Self
+pub fn millipede_html::HtmlKindBuilder::user_agents<I, U>(self, I) -> Self where I: core::iter::traits::collect::IntoIterator<Item = U>, U: core::convert::Into<alloc::string::String>
+impl core::default::Default for millipede_html::HtmlKindBuilder
+pub fn millipede_html::HtmlKindBuilder::default() -> Self
+impl !core::marker::Freeze for millipede_html::HtmlKindBuilder
+impl core::marker::Send for millipede_html::HtmlKindBuilder
+impl core::marker::Sync for millipede_html::HtmlKindBuilder
+impl core::marker::Unpin for millipede_html::HtmlKindBuilder
+impl core::marker::UnsafeUnpin for millipede_html::HtmlKindBuilder
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_html::HtmlKindBuilder
+impl !core::panic::unwind_safe::UnwindSafe for millipede_html::HtmlKindBuilder
+pub struct millipede_html::prelude::HtmlLinkExtractor
+impl millipede_html::HtmlLinkExtractor
+pub fn millipede_html::HtmlLinkExtractor::new(alloc::sync::Arc<scraper::html::Html>, url::Url) -> Self
+impl millipede_core::link_extraction::LinkExtractor for millipede_html::HtmlLinkExtractor
+pub fn millipede_html::HtmlLinkExtractor::extract(&self, core::option::Option<&str>) -> core::result::Result<alloc::vec::Vec<millipede_core::link_extraction::ExtractedLink>, millipede_core::errors::CrawlError>
+impl core::marker::Freeze for millipede_html::HtmlLinkExtractor
+impl core::marker::Send for millipede_html::HtmlLinkExtractor
+impl core::marker::Sync for millipede_html::HtmlLinkExtractor
+impl core::marker::Unpin for millipede_html::HtmlLinkExtractor
+impl core::marker::UnsafeUnpin for millipede_html::HtmlLinkExtractor
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_html::HtmlLinkExtractor
+impl core::panic::unwind_safe::UnwindSafe for millipede_html::HtmlLinkExtractor
+pub type millipede_html::prelude::HtmlCrawler = millipede_core::crawler::Crawler<millipede_html::HtmlKind>
 pub macro millipede_html::selectors!
 pub enum millipede_html::HtmlError
 pub millipede_html::HtmlError::UnsupportedContentType

@@ -97,6 +97,10 @@ pub mod prelude {
     pub use crate::http_client::{
         HttpClient, HttpClientError, HttpRequest, HttpResponse, HttpStatusError, StreamingResponse,
     };
+    pub use crate::link_extraction::{
+        CrawlPolicy, EnqueueStrategy, ExtractedLink, GlobPattern, LinkExtractor, LinkPatternError,
+        SkippedHandler, TransformResult, UrlMatch, UrlPattern,
+    };
     pub use crate::proxy::{
         ProxyBuckets, ProxyConfiguration, ProxyInfo, ProxyKind, ProxyResolveContext, ProxyResolver,
         ProxyRouteContext, ProxyStrategy, RotationStrategy,
@@ -112,6 +116,10 @@ pub mod prelude {
     pub use crate::session::{
         SESSION_POOL_PERSIST_KEY, Session, SessionConfig, SessionId, SessionPool,
         SessionPoolOptions,
+    };
+    pub use crate::sitemap::{
+        RequestQueueWithSitemap, SITEMAP_STATE_KEY, SitemapEntry, SitemapRequestList,
+        SitemapRequestListBuilder,
     };
     pub use crate::statistics::{
         FinalStatistics, STATISTICS_PERSIST_KEY, StatisticsHandle, StatisticsSnapshot,
