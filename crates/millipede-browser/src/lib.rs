@@ -1,5 +1,7 @@
 #![doc = include_str!("../README.md")]
 
+/// HTTP-attempt detector interfaces for smart browser promotion.
+pub mod detect;
 /// Browser-specific errors and crawl error classification.
 pub mod error;
 /// Browser lifecycle hooks.
@@ -12,7 +14,12 @@ pub mod page;
 pub mod pool;
 /// Concrete browser provider integration points.
 pub mod provider;
+/// HTTP-first crawler kind with selective browser promotion.
+pub mod smart;
 
+pub use detect::{
+    BrowserPromotionDetector, DefaultPromotionDetector, HttpAttemptSnapshot, PromotionReason,
+};
 pub use error::BrowserError;
 pub use hooks::{BrowserHooks, PageClosedHook, PageHook, PagePrepHook, PreLaunchHook};
 pub use kind::{BrowserContext, BrowserCrawler, BrowserKind, BrowserKindBuilder};
@@ -21,13 +28,16 @@ pub use page::{
 };
 pub use pool::{BrowserPool, BrowserPoolOptions, PageHandle};
 pub use provider::{BrowserProvider, LaunchContext};
+pub use smart::{SmartContext, SmartCrawler, SmartKind, SmartKindBuilder};
 
 /// Commonly used items from this crate.
 pub mod prelude {
     pub use crate::{
         BrowserContext, BrowserCrawler, BrowserError, BrowserHooks, BrowserKind,
-        BrowserKindBuilder, BrowserPage, BrowserPool, BrowserPoolOptions, BrowserProvider,
-        BrowserResponse, GotoOptions, LaunchContext, PageClosedHook, PageHandle, PageHook, PageId,
-        PageOpts, PagePrepHook, PreLaunchHook, ScreenshotOptions, WaitUntil,
+        BrowserKindBuilder, BrowserPage, BrowserPool, BrowserPoolOptions, BrowserPromotionDetector,
+        BrowserProvider, BrowserResponse, DefaultPromotionDetector, GotoOptions,
+        HttpAttemptSnapshot, LaunchContext, PageClosedHook, PageHandle, PageHook, PageId, PageOpts,
+        PagePrepHook, PreLaunchHook, PromotionReason, ScreenshotOptions, SmartContext,
+        SmartCrawler, SmartKind, SmartKindBuilder, WaitUntil,
     };
 }

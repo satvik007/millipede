@@ -1,4 +1,67 @@
 pub mod millipede_browser
+pub mod millipede_browser::detect
+#[non_exhaustive] pub enum millipede_browser::detect::PromotionReason
+pub millipede_browser::detect::PromotionReason::Custom(alloc::string::String)
+pub millipede_browser::detect::PromotionReason::EmptyBodyLikelyJs
+pub millipede_browser::detect::PromotionReason::KnownAntiBot(millipede_core::errors::AntiBotTech)
+pub millipede_browser::detect::PromotionReason::SelectorMissing
+pub millipede_browser::detect::PromotionReason::SelectorMissing::selector: alloc::string::String
+pub millipede_browser::detect::PromotionReason::StatusPromoted
+pub millipede_browser::detect::PromotionReason::StatusPromoted::status: u16
+impl core::clone::Clone for millipede_browser::detect::PromotionReason
+pub fn millipede_browser::detect::PromotionReason::clone(&self) -> millipede_browser::detect::PromotionReason
+impl core::cmp::PartialEq for millipede_browser::detect::PromotionReason
+pub fn millipede_browser::detect::PromotionReason::eq(&self, &millipede_browser::detect::PromotionReason) -> bool
+impl core::fmt::Debug for millipede_browser::detect::PromotionReason
+pub fn millipede_browser::detect::PromotionReason::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_browser::detect::PromotionReason
+pub fn millipede_browser::detect::PromotionReason::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_browser::detect::PromotionReason
+impl core::marker::Freeze for millipede_browser::detect::PromotionReason
+impl core::marker::Send for millipede_browser::detect::PromotionReason
+impl core::marker::Sync for millipede_browser::detect::PromotionReason
+impl core::marker::Unpin for millipede_browser::detect::PromotionReason
+impl core::marker::UnsafeUnpin for millipede_browser::detect::PromotionReason
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_browser::detect::PromotionReason
+impl core::panic::unwind_safe::UnwindSafe for millipede_browser::detect::PromotionReason
+pub struct millipede_browser::detect::DefaultPromotionDetector
+impl millipede_browser::detect::DefaultPromotionDetector
+pub fn millipede_browser::detect::DefaultPromotionDetector::new() -> Self
+pub fn millipede_browser::detect::DefaultPromotionDetector::with_min_visible_text(self, usize) -> Self
+pub fn millipede_browser::detect::DefaultPromotionDetector::with_required_selector(self, impl core::convert::Into<alloc::string::String>) -> Self
+impl core::clone::Clone for millipede_browser::detect::DefaultPromotionDetector
+pub fn millipede_browser::detect::DefaultPromotionDetector::clone(&self) -> millipede_browser::detect::DefaultPromotionDetector
+impl core::default::Default for millipede_browser::detect::DefaultPromotionDetector
+pub fn millipede_browser::detect::DefaultPromotionDetector::default() -> Self
+impl core::fmt::Debug for millipede_browser::detect::DefaultPromotionDetector
+pub fn millipede_browser::detect::DefaultPromotionDetector::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl millipede_browser::detect::BrowserPromotionDetector for millipede_browser::detect::DefaultPromotionDetector
+pub fn millipede_browser::detect::DefaultPromotionDetector::should_promote(&self, &millipede_browser::detect::HttpAttemptSnapshot<'_>) -> core::option::Option<millipede_browser::detect::PromotionReason>
+impl core::marker::Freeze for millipede_browser::detect::DefaultPromotionDetector
+impl core::marker::Send for millipede_browser::detect::DefaultPromotionDetector
+impl core::marker::Sync for millipede_browser::detect::DefaultPromotionDetector
+impl core::marker::Unpin for millipede_browser::detect::DefaultPromotionDetector
+impl core::marker::UnsafeUnpin for millipede_browser::detect::DefaultPromotionDetector
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_browser::detect::DefaultPromotionDetector
+impl core::panic::unwind_safe::UnwindSafe for millipede_browser::detect::DefaultPromotionDetector
+#[non_exhaustive] pub struct millipede_browser::detect::HttpAttemptSnapshot<'a>
+pub millipede_browser::detect::HttpAttemptSnapshot::body: &'a [u8]
+pub millipede_browser::detect::HttpAttemptSnapshot::final_url: &'a url::Url
+pub millipede_browser::detect::HttpAttemptSnapshot::headers: &'a http::header::map::HeaderMap
+pub millipede_browser::detect::HttpAttemptSnapshot::html: core::option::Option<&'a millipede_html::kind::SynchronizedHtml>
+pub millipede_browser::detect::HttpAttemptSnapshot::request: &'a millipede_core::request::Request
+pub millipede_browser::detect::HttpAttemptSnapshot::status: http::status::StatusCode
+impl<'a> core::marker::Freeze for millipede_browser::detect::HttpAttemptSnapshot<'a>
+impl<'a> core::marker::Send for millipede_browser::detect::HttpAttemptSnapshot<'a>
+impl<'a> core::marker::Sync for millipede_browser::detect::HttpAttemptSnapshot<'a>
+impl<'a> core::marker::Unpin for millipede_browser::detect::HttpAttemptSnapshot<'a>
+impl<'a> core::marker::UnsafeUnpin for millipede_browser::detect::HttpAttemptSnapshot<'a>
+impl<'a> core::panic::unwind_safe::RefUnwindSafe for millipede_browser::detect::HttpAttemptSnapshot<'a>
+impl<'a> core::panic::unwind_safe::UnwindSafe for millipede_browser::detect::HttpAttemptSnapshot<'a>
+pub trait millipede_browser::detect::BrowserPromotionDetector: core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_browser::detect::BrowserPromotionDetector::should_promote(&self, &millipede_browser::detect::HttpAttemptSnapshot<'_>) -> core::option::Option<millipede_browser::detect::PromotionReason>
+impl millipede_browser::detect::BrowserPromotionDetector for millipede_browser::detect::DefaultPromotionDetector
+pub fn millipede_browser::detect::DefaultPromotionDetector::should_promote(&self, &millipede_browser::detect::HttpAttemptSnapshot<'_>) -> core::option::Option<millipede_browser::detect::PromotionReason>
 pub mod millipede_browser::error
 #[non_exhaustive] pub enum millipede_browser::error::BrowserError
 pub millipede_browser::error::BrowserError::BrowserNotFound
@@ -360,6 +423,54 @@ impl core::marker::Unpin for millipede_browser::error::BrowserError
 impl core::marker::UnsafeUnpin for millipede_browser::error::BrowserError
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_browser::error::BrowserError
 impl core::panic::unwind_safe::UnwindSafe for millipede_browser::error::BrowserError
+#[non_exhaustive] pub enum millipede_browser::prelude::PromotionReason
+pub millipede_browser::prelude::PromotionReason::Custom(alloc::string::String)
+pub millipede_browser::prelude::PromotionReason::EmptyBodyLikelyJs
+pub millipede_browser::prelude::PromotionReason::KnownAntiBot(millipede_core::errors::AntiBotTech)
+pub millipede_browser::prelude::PromotionReason::SelectorMissing
+pub millipede_browser::prelude::PromotionReason::SelectorMissing::selector: alloc::string::String
+pub millipede_browser::prelude::PromotionReason::StatusPromoted
+pub millipede_browser::prelude::PromotionReason::StatusPromoted::status: u16
+impl core::clone::Clone for millipede_browser::detect::PromotionReason
+pub fn millipede_browser::detect::PromotionReason::clone(&self) -> millipede_browser::detect::PromotionReason
+impl core::cmp::PartialEq for millipede_browser::detect::PromotionReason
+pub fn millipede_browser::detect::PromotionReason::eq(&self, &millipede_browser::detect::PromotionReason) -> bool
+impl core::fmt::Debug for millipede_browser::detect::PromotionReason
+pub fn millipede_browser::detect::PromotionReason::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_browser::detect::PromotionReason
+pub fn millipede_browser::detect::PromotionReason::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_browser::detect::PromotionReason
+impl core::marker::Freeze for millipede_browser::detect::PromotionReason
+impl core::marker::Send for millipede_browser::detect::PromotionReason
+impl core::marker::Sync for millipede_browser::detect::PromotionReason
+impl core::marker::Unpin for millipede_browser::detect::PromotionReason
+impl core::marker::UnsafeUnpin for millipede_browser::detect::PromotionReason
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_browser::detect::PromotionReason
+impl core::panic::unwind_safe::UnwindSafe for millipede_browser::detect::PromotionReason
+pub enum millipede_browser::prelude::SmartContext
+pub millipede_browser::prelude::SmartContext::Browser(millipede_browser::kind::BrowserContext)
+pub millipede_browser::prelude::SmartContext::Http(millipede_html::kind::HtmlContext)
+impl millipede_browser::smart::SmartContext
+pub fn millipede_browser::smart::SmartContext::as_browser(&self) -> core::option::Option<&millipede_browser::kind::BrowserContext>
+pub fn millipede_browser::smart::SmartContext::as_http(&self) -> core::option::Option<&millipede_html::kind::HtmlContext>
+pub fn millipede_browser::smart::SmartContext::crawler(&self) -> &millipede_core::crawler::CrawlerHandle
+pub fn millipede_browser::smart::SmartContext::enqueue(&self) -> &millipede_core::enqueue::EnqueueLinker
+pub fn millipede_browser::smart::SmartContext::is_browser(&self) -> bool
+pub fn millipede_browser::smart::SmartContext::request(&self) -> &millipede_core::request::Request
+pub fn millipede_browser::smart::SmartContext::storage(&self) -> &millipede_core::storage::handle::StorageHandle
+impl core::clone::Clone for millipede_browser::smart::SmartContext
+pub fn millipede_browser::smart::SmartContext::clone(&self) -> millipede_browser::smart::SmartContext
+impl core::fmt::Debug for millipede_browser::smart::SmartContext
+pub fn millipede_browser::smart::SmartContext::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl millipede_core::router::HasRequest for millipede_browser::smart::SmartContext
+pub fn millipede_browser::smart::SmartContext::request(&self) -> &millipede_core::request::Request
+impl core::marker::Freeze for millipede_browser::smart::SmartContext
+impl core::marker::Send for millipede_browser::smart::SmartContext
+impl core::marker::Sync for millipede_browser::smart::SmartContext
+impl core::marker::Unpin for millipede_browser::smart::SmartContext
+impl core::marker::UnsafeUnpin for millipede_browser::smart::SmartContext
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_browser::smart::SmartContext
+impl !core::panic::unwind_safe::UnwindSafe for millipede_browser::smart::SmartContext
 #[non_exhaustive] pub enum millipede_browser::prelude::WaitUntil
 pub millipede_browser::prelude::WaitUntil::DomContentLoaded
 pub millipede_browser::prelude::WaitUntil::Load
@@ -533,6 +644,26 @@ impl core::marker::Unpin for millipede_browser::page::BrowserResponse
 impl core::marker::UnsafeUnpin for millipede_browser::page::BrowserResponse
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_browser::page::BrowserResponse
 impl core::panic::unwind_safe::UnwindSafe for millipede_browser::page::BrowserResponse
+pub struct millipede_browser::prelude::DefaultPromotionDetector
+impl millipede_browser::detect::DefaultPromotionDetector
+pub fn millipede_browser::detect::DefaultPromotionDetector::new() -> Self
+pub fn millipede_browser::detect::DefaultPromotionDetector::with_min_visible_text(self, usize) -> Self
+pub fn millipede_browser::detect::DefaultPromotionDetector::with_required_selector(self, impl core::convert::Into<alloc::string::String>) -> Self
+impl core::clone::Clone for millipede_browser::detect::DefaultPromotionDetector
+pub fn millipede_browser::detect::DefaultPromotionDetector::clone(&self) -> millipede_browser::detect::DefaultPromotionDetector
+impl core::default::Default for millipede_browser::detect::DefaultPromotionDetector
+pub fn millipede_browser::detect::DefaultPromotionDetector::default() -> Self
+impl core::fmt::Debug for millipede_browser::detect::DefaultPromotionDetector
+pub fn millipede_browser::detect::DefaultPromotionDetector::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl millipede_browser::detect::BrowserPromotionDetector for millipede_browser::detect::DefaultPromotionDetector
+pub fn millipede_browser::detect::DefaultPromotionDetector::should_promote(&self, &millipede_browser::detect::HttpAttemptSnapshot<'_>) -> core::option::Option<millipede_browser::detect::PromotionReason>
+impl core::marker::Freeze for millipede_browser::detect::DefaultPromotionDetector
+impl core::marker::Send for millipede_browser::detect::DefaultPromotionDetector
+impl core::marker::Sync for millipede_browser::detect::DefaultPromotionDetector
+impl core::marker::Unpin for millipede_browser::detect::DefaultPromotionDetector
+impl core::marker::UnsafeUnpin for millipede_browser::detect::DefaultPromotionDetector
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_browser::detect::DefaultPromotionDetector
+impl core::panic::unwind_safe::UnwindSafe for millipede_browser::detect::DefaultPromotionDetector
 #[non_exhaustive] pub struct millipede_browser::prelude::GotoOptions
 pub millipede_browser::prelude::GotoOptions::timeout: core::time::Duration
 pub millipede_browser::prelude::GotoOptions::wait_until: millipede_browser::page::WaitUntil
@@ -552,6 +683,20 @@ impl core::marker::Unpin for millipede_browser::page::GotoOptions
 impl core::marker::UnsafeUnpin for millipede_browser::page::GotoOptions
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_browser::page::GotoOptions
 impl core::panic::unwind_safe::UnwindSafe for millipede_browser::page::GotoOptions
+#[non_exhaustive] pub struct millipede_browser::prelude::HttpAttemptSnapshot<'a>
+pub millipede_browser::prelude::HttpAttemptSnapshot::body: &'a [u8]
+pub millipede_browser::prelude::HttpAttemptSnapshot::final_url: &'a url::Url
+pub millipede_browser::prelude::HttpAttemptSnapshot::headers: &'a http::header::map::HeaderMap
+pub millipede_browser::prelude::HttpAttemptSnapshot::html: core::option::Option<&'a millipede_html::kind::SynchronizedHtml>
+pub millipede_browser::prelude::HttpAttemptSnapshot::request: &'a millipede_core::request::Request
+pub millipede_browser::prelude::HttpAttemptSnapshot::status: http::status::StatusCode
+impl<'a> core::marker::Freeze for millipede_browser::detect::HttpAttemptSnapshot<'a>
+impl<'a> core::marker::Send for millipede_browser::detect::HttpAttemptSnapshot<'a>
+impl<'a> core::marker::Sync for millipede_browser::detect::HttpAttemptSnapshot<'a>
+impl<'a> core::marker::Unpin for millipede_browser::detect::HttpAttemptSnapshot<'a>
+impl<'a> core::marker::UnsafeUnpin for millipede_browser::detect::HttpAttemptSnapshot<'a>
+impl<'a> core::panic::unwind_safe::RefUnwindSafe for millipede_browser::detect::HttpAttemptSnapshot<'a>
+impl<'a> core::panic::unwind_safe::UnwindSafe for millipede_browser::detect::HttpAttemptSnapshot<'a>
 #[non_exhaustive] pub struct millipede_browser::prelude::LaunchContext
 pub millipede_browser::prelude::LaunchContext::extra_args: alloc::vec::Vec<alloc::string::String>
 pub millipede_browser::prelude::LaunchContext::proxy: core::option::Option<millipede_core::proxy::ProxyInfo>
@@ -647,6 +792,41 @@ impl core::marker::Unpin for millipede_browser::page::ScreenshotOptions
 impl core::marker::UnsafeUnpin for millipede_browser::page::ScreenshotOptions
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_browser::page::ScreenshotOptions
 impl core::panic::unwind_safe::UnwindSafe for millipede_browser::page::ScreenshotOptions
+pub struct millipede_browser::prelude::SmartKind<P: millipede_browser::provider::BrowserProvider>
+impl<P: millipede_browser::provider::BrowserProvider> millipede_browser::smart::SmartKind<P>
+pub fn millipede_browser::smart::SmartKind<P>::builder(P) -> millipede_browser::smart::SmartKindBuilder<P>
+impl<P: millipede_browser::provider::BrowserProvider> millipede_core::crawler::CrawlerKind for millipede_browser::smart::SmartKind<P>
+pub type millipede_browser::smart::SmartKind<P>::Context = millipede_browser::smart::SmartContext
+pub fn millipede_browser::smart::SmartKind<P>::after_success<'a>(&'a self, &'a mut Self::Context) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_browser::smart::SmartKind<P>::cleanup(&self, millipede_core::crawler::RequestOutcome<Self::Context>) -> futures_core::future::BoxFuture<'_, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_browser::smart::SmartKind<P>::execute<'a>(&'a self, millipede_core::crawler::RequestEnv<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<Self::Context, millipede_core::errors::CrawlError>>
+pub fn millipede_browser::smart::SmartKind<P>::observe(&self, &Self::Context) -> millipede_core::crawler::AttemptObservation
+pub fn millipede_browser::smart::SmartKind<P>::start<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_browser::smart::SmartKind<P>::stop<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+impl<P> !core::marker::Freeze for millipede_browser::smart::SmartKind<P>
+impl<P> core::marker::Send for millipede_browser::smart::SmartKind<P>
+impl<P> core::marker::Sync for millipede_browser::smart::SmartKind<P>
+impl<P> core::marker::Unpin for millipede_browser::smart::SmartKind<P>
+impl<P> core::marker::UnsafeUnpin for millipede_browser::smart::SmartKind<P>
+impl<P> !core::panic::unwind_safe::RefUnwindSafe for millipede_browser::smart::SmartKind<P>
+impl<P> !core::panic::unwind_safe::UnwindSafe for millipede_browser::smart::SmartKind<P>
+pub struct millipede_browser::prelude::SmartKindBuilder<P: millipede_browser::provider::BrowserProvider>
+impl<P: millipede_browser::provider::BrowserProvider> millipede_browser::smart::SmartKindBuilder<P>
+pub fn millipede_browser::smart::SmartKindBuilder<P>::browser_kind(self, millipede_browser::kind::BrowserKindBuilder<P>) -> Self
+pub fn millipede_browser::smart::SmartKindBuilder<P>::build(self) -> core::result::Result<millipede_browser::smart::SmartKind<P>, millipede_core::http_client::HttpClientError>
+pub fn millipede_browser::smart::SmartKindBuilder<P>::detector<D: millipede_browser::detect::BrowserPromotionDetector>(self, D) -> Self
+pub fn millipede_browser::smart::SmartKindBuilder<P>::disable_sessions(self) -> Self
+pub fn millipede_browser::smart::SmartKindBuilder<P>::html_kind(self, millipede_html::kind::HtmlKindBuilder) -> Self
+pub fn millipede_browser::smart::SmartKindBuilder<P>::promote_status_codes(self, impl core::iter::traits::collect::IntoIterator<Item = u16>) -> Self
+pub fn millipede_browser::smart::SmartKindBuilder<P>::session_pool(self, millipede_core::session::SessionPoolOptions) -> Self
+pub fn millipede_browser::smart::SmartKindBuilder<P>::sticky_promotion(self, bool) -> Self
+impl<P> !core::marker::Freeze for millipede_browser::smart::SmartKindBuilder<P>
+impl<P> core::marker::Send for millipede_browser::smart::SmartKindBuilder<P>
+impl<P> core::marker::Sync for millipede_browser::smart::SmartKindBuilder<P>
+impl<P> core::marker::Unpin for millipede_browser::smart::SmartKindBuilder<P> where P: core::marker::Unpin, <P as millipede_browser::provider::BrowserProvider>::LaunchOptions: core::marker::Unpin
+impl<P> core::marker::UnsafeUnpin for millipede_browser::smart::SmartKindBuilder<P> where P: core::marker::UnsafeUnpin, <P as millipede_browser::provider::BrowserProvider>::LaunchOptions: core::marker::UnsafeUnpin
+impl<P> !core::panic::unwind_safe::RefUnwindSafe for millipede_browser::smart::SmartKindBuilder<P>
+impl<P> !core::panic::unwind_safe::UnwindSafe for millipede_browser::smart::SmartKindBuilder<P>
 pub trait millipede_browser::prelude::BrowserPage: core::marker::Send + core::marker::Sync + 'static
 pub fn millipede_browser::prelude::BrowserPage::click<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 str) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
 pub fn millipede_browser::prelude::BrowserPage::content<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<alloc::string::String, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
@@ -658,6 +838,10 @@ pub fn millipede_browser::prelude::BrowserPage::screenshot<'life0, 'async_trait>
 pub fn millipede_browser::prelude::BrowserPage::set_cookies<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 [millipede_core::cookies::Cookie]) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
 pub fn millipede_browser::prelude::BrowserPage::set_extra_headers<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 http::header::map::HeaderMap) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
 pub fn millipede_browser::prelude::BrowserPage::wait_for_selector<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 str, core::time::Duration) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub trait millipede_browser::prelude::BrowserPromotionDetector: core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_browser::prelude::BrowserPromotionDetector::should_promote(&self, &millipede_browser::detect::HttpAttemptSnapshot<'_>) -> core::option::Option<millipede_browser::detect::PromotionReason>
+impl millipede_browser::detect::BrowserPromotionDetector for millipede_browser::detect::DefaultPromotionDetector
+pub fn millipede_browser::detect::DefaultPromotionDetector::should_promote(&self, &millipede_browser::detect::HttpAttemptSnapshot<'_>) -> core::option::Option<millipede_browser::detect::PromotionReason>
 pub trait millipede_browser::prelude::BrowserProvider: core::marker::Send + core::marker::Sync + 'static
 pub type millipede_browser::prelude::BrowserProvider::Browser: core::marker::Send + core::marker::Sync + 'static
 pub type millipede_browser::prelude::BrowserProvider::LaunchOptions: core::default::Default + core::clone::Clone + core::marker::Send + core::marker::Sync + 'static
@@ -671,6 +855,7 @@ pub type millipede_browser::prelude::PageClosedHook = alloc::sync::Arc<(dyn core
 pub type millipede_browser::prelude::PageHook = alloc::sync::Arc<(dyn for<'a> core::ops::function::Fn(&'a dyn millipede_browser::page::BrowserPage, &'a millipede_browser::page::PageOpts) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + core::marker::Sync)>
 pub type millipede_browser::prelude::PagePrepHook = alloc::sync::Arc<(dyn core::ops::function::Fn(&mut millipede_browser::page::PageOpts) + core::marker::Send + core::marker::Sync)>
 pub type millipede_browser::prelude::PreLaunchHook = alloc::sync::Arc<(dyn core::ops::function::Fn(&mut millipede_browser::provider::LaunchContext) + core::marker::Send + core::marker::Sync)>
+pub type millipede_browser::prelude::SmartCrawler<P> = millipede_core::crawler::Crawler<millipede_browser::smart::SmartKind<P>>
 pub mod millipede_browser::provider
 #[non_exhaustive] pub struct millipede_browser::provider::LaunchContext
 pub millipede_browser::provider::LaunchContext::extra_args: alloc::vec::Vec<alloc::string::String>
@@ -700,6 +885,67 @@ pub fn millipede_browser::provider::BrowserProvider::close_browser<'life0, 'asyn
 pub fn millipede_browser::provider::BrowserProvider::close_page<'life0, 'async_trait>(&'life0 self, Self::Page) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
 pub fn millipede_browser::provider::BrowserProvider::launch<'life0, 'life1, 'async_trait>(&'life0 self, Self::LaunchOptions, &'life1 millipede_browser::provider::LaunchContext) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<Self::Browser, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
 pub fn millipede_browser::provider::BrowserProvider::new_page<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 Self::Browser) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<Self::Page, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub mod millipede_browser::smart
+pub enum millipede_browser::smart::SmartContext
+pub millipede_browser::smart::SmartContext::Browser(millipede_browser::kind::BrowserContext)
+pub millipede_browser::smart::SmartContext::Http(millipede_html::kind::HtmlContext)
+impl millipede_browser::smart::SmartContext
+pub fn millipede_browser::smart::SmartContext::as_browser(&self) -> core::option::Option<&millipede_browser::kind::BrowserContext>
+pub fn millipede_browser::smart::SmartContext::as_http(&self) -> core::option::Option<&millipede_html::kind::HtmlContext>
+pub fn millipede_browser::smart::SmartContext::crawler(&self) -> &millipede_core::crawler::CrawlerHandle
+pub fn millipede_browser::smart::SmartContext::enqueue(&self) -> &millipede_core::enqueue::EnqueueLinker
+pub fn millipede_browser::smart::SmartContext::is_browser(&self) -> bool
+pub fn millipede_browser::smart::SmartContext::request(&self) -> &millipede_core::request::Request
+pub fn millipede_browser::smart::SmartContext::storage(&self) -> &millipede_core::storage::handle::StorageHandle
+impl core::clone::Clone for millipede_browser::smart::SmartContext
+pub fn millipede_browser::smart::SmartContext::clone(&self) -> millipede_browser::smart::SmartContext
+impl core::fmt::Debug for millipede_browser::smart::SmartContext
+pub fn millipede_browser::smart::SmartContext::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl millipede_core::router::HasRequest for millipede_browser::smart::SmartContext
+pub fn millipede_browser::smart::SmartContext::request(&self) -> &millipede_core::request::Request
+impl core::marker::Freeze for millipede_browser::smart::SmartContext
+impl core::marker::Send for millipede_browser::smart::SmartContext
+impl core::marker::Sync for millipede_browser::smart::SmartContext
+impl core::marker::Unpin for millipede_browser::smart::SmartContext
+impl core::marker::UnsafeUnpin for millipede_browser::smart::SmartContext
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_browser::smart::SmartContext
+impl !core::panic::unwind_safe::UnwindSafe for millipede_browser::smart::SmartContext
+pub struct millipede_browser::smart::SmartKind<P: millipede_browser::provider::BrowserProvider>
+impl<P: millipede_browser::provider::BrowserProvider> millipede_browser::smart::SmartKind<P>
+pub fn millipede_browser::smart::SmartKind<P>::builder(P) -> millipede_browser::smart::SmartKindBuilder<P>
+impl<P: millipede_browser::provider::BrowserProvider> millipede_core::crawler::CrawlerKind for millipede_browser::smart::SmartKind<P>
+pub type millipede_browser::smart::SmartKind<P>::Context = millipede_browser::smart::SmartContext
+pub fn millipede_browser::smart::SmartKind<P>::after_success<'a>(&'a self, &'a mut Self::Context) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_browser::smart::SmartKind<P>::cleanup(&self, millipede_core::crawler::RequestOutcome<Self::Context>) -> futures_core::future::BoxFuture<'_, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_browser::smart::SmartKind<P>::execute<'a>(&'a self, millipede_core::crawler::RequestEnv<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<Self::Context, millipede_core::errors::CrawlError>>
+pub fn millipede_browser::smart::SmartKind<P>::observe(&self, &Self::Context) -> millipede_core::crawler::AttemptObservation
+pub fn millipede_browser::smart::SmartKind<P>::start<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_browser::smart::SmartKind<P>::stop<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+impl<P> !core::marker::Freeze for millipede_browser::smart::SmartKind<P>
+impl<P> core::marker::Send for millipede_browser::smart::SmartKind<P>
+impl<P> core::marker::Sync for millipede_browser::smart::SmartKind<P>
+impl<P> core::marker::Unpin for millipede_browser::smart::SmartKind<P>
+impl<P> core::marker::UnsafeUnpin for millipede_browser::smart::SmartKind<P>
+impl<P> !core::panic::unwind_safe::RefUnwindSafe for millipede_browser::smart::SmartKind<P>
+impl<P> !core::panic::unwind_safe::UnwindSafe for millipede_browser::smart::SmartKind<P>
+pub struct millipede_browser::smart::SmartKindBuilder<P: millipede_browser::provider::BrowserProvider>
+impl<P: millipede_browser::provider::BrowserProvider> millipede_browser::smart::SmartKindBuilder<P>
+pub fn millipede_browser::smart::SmartKindBuilder<P>::browser_kind(self, millipede_browser::kind::BrowserKindBuilder<P>) -> Self
+pub fn millipede_browser::smart::SmartKindBuilder<P>::build(self) -> core::result::Result<millipede_browser::smart::SmartKind<P>, millipede_core::http_client::HttpClientError>
+pub fn millipede_browser::smart::SmartKindBuilder<P>::detector<D: millipede_browser::detect::BrowserPromotionDetector>(self, D) -> Self
+pub fn millipede_browser::smart::SmartKindBuilder<P>::disable_sessions(self) -> Self
+pub fn millipede_browser::smart::SmartKindBuilder<P>::html_kind(self, millipede_html::kind::HtmlKindBuilder) -> Self
+pub fn millipede_browser::smart::SmartKindBuilder<P>::promote_status_codes(self, impl core::iter::traits::collect::IntoIterator<Item = u16>) -> Self
+pub fn millipede_browser::smart::SmartKindBuilder<P>::session_pool(self, millipede_core::session::SessionPoolOptions) -> Self
+pub fn millipede_browser::smart::SmartKindBuilder<P>::sticky_promotion(self, bool) -> Self
+impl<P> !core::marker::Freeze for millipede_browser::smart::SmartKindBuilder<P>
+impl<P> core::marker::Send for millipede_browser::smart::SmartKindBuilder<P>
+impl<P> core::marker::Sync for millipede_browser::smart::SmartKindBuilder<P>
+impl<P> core::marker::Unpin for millipede_browser::smart::SmartKindBuilder<P> where P: core::marker::Unpin, <P as millipede_browser::provider::BrowserProvider>::LaunchOptions: core::marker::Unpin
+impl<P> core::marker::UnsafeUnpin for millipede_browser::smart::SmartKindBuilder<P> where P: core::marker::UnsafeUnpin, <P as millipede_browser::provider::BrowserProvider>::LaunchOptions: core::marker::UnsafeUnpin
+impl<P> !core::panic::unwind_safe::RefUnwindSafe for millipede_browser::smart::SmartKindBuilder<P>
+impl<P> !core::panic::unwind_safe::UnwindSafe for millipede_browser::smart::SmartKindBuilder<P>
+pub type millipede_browser::smart::SmartCrawler<P> = millipede_core::crawler::Crawler<millipede_browser::smart::SmartKind<P>>
 #[non_exhaustive] pub enum millipede_browser::BrowserError
 pub millipede_browser::BrowserError::BrowserNotFound
 pub millipede_browser::BrowserError::BrowserNotFound::hint: alloc::string::String
@@ -736,6 +982,54 @@ impl core::marker::Unpin for millipede_browser::error::BrowserError
 impl core::marker::UnsafeUnpin for millipede_browser::error::BrowserError
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_browser::error::BrowserError
 impl core::panic::unwind_safe::UnwindSafe for millipede_browser::error::BrowserError
+#[non_exhaustive] pub enum millipede_browser::PromotionReason
+pub millipede_browser::PromotionReason::Custom(alloc::string::String)
+pub millipede_browser::PromotionReason::EmptyBodyLikelyJs
+pub millipede_browser::PromotionReason::KnownAntiBot(millipede_core::errors::AntiBotTech)
+pub millipede_browser::PromotionReason::SelectorMissing
+pub millipede_browser::PromotionReason::SelectorMissing::selector: alloc::string::String
+pub millipede_browser::PromotionReason::StatusPromoted
+pub millipede_browser::PromotionReason::StatusPromoted::status: u16
+impl core::clone::Clone for millipede_browser::detect::PromotionReason
+pub fn millipede_browser::detect::PromotionReason::clone(&self) -> millipede_browser::detect::PromotionReason
+impl core::cmp::PartialEq for millipede_browser::detect::PromotionReason
+pub fn millipede_browser::detect::PromotionReason::eq(&self, &millipede_browser::detect::PromotionReason) -> bool
+impl core::fmt::Debug for millipede_browser::detect::PromotionReason
+pub fn millipede_browser::detect::PromotionReason::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_browser::detect::PromotionReason
+pub fn millipede_browser::detect::PromotionReason::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_browser::detect::PromotionReason
+impl core::marker::Freeze for millipede_browser::detect::PromotionReason
+impl core::marker::Send for millipede_browser::detect::PromotionReason
+impl core::marker::Sync for millipede_browser::detect::PromotionReason
+impl core::marker::Unpin for millipede_browser::detect::PromotionReason
+impl core::marker::UnsafeUnpin for millipede_browser::detect::PromotionReason
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_browser::detect::PromotionReason
+impl core::panic::unwind_safe::UnwindSafe for millipede_browser::detect::PromotionReason
+pub enum millipede_browser::SmartContext
+pub millipede_browser::SmartContext::Browser(millipede_browser::kind::BrowserContext)
+pub millipede_browser::SmartContext::Http(millipede_html::kind::HtmlContext)
+impl millipede_browser::smart::SmartContext
+pub fn millipede_browser::smart::SmartContext::as_browser(&self) -> core::option::Option<&millipede_browser::kind::BrowserContext>
+pub fn millipede_browser::smart::SmartContext::as_http(&self) -> core::option::Option<&millipede_html::kind::HtmlContext>
+pub fn millipede_browser::smart::SmartContext::crawler(&self) -> &millipede_core::crawler::CrawlerHandle
+pub fn millipede_browser::smart::SmartContext::enqueue(&self) -> &millipede_core::enqueue::EnqueueLinker
+pub fn millipede_browser::smart::SmartContext::is_browser(&self) -> bool
+pub fn millipede_browser::smart::SmartContext::request(&self) -> &millipede_core::request::Request
+pub fn millipede_browser::smart::SmartContext::storage(&self) -> &millipede_core::storage::handle::StorageHandle
+impl core::clone::Clone for millipede_browser::smart::SmartContext
+pub fn millipede_browser::smart::SmartContext::clone(&self) -> millipede_browser::smart::SmartContext
+impl core::fmt::Debug for millipede_browser::smart::SmartContext
+pub fn millipede_browser::smart::SmartContext::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl millipede_core::router::HasRequest for millipede_browser::smart::SmartContext
+pub fn millipede_browser::smart::SmartContext::request(&self) -> &millipede_core::request::Request
+impl core::marker::Freeze for millipede_browser::smart::SmartContext
+impl core::marker::Send for millipede_browser::smart::SmartContext
+impl core::marker::Sync for millipede_browser::smart::SmartContext
+impl core::marker::Unpin for millipede_browser::smart::SmartContext
+impl core::marker::UnsafeUnpin for millipede_browser::smart::SmartContext
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_browser::smart::SmartContext
+impl !core::panic::unwind_safe::UnwindSafe for millipede_browser::smart::SmartContext
 #[non_exhaustive] pub enum millipede_browser::WaitUntil
 pub millipede_browser::WaitUntil::DomContentLoaded
 pub millipede_browser::WaitUntil::Load
@@ -909,6 +1203,26 @@ impl core::marker::Unpin for millipede_browser::page::BrowserResponse
 impl core::marker::UnsafeUnpin for millipede_browser::page::BrowserResponse
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_browser::page::BrowserResponse
 impl core::panic::unwind_safe::UnwindSafe for millipede_browser::page::BrowserResponse
+pub struct millipede_browser::DefaultPromotionDetector
+impl millipede_browser::detect::DefaultPromotionDetector
+pub fn millipede_browser::detect::DefaultPromotionDetector::new() -> Self
+pub fn millipede_browser::detect::DefaultPromotionDetector::with_min_visible_text(self, usize) -> Self
+pub fn millipede_browser::detect::DefaultPromotionDetector::with_required_selector(self, impl core::convert::Into<alloc::string::String>) -> Self
+impl core::clone::Clone for millipede_browser::detect::DefaultPromotionDetector
+pub fn millipede_browser::detect::DefaultPromotionDetector::clone(&self) -> millipede_browser::detect::DefaultPromotionDetector
+impl core::default::Default for millipede_browser::detect::DefaultPromotionDetector
+pub fn millipede_browser::detect::DefaultPromotionDetector::default() -> Self
+impl core::fmt::Debug for millipede_browser::detect::DefaultPromotionDetector
+pub fn millipede_browser::detect::DefaultPromotionDetector::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl millipede_browser::detect::BrowserPromotionDetector for millipede_browser::detect::DefaultPromotionDetector
+pub fn millipede_browser::detect::DefaultPromotionDetector::should_promote(&self, &millipede_browser::detect::HttpAttemptSnapshot<'_>) -> core::option::Option<millipede_browser::detect::PromotionReason>
+impl core::marker::Freeze for millipede_browser::detect::DefaultPromotionDetector
+impl core::marker::Send for millipede_browser::detect::DefaultPromotionDetector
+impl core::marker::Sync for millipede_browser::detect::DefaultPromotionDetector
+impl core::marker::Unpin for millipede_browser::detect::DefaultPromotionDetector
+impl core::marker::UnsafeUnpin for millipede_browser::detect::DefaultPromotionDetector
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_browser::detect::DefaultPromotionDetector
+impl core::panic::unwind_safe::UnwindSafe for millipede_browser::detect::DefaultPromotionDetector
 #[non_exhaustive] pub struct millipede_browser::GotoOptions
 pub millipede_browser::GotoOptions::timeout: core::time::Duration
 pub millipede_browser::GotoOptions::wait_until: millipede_browser::page::WaitUntil
@@ -928,6 +1242,20 @@ impl core::marker::Unpin for millipede_browser::page::GotoOptions
 impl core::marker::UnsafeUnpin for millipede_browser::page::GotoOptions
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_browser::page::GotoOptions
 impl core::panic::unwind_safe::UnwindSafe for millipede_browser::page::GotoOptions
+#[non_exhaustive] pub struct millipede_browser::HttpAttemptSnapshot<'a>
+pub millipede_browser::HttpAttemptSnapshot::body: &'a [u8]
+pub millipede_browser::HttpAttemptSnapshot::final_url: &'a url::Url
+pub millipede_browser::HttpAttemptSnapshot::headers: &'a http::header::map::HeaderMap
+pub millipede_browser::HttpAttemptSnapshot::html: core::option::Option<&'a millipede_html::kind::SynchronizedHtml>
+pub millipede_browser::HttpAttemptSnapshot::request: &'a millipede_core::request::Request
+pub millipede_browser::HttpAttemptSnapshot::status: http::status::StatusCode
+impl<'a> core::marker::Freeze for millipede_browser::detect::HttpAttemptSnapshot<'a>
+impl<'a> core::marker::Send for millipede_browser::detect::HttpAttemptSnapshot<'a>
+impl<'a> core::marker::Sync for millipede_browser::detect::HttpAttemptSnapshot<'a>
+impl<'a> core::marker::Unpin for millipede_browser::detect::HttpAttemptSnapshot<'a>
+impl<'a> core::marker::UnsafeUnpin for millipede_browser::detect::HttpAttemptSnapshot<'a>
+impl<'a> core::panic::unwind_safe::RefUnwindSafe for millipede_browser::detect::HttpAttemptSnapshot<'a>
+impl<'a> core::panic::unwind_safe::UnwindSafe for millipede_browser::detect::HttpAttemptSnapshot<'a>
 #[non_exhaustive] pub struct millipede_browser::LaunchContext
 pub millipede_browser::LaunchContext::extra_args: alloc::vec::Vec<alloc::string::String>
 pub millipede_browser::LaunchContext::proxy: core::option::Option<millipede_core::proxy::ProxyInfo>
@@ -1023,6 +1351,41 @@ impl core::marker::Unpin for millipede_browser::page::ScreenshotOptions
 impl core::marker::UnsafeUnpin for millipede_browser::page::ScreenshotOptions
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_browser::page::ScreenshotOptions
 impl core::panic::unwind_safe::UnwindSafe for millipede_browser::page::ScreenshotOptions
+pub struct millipede_browser::SmartKind<P: millipede_browser::provider::BrowserProvider>
+impl<P: millipede_browser::provider::BrowserProvider> millipede_browser::smart::SmartKind<P>
+pub fn millipede_browser::smart::SmartKind<P>::builder(P) -> millipede_browser::smart::SmartKindBuilder<P>
+impl<P: millipede_browser::provider::BrowserProvider> millipede_core::crawler::CrawlerKind for millipede_browser::smart::SmartKind<P>
+pub type millipede_browser::smart::SmartKind<P>::Context = millipede_browser::smart::SmartContext
+pub fn millipede_browser::smart::SmartKind<P>::after_success<'a>(&'a self, &'a mut Self::Context) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_browser::smart::SmartKind<P>::cleanup(&self, millipede_core::crawler::RequestOutcome<Self::Context>) -> futures_core::future::BoxFuture<'_, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_browser::smart::SmartKind<P>::execute<'a>(&'a self, millipede_core::crawler::RequestEnv<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<Self::Context, millipede_core::errors::CrawlError>>
+pub fn millipede_browser::smart::SmartKind<P>::observe(&self, &Self::Context) -> millipede_core::crawler::AttemptObservation
+pub fn millipede_browser::smart::SmartKind<P>::start<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+pub fn millipede_browser::smart::SmartKind<P>::stop<'a>(&'a self, &'a millipede_core::crawler::CrawlerEnv) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>>
+impl<P> !core::marker::Freeze for millipede_browser::smart::SmartKind<P>
+impl<P> core::marker::Send for millipede_browser::smart::SmartKind<P>
+impl<P> core::marker::Sync for millipede_browser::smart::SmartKind<P>
+impl<P> core::marker::Unpin for millipede_browser::smart::SmartKind<P>
+impl<P> core::marker::UnsafeUnpin for millipede_browser::smart::SmartKind<P>
+impl<P> !core::panic::unwind_safe::RefUnwindSafe for millipede_browser::smart::SmartKind<P>
+impl<P> !core::panic::unwind_safe::UnwindSafe for millipede_browser::smart::SmartKind<P>
+pub struct millipede_browser::SmartKindBuilder<P: millipede_browser::provider::BrowserProvider>
+impl<P: millipede_browser::provider::BrowserProvider> millipede_browser::smart::SmartKindBuilder<P>
+pub fn millipede_browser::smart::SmartKindBuilder<P>::browser_kind(self, millipede_browser::kind::BrowserKindBuilder<P>) -> Self
+pub fn millipede_browser::smart::SmartKindBuilder<P>::build(self) -> core::result::Result<millipede_browser::smart::SmartKind<P>, millipede_core::http_client::HttpClientError>
+pub fn millipede_browser::smart::SmartKindBuilder<P>::detector<D: millipede_browser::detect::BrowserPromotionDetector>(self, D) -> Self
+pub fn millipede_browser::smart::SmartKindBuilder<P>::disable_sessions(self) -> Self
+pub fn millipede_browser::smart::SmartKindBuilder<P>::html_kind(self, millipede_html::kind::HtmlKindBuilder) -> Self
+pub fn millipede_browser::smart::SmartKindBuilder<P>::promote_status_codes(self, impl core::iter::traits::collect::IntoIterator<Item = u16>) -> Self
+pub fn millipede_browser::smart::SmartKindBuilder<P>::session_pool(self, millipede_core::session::SessionPoolOptions) -> Self
+pub fn millipede_browser::smart::SmartKindBuilder<P>::sticky_promotion(self, bool) -> Self
+impl<P> !core::marker::Freeze for millipede_browser::smart::SmartKindBuilder<P>
+impl<P> core::marker::Send for millipede_browser::smart::SmartKindBuilder<P>
+impl<P> core::marker::Sync for millipede_browser::smart::SmartKindBuilder<P>
+impl<P> core::marker::Unpin for millipede_browser::smart::SmartKindBuilder<P> where P: core::marker::Unpin, <P as millipede_browser::provider::BrowserProvider>::LaunchOptions: core::marker::Unpin
+impl<P> core::marker::UnsafeUnpin for millipede_browser::smart::SmartKindBuilder<P> where P: core::marker::UnsafeUnpin, <P as millipede_browser::provider::BrowserProvider>::LaunchOptions: core::marker::UnsafeUnpin
+impl<P> !core::panic::unwind_safe::RefUnwindSafe for millipede_browser::smart::SmartKindBuilder<P>
+impl<P> !core::panic::unwind_safe::UnwindSafe for millipede_browser::smart::SmartKindBuilder<P>
 pub trait millipede_browser::BrowserPage: core::marker::Send + core::marker::Sync + 'static
 pub fn millipede_browser::BrowserPage::click<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 str) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
 pub fn millipede_browser::BrowserPage::content<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<alloc::string::String, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
@@ -1034,6 +1397,10 @@ pub fn millipede_browser::BrowserPage::screenshot<'life0, 'async_trait>(&'life0 
 pub fn millipede_browser::BrowserPage::set_cookies<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 [millipede_core::cookies::Cookie]) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
 pub fn millipede_browser::BrowserPage::set_extra_headers<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 http::header::map::HeaderMap) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
 pub fn millipede_browser::BrowserPage::wait_for_selector<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 str, core::time::Duration) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub trait millipede_browser::BrowserPromotionDetector: core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_browser::BrowserPromotionDetector::should_promote(&self, &millipede_browser::detect::HttpAttemptSnapshot<'_>) -> core::option::Option<millipede_browser::detect::PromotionReason>
+impl millipede_browser::detect::BrowserPromotionDetector for millipede_browser::detect::DefaultPromotionDetector
+pub fn millipede_browser::detect::DefaultPromotionDetector::should_promote(&self, &millipede_browser::detect::HttpAttemptSnapshot<'_>) -> core::option::Option<millipede_browser::detect::PromotionReason>
 pub trait millipede_browser::BrowserProvider: core::marker::Send + core::marker::Sync + 'static
 pub type millipede_browser::BrowserProvider::Browser: core::marker::Send + core::marker::Sync + 'static
 pub type millipede_browser::BrowserProvider::LaunchOptions: core::default::Default + core::clone::Clone + core::marker::Send + core::marker::Sync + 'static
@@ -1047,3 +1414,4 @@ pub type millipede_browser::PageClosedHook = alloc::sync::Arc<(dyn core::ops::fu
 pub type millipede_browser::PageHook = alloc::sync::Arc<(dyn for<'a> core::ops::function::Fn(&'a dyn millipede_browser::page::BrowserPage, &'a millipede_browser::page::PageOpts) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + core::marker::Sync)>
 pub type millipede_browser::PagePrepHook = alloc::sync::Arc<(dyn core::ops::function::Fn(&mut millipede_browser::page::PageOpts) + core::marker::Send + core::marker::Sync)>
 pub type millipede_browser::PreLaunchHook = alloc::sync::Arc<(dyn core::ops::function::Fn(&mut millipede_browser::provider::LaunchContext) + core::marker::Send + core::marker::Sync)>
+pub type millipede_browser::SmartCrawler<P> = millipede_core::crawler::Crawler<millipede_browser::smart::SmartKind<P>>
