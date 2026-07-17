@@ -5,6 +5,87 @@ use std::{fmt, sync::Mutex};
 use http::{HeaderMap, HeaderValue, header::SET_COOKIE};
 use url::Url;
 
+/// A transport-neutral HTTP cookie shared by HTTP and browser crawler contexts.
+///
+/// `domain` is stored as a bare host without a leading dot. A cookie with
+/// `host_only` set is sent only to that exact host, while `expires: None`
+/// represents a session cookie.
+///
+/// # Examples
+///
+/// ```
+/// use millipede_core::cookies::Cookie;
+///
+/// let cookie = Cookie::new("session", "abc", "example.com");
+/// assert_eq!(cookie.path, "/");
+/// assert!(!cookie.host_only);
+/// ```
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[non_exhaustive]
+pub struct Cookie {
+    /// The cookie name.
+    pub name: String,
+    /// The cookie value.
+    pub value: String,
+    /// The bare host, without a leading dot.
+    pub domain: String,
+    /// Whether the cookie is restricted to the exact host in `domain`.
+    pub host_only: bool,
+    /// The URL path scope, normally `/`.
+    pub path: String,
+    /// The persistent expiry instant, or `None` for a session cookie.
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub expires: Option<time::OffsetDateTime>,
+    /// Whether the cookie is sent only over secure transports.
+    pub secure: bool,
+    /// Whether browser scripts are prevented from reading the cookie.
+    pub http_only: bool,
+    /// The cookie's cross-site request policy, when explicitly set.
+    pub same_site: Option<SameSite>,
+}
+
+impl Cookie {
+    /// Creates a domain cookie with `/` path and no optional attributes.
+    pub fn new(
+        name: impl Into<String>,
+        value: impl Into<String>,
+        domain: impl Into<String>,
+    ) -> Self {
+        Self {
+            name: name.into(),
+            value: value.into(),
+            domain: domain.into(),
+            host_only: false,
+            path: "/".to_owned(),
+            expires: None,
+            secure: false,
+            http_only: false,
+            same_site: None,
+        }
+    }
+}
+
+/// A cookie's cross-site request policy.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub enum SameSite {
+    /// Send the cookie only in same-site requests.
+    Strict,
+    /// Also send the cookie for safe top-level cross-site navigations.
+    Lax,
+    /// Permit cross-site requests; secure transport is normally required.
+    None,
+}
+
+impl SameSite {
+    fn as_str(self) -> &'static str {
+        match self {
+            Self::Strict => "Strict",
+            Self::Lax => "Lax",
+            Self::None => "None",
+        }
+    }
+}
+
 /// A synchronized cookie store shared by crawler sessions.
 ///
 /// The inner representation is fixed by ADR-0002; the newtype boundary keeps
@@ -57,6 +138,127 @@ impl CookieJar {
         } else {
             HeaderValue::from_str(&value).ok()
         }
+    }
+
+    /// Exports all currently unexpired cookies in the transport-neutral representation.
+    pub fn export_cookies(&self) -> Vec<Cookie> {
+        let store = self.store.lock().unwrap_or_else(|error| error.into_inner());
+        store
+            .iter_unexpired()
+            .filter_map(|stored| {
+                let (domain, host_only) = match &stored.domain {
+                    cookie_store::CookieDomain::HostOnly(host) => (host.clone(), true),
+                    cookie_store::CookieDomain::Suffix(suffix) => {
+                        (suffix.trim_start_matches('.').to_owned(), false)
+                    }
+                    cookie_store::CookieDomain::NotPresent | cookie_store::CookieDomain::Empty => {
+                        tracing::debug!(
+                            name = stored.name(),
+                            "skipping exported cookie without a usable domain"
+                        );
+                        return None;
+                    }
+                };
+                let path = if stored.path.is_empty() {
+                    "/".to_owned()
+                } else {
+                    stored.path.to_string()
+                };
+                let expires = match &stored.expires {
+                    cookie_store::CookieExpiration::AtUtc(expires) => Some(*expires),
+                    cookie_store::CookieExpiration::SessionEnd => None,
+                };
+                let same_site = stored.same_site().map(|same_site| {
+                    if same_site.is_strict() {
+                        SameSite::Strict
+                    } else if same_site.is_lax() {
+                        SameSite::Lax
+                    } else {
+                        SameSite::None
+                    }
+                });
+
+                Some(Cookie {
+                    name: stored.name().to_owned(),
+                    value: stored.value().to_owned(),
+                    domain,
+                    host_only,
+                    path,
+                    expires,
+                    secure: stored.secure().unwrap_or(false),
+                    http_only: stored.http_only().unwrap_or(false),
+                    same_site,
+                })
+            })
+            .collect()
+    }
+
+    /// Imports cookies, merging or overwriting entries by `(name, domain, path)`.
+    ///
+    /// Invalid entries are skipped. The returned count includes only cookies that
+    /// the underlying store accepted.
+    pub fn import_cookies(&self, cookies: &[Cookie]) -> usize {
+        let mut store = self.store.lock().unwrap_or_else(|error| error.into_inner());
+        let mut stored_count = 0;
+
+        for cookie in cookies {
+            if cookie.name.is_empty() || cookie.domain.is_empty() {
+                tracing::debug!(
+                    name = cookie.name,
+                    domain = cookie.domain,
+                    "skipping imported cookie with an empty name or domain"
+                );
+                continue;
+            }
+
+            let path = if cookie.path.is_empty() {
+                "/"
+            } else {
+                cookie.path.as_str()
+            };
+            let mut builder =
+                cookie_store::RawCookie::build((cookie.name.clone(), cookie.value.clone()))
+                    .path(path.to_owned())
+                    .secure(cookie.secure)
+                    .http_only(cookie.http_only);
+            if !cookie.host_only {
+                builder = builder.domain(cookie.domain.clone());
+            }
+            if let Some(expires) = cookie.expires {
+                builder = builder.expires(expires);
+            }
+            let mut raw = builder.build();
+            if let Some(same_site) = cookie.same_site {
+                let marker = format!("millipede=marker; SameSite={}", same_site.as_str());
+                if let Ok(parsed) = cookie_store::RawCookie::parse(marker) {
+                    if let Some(parsed_same_site) = parsed.same_site() {
+                        raw.set_same_site(parsed_same_site);
+                    }
+                }
+            }
+
+            let request_url = format!(
+                "{}://{}{}",
+                if cookie.secure { "https" } else { "http" },
+                cookie.domain,
+                path
+            );
+            let request_url = match Url::parse(&request_url) {
+                Ok(url) => url,
+                Err(error) => {
+                    tracing::debug!(%error, url = request_url, "skipping cookie with an invalid request URL");
+                    continue;
+                }
+            };
+            match store.insert_raw(&raw, &request_url) {
+                Ok(_) => stored_count += 1,
+                Err(error) => {
+                    tracing::debug!(%error, url = %request_url, name = cookie.name, "skipping cookie rejected by the store");
+                }
+            }
+        }
+
+        stored_count
     }
 
     /// Serializes all cookies, including session and expired cookies, to JSON.

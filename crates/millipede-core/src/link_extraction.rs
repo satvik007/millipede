@@ -363,14 +363,18 @@ pub struct ExtractedLink {
     pub base: Option<Url>,
 }
 
-/// Extracts links from an already-parsed document.
+/// Extracts links from a static document or live browser page.
 ///
 /// Passing `None` selects the implementation's default selector, normally
-/// `a[href]`. The trait is synchronous because extraction only walks an existing
-/// DOM, and it is object-safe so crawler implementations can erase their parser.
+/// `a[href]`. Extraction is asynchronous because a DOM-level browser extractor
+/// evaluates JavaScript against a live page over CDP (`millipede-browser`, Phase
+/// 6), while static-document extractors such as `millipede-html` simply have no
+/// await points. The trait remains object-safe so crawler implementations can
+/// erase their extractor.
+#[async_trait::async_trait]
 pub trait LinkExtractor: Send + Sync {
     /// Extracts raw links selected by `selector` or the implementation default.
-    fn extract(&self, selector: Option<&str>) -> Result<Vec<ExtractedLink>, CrawlError>;
+    async fn extract(&self, selector: Option<&str>) -> Result<Vec<ExtractedLink>, CrawlError>;
 }
 
 /// The outcome of transforming a candidate request before enqueueing.

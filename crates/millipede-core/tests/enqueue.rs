@@ -27,14 +27,90 @@ impl FakeExtractor {
     }
 }
 
+#[async_trait::async_trait]
 impl LinkExtractor for FakeExtractor {
-    fn extract(&self, selector: Option<&str>) -> Result<Vec<ExtractedLink>, CrawlError> {
+    async fn extract(&self, selector: Option<&str>) -> Result<Vec<ExtractedLink>, CrawlError> {
         self.selectors
             .lock()
             .unwrap()
             .push(selector.map(str::to_owned));
         Ok(self.links.clone())
     }
+}
+
+#[tokio::test]
+async fn dyn_link_extractor_is_awaitable_through_arc() {
+    let fixture = vec![ExtractedLink {
+        url: "/fixture".to_owned(),
+        base: None,
+    }];
+    let e: Arc<dyn LinkExtractor> = Arc::new(FakeExtractor::new(fixture.clone()));
+
+    let extracted = e.extract(None).await.expect("extraction should succeed");
+
+    assert_eq!(extracted.len(), fixture.len());
+    assert_eq!(extracted[0].url, fixture[0].url);
+}
+
+#[tokio::test]
+async fn genuinely_async_extractor_enqueues_and_receives_selector()
+-> Result<(), Box<dyn std::error::Error>> {
+    struct YieldingExtractor {
+        selectors: Arc<Mutex<Vec<Option<String>>>>,
+    }
+
+    #[async_trait::async_trait]
+    impl LinkExtractor for YieldingExtractor {
+        async fn extract(&self, selector: Option<&str>) -> Result<Vec<ExtractedLink>, CrawlError> {
+            self.selectors
+                .lock()
+                .unwrap()
+                .push(selector.map(str::to_owned));
+            tokio::task::yield_now().await;
+            Ok(vec![ExtractedLink {
+                url: "next".to_owned(),
+                base: None,
+            }])
+        }
+    }
+
+    let crawler = Crawler::builder(BasicKind)
+        .storage_client(storage())
+        .request_handler(|_: BasicContext| async { Ok(()) })
+        .build()
+        .await?;
+    let parent = Request::get("https://example.test/catalog/page").build()?;
+    let selectors = Arc::new(Mutex::new(Vec::new()));
+    let result = EnqueueLinker::with_extractor(
+        crawler.handle(),
+        &parent,
+        Arc::new(YieldingExtractor {
+            selectors: selectors.clone(),
+        }),
+    )
+    .options()
+    .selector("a.next")
+    .send()
+    .await?;
+
+    assert_eq!(result.added_count(), 1);
+    assert_eq!(
+        selectors.lock().unwrap().as_slice(),
+        &[Some("a.next".into())]
+    );
+    let queue = crawler
+        .handle()
+        .request_queue()
+        .expect("crawler queue should remain available");
+    let lease = queue
+        .fetch_next()
+        .await?
+        .expect("extracted link was enqueued");
+    assert_eq!(
+        lease.request.url.as_str(),
+        "https://example.test/catalog/next"
+    );
+    Ok(())
 }
 
 fn storage() -> Arc<dyn StorageClient> {
@@ -574,7 +650,11 @@ async fn selector_requires_an_extractor() -> Result<(), Box<dyn std::error::Erro
         .send()
         .await
         .expect_err("selector use without HTML must fail");
-    assert!(error.to_string().contains("requires an HTML context"));
+    assert!(
+        error
+            .to_string()
+            .contains("requires an HTML or browser context")
+    );
     Ok(())
 }
 

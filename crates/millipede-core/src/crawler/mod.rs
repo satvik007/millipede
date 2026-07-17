@@ -467,6 +467,20 @@ pub struct RequestEnv<'a> {
     pub overrides: crate::retry_strategy::AttemptOverrides,
 }
 
+impl<'a> RequestEnv<'a> {
+    /// Clones these per-attempt inputs so one attempt can try a second execution path (e.g. smart
+    /// HTTP-first promotion re-executing through a browser kind). The struct is non-exhaustive, so
+    /// only core can provide this.
+    pub fn duplicate(&self) -> RequestEnv<'a> {
+        RequestEnv {
+            request: Arc::clone(&self.request),
+            crawler: self.crawler.clone(),
+            events: self.events,
+            overrides: self.overrides.clone(),
+        }
+    }
+}
+
 /// Metadata observed after a kind successfully constructs its handler context.
 ///
 /// # Examples

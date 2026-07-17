@@ -18,6 +18,7 @@ pub use millipede::ClientLoadSignalHandle
 pub use millipede::CoalescingClient
 pub use millipede::Configuration
 pub use millipede::ConfigurationBuilder
+pub use millipede::Cookie
 pub use millipede::CookieJar
 pub use millipede::CookieJarError
 pub use millipede::CpuLoadSignal
@@ -117,6 +118,7 @@ pub use millipede::Router
 pub use millipede::SESSION_POOL_PERSIST_KEY
 pub use millipede::SITEMAP_STATE_KEY
 pub use millipede::STATISTICS_PERSIST_KEY
+pub use millipede::SameSite
 pub use millipede::ScaleDecision
 pub use millipede::Session
 pub use millipede::SessionConfig

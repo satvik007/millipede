@@ -78,7 +78,7 @@ pub mod prelude {
         SystemStatus, SystemStatusOptions, TokioRuntimeLoadSignal, TokioRuntimeLoadSignalOptions,
     };
     pub use crate::config::{Configuration, ConfigurationBuilder, LogLevel};
-    pub use crate::cookies::{CookieJar, CookieJarError};
+    pub use crate::cookies::{Cookie, CookieJar, CookieJarError, SameSite};
     pub use crate::crawler::{
         AttemptObservation, AutoscalerSnapshot, BasicContext, BasicCrawler, BasicKind, Crawler,
         CrawlerBuildError, CrawlerBuilder, CrawlerEnv, CrawlerHandle, CrawlerKind,

@@ -453,12 +453,68 @@ impl core::marker::Unpin for millipede_core::cookies::CookieJarError
 impl core::marker::UnsafeUnpin for millipede_core::cookies::CookieJarError
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::cookies::CookieJarError
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::cookies::CookieJarError
+pub enum millipede_core::cookies::SameSite
+pub millipede_core::cookies::SameSite::Lax
+pub millipede_core::cookies::SameSite::None
+pub millipede_core::cookies::SameSite::Strict
+impl core::clone::Clone for millipede_core::cookies::SameSite
+pub fn millipede_core::cookies::SameSite::clone(&self) -> millipede_core::cookies::SameSite
+impl core::cmp::Eq for millipede_core::cookies::SameSite
+impl core::cmp::PartialEq for millipede_core::cookies::SameSite
+pub fn millipede_core::cookies::SameSite::eq(&self, &millipede_core::cookies::SameSite) -> bool
+impl core::fmt::Debug for millipede_core::cookies::SameSite
+pub fn millipede_core::cookies::SameSite::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for millipede_core::cookies::SameSite
+impl core::marker::StructuralPartialEq for millipede_core::cookies::SameSite
+impl serde_core::ser::Serialize for millipede_core::cookies::SameSite
+pub fn millipede_core::cookies::SameSite::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl<'de> serde_core::de::Deserialize<'de> for millipede_core::cookies::SameSite
+pub fn millipede_core::cookies::SameSite::deserialize<__D>(__D) -> core::result::Result<Self, <__D as serde_core::de::Deserializer>::Error> where __D: serde_core::de::Deserializer<'de>
+impl core::marker::Freeze for millipede_core::cookies::SameSite
+impl core::marker::Send for millipede_core::cookies::SameSite
+impl core::marker::Sync for millipede_core::cookies::SameSite
+impl core::marker::Unpin for millipede_core::cookies::SameSite
+impl core::marker::UnsafeUnpin for millipede_core::cookies::SameSite
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::cookies::SameSite
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::cookies::SameSite
+#[non_exhaustive] pub struct millipede_core::cookies::Cookie
+pub millipede_core::cookies::Cookie::domain: alloc::string::String
+pub millipede_core::cookies::Cookie::expires: core::option::Option<time::offset_date_time::OffsetDateTime>
+pub millipede_core::cookies::Cookie::host_only: bool
+pub millipede_core::cookies::Cookie::http_only: bool
+pub millipede_core::cookies::Cookie::name: alloc::string::String
+pub millipede_core::cookies::Cookie::path: alloc::string::String
+pub millipede_core::cookies::Cookie::same_site: core::option::Option<millipede_core::cookies::SameSite>
+pub millipede_core::cookies::Cookie::secure: bool
+pub millipede_core::cookies::Cookie::value: alloc::string::String
+impl millipede_core::cookies::Cookie
+pub fn millipede_core::cookies::Cookie::new(impl core::convert::Into<alloc::string::String>, impl core::convert::Into<alloc::string::String>, impl core::convert::Into<alloc::string::String>) -> Self
+impl core::clone::Clone for millipede_core::cookies::Cookie
+pub fn millipede_core::cookies::Cookie::clone(&self) -> millipede_core::cookies::Cookie
+impl core::cmp::PartialEq for millipede_core::cookies::Cookie
+pub fn millipede_core::cookies::Cookie::eq(&self, &millipede_core::cookies::Cookie) -> bool
+impl core::fmt::Debug for millipede_core::cookies::Cookie
+pub fn millipede_core::cookies::Cookie::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_core::cookies::Cookie
+impl serde_core::ser::Serialize for millipede_core::cookies::Cookie
+pub fn millipede_core::cookies::Cookie::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl<'de> serde_core::de::Deserialize<'de> for millipede_core::cookies::Cookie
+pub fn millipede_core::cookies::Cookie::deserialize<__D>(__D) -> core::result::Result<Self, <__D as serde_core::de::Deserializer>::Error> where __D: serde_core::de::Deserializer<'de>
+impl core::marker::Freeze for millipede_core::cookies::Cookie
+impl core::marker::Send for millipede_core::cookies::Cookie
+impl core::marker::Sync for millipede_core::cookies::Cookie
+impl core::marker::Unpin for millipede_core::cookies::Cookie
+impl core::marker::UnsafeUnpin for millipede_core::cookies::Cookie
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::cookies::Cookie
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::cookies::Cookie
 pub struct millipede_core::cookies::CookieJar
 impl millipede_core::cookies::CookieJar
 pub fn millipede_core::cookies::CookieJar::clear(&self)
 pub fn millipede_core::cookies::CookieJar::cookie_count(&self) -> usize
 pub fn millipede_core::cookies::CookieJar::cookie_header_for(&self, &url::Url) -> core::option::Option<http::header::value::HeaderValue>
+pub fn millipede_core::cookies::CookieJar::export_cookies(&self) -> alloc::vec::Vec<millipede_core::cookies::Cookie>
 pub fn millipede_core::cookies::CookieJar::from_json(&str) -> core::result::Result<Self, millipede_core::cookies::CookieJarError>
+pub fn millipede_core::cookies::CookieJar::import_cookies(&self, &[millipede_core::cookies::Cookie]) -> usize
 pub fn millipede_core::cookies::CookieJar::new() -> Self
 pub fn millipede_core::cookies::CookieJar::store_response_cookies(&self, &url::Url, &http::header::map::HeaderMap)
 pub fn millipede_core::cookies::CookieJar::to_json(&self) -> core::result::Result<alloc::string::String, millipede_core::cookies::CookieJarError>
@@ -683,6 +739,8 @@ pub millipede_core::crawler::RequestEnv::crawler: millipede_core::crawler::Crawl
 pub millipede_core::crawler::RequestEnv::events: &'a millipede_core::events::EventBus
 pub millipede_core::crawler::RequestEnv::overrides: millipede_core::retry_strategy::AttemptOverrides
 pub millipede_core::crawler::RequestEnv::request: alloc::sync::Arc<millipede_core::request::Request>
+impl<'a> millipede_core::crawler::RequestEnv<'a>
+pub fn millipede_core::crawler::RequestEnv<'a>::duplicate(&self) -> millipede_core::crawler::RequestEnv<'a>
 impl<'a> core::marker::Freeze for millipede_core::crawler::RequestEnv<'a>
 impl<'a> core::marker::Send for millipede_core::crawler::RequestEnv<'a>
 impl<'a> core::marker::Sync for millipede_core::crawler::RequestEnv<'a>
@@ -1336,7 +1394,7 @@ impl core::marker::UnsafeUnpin for millipede_core::link_extraction::UrlMatch
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::link_extraction::UrlMatch
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::link_extraction::UrlMatch
 pub trait millipede_core::link_extraction::LinkExtractor: core::marker::Send + core::marker::Sync
-pub fn millipede_core::link_extraction::LinkExtractor::extract(&self, core::option::Option<&str>) -> core::result::Result<alloc::vec::Vec<millipede_core::link_extraction::ExtractedLink>, millipede_core::errors::CrawlError>
+pub fn millipede_core::link_extraction::LinkExtractor::extract<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<alloc::vec::Vec<millipede_core::link_extraction::ExtractedLink>, millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
 pub trait millipede_core::link_extraction::SkippedHandler: core::marker::Send + core::marker::Sync + 'static
 pub fn millipede_core::link_extraction::SkippedHandler::on_skip(&self, &str, &millipede_core::enqueue::SkipReason)
 impl<F> millipede_core::link_extraction::SkippedHandler for F where F: core::ops::function::Fn(&str, &millipede_core::enqueue::SkipReason) + core::marker::Send + core::marker::Sync + 'static
@@ -1786,6 +1844,30 @@ impl core::marker::Unpin for millipede_core::proxy::RotationStrategy
 impl core::marker::UnsafeUnpin for millipede_core::proxy::RotationStrategy
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::proxy::RotationStrategy
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::proxy::RotationStrategy
+pub enum millipede_core::prelude::SameSite
+pub millipede_core::prelude::SameSite::Lax
+pub millipede_core::prelude::SameSite::None
+pub millipede_core::prelude::SameSite::Strict
+impl core::clone::Clone for millipede_core::cookies::SameSite
+pub fn millipede_core::cookies::SameSite::clone(&self) -> millipede_core::cookies::SameSite
+impl core::cmp::Eq for millipede_core::cookies::SameSite
+impl core::cmp::PartialEq for millipede_core::cookies::SameSite
+pub fn millipede_core::cookies::SameSite::eq(&self, &millipede_core::cookies::SameSite) -> bool
+impl core::fmt::Debug for millipede_core::cookies::SameSite
+pub fn millipede_core::cookies::SameSite::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for millipede_core::cookies::SameSite
+impl core::marker::StructuralPartialEq for millipede_core::cookies::SameSite
+impl serde_core::ser::Serialize for millipede_core::cookies::SameSite
+pub fn millipede_core::cookies::SameSite::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl<'de> serde_core::de::Deserialize<'de> for millipede_core::cookies::SameSite
+pub fn millipede_core::cookies::SameSite::deserialize<__D>(__D) -> core::result::Result<Self, <__D as serde_core::de::Deserializer>::Error> where __D: serde_core::de::Deserializer<'de>
+impl core::marker::Freeze for millipede_core::cookies::SameSite
+impl core::marker::Send for millipede_core::cookies::SameSite
+impl core::marker::Sync for millipede_core::cookies::SameSite
+impl core::marker::Unpin for millipede_core::cookies::SameSite
+impl core::marker::UnsafeUnpin for millipede_core::cookies::SameSite
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::cookies::SameSite
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::cookies::SameSite
 #[non_exhaustive] pub enum millipede_core::prelude::ScaleDecision
 pub millipede_core::prelude::ScaleDecision::Hold
 pub millipede_core::prelude::ScaleDecision::ScaleDown
@@ -2229,12 +2311,44 @@ impl core::marker::Unpin for millipede_core::config::ConfigurationBuilder
 impl core::marker::UnsafeUnpin for millipede_core::config::ConfigurationBuilder
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::config::ConfigurationBuilder
 impl !core::panic::unwind_safe::UnwindSafe for millipede_core::config::ConfigurationBuilder
+#[non_exhaustive] pub struct millipede_core::prelude::Cookie
+pub millipede_core::prelude::Cookie::domain: alloc::string::String
+pub millipede_core::prelude::Cookie::expires: core::option::Option<time::offset_date_time::OffsetDateTime>
+pub millipede_core::prelude::Cookie::host_only: bool
+pub millipede_core::prelude::Cookie::http_only: bool
+pub millipede_core::prelude::Cookie::name: alloc::string::String
+pub millipede_core::prelude::Cookie::path: alloc::string::String
+pub millipede_core::prelude::Cookie::same_site: core::option::Option<millipede_core::cookies::SameSite>
+pub millipede_core::prelude::Cookie::secure: bool
+pub millipede_core::prelude::Cookie::value: alloc::string::String
+impl millipede_core::cookies::Cookie
+pub fn millipede_core::cookies::Cookie::new(impl core::convert::Into<alloc::string::String>, impl core::convert::Into<alloc::string::String>, impl core::convert::Into<alloc::string::String>) -> Self
+impl core::clone::Clone for millipede_core::cookies::Cookie
+pub fn millipede_core::cookies::Cookie::clone(&self) -> millipede_core::cookies::Cookie
+impl core::cmp::PartialEq for millipede_core::cookies::Cookie
+pub fn millipede_core::cookies::Cookie::eq(&self, &millipede_core::cookies::Cookie) -> bool
+impl core::fmt::Debug for millipede_core::cookies::Cookie
+pub fn millipede_core::cookies::Cookie::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_core::cookies::Cookie
+impl serde_core::ser::Serialize for millipede_core::cookies::Cookie
+pub fn millipede_core::cookies::Cookie::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl<'de> serde_core::de::Deserialize<'de> for millipede_core::cookies::Cookie
+pub fn millipede_core::cookies::Cookie::deserialize<__D>(__D) -> core::result::Result<Self, <__D as serde_core::de::Deserializer>::Error> where __D: serde_core::de::Deserializer<'de>
+impl core::marker::Freeze for millipede_core::cookies::Cookie
+impl core::marker::Send for millipede_core::cookies::Cookie
+impl core::marker::Sync for millipede_core::cookies::Cookie
+impl core::marker::Unpin for millipede_core::cookies::Cookie
+impl core::marker::UnsafeUnpin for millipede_core::cookies::Cookie
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::cookies::Cookie
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::cookies::Cookie
 pub struct millipede_core::prelude::CookieJar
 impl millipede_core::cookies::CookieJar
 pub fn millipede_core::cookies::CookieJar::clear(&self)
 pub fn millipede_core::cookies::CookieJar::cookie_count(&self) -> usize
 pub fn millipede_core::cookies::CookieJar::cookie_header_for(&self, &url::Url) -> core::option::Option<http::header::value::HeaderValue>
+pub fn millipede_core::cookies::CookieJar::export_cookies(&self) -> alloc::vec::Vec<millipede_core::cookies::Cookie>
 pub fn millipede_core::cookies::CookieJar::from_json(&str) -> core::result::Result<Self, millipede_core::cookies::CookieJarError>
+pub fn millipede_core::cookies::CookieJar::import_cookies(&self, &[millipede_core::cookies::Cookie]) -> usize
 pub fn millipede_core::cookies::CookieJar::new() -> Self
 pub fn millipede_core::cookies::CookieJar::store_response_cookies(&self, &url::Url, &http::header::map::HeaderMap)
 pub fn millipede_core::cookies::CookieJar::to_json(&self) -> core::result::Result<alloc::string::String, millipede_core::cookies::CookieJarError>
@@ -3068,6 +3182,8 @@ pub millipede_core::prelude::RequestEnv::crawler: millipede_core::crawler::Crawl
 pub millipede_core::prelude::RequestEnv::events: &'a millipede_core::events::EventBus
 pub millipede_core::prelude::RequestEnv::overrides: millipede_core::retry_strategy::AttemptOverrides
 pub millipede_core::prelude::RequestEnv::request: alloc::sync::Arc<millipede_core::request::Request>
+impl<'a> millipede_core::crawler::RequestEnv<'a>
+pub fn millipede_core::crawler::RequestEnv<'a>::duplicate(&self) -> millipede_core::crawler::RequestEnv<'a>
 impl<'a> core::marker::Freeze for millipede_core::crawler::RequestEnv<'a>
 impl<'a> core::marker::Send for millipede_core::crawler::RequestEnv<'a>
 impl<'a> core::marker::Sync for millipede_core::crawler::RequestEnv<'a>
@@ -3689,7 +3805,7 @@ impl<K: millipede_core::storage::KeyValueStore + ?core::marker::Sized> millipede
 pub fn K::get<'life0, 'life1, 'async_trait, T>(&'life0 self, &'life1 str) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<core::option::Option<T>>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::de::DeserializeOwned + 'static, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
 pub fn K::set<'life0, 'life1, 'life2, 'async_trait, T>(&'life0 self, &'life1 str, &'life2 T) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where T: 'async_trait + serde_core::ser::Serialize + core::marker::Send + core::marker::Sync, Self: core::marker::Sync + 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait, 'life2: 'async_trait
 pub trait millipede_core::prelude::LinkExtractor: core::marker::Send + core::marker::Sync
-pub fn millipede_core::prelude::LinkExtractor::extract(&self, core::option::Option<&str>) -> core::result::Result<alloc::vec::Vec<millipede_core::link_extraction::ExtractedLink>, millipede_core::errors::CrawlError>
+pub fn millipede_core::prelude::LinkExtractor::extract<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<alloc::vec::Vec<millipede_core::link_extraction::ExtractedLink>, millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
 pub trait millipede_core::prelude::LoadSignal: core::marker::Send + core::marker::Sync + 'static
 pub fn millipede_core::prelude::LoadSignal::name(&self) -> &str
 pub fn millipede_core::prelude::LoadSignal::overload_threshold(&self) -> f32

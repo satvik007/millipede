@@ -29,8 +29,9 @@ impl HtmlLinkExtractor {
     }
 }
 
+#[async_trait::async_trait]
 impl LinkExtractor for HtmlLinkExtractor {
-    fn extract(&self, selector: Option<&str>) -> Result<Vec<ExtractedLink>, CrawlError> {
+    async fn extract(&self, selector: Option<&str>) -> Result<Vec<ExtractedLink>, CrawlError> {
         let selector_text = selector.unwrap_or("a[href]");
         let selector = Selector::parse(selector_text).map_err(|error| {
             CrawlError::non_retryable(anyhow::anyhow!(
@@ -71,13 +72,14 @@ mod tests {
         )
     }
 
-    #[test]
-    fn extracts_raw_hrefs_against_the_first_valid_base() {
+    #[tokio::test]
+    async fn extracts_raw_hrefs_against_the_first_valid_base() {
         let links = extractor(
             r#"<base href="/catalog/"><base href="/ignored/">
                <a href="item">default</a><a class="product" href="../other">other</a>"#,
         )
         .extract(None)
+        .await
         .expect("default selector must extract");
 
         assert_eq!(links.len(), 2);
@@ -88,10 +90,11 @@ mod tests {
         );
     }
 
-    #[test]
-    fn missing_base_uses_document_url_for_every_link() {
+    #[tokio::test]
+    async fn missing_base_uses_document_url_for_every_link() {
         let links = extractor(r#"<a href="child">child</a>"#)
             .extract(None)
+            .await
             .expect("default selector must extract");
 
         assert_eq!(links.len(), 1);
@@ -101,13 +104,14 @@ mod tests {
         );
     }
 
-    #[test]
-    fn invalid_first_base_falls_back_to_document_url_and_ignores_later_bases() {
+    #[tokio::test]
+    async fn invalid_first_base_falls_back_to_document_url_and_ignores_later_bases() {
         let links = extractor(
             r#"<base href="http://["><base href="/later-valid/">
                <a href="child">child</a>"#,
         )
         .extract(None)
+        .await
         .expect("default selector must extract");
 
         assert_eq!(links.len(), 1);
@@ -117,20 +121,22 @@ mod tests {
         );
     }
 
-    #[test]
-    fn custom_selector_still_skips_elements_without_href() {
+    #[tokio::test]
+    async fn custom_selector_still_skips_elements_without_href() {
         let links =
             extractor(r#"<a class="product">missing</a><a class="product" href="kept">kept</a>"#)
                 .extract(Some("a.product"))
+                .await
                 .expect("custom selector must extract");
         assert_eq!(links.len(), 1);
         assert_eq!(links[0].url, "kept");
     }
 
-    #[test]
-    fn invalid_selector_reports_source_text() {
+    #[tokio::test]
+    async fn invalid_selector_reports_source_text() {
         let error = extractor("")
             .extract(Some("a["))
+            .await
             .expect_err("invalid selector must fail");
         assert!(error.to_string().contains("a["));
     }

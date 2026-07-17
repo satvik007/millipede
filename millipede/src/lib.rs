@@ -25,7 +25,7 @@ pub use millipede_core::autoscale::{
     SystemStatus, SystemStatusOptions, TokioRuntimeLoadSignal, TokioRuntimeLoadSignalOptions,
 };
 pub use millipede_core::config::{Configuration, ConfigurationBuilder, LogLevel};
-pub use millipede_core::cookies::{CookieJar, CookieJarError};
+pub use millipede_core::cookies::{Cookie, CookieJar, CookieJarError, SameSite};
 pub use millipede_core::crawler::{
     AttemptObservation, AutoscalerSnapshot, BasicContext, BasicCrawler, BasicKind, Crawler,
     CrawlerBuildError, CrawlerBuilder, CrawlerEnv, CrawlerHandle, CrawlerKind, IntoStartRequest,

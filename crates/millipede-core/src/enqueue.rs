@@ -275,10 +275,10 @@ impl<'a> EnqueueLinksOptions<'a> {
         if should_extract {
             let extractor = self.linker.extractor.as_ref().ok_or_else(|| {
                 CrawlError::non_retryable(anyhow::anyhow!(
-                    "selector-based enqueue requires an HTML context; use urls()/raw_urls() on HTTP contexts"
+                    "selector-based enqueue requires an HTML or browser context; use urls()/raw_urls() on HTTP contexts"
                 ))
             })?;
-            let extracted = extractor.extract(self.selector.as_deref())?;
+            let extracted = extractor.extract(self.selector.as_deref()).await?;
             self.candidates.extend(
                 extracted
                     .into_iter()
