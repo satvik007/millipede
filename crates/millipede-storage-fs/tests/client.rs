@@ -189,14 +189,3 @@ async fn rejects_unsafe_storage_names() {
     assert!(client.open_request_queue(Some("../evil")).await.is_err());
     assert!(!root.path().join("evil").exists());
 }
-
-#[tokio::test]
-async fn request_queue_reports_phase_placeholder() {
-    let root = tempfile::tempdir().unwrap();
-    let error = FsStorageClient::new(root.path())
-        .open_request_queue(None)
-        .await
-        .err()
-        .expect("request queue is not implemented yet");
-    assert!(error.to_string().contains("lands later in Phase 5"));
-}

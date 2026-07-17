@@ -1,10 +1,8 @@
 use crate::{
-    FsDataset, FsKeyValueStore,
+    FsDataset, FsKeyValueStore, FsRequestQueue,
     layout::{DATASETS, KEY_VALUE_STORES, REQUEST_QUEUES, store_name, store_path},
 };
-use millipede_core::storage::{
-    Dataset, KeyValueStore, RequestQueue, StorageClient, StorageError, StorageResult,
-};
+use millipede_core::storage::{Dataset, KeyValueStore, RequestQueue, StorageClient, StorageResult};
 use std::{collections::HashMap, path::Path, path::PathBuf, sync::Arc};
 use tokio::sync::{Mutex, RwLock};
 
@@ -14,6 +12,7 @@ pub struct FsStorageClient {
     operations: Arc<RwLock<()>>,
     datasets: Mutex<HashMap<String, Arc<FsDataset>>>,
     kv_stores: Mutex<HashMap<String, Arc<FsKeyValueStore>>>,
+    request_queues: Mutex<HashMap<String, Arc<FsRequestQueue>>>,
 }
 
 impl FsStorageClient {
@@ -25,6 +24,7 @@ impl FsStorageClient {
             operations: Arc::new(RwLock::new(())),
             datasets: Mutex::new(HashMap::new()),
             kv_stores: Mutex::new(HashMap::new()),
+            request_queues: Mutex::new(HashMap::new()),
         }
     }
 
@@ -78,11 +78,20 @@ impl StorageClient for FsStorageClient {
     }
 
     async fn open_request_queue(&self, name: Option<&str>) -> StorageResult<Arc<dyn RequestQueue>> {
-        let _ = store_name(name)?;
+        let name = store_name(name)?;
         let _operation = self.operations.read().await;
-        Err(StorageError::Backend(anyhow::anyhow!(
-            "FsStorageClient request queue lands later in Phase 5"
-        )))
+        let mut queues = self.request_queues.lock().await;
+        if let Some(queue) = queues.get(&name) {
+            queue.ensure_layout().await?;
+            return Ok(queue.clone());
+        }
+
+        let path = store_path(&self.root, REQUEST_QUEUES, &name);
+        tokio::fs::create_dir_all(path.join("requests")).await?;
+        let queue =
+            Arc::new(FsRequestQueue::open(name.clone(), path, Arc::clone(&self.operations)).await?);
+        queues.insert(name, queue.clone());
+        Ok(queue)
     }
 
     /// Deletes stored contents and clears the opened dataset and store caches.
@@ -95,14 +104,19 @@ impl StorageClient for FsStorageClient {
         let _operation = self.operations.write().await;
         let mut datasets = self.datasets.lock().await;
         let mut kv_stores = self.kv_stores.lock().await;
+        let mut request_queues = self.request_queues.lock().await;
         purge_category(&self.root.join(DATASETS), false).await?;
         for dataset in datasets.values() {
             dataset.reset_sequence().await;
         }
         purge_category(&self.root.join(KEY_VALUE_STORES), true).await?;
         purge_category(&self.root.join(REQUEST_QUEUES), false).await?;
+        for queue in request_queues.values() {
+            queue.reset().await;
+        }
         datasets.clear();
         kv_stores.clear();
+        request_queues.clear();
         Ok(())
     }
 }
