@@ -1557,6 +1557,23 @@ dependencies = [
 [[package]]
 name = "millipede-browser"
 version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "bytes",
+ "futures-util",
+ "http",
+ "millipede-core",
+ "millipede-html",
+ "millipede-http",
+ "millipede-storage-memory",
+ "serde_json",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "url",
+ "wiremock",
+]
 
 [[package]]
 name = "millipede-browser-chromiumoxide"

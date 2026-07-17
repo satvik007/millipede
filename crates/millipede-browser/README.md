@@ -1,5 +1,5 @@
 # millipede-browser
 
-BrowserCrawler core, BrowserProvider trait, and BrowserPool for the Millipede web crawler.
+A provider-erased browser abstraction for the Millipede web crawler, including the `BrowserProvider` and `BrowserPage` traits, `BrowserPool`, `BrowserKind`, and smart mode. Concrete providers live in sibling crates.
 
-**Status: pre-alpha skeleton.** This crate is part of the [Millipede](https://github.com/satvik007/millipede) workspace and does not yet expose a usable API. Real types land in later phases per `docs/ROADMAP.md`.
+The core surface is provider-neutral so request handlers can operate on browser pages without depending on a concrete browser driver.
