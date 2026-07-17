@@ -1,0 +1,92 @@
+//! Crawls category and detail pages on books.toscrape.com and stores a structured book dataset.
+//!
+//! Run with:
+//! `cargo run -p millipede --example scrape_books --features storage-fs`
+//!
+//! This example HITS THE REAL NETWORK. books.toscrape.com is an open-source practice site for
+//! scraping. CI instead runs the wiremock version in `millipede/tests/scrape_books_mock.rs`, which
+//! is why this example is deliberately not in the `.github/workflows/ci.yml` examples job.
+//! `MILLIPEDE_BOOKS_BASE_URL` or the first command-line argument overrides the base URL.
+
+use std::sync::Arc;
+
+use millipede::{
+    Configuration, CrawlPolicy, Crawler, DatasetExt, EnqueueStrategy, FailedRequestContext,
+    FsStorageClient, HtmlContext, HtmlKind, Router,
+};
+use serde_json::json;
+
+millipede_html::selectors! {
+    title_selector = "h1";
+    price_selector = "p.price_color";
+    availability_selector = "p.instock.availability";
+}
+
+fn text(ctx: &HtmlContext, selector: &millipede_html::scraper::Selector) -> String {
+    ctx.html
+        .select_first(selector, |element| element.text().collect::<String>())
+        .unwrap_or_default()
+        .trim()
+        .to_owned()
+}
+
+fn base_url() -> String {
+    std::env::args()
+        .nth(1)
+        .or_else(|| std::env::var("MILLIPEDE_BOOKS_BASE_URL").ok())
+        .unwrap_or_else(|| "https://books.toscrape.com/".to_owned())
+}
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let storage_client = Arc::new(FsStorageClient::new("./storage"));
+    let configuration = Configuration::builder().purge_on_start(true).build()?;
+
+    let router = Router::<HtmlContext>::new()
+        .default(|ctx: HtmlContext| async move {
+            ctx.enqueue.options().selector("ul.pager a").send().await?;
+            ctx.enqueue
+                .options()
+                .selector("article.product_pod h3 a")
+                .globs(["**/catalogue/**"])
+                .label("detail")
+                .send()
+                .await?;
+            Ok(())
+        })
+        .route("detail", |ctx: HtmlContext| async move {
+            let book = json!({
+                "url": ctx.request.url,
+                "title": text(&ctx, title_selector()),
+                "price": text(&ctx, price_selector()),
+                "availability": text(&ctx, availability_selector()),
+            });
+            ctx.storage.dataset().push(&book).await?;
+            Ok(())
+        });
+
+    let crawler = Crawler::builder(HtmlKind::new()?)
+        .configuration(configuration)
+        .storage_client(storage_client)
+        .crawl_policy(
+            CrawlPolicy::new()
+                .strategy(EnqueueStrategy::SameHostname)
+                .max_requests_per_crawl(200),
+        )
+        .max_concurrency(5)
+        .request_handler(router)
+        .failed_request_handler(|ctx: FailedRequestContext| async move {
+            eprintln!("book request failed for {}: {}", ctx.request.url, ctx.error);
+            Ok(())
+        })
+        .build()
+        .await?;
+
+    let stats = crawler.run(base_url()).await?;
+    println!("crawl complete: {stats:#?}");
+    println!(
+        "books are in ./storage/datasets/default/ using a Crawlee-compatible layout; see \
+         docs/guide/crawlee-storage-migration.md"
+    );
+    Ok(())
+}

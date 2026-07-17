@@ -1384,6 +1384,7 @@ name = "millipede"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "flate2",
  "millipede-browser",
  "millipede-browser-chromiumoxide",
  "millipede-core",

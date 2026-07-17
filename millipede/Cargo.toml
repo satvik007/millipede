@@ -23,6 +23,7 @@ millipede-fingerprint = { path = "../crates/millipede-fingerprint", version = "0
 
 [dev-dependencies]
 anyhow = { workspace = true }
+flate2 = { workspace = true }
 tokio = { workspace = true }
 wiremock = { workspace = true }
 millipede-storage-fs = { path = "../crates/millipede-storage-fs" }
@@ -63,3 +64,8 @@ required-features = ["http", "storage-memory"]
 name = "autoscale_demo"
 path = "../examples/autoscale_demo.rs"
 required-features = ["http", "storage-memory"]
+
+[[example]]
+name = "scrape_books"
+path = "../examples/scrape_books.rs"
+required-features = ["http", "html", "storage-fs"]
