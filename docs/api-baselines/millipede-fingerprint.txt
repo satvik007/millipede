@@ -1,2 +1,116 @@
 pub mod millipede_fingerprint
 pub mod millipede_fingerprint::prelude
+pub struct millipede_fingerprint::prelude::BrowserFingerprintGenerator
+impl millipede_fingerprint::BrowserFingerprintGenerator
+pub fn millipede_fingerprint::BrowserFingerprintGenerator::generate(&self, &str) -> millipede_fingerprint::HeaderProfile
+pub fn millipede_fingerprint::BrowserFingerprintGenerator::new() -> Self
+impl core::clone::Clone for millipede_fingerprint::BrowserFingerprintGenerator
+pub fn millipede_fingerprint::BrowserFingerprintGenerator::clone(&self) -> millipede_fingerprint::BrowserFingerprintGenerator
+impl core::default::Default for millipede_fingerprint::BrowserFingerprintGenerator
+pub fn millipede_fingerprint::BrowserFingerprintGenerator::default() -> millipede_fingerprint::BrowserFingerprintGenerator
+impl core::fmt::Debug for millipede_fingerprint::BrowserFingerprintGenerator
+pub fn millipede_fingerprint::BrowserFingerprintGenerator::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_fingerprint::BrowserFingerprintGenerator
+impl core::marker::Send for millipede_fingerprint::BrowserFingerprintGenerator
+impl core::marker::Sync for millipede_fingerprint::BrowserFingerprintGenerator
+impl core::marker::Unpin for millipede_fingerprint::BrowserFingerprintGenerator
+impl core::marker::UnsafeUnpin for millipede_fingerprint::BrowserFingerprintGenerator
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_fingerprint::BrowserFingerprintGenerator
+impl core::panic::unwind_safe::UnwindSafe for millipede_fingerprint::BrowserFingerprintGenerator
+pub struct millipede_fingerprint::prelude::HeaderGenerator
+impl millipede_fingerprint::HeaderGenerator
+pub fn millipede_fingerprint::HeaderGenerator::from_profiles(alloc::vec::Vec<millipede_fingerprint::HeaderProfile>) -> Self
+pub fn millipede_fingerprint::HeaderGenerator::generate(&self, &str) -> millipede_fingerprint::HeaderProfile
+pub fn millipede_fingerprint::HeaderGenerator::new() -> Self
+impl core::clone::Clone for millipede_fingerprint::HeaderGenerator
+pub fn millipede_fingerprint::HeaderGenerator::clone(&self) -> millipede_fingerprint::HeaderGenerator
+impl core::default::Default for millipede_fingerprint::HeaderGenerator
+pub fn millipede_fingerprint::HeaderGenerator::default() -> Self
+impl core::fmt::Debug for millipede_fingerprint::HeaderGenerator
+pub fn millipede_fingerprint::HeaderGenerator::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_fingerprint::HeaderGenerator
+impl core::marker::Send for millipede_fingerprint::HeaderGenerator
+impl core::marker::Sync for millipede_fingerprint::HeaderGenerator
+impl core::marker::Unpin for millipede_fingerprint::HeaderGenerator
+impl core::marker::UnsafeUnpin for millipede_fingerprint::HeaderGenerator
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_fingerprint::HeaderGenerator
+impl core::panic::unwind_safe::UnwindSafe for millipede_fingerprint::HeaderGenerator
+pub struct millipede_fingerprint::prelude::HeaderProfile
+pub millipede_fingerprint::prelude::HeaderProfile::headers: alloc::vec::Vec<(alloc::string::String, alloc::string::String)>
+pub millipede_fingerprint::prelude::HeaderProfile::user_agent: alloc::string::String
+impl core::clone::Clone for millipede_fingerprint::HeaderProfile
+pub fn millipede_fingerprint::HeaderProfile::clone(&self) -> millipede_fingerprint::HeaderProfile
+impl core::cmp::Eq for millipede_fingerprint::HeaderProfile
+impl core::cmp::PartialEq for millipede_fingerprint::HeaderProfile
+pub fn millipede_fingerprint::HeaderProfile::eq(&self, &millipede_fingerprint::HeaderProfile) -> bool
+impl core::fmt::Debug for millipede_fingerprint::HeaderProfile
+pub fn millipede_fingerprint::HeaderProfile::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_fingerprint::HeaderProfile
+impl serde_core::ser::Serialize for millipede_fingerprint::HeaderProfile
+pub fn millipede_fingerprint::HeaderProfile::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl<'de> serde_core::de::Deserialize<'de> for millipede_fingerprint::HeaderProfile
+pub fn millipede_fingerprint::HeaderProfile::deserialize<__D>(__D) -> core::result::Result<Self, <__D as serde_core::de::Deserializer>::Error> where __D: serde_core::de::Deserializer<'de>
+impl core::marker::Freeze for millipede_fingerprint::HeaderProfile
+impl core::marker::Send for millipede_fingerprint::HeaderProfile
+impl core::marker::Sync for millipede_fingerprint::HeaderProfile
+impl core::marker::Unpin for millipede_fingerprint::HeaderProfile
+impl core::marker::UnsafeUnpin for millipede_fingerprint::HeaderProfile
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_fingerprint::HeaderProfile
+impl core::panic::unwind_safe::UnwindSafe for millipede_fingerprint::HeaderProfile
+pub struct millipede_fingerprint::BrowserFingerprintGenerator
+impl millipede_fingerprint::BrowserFingerprintGenerator
+pub fn millipede_fingerprint::BrowserFingerprintGenerator::generate(&self, &str) -> millipede_fingerprint::HeaderProfile
+pub fn millipede_fingerprint::BrowserFingerprintGenerator::new() -> Self
+impl core::clone::Clone for millipede_fingerprint::BrowserFingerprintGenerator
+pub fn millipede_fingerprint::BrowserFingerprintGenerator::clone(&self) -> millipede_fingerprint::BrowserFingerprintGenerator
+impl core::default::Default for millipede_fingerprint::BrowserFingerprintGenerator
+pub fn millipede_fingerprint::BrowserFingerprintGenerator::default() -> millipede_fingerprint::BrowserFingerprintGenerator
+impl core::fmt::Debug for millipede_fingerprint::BrowserFingerprintGenerator
+pub fn millipede_fingerprint::BrowserFingerprintGenerator::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_fingerprint::BrowserFingerprintGenerator
+impl core::marker::Send for millipede_fingerprint::BrowserFingerprintGenerator
+impl core::marker::Sync for millipede_fingerprint::BrowserFingerprintGenerator
+impl core::marker::Unpin for millipede_fingerprint::BrowserFingerprintGenerator
+impl core::marker::UnsafeUnpin for millipede_fingerprint::BrowserFingerprintGenerator
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_fingerprint::BrowserFingerprintGenerator
+impl core::panic::unwind_safe::UnwindSafe for millipede_fingerprint::BrowserFingerprintGenerator
+pub struct millipede_fingerprint::HeaderGenerator
+impl millipede_fingerprint::HeaderGenerator
+pub fn millipede_fingerprint::HeaderGenerator::from_profiles(alloc::vec::Vec<millipede_fingerprint::HeaderProfile>) -> Self
+pub fn millipede_fingerprint::HeaderGenerator::generate(&self, &str) -> millipede_fingerprint::HeaderProfile
+pub fn millipede_fingerprint::HeaderGenerator::new() -> Self
+impl core::clone::Clone for millipede_fingerprint::HeaderGenerator
+pub fn millipede_fingerprint::HeaderGenerator::clone(&self) -> millipede_fingerprint::HeaderGenerator
+impl core::default::Default for millipede_fingerprint::HeaderGenerator
+pub fn millipede_fingerprint::HeaderGenerator::default() -> Self
+impl core::fmt::Debug for millipede_fingerprint::HeaderGenerator
+pub fn millipede_fingerprint::HeaderGenerator::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_fingerprint::HeaderGenerator
+impl core::marker::Send for millipede_fingerprint::HeaderGenerator
+impl core::marker::Sync for millipede_fingerprint::HeaderGenerator
+impl core::marker::Unpin for millipede_fingerprint::HeaderGenerator
+impl core::marker::UnsafeUnpin for millipede_fingerprint::HeaderGenerator
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_fingerprint::HeaderGenerator
+impl core::panic::unwind_safe::UnwindSafe for millipede_fingerprint::HeaderGenerator
+pub struct millipede_fingerprint::HeaderProfile
+pub millipede_fingerprint::HeaderProfile::headers: alloc::vec::Vec<(alloc::string::String, alloc::string::String)>
+pub millipede_fingerprint::HeaderProfile::user_agent: alloc::string::String
+impl core::clone::Clone for millipede_fingerprint::HeaderProfile
+pub fn millipede_fingerprint::HeaderProfile::clone(&self) -> millipede_fingerprint::HeaderProfile
+impl core::cmp::Eq for millipede_fingerprint::HeaderProfile
+impl core::cmp::PartialEq for millipede_fingerprint::HeaderProfile
+pub fn millipede_fingerprint::HeaderProfile::eq(&self, &millipede_fingerprint::HeaderProfile) -> bool
+impl core::fmt::Debug for millipede_fingerprint::HeaderProfile
+pub fn millipede_fingerprint::HeaderProfile::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_fingerprint::HeaderProfile
+impl serde_core::ser::Serialize for millipede_fingerprint::HeaderProfile
+pub fn millipede_fingerprint::HeaderProfile::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl<'de> serde_core::de::Deserialize<'de> for millipede_fingerprint::HeaderProfile
+pub fn millipede_fingerprint::HeaderProfile::deserialize<__D>(__D) -> core::result::Result<Self, <__D as serde_core::de::Deserializer>::Error> where __D: serde_core::de::Deserializer<'de>
+impl core::marker::Freeze for millipede_fingerprint::HeaderProfile
+impl core::marker::Send for millipede_fingerprint::HeaderProfile
+impl core::marker::Sync for millipede_fingerprint::HeaderProfile
+impl core::marker::Unpin for millipede_fingerprint::HeaderProfile
+impl core::marker::UnsafeUnpin for millipede_fingerprint::HeaderProfile
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_fingerprint::HeaderProfile
+impl core::panic::unwind_safe::UnwindSafe for millipede_fingerprint::HeaderProfile
