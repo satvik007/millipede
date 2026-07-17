@@ -61,6 +61,42 @@ jobs:
       - run: cargo run -p millipede --example basic_engine
       - run: cargo run -p millipede --example autoscale_demo
 
+  # Browser tests run on Linux + macOS only; Windows is intentionally excluded
+  # (ROADMAP Phase 6 exit criteria). setup-chrome caches the Chromium download.
+  # The browser_crawl and smart_crawl examples land later in this phase and do
+  # not exist yet; CI never executes before the first push, so that is expected.
+  # The workspace test job above stays unchanged: browser tests skip gracefully
+  # when MILLIPEDE_CHROME is unset and no local Chrome exists. GitHub runners
+  # typically have Chrome preinstalled, so those tests simply run there too.
+  browser:
+    name: browser tests (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Install Chromium (cached by the action)
+        id: chrome
+        uses: browser-actions/setup-chrome@v2
+        with:
+          chrome-version: stable
+      - name: Run browser integration tests
+        env:
+          MILLIPEDE_CHROME: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          cargo test -p millipede-browser-chromiumoxide -- --nocapture
+          cargo test -p millipede-browser -- --nocapture
+      - name: Run browser examples against a local site
+        env:
+          MILLIPEDE_CHROME: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          cargo run -p millipede --features browser-chromiumoxide,storage-memory --example browser_crawl
+          cargo run -p millipede --features browser-chromiumoxide,html,storage-memory --example smart_crawl
+
   doc:
     name: rustdoc (${{ matrix.os }})
     strategy:
