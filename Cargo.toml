@@ -38,6 +38,7 @@ flate2 = "1"
 scraper = { version = "0.24", features = ["atomic"] }
 criterion = "0.5"
 lol_html = "=2.8.1"
+chromiumoxide = { version = "=0.9.1", default-features = false, features = ["bytes"] }
 
 [workspace.lints.rust]
 unsafe_code = "deny"
