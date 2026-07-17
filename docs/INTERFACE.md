@@ -245,7 +245,7 @@ pub type HtmlCrawler = Crawler<HtmlKind>;
 pub struct HtmlContext {
     pub request: Arc<Request>,
     pub response: HttpResponse,
-    pub html: Arc<scraper::Html>,      // owned Arc so it can move into spawned tasks
+    pub html: Arc<SynchronizedHtml>,   // synchronized parsed DOM, shareable across spawned tasks
     pub session: Option<Arc<Session>>,
     pub proxy_info: Option<ProxyInfo>,
     pub enqueue: EnqueueLinker,
@@ -595,7 +595,7 @@ Inside `EnqueueLinker::send()` (in order, short-circuiting on first reject):
 
 For `HttpContext` (no DOM), only `EnqueueLinker::urls(...)` is available; selector-based extraction returns a compile-time error because the extractor is `None`.
 
-Implementation note: `HtmlContext` exposes `Arc<scraper::Html>` for ergonomic handler queries, but the engine is not required to use `scraper` for its own link-discovery pass. Phase 5 benchmarks `scraper` against a streaming `lol_html` extractor with precompiled selectors; if streaming extraction materially reduces memory or latency, `EnqueueLinker` uses it internally while preserving the public `scraper::Html` handler API.
+Implementation note: `HtmlContext` exposes `Arc<SynchronizedHtml>` for ergonomic synchronized handler queries over the parsed `scraper::Html`, but the engine is not required to use `scraper` for its own link-discovery pass. Phase 5 benchmarks `scraper` against a streaming `lol_html` extractor with precompiled selectors; if streaming extraction materially reduces memory or latency, `EnqueueLinker` uses it internally while preserving the public synchronized handler API.
 
 ---
 
@@ -1585,22 +1585,17 @@ These map directly onto Crawlee's options and are wired into the engine, not sur
 - ✅ **Async-trait policy.** Object-safe traits (`StorageClient`, `Dataset`, `KeyValueStore`, `RequestQueue`, `HttpClient`, `ProxyResolver`, `BrowserPage`, `SkippedHandler`) use `#[async_trait]`. Internal generic traits and `RequestHandler<C>` use native async fn or boxed-future returns. Decision documented per-crate in an ADR.
 - ✅ **Result streaming shape.** Resolved in §4.3 and §15: `run()` returns final stats, `results()` exposes completed-request snapshots, and `events()` remains the control-plane feed. We do not make `run()` return a stream because the owned handler context is consumed and browser resources may already be cleaned up.
 - ✅ **Cookie jar concretion.** Resolved at Phase 3 (ADR-0002): custom `CookieJar` newtype over `cookie_store::CookieStore` behind `std::sync::Mutex`; `reqwest_cookie_store` rejected (would pull `reqwest` into `millipede-core`; manual redirect handling for `redirect_chain` makes reqwest's cookie layer unused; per-request jars cannot ride a per-client cookie provider).
+- ✅ **`scraper` ergonomics and engine extraction path.** Resolved at Phase 5 (ADR-0005): `selectors!` `OnceLock` macro shipped in `millipede-html`; `EnqueueLinker` extracts over the pre-parsed `Arc<millipede_html::SynchronizedHtml>`, whose synchronized query helpers access the wrapped `scraper::Html`; no `ctx.selectors` registry; `lol_html` not adopted.
 
 **Still open:**
 
-1. **`scraper` ergonomics and engine extraction path (ChatGPT Pro #2 + Spider review).** `HtmlContext::html: Arc<scraper::Html>` is fixed for handler ergonomics and spawn-friendliness, but `Selector::parse` is fallible and cheap-to-repeat, and engine-owned link discovery may need streaming extraction. Four candidate layers/paths are evaluated in **Phase 5** under Criterion before any of them lands:
-   - A `selectors!("a.detail", "h1 > span", …)` macro that expands to `static` items behind `OnceLock<Selector>`. Compile-time validation, zero runtime parsing cost.
-   - A `Selectors` registry on `HtmlContext` (`ctx.selectors.parse_or_get("a.detail")`) for handlers that compute selector strings dynamically.
-   - Status quo: users call `Selector::parse(…).unwrap()` inline.
-   - A streaming `lol_html` extractor used only by `EnqueueLinker` for the engine hot path, while handlers still see `scraper::Html`.
-   We will not pick one in the abstract — we'll measure on a 100k-page crawl whether selector-parse or full-body parsing dominates handler time. If it doesn't, we ship the macro only (zero-cost when used, no runtime API surface to support forever).
-2. **Dynamic configuration reload (Gemini #3.2, ChatGPT Pro #7).** Currently a built crawler's `Configuration` is immutable. Allow `set_log_level` / `set_proxy_strategy` post-build via an `Arc<RwLock<RuntimeConfig>>` for the small subset that's safe to mutate live? Decision: defer to **post-1.0** unless a use case appears. The candidate mutable surface — log level, proxy strategy choice (not the proxy URLs themselves), autoscaler ceiling — is documented here so we don't have to re-derive it later.
-3. **Scaffolding (ChatGPT Pro #4).** Crawlee ships a CLI scaffolder. Two-stage plan:
+1. **Dynamic configuration reload (Gemini #3.2, ChatGPT Pro #7).** Currently a built crawler's `Configuration` is immutable. Allow `set_log_level` / `set_proxy_strategy` post-build via an `Arc<RwLock<RuntimeConfig>>` for the small subset that's safe to mutate live? Decision: defer to **post-1.0** unless a use case appears. The candidate mutable surface — log level, proxy strategy choice (not the proxy URLs themselves), autoscaler ceiling — is documented here so we don't have to re-derive it later.
+2. **Scaffolding (ChatGPT Pro #4).** Crawlee ships a CLI scaffolder. Two-stage plan:
    - **Pre-0.2:** publish a `cargo-generate` template (`millipede-template`) under the same org. Cheap to maintain — it's just a starter `Cargo.toml` + `main.rs` for each crawler kind. Lowers the adoption barrier without committing to a CLI surface we'd have to support.
    - **Post-1.0:** the full `millipede-cli` crate (`millipede new`, `millipede run`, future `millipede serve` for the inspector UI). Tracked as an issue, not a phase.
-4. **Distributed crawl support.** `RequestQueue` lease semantics open the door; a Redis-backed impl is the obvious post-1.0 add. Apify platform integration is a longer arc — see also the Crawlee parity & migration notes below.
-5. **`CrawlError` source granularity (Gemini #1.3).** Variants currently wrap `anyhow::Error`. Consider replacing with typed `source` chains (`NetworkError { source: reqwest::Error }`, `ParseError { source: scraper::Error }`) before 1.0 to give users structured matching power. Open until we collect feedback on what failure-handling patterns users actually want.
-6. **`UserData` typing (Gemini #1.2).** `serde_json::Map`-backed is the practical choice. Worth exploring a derive macro (`#[derive(UserData)]`) that generates typed accessors against an underlying map. Post-1.0.
+3. **Distributed crawl support.** `RequestQueue` lease semantics open the door; a Redis-backed impl is the obvious post-1.0 add. Apify platform integration is a longer arc — see also the Crawlee parity & migration notes below.
+4. **`CrawlError` source granularity (Gemini #1.3).** Variants currently wrap `anyhow::Error`. Consider replacing with typed `source` chains (`NetworkError { source: reqwest::Error }`, `ParseError { source: scraper::Error }`) before 1.0 to give users structured matching power. Open until we collect feedback on what failure-handling patterns users actually want.
+5. **`UserData` typing (Gemini #1.2).** `serde_json::Map`-backed is the practical choice. Worth exploring a derive macro (`#[derive(UserData)]`) that generates typed accessors against an underlying map. Post-1.0.
 
 **Ecosystem & migration (ChatGPT Pro #5, #6):**
 

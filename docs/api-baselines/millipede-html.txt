@@ -1,5 +1,7 @@
 pub mod millipede_html
+pub use millipede_html::scraper
 pub mod millipede_html::prelude
+pub macro millipede_html::selectors!
 pub enum millipede_html::HtmlError
 pub millipede_html::HtmlError::UnsupportedContentType
 pub millipede_html::HtmlError::UnsupportedContentType::content_type: alloc::string::String
