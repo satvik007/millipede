@@ -60,6 +60,8 @@ pub mod retry_strategy;
 pub mod router;
 /// Sessions and reusable session pools.
 pub mod session;
+/// Streaming sitemap ingestion.
+pub mod sitemap;
 /// Crawl statistics, rates, and persistence.
 pub mod statistics;
 /// Object-safe storage abstractions and typed convenience wrappers.

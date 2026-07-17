@@ -4144,6 +4144,59 @@ impl core::marker::UnsafeUnpin for millipede_core::session::SessionPoolOptions
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::session::SessionPoolOptions
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::session::SessionPoolOptions
 pub const millipede_core::session::SESSION_POOL_PERSIST_KEY: &str
+pub mod millipede_core::sitemap
+pub struct millipede_core::sitemap::SitemapEntry
+pub millipede_core::sitemap::SitemapEntry::changefreq: core::option::Option<alloc::string::String>
+pub millipede_core::sitemap::SitemapEntry::lastmod: core::option::Option<alloc::string::String>
+pub millipede_core::sitemap::SitemapEntry::loc: alloc::string::String
+pub millipede_core::sitemap::SitemapEntry::priority: core::option::Option<f32>
+impl core::clone::Clone for millipede_core::sitemap::SitemapEntry
+pub fn millipede_core::sitemap::SitemapEntry::clone(&self) -> millipede_core::sitemap::SitemapEntry
+impl core::cmp::PartialEq for millipede_core::sitemap::SitemapEntry
+pub fn millipede_core::sitemap::SitemapEntry::eq(&self, &millipede_core::sitemap::SitemapEntry) -> bool
+impl core::fmt::Debug for millipede_core::sitemap::SitemapEntry
+pub fn millipede_core::sitemap::SitemapEntry::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_core::sitemap::SitemapEntry
+impl core::marker::Freeze for millipede_core::sitemap::SitemapEntry
+impl core::marker::Send for millipede_core::sitemap::SitemapEntry
+impl core::marker::Sync for millipede_core::sitemap::SitemapEntry
+impl core::marker::Unpin for millipede_core::sitemap::SitemapEntry
+impl core::marker::UnsafeUnpin for millipede_core::sitemap::SitemapEntry
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::sitemap::SitemapEntry
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::sitemap::SitemapEntry
+pub struct millipede_core::sitemap::SitemapRequestList
+impl millipede_core::sitemap::SitemapRequestList
+pub async fn millipede_core::sitemap::SitemapRequestList::fetch_next(&self) -> core::result::Result<core::option::Option<millipede_core::request::Request>, millipede_core::errors::CrawlError>
+pub async fn millipede_core::sitemap::SitemapRequestList::is_finished(&self) -> bool
+pub async fn millipede_core::sitemap::SitemapRequestList::persist(&self) -> core::result::Result<(), millipede_core::errors::CrawlError>
+pub async fn millipede_core::sitemap::SitemapRequestList::processed_count(&self) -> u64
+impl !core::marker::Freeze for millipede_core::sitemap::SitemapRequestList
+impl core::marker::Send for millipede_core::sitemap::SitemapRequestList
+impl core::marker::Sync for millipede_core::sitemap::SitemapRequestList
+impl core::marker::Unpin for millipede_core::sitemap::SitemapRequestList
+impl core::marker::UnsafeUnpin for millipede_core::sitemap::SitemapRequestList
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::sitemap::SitemapRequestList
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::sitemap::SitemapRequestList
+pub struct millipede_core::sitemap::SitemapRequestListBuilder
+impl millipede_core::sitemap::SitemapRequestListBuilder
+pub fn millipede_core::sitemap::SitemapRequestListBuilder::build(self) -> core::result::Result<millipede_core::sitemap::SitemapRequestList, millipede_core::errors::CrawlError>
+pub fn millipede_core::sitemap::SitemapRequestListBuilder::http_client(self, alloc::sync::Arc<dyn millipede_core::http_client::HttpClient>) -> Self
+pub fn millipede_core::sitemap::SitemapRequestListBuilder::label(self, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_core::sitemap::SitemapRequestListBuilder::limit(self, u64) -> Self
+pub fn millipede_core::sitemap::SitemapRequestListBuilder::persist(self, alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_core::sitemap::SitemapRequestListBuilder::sitemap_url(self, url::Url) -> Self
+pub fn millipede_core::sitemap::SitemapRequestListBuilder::sitemap_urls(self, impl core::iter::traits::collect::IntoIterator<Item = url::Url>) -> Self
+pub fn millipede_core::sitemap::SitemapRequestListBuilder::user_data(self, millipede_core::request::UserData) -> Self
+impl core::default::Default for millipede_core::sitemap::SitemapRequestListBuilder
+pub fn millipede_core::sitemap::SitemapRequestListBuilder::default() -> millipede_core::sitemap::SitemapRequestListBuilder
+impl core::marker::Freeze for millipede_core::sitemap::SitemapRequestListBuilder
+impl core::marker::Send for millipede_core::sitemap::SitemapRequestListBuilder
+impl core::marker::Sync for millipede_core::sitemap::SitemapRequestListBuilder
+impl core::marker::Unpin for millipede_core::sitemap::SitemapRequestListBuilder
+impl core::marker::UnsafeUnpin for millipede_core::sitemap::SitemapRequestListBuilder
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::sitemap::SitemapRequestListBuilder
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::sitemap::SitemapRequestListBuilder
+pub const millipede_core::sitemap::SITEMAP_STATE_KEY: &str
 pub mod millipede_core::statistics
 pub struct millipede_core::statistics::FinalStatistics
 pub millipede_core::statistics::FinalStatistics::crawler_runtime: core::time::Duration
