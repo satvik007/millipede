@@ -86,8 +86,9 @@ pub type QueueOpInfo = ProcessedRequest;
 
 /// A source from which requests can be added.
 ///
-/// URL-list and sitemap variants are Phase 5 additions. This enum is non-exhaustive so those
-/// sources can be added without breaking the Phase 1 API.
+/// Sitemap ingestion ships as [`crate::sitemap::RequestQueueWithSitemap`], a queue wrapper rather
+/// than a `RequestSource` variant, which keeps queue backends decoupled from fetching. This enum
+/// remains non-exhaustive for future request-source variants.
 #[derive(Debug, Clone)]
 #[non_exhaustive]
 pub enum RequestSource {

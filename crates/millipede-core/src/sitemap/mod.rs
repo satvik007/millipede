@@ -1,6 +1,9 @@
 //! Streaming, gzip-aware XML sitemap ingestion.
 
 mod parser;
+mod tandem;
+
+pub use tandem::RequestQueueWithSitemap;
 
 use std::{
     collections::{HashMap, HashSet},
@@ -155,6 +158,17 @@ pub struct SitemapRequestList {
 impl SitemapRequestList {
     /// Returns the next unique request, fetching sitemap documents only on demand.
     pub async fn fetch_next(&self) -> Result<Option<Request>, CrawlError> {
+        self.fetch_next_inner(true).await
+    }
+
+    pub(super) async fn fetch_next_for_tandem(&self) -> Result<Option<Request>, CrawlError> {
+        self.fetch_next_inner(false).await
+    }
+
+    async fn fetch_next_inner(
+        &self,
+        auto_persist_emission: bool,
+    ) -> Result<Option<Request>, CrawlError> {
         let mut state = self.inner.lock().await;
         state.load_persisted().await?;
         loop {
@@ -170,7 +184,7 @@ impl SitemapRequestList {
 
             if state.pending_emission.is_some() {
                 let emitted_total = state.emitted_total + 1;
-                if emitted_total % AUTO_PERSIST_INTERVAL == 0 {
+                if auto_persist_emission && emitted_total % AUTO_PERSIST_INTERVAL == 0 {
                     if let Err(error) = state.persist_emission(emitted_total).await {
                         tracing::warn!(%error, "automatic sitemap checkpoint failed");
                     }
@@ -199,7 +213,9 @@ impl SitemapRequestList {
                     }
                     Err(error) => {
                         state.pending.pop();
-                        state.mark_fetch_failure(next, error).await?;
+                        state
+                            .mark_fetch_failure(next, error, auto_persist_emission)
+                            .await?;
                         continue;
                     }
                 }
@@ -242,12 +258,12 @@ impl SitemapRequestList {
                 Some(Err(error)) => {
                     tracing::warn!(%error, "sitemap parsing failed");
                     if error.is_body() {
-                        state.fail_current().await?;
+                        state.fail_current(auto_persist_emission).await?;
                     } else {
-                        state.complete_current().await?;
+                        state.complete_current(auto_persist_emission).await?;
                     }
                 }
-                None => state.complete_current().await?,
+                None => state.complete_current(auto_persist_emission).await?,
             }
         }
     }
@@ -459,7 +475,7 @@ impl State {
         }
     }
 
-    async fn complete_current(&mut self) -> Result<(), CrawlError> {
+    async fn complete_current(&mut self, persist: bool) -> Result<(), CrawlError> {
         if let Some(mut current) = self.current.take() {
             for nested in current.nested.drain(..).rev() {
                 self.pending.push(nested);
@@ -468,13 +484,17 @@ impl State {
             self.completed_failures.remove(&url);
             self.completed.insert(url);
         }
-        self.persist_now().await
+        if persist {
+            self.persist_now().await?;
+        }
+        Ok(())
     }
 
     async fn mark_fetch_failure(
         &mut self,
         failed: PendingSitemap,
         error: CrawlError,
+        persist: bool,
     ) -> Result<(), CrawlError> {
         let url = failed.url.as_str().to_owned();
         tracing::warn!(%url, %error, "sitemap fetch failed; continuing");
@@ -484,10 +504,13 @@ impl State {
         }
         self.completed_failures.insert(url.clone());
         self.completed.insert(url);
-        self.persist_now().await
+        if persist {
+            self.persist_now().await?;
+        }
+        Ok(())
     }
 
-    async fn fail_current(&mut self) -> Result<(), CrawlError> {
+    async fn fail_current(&mut self, persist: bool) -> Result<(), CrawlError> {
         if let Some(current) = self.current.take() {
             for nested in &current.nested {
                 self.seen_sitemaps.remove(nested.url.as_str());
@@ -500,7 +523,10 @@ impl State {
             self.completed_failures.insert(url.clone());
             self.completed.insert(url);
         }
-        self.persist_now().await
+        if persist {
+            self.persist_now().await?;
+        }
+        Ok(())
     }
 
     async fn persist_now(&self) -> Result<(), CrawlError> {

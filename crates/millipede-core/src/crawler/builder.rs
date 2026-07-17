@@ -6,7 +6,7 @@ use crate::{
     config::{ConfigError, Configuration},
     handler::{FailedRequestHandler, RequestHandler},
     link_extraction::CrawlPolicy,
-    storage::{KeyValueStore, StorageClient, StorageError},
+    storage::{KeyValueStore, RequestQueue, StorageClient, StorageError},
 };
 use std::{sync::Arc, time::Duration};
 
@@ -52,6 +52,7 @@ pub struct CrawlerBuilder<K: CrawlerKind> {
     internal_operation_timeout: Duration,
     configuration: Option<Configuration>,
     storage_client: Option<Arc<dyn StorageClient>>,
+    request_queue: Option<Arc<dyn RequestQueue>>,
     results_capacity: usize,
     retry_strategy: Option<Arc<dyn crate::retry_strategy::RetryStrategy>>,
     crawl_policy: Option<Arc<CrawlPolicy>>,
@@ -75,6 +76,7 @@ impl<K: CrawlerKind> CrawlerBuilder<K> {
             internal_operation_timeout: Duration::from_secs(30),
             configuration: None,
             storage_client: None,
+            request_queue: None,
             results_capacity: 1024,
             retry_strategy: None,
             crawl_policy: None,
@@ -170,6 +172,16 @@ impl<K: CrawlerKind> CrawlerBuilder<K> {
         self.storage_client = Some(storage);
         self
     }
+    /// Overrides the request queue opened from storage.
+    ///
+    /// This hook lets a [`crate::sitemap::RequestQueueWithSitemap`] tandem drive the crawler.
+    /// Callers resuming a pre-populated persistent queue should pair it with
+    /// [`crate::config::ConfigurationBuilder::purge_on_start`] set to `false`. Storage still
+    /// supplies the crawler's key-value store and other storage objects.
+    pub fn request_queue(mut self, queue: Arc<dyn RequestQueue>) -> Self {
+        self.request_queue = Some(queue);
+        self
+    }
     /// Sets the terminal-result broadcast capacity.
     pub fn results_capacity(mut self, capacity: usize) -> Self {
         self.results_capacity = capacity;
@@ -220,9 +232,14 @@ impl<K: CrawlerKind> CrawlerBuilder<K> {
         if config.purge_on_start() {
             storage.purge().await?;
         }
-        let queue = storage
-            .open_request_queue(Some(config.default_request_queue_id()))
-            .await?;
+        let queue = match self.request_queue {
+            Some(queue) => queue,
+            None => {
+                storage
+                    .open_request_queue(Some(config.default_request_queue_id()))
+                    .await?
+            }
+        };
         let kvs: Option<Arc<dyn KeyValueStore>> = Some(
             storage
                 .open_key_value_store(Some(config.default_key_value_store_id()))
