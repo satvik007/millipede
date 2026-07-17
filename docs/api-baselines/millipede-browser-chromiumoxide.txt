@@ -1,2 +1,252 @@
 pub mod millipede_browser_chromiumoxide
+pub mod millipede_browser_chromiumoxide::discovery
+pub fn millipede_browser_chromiumoxide::discovery::find_browser() -> core::option::Option<std::path::PathBuf>
+pub mod millipede_browser_chromiumoxide::launch
+#[non_exhaustive] pub struct millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+pub millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::args: alloc::vec::Vec<alloc::string::String>
+pub millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::executable: core::option::Option<std::path::PathBuf>
+pub millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::headless: bool
+pub millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::launch_timeout: core::time::Duration
+pub millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::request_timeout: core::time::Duration
+pub millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::user_data_dir: core::option::Option<std::path::PathBuf>
+pub millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::window_size: core::option::Option<(u32, u32)>
+impl millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::arg(self, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::args<I, S>(self, I) -> Self where I: core::iter::traits::collect::IntoIterator<Item = S>, S: core::convert::Into<alloc::string::String>
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::headless(self, bool) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::launch_timeout(self, core::time::Duration) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::request_timeout(self, core::time::Duration) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::user_data_dir(self, impl core::convert::Into<std::path::PathBuf>) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::window_size(self, u32, u32) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_executable(self, impl core::convert::Into<std::path::PathBuf>) -> Self
+impl core::clone::Clone for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::clone(&self) -> millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+impl core::default::Default for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::default() -> Self
+impl core::fmt::Debug for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+impl core::marker::Send for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+impl core::marker::Sync for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+impl core::marker::Unpin for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+impl core::marker::UnsafeUnpin for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+impl core::panic::unwind_safe::UnwindSafe for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+pub mod millipede_browser_chromiumoxide::page
+pub struct millipede_browser_chromiumoxide::page::ChromiumPage
+impl core::clone::Clone for millipede_browser_chromiumoxide::page::ChromiumPage
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::clone(&self) -> millipede_browser_chromiumoxide::page::ChromiumPage
+impl millipede_browser::page::BrowserPage for millipede_browser_chromiumoxide::page::ChromiumPage
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::click<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 str) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::content<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<alloc::string::String, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::cookies<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<alloc::vec::Vec<millipede_core::cookies::Cookie>, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::evaluate_anchors<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<alloc::vec::Vec<url::Url>, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::evaluate_js<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 str) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<serde_json::value::Value, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::goto<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 url::Url, millipede_browser::page::GotoOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<core::option::Option<millipede_browser::page::BrowserResponse>, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::screenshot<'life0, 'async_trait>(&'life0 self, millipede_browser::page::ScreenshotOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<bytes::bytes::Bytes, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::set_cookies<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 [millipede_core::cookies::Cookie]) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::set_extra_headers<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 http::header::map::HeaderMap) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::wait_for_selector<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 str, core::time::Duration) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+impl core::marker::Freeze for millipede_browser_chromiumoxide::page::ChromiumPage
+impl core::marker::Send for millipede_browser_chromiumoxide::page::ChromiumPage
+impl core::marker::Sync for millipede_browser_chromiumoxide::page::ChromiumPage
+impl core::marker::Unpin for millipede_browser_chromiumoxide::page::ChromiumPage
+impl core::marker::UnsafeUnpin for millipede_browser_chromiumoxide::page::ChromiumPage
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_browser_chromiumoxide::page::ChromiumPage
+impl !core::panic::unwind_safe::UnwindSafe for millipede_browser_chromiumoxide::page::ChromiumPage
 pub mod millipede_browser_chromiumoxide::prelude
+pub struct millipede_browser_chromiumoxide::prelude::ChromiumBrowser
+impl core::marker::Freeze for millipede_browser_chromiumoxide::provider::ChromiumBrowser
+impl core::marker::Send for millipede_browser_chromiumoxide::provider::ChromiumBrowser
+impl core::marker::Sync for millipede_browser_chromiumoxide::provider::ChromiumBrowser
+impl core::marker::Unpin for millipede_browser_chromiumoxide::provider::ChromiumBrowser
+impl core::marker::UnsafeUnpin for millipede_browser_chromiumoxide::provider::ChromiumBrowser
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_browser_chromiumoxide::provider::ChromiumBrowser
+impl !core::panic::unwind_safe::UnwindSafe for millipede_browser_chromiumoxide::provider::ChromiumBrowser
+#[non_exhaustive] pub struct millipede_browser_chromiumoxide::prelude::ChromiumLaunchOptions
+pub millipede_browser_chromiumoxide::prelude::ChromiumLaunchOptions::args: alloc::vec::Vec<alloc::string::String>
+pub millipede_browser_chromiumoxide::prelude::ChromiumLaunchOptions::executable: core::option::Option<std::path::PathBuf>
+pub millipede_browser_chromiumoxide::prelude::ChromiumLaunchOptions::headless: bool
+pub millipede_browser_chromiumoxide::prelude::ChromiumLaunchOptions::launch_timeout: core::time::Duration
+pub millipede_browser_chromiumoxide::prelude::ChromiumLaunchOptions::request_timeout: core::time::Duration
+pub millipede_browser_chromiumoxide::prelude::ChromiumLaunchOptions::user_data_dir: core::option::Option<std::path::PathBuf>
+pub millipede_browser_chromiumoxide::prelude::ChromiumLaunchOptions::window_size: core::option::Option<(u32, u32)>
+impl millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::arg(self, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::args<I, S>(self, I) -> Self where I: core::iter::traits::collect::IntoIterator<Item = S>, S: core::convert::Into<alloc::string::String>
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::headless(self, bool) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::launch_timeout(self, core::time::Duration) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::request_timeout(self, core::time::Duration) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::user_data_dir(self, impl core::convert::Into<std::path::PathBuf>) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::window_size(self, u32, u32) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_executable(self, impl core::convert::Into<std::path::PathBuf>) -> Self
+impl core::clone::Clone for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::clone(&self) -> millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+impl core::default::Default for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::default() -> Self
+impl core::fmt::Debug for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+impl core::marker::Send for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+impl core::marker::Sync for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+impl core::marker::Unpin for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+impl core::marker::UnsafeUnpin for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+impl core::panic::unwind_safe::UnwindSafe for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+pub struct millipede_browser_chromiumoxide::prelude::ChromiumPage
+impl core::clone::Clone for millipede_browser_chromiumoxide::page::ChromiumPage
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::clone(&self) -> millipede_browser_chromiumoxide::page::ChromiumPage
+impl millipede_browser::page::BrowserPage for millipede_browser_chromiumoxide::page::ChromiumPage
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::click<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 str) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::content<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<alloc::string::String, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::cookies<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<alloc::vec::Vec<millipede_core::cookies::Cookie>, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::evaluate_anchors<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<alloc::vec::Vec<url::Url>, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::evaluate_js<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 str) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<serde_json::value::Value, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::goto<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 url::Url, millipede_browser::page::GotoOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<core::option::Option<millipede_browser::page::BrowserResponse>, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::screenshot<'life0, 'async_trait>(&'life0 self, millipede_browser::page::ScreenshotOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<bytes::bytes::Bytes, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::set_cookies<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 [millipede_core::cookies::Cookie]) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::set_extra_headers<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 http::header::map::HeaderMap) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::wait_for_selector<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 str, core::time::Duration) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+impl core::marker::Freeze for millipede_browser_chromiumoxide::page::ChromiumPage
+impl core::marker::Send for millipede_browser_chromiumoxide::page::ChromiumPage
+impl core::marker::Sync for millipede_browser_chromiumoxide::page::ChromiumPage
+impl core::marker::Unpin for millipede_browser_chromiumoxide::page::ChromiumPage
+impl core::marker::UnsafeUnpin for millipede_browser_chromiumoxide::page::ChromiumPage
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_browser_chromiumoxide::page::ChromiumPage
+impl !core::panic::unwind_safe::UnwindSafe for millipede_browser_chromiumoxide::page::ChromiumPage
+pub struct millipede_browser_chromiumoxide::prelude::ChromiumoxideProvider
+impl core::clone::Clone for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+pub fn millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::clone(&self) -> millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+impl core::default::Default for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+pub fn millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::default() -> millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+impl core::fmt::Debug for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+pub fn millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl millipede_browser::provider::BrowserProvider for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+pub type millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::Browser = millipede_browser_chromiumoxide::provider::ChromiumBrowser
+pub type millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::LaunchOptions = millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+pub type millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::Page = millipede_browser_chromiumoxide::page::ChromiumPage
+pub fn millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::close_browser<'life0, 'async_trait>(&'life0 self, Self::Browser) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::close_page<'life0, 'async_trait>(&'life0 self, Self::Page) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::launch<'life0, 'life1, 'async_trait>(&'life0 self, Self::LaunchOptions, &'life1 millipede_browser::provider::LaunchContext) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<Self::Browser, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::new_page<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 Self::Browser) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<Self::Page, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+impl core::marker::Freeze for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+impl core::marker::Send for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+impl core::marker::Sync for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+impl core::marker::Unpin for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+impl core::marker::UnsafeUnpin for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+impl core::panic::unwind_safe::UnwindSafe for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+pub fn millipede_browser_chromiumoxide::prelude::find_browser() -> core::option::Option<std::path::PathBuf>
+pub mod millipede_browser_chromiumoxide::provider
+pub struct millipede_browser_chromiumoxide::provider::ChromiumBrowser
+impl core::marker::Freeze for millipede_browser_chromiumoxide::provider::ChromiumBrowser
+impl core::marker::Send for millipede_browser_chromiumoxide::provider::ChromiumBrowser
+impl core::marker::Sync for millipede_browser_chromiumoxide::provider::ChromiumBrowser
+impl core::marker::Unpin for millipede_browser_chromiumoxide::provider::ChromiumBrowser
+impl core::marker::UnsafeUnpin for millipede_browser_chromiumoxide::provider::ChromiumBrowser
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_browser_chromiumoxide::provider::ChromiumBrowser
+impl !core::panic::unwind_safe::UnwindSafe for millipede_browser_chromiumoxide::provider::ChromiumBrowser
+pub struct millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+impl core::clone::Clone for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+pub fn millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::clone(&self) -> millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+impl core::default::Default for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+pub fn millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::default() -> millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+impl core::fmt::Debug for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+pub fn millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl millipede_browser::provider::BrowserProvider for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+pub type millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::Browser = millipede_browser_chromiumoxide::provider::ChromiumBrowser
+pub type millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::LaunchOptions = millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+pub type millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::Page = millipede_browser_chromiumoxide::page::ChromiumPage
+pub fn millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::close_browser<'life0, 'async_trait>(&'life0 self, Self::Browser) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::close_page<'life0, 'async_trait>(&'life0 self, Self::Page) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::launch<'life0, 'life1, 'async_trait>(&'life0 self, Self::LaunchOptions, &'life1 millipede_browser::provider::LaunchContext) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<Self::Browser, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::new_page<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 Self::Browser) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<Self::Page, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+impl core::marker::Freeze for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+impl core::marker::Send for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+impl core::marker::Sync for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+impl core::marker::Unpin for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+impl core::marker::UnsafeUnpin for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+impl core::panic::unwind_safe::UnwindSafe for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+pub struct millipede_browser_chromiumoxide::ChromiumBrowser
+impl core::marker::Freeze for millipede_browser_chromiumoxide::provider::ChromiumBrowser
+impl core::marker::Send for millipede_browser_chromiumoxide::provider::ChromiumBrowser
+impl core::marker::Sync for millipede_browser_chromiumoxide::provider::ChromiumBrowser
+impl core::marker::Unpin for millipede_browser_chromiumoxide::provider::ChromiumBrowser
+impl core::marker::UnsafeUnpin for millipede_browser_chromiumoxide::provider::ChromiumBrowser
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_browser_chromiumoxide::provider::ChromiumBrowser
+impl !core::panic::unwind_safe::UnwindSafe for millipede_browser_chromiumoxide::provider::ChromiumBrowser
+#[non_exhaustive] pub struct millipede_browser_chromiumoxide::ChromiumLaunchOptions
+pub millipede_browser_chromiumoxide::ChromiumLaunchOptions::args: alloc::vec::Vec<alloc::string::String>
+pub millipede_browser_chromiumoxide::ChromiumLaunchOptions::executable: core::option::Option<std::path::PathBuf>
+pub millipede_browser_chromiumoxide::ChromiumLaunchOptions::headless: bool
+pub millipede_browser_chromiumoxide::ChromiumLaunchOptions::launch_timeout: core::time::Duration
+pub millipede_browser_chromiumoxide::ChromiumLaunchOptions::request_timeout: core::time::Duration
+pub millipede_browser_chromiumoxide::ChromiumLaunchOptions::user_data_dir: core::option::Option<std::path::PathBuf>
+pub millipede_browser_chromiumoxide::ChromiumLaunchOptions::window_size: core::option::Option<(u32, u32)>
+impl millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::arg(self, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::args<I, S>(self, I) -> Self where I: core::iter::traits::collect::IntoIterator<Item = S>, S: core::convert::Into<alloc::string::String>
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::headless(self, bool) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::launch_timeout(self, core::time::Duration) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::request_timeout(self, core::time::Duration) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::user_data_dir(self, impl core::convert::Into<std::path::PathBuf>) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::window_size(self, u32, u32) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_executable(self, impl core::convert::Into<std::path::PathBuf>) -> Self
+impl core::clone::Clone for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::clone(&self) -> millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+impl core::default::Default for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::default() -> Self
+impl core::fmt::Debug for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+impl core::marker::Send for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+impl core::marker::Sync for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+impl core::marker::Unpin for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+impl core::marker::UnsafeUnpin for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+impl core::panic::unwind_safe::UnwindSafe for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+pub struct millipede_browser_chromiumoxide::ChromiumPage
+impl core::clone::Clone for millipede_browser_chromiumoxide::page::ChromiumPage
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::clone(&self) -> millipede_browser_chromiumoxide::page::ChromiumPage
+impl millipede_browser::page::BrowserPage for millipede_browser_chromiumoxide::page::ChromiumPage
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::click<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 str) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::content<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<alloc::string::String, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::cookies<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<alloc::vec::Vec<millipede_core::cookies::Cookie>, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::evaluate_anchors<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<alloc::vec::Vec<url::Url>, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::evaluate_js<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 str) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<serde_json::value::Value, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::goto<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 url::Url, millipede_browser::page::GotoOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<core::option::Option<millipede_browser::page::BrowserResponse>, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::screenshot<'life0, 'async_trait>(&'life0 self, millipede_browser::page::ScreenshotOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<bytes::bytes::Bytes, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::set_cookies<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 [millipede_core::cookies::Cookie]) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::set_extra_headers<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 http::header::map::HeaderMap) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_browser_chromiumoxide::page::ChromiumPage::wait_for_selector<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 str, core::time::Duration) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+impl core::marker::Freeze for millipede_browser_chromiumoxide::page::ChromiumPage
+impl core::marker::Send for millipede_browser_chromiumoxide::page::ChromiumPage
+impl core::marker::Sync for millipede_browser_chromiumoxide::page::ChromiumPage
+impl core::marker::Unpin for millipede_browser_chromiumoxide::page::ChromiumPage
+impl core::marker::UnsafeUnpin for millipede_browser_chromiumoxide::page::ChromiumPage
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_browser_chromiumoxide::page::ChromiumPage
+impl !core::panic::unwind_safe::UnwindSafe for millipede_browser_chromiumoxide::page::ChromiumPage
+pub struct millipede_browser_chromiumoxide::ChromiumoxideProvider
+impl core::clone::Clone for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+pub fn millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::clone(&self) -> millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+impl core::default::Default for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+pub fn millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::default() -> millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+impl core::fmt::Debug for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+pub fn millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl millipede_browser::provider::BrowserProvider for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+pub type millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::Browser = millipede_browser_chromiumoxide::provider::ChromiumBrowser
+pub type millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::LaunchOptions = millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
+pub type millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::Page = millipede_browser_chromiumoxide::page::ChromiumPage
+pub fn millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::close_browser<'life0, 'async_trait>(&'life0 self, Self::Browser) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::close_page<'life0, 'async_trait>(&'life0 self, Self::Page) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::launch<'life0, 'life1, 'async_trait>(&'life0 self, Self::LaunchOptions, &'life1 millipede_browser::provider::LaunchContext) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<Self::Browser, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_browser_chromiumoxide::provider::ChromiumoxideProvider::new_page<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 Self::Browser) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<Self::Page, millipede_browser::error::BrowserError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+impl core::marker::Freeze for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+impl core::marker::Send for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+impl core::marker::Sync for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+impl core::marker::Unpin for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+impl core::marker::UnsafeUnpin for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+impl core::panic::unwind_safe::UnwindSafe for millipede_browser_chromiumoxide::provider::ChromiumoxideProvider
+pub fn millipede_browser_chromiumoxide::find_browser() -> core::option::Option<std::path::PathBuf>
