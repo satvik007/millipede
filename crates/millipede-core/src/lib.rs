@@ -48,6 +48,8 @@ pub mod events;
 pub mod handler;
 /// Backend-independent HTTP request, response, and client abstractions.
 pub mod http_client;
+/// Link-extraction strategies, URL patterns, and crawl policy.
+pub mod link_extraction;
 /// Proxy configuration and rotation strategies.
 pub mod proxy;
 /// Request data types and construction helpers.

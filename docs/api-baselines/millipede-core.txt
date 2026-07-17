@@ -1155,6 +1155,168 @@ impl !core::panic::unwind_safe::UnwindSafe for millipede_core::http_client::Stre
 pub trait millipede_core::http_client::HttpClient: core::marker::Send + core::marker::Sync + 'static
 pub fn millipede_core::http_client::HttpClient::send<'life0, 'async_trait>(&'life0 self, millipede_core::http_client::HttpRequest) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<millipede_core::http_client::HttpResponse, millipede_core::http_client::HttpClientError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
 pub fn millipede_core::http_client::HttpClient::stream<'life0, 'async_trait>(&'life0 self, millipede_core::http_client::HttpRequest) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<millipede_core::http_client::StreamingResponse, millipede_core::http_client::HttpClientError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub mod millipede_core::link_extraction
+pub enum millipede_core::link_extraction::EnqueueStrategy
+pub millipede_core::link_extraction::EnqueueStrategy::All
+pub millipede_core::link_extraction::EnqueueStrategy::SameDomain
+pub millipede_core::link_extraction::EnqueueStrategy::SameHostname
+pub millipede_core::link_extraction::EnqueueStrategy::SameOrigin
+impl core::clone::Clone for millipede_core::link_extraction::EnqueueStrategy
+pub fn millipede_core::link_extraction::EnqueueStrategy::clone(&self) -> millipede_core::link_extraction::EnqueueStrategy
+impl core::cmp::Eq for millipede_core::link_extraction::EnqueueStrategy
+impl core::cmp::PartialEq for millipede_core::link_extraction::EnqueueStrategy
+pub fn millipede_core::link_extraction::EnqueueStrategy::eq(&self, &millipede_core::link_extraction::EnqueueStrategy) -> bool
+impl core::default::Default for millipede_core::link_extraction::EnqueueStrategy
+pub fn millipede_core::link_extraction::EnqueueStrategy::default() -> millipede_core::link_extraction::EnqueueStrategy
+impl core::fmt::Debug for millipede_core::link_extraction::EnqueueStrategy
+pub fn millipede_core::link_extraction::EnqueueStrategy::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for millipede_core::link_extraction::EnqueueStrategy
+impl core::marker::StructuralPartialEq for millipede_core::link_extraction::EnqueueStrategy
+impl core::marker::Freeze for millipede_core::link_extraction::EnqueueStrategy
+impl core::marker::Send for millipede_core::link_extraction::EnqueueStrategy
+impl core::marker::Sync for millipede_core::link_extraction::EnqueueStrategy
+impl core::marker::Unpin for millipede_core::link_extraction::EnqueueStrategy
+impl core::marker::UnsafeUnpin for millipede_core::link_extraction::EnqueueStrategy
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::link_extraction::EnqueueStrategy
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::link_extraction::EnqueueStrategy
+pub enum millipede_core::link_extraction::LinkPatternError
+pub millipede_core::link_extraction::LinkPatternError::InvalidGlob
+pub millipede_core::link_extraction::LinkPatternError::InvalidGlob::pattern: alloc::string::String
+pub millipede_core::link_extraction::LinkPatternError::InvalidGlob::source: globset::Error
+impl core::error::Error for millipede_core::link_extraction::LinkPatternError
+pub fn millipede_core::link_extraction::LinkPatternError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
+impl core::fmt::Debug for millipede_core::link_extraction::LinkPatternError
+pub fn millipede_core::link_extraction::LinkPatternError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::link_extraction::LinkPatternError
+pub fn millipede_core::link_extraction::LinkPatternError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::link_extraction::LinkPatternError
+impl core::marker::Send for millipede_core::link_extraction::LinkPatternError
+impl core::marker::Sync for millipede_core::link_extraction::LinkPatternError
+impl core::marker::Unpin for millipede_core::link_extraction::LinkPatternError
+impl core::marker::UnsafeUnpin for millipede_core::link_extraction::LinkPatternError
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::link_extraction::LinkPatternError
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::link_extraction::LinkPatternError
+pub enum millipede_core::link_extraction::TransformResult
+pub millipede_core::link_extraction::TransformResult::Enqueue
+pub millipede_core::link_extraction::TransformResult::Skip
+pub millipede_core::link_extraction::TransformResult::Skip::reason: alloc::string::String
+impl core::fmt::Debug for millipede_core::link_extraction::TransformResult
+pub fn millipede_core::link_extraction::TransformResult::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::link_extraction::TransformResult
+impl core::marker::Send for millipede_core::link_extraction::TransformResult
+impl core::marker::Sync for millipede_core::link_extraction::TransformResult
+impl core::marker::Unpin for millipede_core::link_extraction::TransformResult
+impl core::marker::UnsafeUnpin for millipede_core::link_extraction::TransformResult
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::link_extraction::TransformResult
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::link_extraction::TransformResult
+pub enum millipede_core::link_extraction::UrlPattern
+pub millipede_core::link_extraction::UrlPattern::Glob(alloc::string::String)
+pub millipede_core::link_extraction::UrlPattern::Regex(regex::regex::string::Regex)
+impl core::clone::Clone for millipede_core::link_extraction::UrlPattern
+pub fn millipede_core::link_extraction::UrlPattern::clone(&self) -> millipede_core::link_extraction::UrlPattern
+impl core::convert::From<&str> for millipede_core::link_extraction::UrlPattern
+pub fn millipede_core::link_extraction::UrlPattern::from(&str) -> Self
+impl core::convert::From<alloc::string::String> for millipede_core::link_extraction::UrlPattern
+pub fn millipede_core::link_extraction::UrlPattern::from(alloc::string::String) -> Self
+impl core::convert::From<regex::regex::string::Regex> for millipede_core::link_extraction::UrlPattern
+pub fn millipede_core::link_extraction::UrlPattern::from(regex::regex::string::Regex) -> Self
+impl core::fmt::Debug for millipede_core::link_extraction::UrlPattern
+pub fn millipede_core::link_extraction::UrlPattern::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::link_extraction::UrlPattern
+impl core::marker::Send for millipede_core::link_extraction::UrlPattern
+impl core::marker::Sync for millipede_core::link_extraction::UrlPattern
+impl core::marker::Unpin for millipede_core::link_extraction::UrlPattern
+impl core::marker::UnsafeUnpin for millipede_core::link_extraction::UrlPattern
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::link_extraction::UrlPattern
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::link_extraction::UrlPattern
+#[non_exhaustive] pub struct millipede_core::link_extraction::CrawlPolicy
+pub millipede_core::link_extraction::CrawlPolicy::max_crawl_depth: core::option::Option<u32>
+pub millipede_core::link_extraction::CrawlPolicy::max_requests_per_crawl: core::option::Option<u64>
+pub millipede_core::link_extraction::CrawlPolicy::on_skipped: core::option::Option<alloc::sync::Arc<dyn millipede_core::link_extraction::SkippedHandler>>
+pub millipede_core::link_extraction::CrawlPolicy::strategy: millipede_core::link_extraction::EnqueueStrategy
+impl millipede_core::link_extraction::CrawlPolicy
+pub fn millipede_core::link_extraction::CrawlPolicy::max_crawl_depth(self, u32) -> Self
+pub fn millipede_core::link_extraction::CrawlPolicy::max_requests_per_crawl(self, u64) -> Self
+pub fn millipede_core::link_extraction::CrawlPolicy::new() -> Self
+pub fn millipede_core::link_extraction::CrawlPolicy::on_skipped<H: millipede_core::link_extraction::SkippedHandler>(self, H) -> Self
+pub fn millipede_core::link_extraction::CrawlPolicy::strategy(self, millipede_core::link_extraction::EnqueueStrategy) -> Self
+impl core::default::Default for millipede_core::link_extraction::CrawlPolicy
+pub fn millipede_core::link_extraction::CrawlPolicy::default() -> millipede_core::link_extraction::CrawlPolicy
+impl core::fmt::Debug for millipede_core::link_extraction::CrawlPolicy
+pub fn millipede_core::link_extraction::CrawlPolicy::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::link_extraction::CrawlPolicy
+impl core::marker::Send for millipede_core::link_extraction::CrawlPolicy
+impl core::marker::Sync for millipede_core::link_extraction::CrawlPolicy
+impl core::marker::Unpin for millipede_core::link_extraction::CrawlPolicy
+impl core::marker::UnsafeUnpin for millipede_core::link_extraction::CrawlPolicy
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::link_extraction::CrawlPolicy
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::link_extraction::CrawlPolicy
+pub struct millipede_core::link_extraction::ExtractedLink
+pub millipede_core::link_extraction::ExtractedLink::base: core::option::Option<url::Url>
+pub millipede_core::link_extraction::ExtractedLink::url: alloc::string::String
+impl core::clone::Clone for millipede_core::link_extraction::ExtractedLink
+pub fn millipede_core::link_extraction::ExtractedLink::clone(&self) -> millipede_core::link_extraction::ExtractedLink
+impl core::fmt::Debug for millipede_core::link_extraction::ExtractedLink
+pub fn millipede_core::link_extraction::ExtractedLink::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::link_extraction::ExtractedLink
+impl core::marker::Send for millipede_core::link_extraction::ExtractedLink
+impl core::marker::Sync for millipede_core::link_extraction::ExtractedLink
+impl core::marker::Unpin for millipede_core::link_extraction::ExtractedLink
+impl core::marker::UnsafeUnpin for millipede_core::link_extraction::ExtractedLink
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::link_extraction::ExtractedLink
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::link_extraction::ExtractedLink
+pub struct millipede_core::link_extraction::GlobPattern
+impl core::clone::Clone for millipede_core::link_extraction::GlobPattern
+pub fn millipede_core::link_extraction::GlobPattern::clone(&self) -> millipede_core::link_extraction::GlobPattern
+impl core::convert::From<&str> for millipede_core::link_extraction::GlobPattern
+pub fn millipede_core::link_extraction::GlobPattern::from(&str) -> Self
+impl core::convert::From<alloc::string::String> for millipede_core::link_extraction::GlobPattern
+pub fn millipede_core::link_extraction::GlobPattern::from(alloc::string::String) -> Self
+impl core::convert::From<millipede_core::link_extraction::UrlMatch> for millipede_core::link_extraction::GlobPattern
+pub fn millipede_core::link_extraction::GlobPattern::from(millipede_core::link_extraction::UrlMatch) -> Self
+impl core::convert::From<regex::regex::string::Regex> for millipede_core::link_extraction::GlobPattern
+pub fn millipede_core::link_extraction::GlobPattern::from(regex::regex::string::Regex) -> Self
+impl core::fmt::Debug for millipede_core::link_extraction::GlobPattern
+pub fn millipede_core::link_extraction::GlobPattern::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::link_extraction::GlobPattern
+impl core::marker::Send for millipede_core::link_extraction::GlobPattern
+impl core::marker::Sync for millipede_core::link_extraction::GlobPattern
+impl core::marker::Unpin for millipede_core::link_extraction::GlobPattern
+impl core::marker::UnsafeUnpin for millipede_core::link_extraction::GlobPattern
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::link_extraction::GlobPattern
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::link_extraction::GlobPattern
+pub struct millipede_core::link_extraction::UrlMatch
+pub millipede_core::link_extraction::UrlMatch::headers: core::option::Option<http::header::map::HeaderMap>
+pub millipede_core::link_extraction::UrlMatch::label: core::option::Option<alloc::string::String>
+pub millipede_core::link_extraction::UrlMatch::method: core::option::Option<http::method::Method>
+pub millipede_core::link_extraction::UrlMatch::pattern: millipede_core::link_extraction::UrlPattern
+pub millipede_core::link_extraction::UrlMatch::user_data: core::option::Option<millipede_core::request::UserData>
+impl millipede_core::link_extraction::UrlMatch
+pub fn millipede_core::link_extraction::UrlMatch::headers(self, http::header::map::HeaderMap) -> Self
+pub fn millipede_core::link_extraction::UrlMatch::label(self, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_core::link_extraction::UrlMatch::method(self, http::method::Method) -> Self
+pub fn millipede_core::link_extraction::UrlMatch::new(impl core::convert::Into<millipede_core::link_extraction::UrlPattern>) -> Self
+pub fn millipede_core::link_extraction::UrlMatch::user_data(self, millipede_core::request::UserData) -> Self
+impl core::clone::Clone for millipede_core::link_extraction::UrlMatch
+pub fn millipede_core::link_extraction::UrlMatch::clone(&self) -> millipede_core::link_extraction::UrlMatch
+impl core::convert::From<millipede_core::link_extraction::UrlMatch> for millipede_core::link_extraction::GlobPattern
+pub fn millipede_core::link_extraction::GlobPattern::from(millipede_core::link_extraction::UrlMatch) -> Self
+impl core::fmt::Debug for millipede_core::link_extraction::UrlMatch
+pub fn millipede_core::link_extraction::UrlMatch::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::link_extraction::UrlMatch
+impl core::marker::Send for millipede_core::link_extraction::UrlMatch
+impl core::marker::Sync for millipede_core::link_extraction::UrlMatch
+impl core::marker::Unpin for millipede_core::link_extraction::UrlMatch
+impl core::marker::UnsafeUnpin for millipede_core::link_extraction::UrlMatch
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::link_extraction::UrlMatch
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::link_extraction::UrlMatch
+pub trait millipede_core::link_extraction::LinkExtractor: core::marker::Send + core::marker::Sync
+pub fn millipede_core::link_extraction::LinkExtractor::extract(&self, core::option::Option<&str>) -> core::result::Result<alloc::vec::Vec<millipede_core::link_extraction::ExtractedLink>, millipede_core::errors::CrawlError>
+pub trait millipede_core::link_extraction::SkippedHandler: core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_core::link_extraction::SkippedHandler::on_skip(&self, &str, &millipede_core::enqueue::SkipReason)
+impl<F> millipede_core::link_extraction::SkippedHandler for F where F: core::ops::function::Fn(&str, &millipede_core::enqueue::SkipReason) + core::marker::Send + core::marker::Sync + 'static
+pub fn F::on_skip(&self, &str, &millipede_core::enqueue::SkipReason)
+pub fn millipede_core::link_extraction::strategy_allows(millipede_core::link_extraction::EnqueueStrategy, &url::Url, &url::Url) -> bool
 pub mod millipede_core::prelude
 pub use millipede_core::prelude::HeaderMap
 pub use millipede_core::prelude::Method
