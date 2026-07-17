@@ -1,2 +1,47 @@
 pub mod millipede_storage_fs
 pub mod millipede_storage_fs::prelude
+pub struct millipede_storage_fs::FsDataset
+impl millipede_core::storage::dataset::Dataset for millipede_storage_fs::FsDataset
+pub fn millipede_storage_fs::FsDataset::export_csv<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 std::path::Path) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_storage_fs::FsDataset::export_json<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 std::path::Path) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_storage_fs::FsDataset::info<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<millipede_core::storage::dataset::DatasetInfo>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_storage_fs::FsDataset::list_raw<'life0, 'async_trait>(&'life0 self, millipede_core::storage::dataset::ListOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<millipede_core::storage::dataset::Page<serde_json::value::Value>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_storage_fs::FsDataset::push_json<'life0, 'async_trait>(&'life0 self, serde_json::value::Value) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_storage_fs::FsDataset::push_json_batch<'life0, 'async_trait>(&'life0 self, alloc::vec::Vec<serde_json::value::Value>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_storage_fs::FsDataset::stream_raw(&self, millipede_core::storage::dataset::ListOptions) -> futures_core::stream::BoxStream<'_, millipede_core::storage::StorageResult<serde_json::value::Value>>
+impl !core::marker::Freeze for millipede_storage_fs::FsDataset
+impl core::marker::Send for millipede_storage_fs::FsDataset
+impl core::marker::Sync for millipede_storage_fs::FsDataset
+impl core::marker::Unpin for millipede_storage_fs::FsDataset
+impl core::marker::UnsafeUnpin for millipede_storage_fs::FsDataset
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_storage_fs::FsDataset
+impl !core::panic::unwind_safe::UnwindSafe for millipede_storage_fs::FsDataset
+pub struct millipede_storage_fs::FsKeyValueStore
+impl millipede_core::storage::kvs::KeyValueStore for millipede_storage_fs::FsKeyValueStore
+pub fn millipede_storage_fs::FsKeyValueStore::delete<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 str) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_storage_fs::FsKeyValueStore::get_bytes<'life0, 'life1, 'async_trait>(&'life0 self, &'life1 str) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<core::option::Option<millipede_core::storage::kvs::KvEntry>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_storage_fs::FsKeyValueStore::list_keys<'life0, 'async_trait>(&'life0 self, millipede_core::storage::kvs::ListKeysOptions) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<millipede_core::storage::kvs::KeyList>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+pub fn millipede_storage_fs::FsKeyValueStore::set_bytes<'life0, 'life1, 'life2, 'async_trait>(&'life0 self, &'life1 str, bytes::bytes::Bytes, &'life2 str) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait, 'life2: 'async_trait
+impl !core::marker::Freeze for millipede_storage_fs::FsKeyValueStore
+impl core::marker::Send for millipede_storage_fs::FsKeyValueStore
+impl core::marker::Sync for millipede_storage_fs::FsKeyValueStore
+impl core::marker::Unpin for millipede_storage_fs::FsKeyValueStore
+impl core::marker::UnsafeUnpin for millipede_storage_fs::FsKeyValueStore
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_storage_fs::FsKeyValueStore
+impl !core::panic::unwind_safe::UnwindSafe for millipede_storage_fs::FsKeyValueStore
+pub struct millipede_storage_fs::FsStorageClient
+impl millipede_storage_fs::FsStorageClient
+pub fn millipede_storage_fs::FsStorageClient::new(impl core::convert::Into<std::path::PathBuf>) -> Self
+pub fn millipede_storage_fs::FsStorageClient::root(&self) -> &std::path::Path
+impl millipede_core::storage::StorageClient for millipede_storage_fs::FsStorageClient
+pub fn millipede_storage_fs::FsStorageClient::open_dataset<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::dataset::Dataset>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_storage_fs::FsStorageClient::open_key_value_store<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::kvs::KeyValueStore>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_storage_fs::FsStorageClient::open_request_queue<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::queue::RequestQueue>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_storage_fs::FsStorageClient::purge<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+impl !core::marker::Freeze for millipede_storage_fs::FsStorageClient
+impl core::marker::Send for millipede_storage_fs::FsStorageClient
+impl core::marker::Sync for millipede_storage_fs::FsStorageClient
+impl core::marker::Unpin for millipede_storage_fs::FsStorageClient
+impl core::marker::UnsafeUnpin for millipede_storage_fs::FsStorageClient
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_storage_fs::FsStorageClient
+impl !core::panic::unwind_safe::UnwindSafe for millipede_storage_fs::FsStorageClient
