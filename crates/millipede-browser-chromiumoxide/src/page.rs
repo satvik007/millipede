@@ -6,7 +6,7 @@ use async_trait::async_trait;
 use chromiumoxide::{
     Page,
     cdp::browser_protocol::{
-        network::{Headers, SetExtraHttpHeadersParams},
+        network::{Headers, SetCookiesParams, SetExtraHttpHeadersParams},
         page::CaptureScreenshotFormat,
     },
     page::ScreenshotParams,
@@ -165,8 +165,11 @@ impl BrowserPage for ChromiumPage {
             .iter()
             .map(crate::cookie::to_cdp)
             .collect::<Result<Vec<_>, _>>()?;
+        // Chromiumoxide's page helper rejects an about:blank current URL even when every cookie
+        // supplies its own URL or domain. Pooled pages restore session cookies before navigation,
+        // so issue the CDP command directly instead.
         self.page
-            .set_cookies(converted)
+            .execute(SetCookiesParams::new(converted))
             .await
             .map_err(|error| BrowserError::Protocol(anyhow::Error::new(error)))?;
         Ok(())
