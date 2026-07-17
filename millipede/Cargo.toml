@@ -69,3 +69,13 @@ required-features = ["http", "storage-memory"]
 name = "scrape_books"
 path = "../examples/scrape_books.rs"
 required-features = ["http", "html", "storage-fs"]
+
+[[example]]
+name = "browser_crawl"
+path = "../examples/browser_crawl.rs"
+required-features = ["browser-chromiumoxide", "storage-memory"]
+
+[[example]]
+name = "smart_crawl"
+path = "../examples/smart_crawl.rs"
+required-features = ["browser-chromiumoxide", "html", "storage-memory"]

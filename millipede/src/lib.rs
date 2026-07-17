@@ -17,6 +17,20 @@ pub use millipede_storage_fs as storage_fs;
 #[cfg(feature = "storage-memory")]
 pub use millipede_storage_memory as storage_memory;
 
+#[cfg(feature = "browser")]
+pub use millipede_browser::{
+    BrowserContext, BrowserCrawler, BrowserError, BrowserHooks, BrowserKind, BrowserKindBuilder,
+    BrowserPage, BrowserPool, BrowserPoolOptions, BrowserPromotionDetector, BrowserProvider,
+    BrowserResponse, DefaultPromotionDetector, GotoOptions, HttpAttemptSnapshot, LaunchContext,
+    PageHandle, PageId, PageOpts, PromotionReason, ScreenshotOptions, SmartContext, SmartCrawler,
+    SmartKind, SmartKindBuilder, WaitUntil,
+};
+#[cfg(feature = "browser-chromiumoxide")]
+pub use millipede_browser_chromiumoxide::discovery::find_browser;
+#[cfg(feature = "browser-chromiumoxide")]
+pub use millipede_browser_chromiumoxide::{
+    ChromiumBrowser, ChromiumLaunchOptions, ChromiumPage, ChromiumoxideProvider,
+};
 /// Curated public API for ergonomic `millipede::Type` imports.
 pub use millipede_core::autoscale::{
     AimdController, AutoscaleMode, AutoscaledPool, AutoscaledPoolOptions, ClientLoadSignal,
@@ -91,8 +105,8 @@ pub use millipede_storage_memory::{MemoryQueuePolicy, MemoryRequestQueue, Memory
 
 /// Commonly used items across all enabled Millipede crates.
 pub mod prelude {
-    // The browser, browser-chromiumoxide, and fingerprint preludes remain empty until their phases
-    // land, so those glob re-exports would otherwise trip `unused_imports` under -D warnings.
+    // The fingerprint prelude remains empty until Phase 7, so its glob re-export would otherwise
+    // trip `unused_imports` under -D warnings. Keep this allowance scoped to the prelude module.
     #![allow(unused_imports)]
 
     pub use millipede_core::prelude::*;
@@ -111,4 +125,22 @@ pub mod prelude {
     pub use millipede_storage_fs::prelude::*;
     #[cfg(feature = "storage-memory")]
     pub use millipede_storage_memory::prelude::*;
+}
+
+#[cfg(all(test, feature = "browser", feature = "browser-chromiumoxide"))]
+mod browser_reexport_compile_guard {
+    use super::*;
+
+    fn assert_provider<P: BrowserProvider>() {}
+    fn assert_page<P: BrowserPage>() {}
+
+    #[test]
+    fn umbrella_exposes_browser_types() {
+        assert_provider::<ChromiumoxideProvider>();
+        assert_page::<ChromiumPage>();
+        let _ = ChromiumLaunchOptions::default();
+        let _ = find_browser as fn() -> Option<std::path::PathBuf>;
+        let _: Option<BrowserKindBuilder<ChromiumoxideProvider>> = None;
+        let _: Option<SmartKindBuilder<ChromiumoxideProvider>> = None;
+    }
 }
