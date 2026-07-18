@@ -869,7 +869,7 @@ pub struct SessionPool {
 
 impl SessionPool {
     pub async fn new(opts: SessionPoolOptions, storage: StorageHandle) -> Result<Self>;
-    pub async fn get_session(&self, sticky_id: Option<&SessionId>) -> Result<Arc<Session>>;
+    pub async fn session(&self, sticky_id: Option<&SessionId>) -> Arc<Session>;
     pub async fn retire_session(&self, s: &Session);
     pub async fn persist(&self) -> Result<()>;     // wire to PersistState event
     pub async fn restore(&self) -> Result<()>;
@@ -986,7 +986,7 @@ pub struct PageHandle<P: BrowserProvider> { … }
 pub struct BrowserHooks<P: BrowserProvider> {
     pub pre_launch: Vec<Hook<LaunchContext, P>>,
     pub post_launch: Vec<Hook<(Arc<P::Browser>, LaunchContext), P>>,
-    pub pre_page_create: Vec<Hook<(&Arc<P::Browser>, PageOpts<P>), P>>,
+    pub pre_page_create: Vec<Hook<(&Arc<P::Browser>, PageOptions), P>>,
     pub post_page_create: Vec<Hook<&P::Page, P>>,
     pub pre_page_close: Vec<Hook<&P::Page, P>>,
     pub post_page_close: Vec<Hook<(), P>>,
@@ -1569,14 +1569,14 @@ These map directly onto Crawlee's options and are wired into the engine, not sur
 
 - **`AsyncLocalStorage` access checks.** Storage access is gated by *which `StorageHandle` was passed in*, not by ambient runtime state. There's no equivalent "you accessed a dataset outside a crawler" error — passing the handle around is the contract.
 - **JS-style `RouterHandler` callable object.** We use a normal `Router` struct that implements `RequestHandler`. Builders set the handler on the crawler; the duality is gone.
-- **`useState` magic.** Crawlee's `useState()` returns an auto-persisted reactive value bound to context identity. We expose `kvs.auto_saved("key", default)` explicitly. Users opt in.
+- **`useState` magic.** Crawlee's `useState()` returns an auto-persisted reactive value bound to context identity. We expose `AutoSaved::open(kvs, "key", default).await` explicitly. Users opt in.
 - **`got-scraping` directly.** Header generation is reimplemented in `millipede-fingerprint`; we don't shell out to a Node library. True TLS fingerprinting is handled only by swapping the `HttpClient` backend (for example a future `wreq`/`impit`-style client), not by pretending a custom verifier is enough.
 - **`PseudoUrl` legacy patterns.** Crawlee's `[regex]` bracketed pseudo-URLs are deprecated even there; we accept only globs and regexes.
 - **A 1:1 port of `BrowserCrawler`'s 80+ context utility methods** (`infinite_scroll`, `save_snapshot`, `enqueue_links_by_click_elements`, …). We ship the obvious ones (`enqueue_links` works with CSS selectors on `BrowserContext`); the rest are user-space helper crates.
 
 ---
 
-## 22. Open Questions & Resolved Decisions
+## 22. Resolved Decisions & Tracked Follow-ups
 
 **Resolved (via Codex/Gemini review):**
 
@@ -1593,19 +1593,16 @@ These map directly onto Crawlee's options and are wired into the engine, not sur
 - ✅ **Result streaming shape.** Resolved in §4.3 and §15: `run()` returns final stats, `results()` exposes completed-request snapshots, and `events()` remains the control-plane feed. We do not make `run()` return a stream because the owned handler context is consumed and browser resources may already be cleaned up.
 - ✅ **Cookie jar concretion.** Resolved at Phase 3 (ADR-0002): custom `CookieJar` newtype over `cookie_store::CookieStore` behind `std::sync::Mutex`; `reqwest_cookie_store` rejected (would pull `reqwest` into `millipede-core`; manual redirect handling for `redirect_chain` makes reqwest's cookie layer unused; per-request jars cannot ride a per-client cookie provider).
 - ✅ **`scraper` ergonomics and engine extraction path.** Resolved at Phase 5 (ADR-0005): `selectors!` `OnceLock` macro shipped in `millipede-html`; `EnqueueLinker` extracts over the pre-parsed `Arc<millipede_html::SynchronizedHtml>`, whose owned query helpers and dereferencing lock guard provide synchronized access to the wrapped `scraper::Html`; no `ctx.selectors` registry; `lol_html` not adopted. Direct `Arc<scraper::Html>` is unsound for the `Send` context contract because scraper 0.24's `Html` is not `Sync`.
+- ✅ **Phase 8 public API naming audit.** `PageOptions` and the infallible `SessionPool::session` are the shipped names, replacing their pre-audit spellings according to the naming conventions codified in ADR-0007.
 
-**Still open:**
-
-1. **Dynamic configuration reload (Gemini #3.2, ChatGPT Pro #7).** Currently a built crawler's `Configuration` is immutable. Allow `set_log_level` / `set_proxy_strategy` post-build via an `Arc<RwLock<RuntimeConfig>>` for the small subset that's safe to mutate live? Decision: defer to **post-1.0** unless a use case appears. The candidate mutable surface — log level, proxy strategy choice (not the proxy URLs themselves), autoscaler ceiling — is documented here so we don't have to re-derive it later.
-2. **Scaffolding (ChatGPT Pro #4).** Crawlee ships a CLI scaffolder. Two-stage plan:
-   - **Pre-0.2:** publish a `cargo-generate` template (`millipede-template`) under the same org. Cheap to maintain — it's just a starter `Cargo.toml` + `main.rs` for each crawler kind. Lowers the adoption barrier without committing to a CLI surface we'd have to support.
-   - **Post-1.0:** the full `millipede-cli` crate (`millipede new`, `millipede run`, future `millipede serve` for the inspector UI). Tracked as an issue, not a phase.
-3. **Distributed crawl support.** `RequestQueue` lease semantics open the door; a Redis-backed impl is the obvious post-1.0 add. Apify platform integration is a longer arc — see also the Crawlee parity & migration notes below.
-4. **`CrawlError` source granularity (Gemini #1.3).** Variants currently wrap `anyhow::Error`. Consider replacing with typed `source` chains (`NetworkError { source: reqwest::Error }`, `ParseError { source: scraper::Error }`) before 1.0 to give users structured matching power. Open until we collect feedback on what failure-handling patterns users actually want.
-5. **`UserData` typing (Gemini #1.2).** `serde_json::Map`-backed is the practical choice. Worth exploring a derive macro (`#[derive(UserData)]`) that generates typed accessors against an underlying map. Post-1.0.
+- **Dynamic configuration reload.** Deferred until post-1.0; the candidate runtime-mutable subset is staged in [`docs/tracked-issues.md`](tracked-issues.md).
+- **Scaffolding.** Phase 8 ships local `cargo-generate` starters under `templates/` (`basic-http`, `basic-html`, and `basic-browser`), validated with `cargo generate --path`. At publish time, the maintainer will extract them into a standalone `millipede-template` repository. The `millipede-cli` scaffolder remains post-1.0 and is staged in [`docs/tracked-issues.md`](tracked-issues.md).
+- **Distributed crawl support.** A Redis-backed `RequestQueue` remains a follow-up staged in [`docs/tracked-issues.md`](tracked-issues.md).
+- **`CrawlError` source granularity.** Keep `anyhow`-wrapped sources for 0.1.0 and revisit typed source chains before 1.0; the work is staged in [`docs/tracked-issues.md`](tracked-issues.md).
+- **`UserData` derive macro.** Deferred until post-1.0 and staged in [`docs/tracked-issues.md`](tracked-issues.md).
 
 **Ecosystem & migration (ChatGPT Pro #5, #6):**
 
-- **`millipede-extras` (community crate).** Crawlee's `infinite_scroll`, `save_snapshot`, `enqueue_links_by_click_elements`, login helpers, etc. are deliberately out of `millipede-core` (see §21). Rather than absorb that surface, we will publish an opt-in `millipede-extras` crate as a venue for these — same org, looser API stability bar than core, semver-independent of `millipede` itself. Helpers ship there until they earn a place in core. Tracked as a post-1.0 effort; the policy doc is what we want in place by 0.1.0 so contributors know where to send PRs.
-- **Crawlee → Millipede migration guide.** Phase 8 (the release candidate) must include a side-by-side guide covering: error-handling semantics (typed `CrawlError` vs. string sniffing), router semantics (label + method matching, no `this`-binding), `enqueue_links` API differences (typed builder vs. options object), storage layout (FS layer is wire-compatible — see §8.2), and the `useState` ⇒ `kvs.auto_saved` mapping. This is a hard exit criterion for 0.1.0, not a stretch goal.
+- **`millipede-extras` (community crate).** Crawlee's `infinite_scroll`, `save_snapshot`, `enqueue_links_by_click_elements`, login helpers, etc. are deliberately out of `millipede-core` (see §21). Rather than absorb that surface, we will publish an opt-in `millipede-extras` crate as a venue for these — same org, looser API stability bar than core, semver-independent of `millipede` itself. Helpers ship there until they earn a place in core. Phase 8 lands [`docs/guide/extras.md`](guide/extras.md) with the contribution, governance, and promotion policy.
+- **Crawlee → Millipede migration guide.** Phase 8 lands [`docs/guide/migrating-from-crawlee.md`](guide/migrating-from-crawlee.md) with side-by-side treatment of error handling, router semantics, `enqueue_links`, storage compatibility, and the `useState` ⇒ `AutoSaved<T>` mapping.
 - **Apify platform deployment.** Out of scope until the `millipede-storage-apify` crate exists (post-1.0). When it lands, we ship: a `Dockerfile.example` per crawler kind, the `APIFY_*` environment variable mapping, and a "running on Apify" section in the guide. Tracked so we don't lose context, but no work in 0.1.0.
