@@ -8,6 +8,8 @@ pub use millipede_browser as browser;
 pub use millipede_browser_chromiumoxide as browser_chromiumoxide;
 #[cfg(feature = "fingerprint")]
 pub use millipede_fingerprint as fingerprint;
+#[cfg(feature = "fingerprint")]
+pub use millipede_fingerprint::{BrowserFingerprintGenerator, HeaderGenerator, HeaderProfile};
 #[cfg(feature = "html")]
 pub use millipede_html as html;
 #[cfg(feature = "http")]
@@ -20,7 +22,8 @@ pub use millipede_storage_memory as storage_memory;
 #[cfg(feature = "browser")]
 pub use millipede_browser::{
     BrowserContext, BrowserCrawler, BrowserError, BrowserHooks, BrowserKind, BrowserKindBuilder,
-    BrowserPage, BrowserPool, BrowserPoolOptions, BrowserPromotionDetector, BrowserProvider,
+    BrowserPage, BrowserPool, BrowserPoolOptions, BrowserPostHookCtx, BrowserPostNavigationHook,
+    BrowserPreHookCtx, BrowserPreNavigationHook, BrowserPromotionDetector, BrowserProvider,
     BrowserResponse, DefaultPromotionDetector, GotoOptions, HttpAttemptSnapshot, LaunchContext,
     PageHandle, PageId, PageOpts, PromotionReason, ScreenshotOptions, SmartContext, SmartCrawler,
     SmartKind, SmartKindBuilder, WaitUntil,
@@ -32,6 +35,7 @@ pub use millipede_browser_chromiumoxide::{
     ChromiumBrowser, ChromiumLaunchOptions, ChromiumPage, ChromiumoxideProvider,
 };
 /// Curated public API for ergonomic `millipede::Type` imports.
+pub use millipede_core::antibot::{AntiBotDetector, AntiBotSignals, DefaultAntiBotDetector};
 pub use millipede_core::autoscale::{
     AimdController, AutoscaleMode, AutoscaledPool, AutoscaledPoolOptions, ClientLoadSignal,
     ClientLoadSignalHandle, CpuLoadSignal, CpuLoadSignalOptions, LoadSignal, LoadSnapshot,
@@ -76,18 +80,20 @@ pub use millipede_core::retry_strategy::{
 pub use millipede_core::router::{HasRequest, MethodFilter, Router};
 pub use millipede_core::session::{
     SESSION_POOL_PERSIST_KEY, Session, SessionConfig, SessionId, SessionPool, SessionPoolOptions,
+    SessionToken,
 };
 pub use millipede_core::sitemap::{
     RequestQueueWithSitemap, SITEMAP_STATE_KEY, SitemapEntry, SitemapRequestList,
     SitemapRequestListBuilder,
 };
+pub use millipede_core::snapshot::{ErrorSnapshot, ErrorSnapshotter};
 pub use millipede_core::statistics::{
     FinalStatistics, STATISTICS_PERSIST_KEY, StatisticsHandle, StatisticsSnapshot,
 };
 pub use millipede_core::storage::{
     AddOptions, AutoSaved, Dataset, DatasetExt, KeyValueStore, KeyValueStoreExt, Lease, LeaseId,
-    ListOptions, ProcessedRequest, QueueOpInfo, ReclaimOptions, RequestQueue, RequestSource,
-    StorageClient, StorageError, StorageHandle, StorageResult,
+    ListOptions, ProcessedRequest, QueueOpInfo, RateLimitReportingClient, ReclaimOptions,
+    RequestQueue, RequestSource, StorageClient, StorageError, StorageHandle, StorageResult,
 };
 #[cfg(feature = "html")]
 pub use millipede_html::{
@@ -95,7 +101,8 @@ pub use millipede_html::{
 };
 #[cfg(feature = "http")]
 pub use millipede_http::{
-    CoalescingClient, HttpContext, HttpCrawler, HttpKind, HttpKindBuilder, ReqwestClient,
+    CoalescingClient, HttpContext, HttpCrawler, HttpKind, HttpKindBuilder, HttpPostHookCtx,
+    HttpPostNavigationHook, HttpPreHookCtx, HttpPreNavigationHook, ReqwestClient,
     ReqwestClientOptions,
 };
 #[cfg(feature = "storage-fs")]
@@ -105,10 +112,6 @@ pub use millipede_storage_memory::{MemoryQueuePolicy, MemoryRequestQueue, Memory
 
 /// Commonly used items across all enabled Millipede crates.
 pub mod prelude {
-    // The fingerprint prelude remains empty until Phase 7, so its glob re-export would otherwise
-    // trip `unused_imports` under -D warnings. Keep this allowance scoped to the prelude module.
-    #![allow(unused_imports)]
-
     pub use millipede_core::prelude::*;
 
     #[cfg(feature = "browser")]

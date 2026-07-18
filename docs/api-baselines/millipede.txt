@@ -1,6 +1,8 @@
 pub mod millipede
 pub use millipede::AddOptions
 pub use millipede::AimdController
+pub use millipede::AntiBotDetector
+pub use millipede::AntiBotSignals
 pub use millipede::AntiBotTech
 pub use millipede::AttemptObservation
 pub use millipede::AttemptOutcome
@@ -34,10 +36,13 @@ pub use millipede::CrawlerHandle
 pub use millipede::CrawlerKind
 pub use millipede::Dataset
 pub use millipede::DatasetExt
+pub use millipede::DefaultAntiBotDetector
 pub use millipede::EnqueueLinker
 pub use millipede::EnqueueLinksOptions
 pub use millipede::EnqueueResult
 pub use millipede::EnqueueStrategy
+pub use millipede::ErrorSnapshot
+pub use millipede::ErrorSnapshotter
 pub use millipede::EventBus
 pub use millipede::EventStream
 pub use millipede::ExtractedLink
@@ -60,6 +65,10 @@ pub use millipede::HttpContext
 pub use millipede::HttpCrawler
 pub use millipede::HttpKind
 pub use millipede::HttpKindBuilder
+pub use millipede::HttpPostHookCtx
+pub use millipede::HttpPostNavigationHook
+pub use millipede::HttpPreHookCtx
+pub use millipede::HttpPreNavigationHook
 pub use millipede::HttpRequest
 pub use millipede::HttpResponse
 pub use millipede::HttpStatusError
@@ -94,6 +103,7 @@ pub use millipede::ProxyResolver
 pub use millipede::ProxyRouteContext
 pub use millipede::ProxyStrategy
 pub use millipede::QueueOpInfo
+pub use millipede::RateLimitReportingClient
 pub use millipede::ReclaimOptions
 pub use millipede::Request
 pub use millipede::RequestBody
@@ -126,6 +136,7 @@ pub use millipede::SessionId
 pub use millipede::SessionPool
 pub use millipede::SessionPoolOptions
 pub use millipede::SessionRetryAction
+pub use millipede::SessionToken
 pub use millipede::SitemapEntry
 pub use millipede::SitemapRequestList
 pub use millipede::SitemapRequestListBuilder

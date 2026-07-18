@@ -79,3 +79,8 @@ required-features = ["browser-chromiumoxide", "storage-memory"]
 name = "smart_crawl"
 path = "../examples/smart_crawl.rs"
 required-features = ["browser-chromiumoxide", "html", "storage-memory"]
+
+[[example]]
+name = "fingerprint_crawl"
+path = "../examples/fingerprint_crawl.rs"
+required-features = ["http", "fingerprint", "storage-memory"]

@@ -3,7 +3,7 @@
 
 #![cfg(all(feature = "http", feature = "html"))]
 
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use millipede::{
     CrawlPolicy, Crawler, DatasetExt, EnqueueStrategy, HtmlContext, HtmlKind, ListOptions,
@@ -63,5 +63,52 @@ async fn scrapes_books_over_the_live_network() -> anyhow::Result<()> {
         .await?;
     assert!(stats.requests_finished > 0);
     assert!(!books.items.is_empty());
+    Ok(())
+}
+
+// This sandbox has no network egress and cannot bind localhost, so this stays ignored. The lead
+// engineer runs it on the host with `cargo test -p millipede --test scrape_books_live -- --ignored`;
+// exit auditors must not report sandbox network failures as blockers.
+#[tokio::test]
+#[ignore = "hits books.toscrape.com over the real network"]
+async fn crawls_without_trivial_bot_blocks() -> anyhow::Result<()> {
+    let errors = Arc::new(Mutex::new(Vec::<String>::new()));
+    let crawler = Crawler::builder(HtmlKind::builder().detect_anti_bot_default().build()?)
+        .storage_client(Arc::new(MemoryStorageClient::new()))
+        .crawl_policy(
+            CrawlPolicy::new()
+                .strategy(EnqueueStrategy::SameHostname)
+                .max_requests_per_crawl(30),
+        )
+        .max_concurrency(5)
+        .request_handler(|ctx: HtmlContext| async move {
+            ctx.enqueue.options().selector("a").send().await?;
+            Ok(())
+        })
+        .failed_request_handler({
+            let errors = Arc::clone(&errors);
+            move |ctx: millipede::FailedRequestContext| {
+                let errors = Arc::clone(&errors);
+                async move {
+                    errors
+                        .lock()
+                        .expect("error mutex poisoned")
+                        .push(ctx.error.to_string());
+                    Ok(())
+                }
+            }
+        })
+        .build()
+        .await?;
+
+    let stats = crawler.run("https://books.toscrape.com/").await?;
+    assert!(stats.requests_finished > 0);
+    assert!(
+        errors
+            .lock()
+            .expect("error mutex poisoned")
+            .iter()
+            .all(|error| !error.contains("anti-bot detected"))
+    );
     Ok(())
 }

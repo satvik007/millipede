@@ -60,6 +60,7 @@ jobs:
       - run: cargo run -p millipede --example phase1_queue_demo
       - run: cargo run -p millipede --example basic_engine
       - run: cargo run -p millipede --example autoscale_demo
+      - run: cargo run -p millipede --features http,fingerprint,storage-memory --example fingerprint_crawl
 
   # Browser tests run on Linux + macOS only; Windows is intentionally excluded
   # (ROADMAP Phase 6 exit criteria). setup-chrome caches the Chromium download.
