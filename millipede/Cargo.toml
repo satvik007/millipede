@@ -43,45 +43,53 @@ browser-chromiumoxide = ["dep:millipede-browser-chromiumoxide", "browser"]
 fingerprint = ["dep:millipede-fingerprint"]
 
 [[example]]
-name = "phase0_hello"
-path = "../examples/phase0_hello.rs"
-
-[[example]]
 name = "phase1_queue_demo"
-path = "../examples/phase1_queue_demo.rs"
 required-features = ["storage-memory"]
 
 [[example]]
 name = "basic_engine"
-path = "../examples/basic_engine.rs"
 required-features = ["storage-memory"]
 
 [[example]]
 name = "http_crawl"
-path = "../examples/http_crawl.rs"
 required-features = ["http", "storage-memory"]
 
 [[example]]
 name = "autoscale_demo"
-path = "../examples/autoscale_demo.rs"
 required-features = ["http", "storage-memory"]
 
 [[example]]
 name = "scrape_books"
-path = "../examples/scrape_books.rs"
 required-features = ["http", "html", "storage-fs"]
 
 [[example]]
 name = "browser_crawl"
-path = "../examples/browser_crawl.rs"
 required-features = ["browser-chromiumoxide", "storage-memory"]
 
 [[example]]
 name = "smart_crawl"
-path = "../examples/smart_crawl.rs"
 required-features = ["browser-chromiumoxide", "html", "storage-memory"]
 
 [[example]]
 name = "fingerprint_crawl"
-path = "../examples/fingerprint_crawl.rs"
 required-features = ["http", "fingerprint", "storage-memory"]
+
+[[example]]
+name = "basic"
+required-features = ["http", "html", "storage-memory"]
+
+[[example]]
+name = "error_handling"
+required-features = ["http", "storage-memory"]
+
+[[example]]
+name = "rate_limit"
+required-features = ["http", "storage-memory"]
+
+[[example]]
+name = "proxy_switcher"
+required-features = ["http", "storage-memory"]
+
+[[example]]
+name = "hackernews"
+required-features = ["http", "html", "storage-memory"]

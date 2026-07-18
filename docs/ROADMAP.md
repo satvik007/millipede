@@ -309,6 +309,14 @@ The phase that makes Millipede usable for "real" scraping projects.
 
 ## Phase 8 — `0.1.0` Release Candidate  (target: 1–2 weeks)
 
+> **Local proxies for publication-shaped work.** Examples now live in
+> `millipede/examples/` so the umbrella crate includes them in its package. Per CTO decision,
+> this phase satisfies publication-shaped exit criteria with local proxies: use
+> `cargo package --workspace` / `cargo publish --dry-run` instead of crates.io publication;
+> validate `templates/` with `cargo generate --path` and a documented `[patch.crates-io]`
+> instead of a published template repository; and commit the announcement as a draft. Actual
+> publication, pushes, and repository creation require explicit maintainer action after the phase.
+
 ### Scope
 - Audit public API for consistency (naming, async signature uniformity).
 - Run `cargo public-api` and lock the surface; document everything.
