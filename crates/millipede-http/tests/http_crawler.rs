@@ -9,11 +9,13 @@ use http::StatusCode;
 use millipede_core::{
     config::Configuration,
     crawler::Crawler,
+    errors::CrawlError,
     handler::FailedRequestContext,
     proxy::{ProxyBuckets, ProxyConfiguration, ProxyKind, ProxyRouteContext, ProxyStrategy},
     request::Request,
     retry_strategy::{AttemptOutcome, RetryDirective, RetryStrategy},
     session::{SESSION_POOL_PERSIST_KEY, SessionPool, SessionPoolOptions},
+    snapshot::ErrorSnapshotter,
     storage::StorageClient,
 };
 use millipede_http::{HttpContext, HttpKind};
@@ -474,5 +476,216 @@ async fn coalescing_is_an_opt_in_smoke_test() -> Result<(), Box<dyn std::error::
         .run([Request::get(url(&server, "/page")).build()?])
         .await?;
     assert_eq!(stats.requests_finished, 1);
+    Ok(())
+}
+
+#[tokio::test]
+async fn anti_bot_challenge_reported_as_anti_bot_detected() -> Result<(), Box<dyn std::error::Error>>
+{
+    let server = MockServer::start().await;
+    Mock::given(path("/challenge"))
+        .respond_with(
+            ResponseTemplate::new(403)
+                .set_body_raw("<html><title>Just a moment...</title></html>", "text/html"),
+        )
+        .mount(&server)
+        .await;
+    let terminal_error = Arc::new(Mutex::new(String::new()));
+    let crawler = Crawler::builder(HttpKind::builder().detect_anti_bot_default().build()?)
+        .max_request_retries(0)
+        .max_session_rotations(0)
+        .request_handler(|_: HttpContext| async { Ok(()) })
+        .failed_request_handler({
+            let terminal_error = Arc::clone(&terminal_error);
+            move |ctx: FailedRequestContext| {
+                let terminal_error = Arc::clone(&terminal_error);
+                async move {
+                    *terminal_error.lock().expect("error mutex poisoned") = ctx.error.to_string();
+                    Ok(())
+                }
+            }
+        })
+        .storage_client(Arc::new(MemoryStorageClient::new()))
+        .build()
+        .await?;
+
+    let stats = crawler.run([url(&server, "/challenge")]).await?;
+
+    assert_eq!(stats.requests_failed, 1);
+    assert!(
+        terminal_error
+            .lock()
+            .expect("error mutex poisoned")
+            .contains("anti-bot detected")
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn default_off_leaves_challenge_to_status_classification()
+-> Result<(), Box<dyn std::error::Error>> {
+    let server = MockServer::start().await;
+    Mock::given(path("/challenge"))
+        .respond_with(
+            ResponseTemplate::new(403)
+                .set_body_raw("<html><title>Just a moment...</title></html>", "text/html"),
+        )
+        .mount(&server)
+        .await;
+    let terminal_error = Arc::new(Mutex::new(String::new()));
+    let crawler = Crawler::builder(HttpKind::builder().build()?)
+        .max_request_retries(0)
+        .max_session_rotations(0)
+        .request_handler(|_: HttpContext| async { Ok(()) })
+        .failed_request_handler({
+            let terminal_error = Arc::clone(&terminal_error);
+            move |ctx: FailedRequestContext| {
+                let terminal_error = Arc::clone(&terminal_error);
+                async move {
+                    *terminal_error.lock().expect("error mutex poisoned") = ctx.error.to_string();
+                    Ok(())
+                }
+            }
+        })
+        .storage_client(Arc::new(MemoryStorageClient::new()))
+        .build()
+        .await?;
+
+    let stats = crawler.run([url(&server, "/challenge")]).await?;
+
+    assert_eq!(stats.requests_failed, 1);
+    assert!(
+        !terminal_error
+            .lock()
+            .expect("error mutex poisoned")
+            .contains("anti-bot detected")
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn ordinary_body_not_flagged() -> Result<(), Box<dyn std::error::Error>> {
+    let server = MockServer::start().await;
+    Mock::given(path("/ordinary"))
+        .respond_with(ResponseTemplate::new(200).set_body_raw("<html>hello</html>", "text/html"))
+        .mount(&server)
+        .await;
+    let crawler = Crawler::builder(HttpKind::builder().detect_anti_bot_default().build()?)
+        .request_handler(|_: HttpContext| async { Ok(()) })
+        .storage_client(Arc::new(MemoryStorageClient::new()))
+        .build()
+        .await?;
+
+    let stats = crawler.run([url(&server, "/ordinary")]).await?;
+
+    assert_eq!(stats.requests_finished, 1);
+    assert_eq!(stats.requests_failed, 0);
+    Ok(())
+}
+
+#[tokio::test]
+async fn pre_navigation_hook_mutates_headers() -> Result<(), Box<dyn std::error::Error>> {
+    let server = MockServer::start().await;
+    Mock::given(path("/hook"))
+        .and(header("x-millipede-hook", "pre"))
+        .respond_with(ResponseTemplate::new(200))
+        .expect(1)
+        .mount(&server)
+        .await;
+    let kind = HttpKind::builder()
+        .pre_navigation_hook(|ctx| {
+            ctx.http_request.headers.insert(
+                http::HeaderName::from_static("x-millipede-hook"),
+                http::HeaderValue::from_static("pre"),
+            );
+            Box::pin(async { Ok(()) })
+        })
+        .build()?;
+    let crawler = Crawler::builder(kind)
+        .request_handler(|_: HttpContext| async { Ok(()) })
+        .storage_client(Arc::new(MemoryStorageClient::new()))
+        .build()
+        .await?;
+
+    let stats = crawler.run([url(&server, "/hook")]).await?;
+
+    assert_eq!(stats.requests_finished, 1);
+    server.verify().await;
+    Ok(())
+}
+
+#[tokio::test]
+async fn post_navigation_hook_error_short_circuits() -> Result<(), Box<dyn std::error::Error>> {
+    let server = MockServer::start().await;
+    Mock::given(path("/hook"))
+        .respond_with(ResponseTemplate::new(200))
+        .mount(&server)
+        .await;
+    let failed = Arc::new(Mutex::new(false));
+    let kind = HttpKind::builder()
+        .post_navigation_hook(|_| {
+            Box::pin(async { Err(CrawlError::non_retryable(anyhow::anyhow!("post hook"))) })
+        })
+        .build()?;
+    let crawler = Crawler::builder(kind)
+        .max_request_retries(0)
+        .request_handler(|_: HttpContext| async { Ok(()) })
+        .failed_request_handler({
+            let failed = Arc::clone(&failed);
+            move |_: FailedRequestContext| {
+                let failed = Arc::clone(&failed);
+                async move {
+                    *failed.lock().expect("failed mutex poisoned") = true;
+                    Ok(())
+                }
+            }
+        })
+        .storage_client(Arc::new(MemoryStorageClient::new()))
+        .build()
+        .await?;
+
+    let stats = crawler.run([url(&server, "/hook")]).await?;
+
+    assert_eq!(stats.requests_failed, 1);
+    assert!(*failed.lock().expect("failed mutex poisoned"));
+    Ok(())
+}
+
+#[tokio::test]
+async fn snapshot_errors_persists_body() -> Result<(), Box<dyn std::error::Error>> {
+    let server = MockServer::start().await;
+    Mock::given(path("/gone"))
+        .respond_with(ResponseTemplate::new(200).set_body_raw("gone", "text/html"))
+        .mount(&server)
+        .await;
+    let configuration = Configuration::builder().build()?;
+    let default_kvs_id = configuration.default_key_value_store_id().to_owned();
+    let storage = Arc::new(MemoryStorageClient::new());
+    let request = Request::get(url(&server, "/gone")).build()?;
+    let snapshot_key = format!("{}.body", ErrorSnapshotter::base_key(&request));
+    let crawler = Crawler::builder(
+        HttpKind::builder()
+            .snapshot_errors_on_failure(true)
+            .build()?,
+    )
+    .max_request_retries(0)
+    .request_handler(|_: HttpContext| async {
+        Err(CrawlError::non_retryable(anyhow::anyhow!("handler failed")))
+    })
+    .configuration(configuration)
+    .storage_client(storage.clone())
+    .build()
+    .await?;
+
+    let stats = crawler.run([request]).await?;
+    assert_eq!(stats.requests_failed, 1);
+
+    let kvs = storage.open_key_value_store(Some(&default_kvs_id)).await?;
+    let snapshot = ErrorSnapshotter::new(kvs)
+        .load(&snapshot_key)
+        .await?
+        .expect("body snapshot should exist");
+    assert_eq!(snapshot.bytes.as_ref(), b"gone");
+    assert_eq!(snapshot.content_type, "text/html");
     Ok(())
 }

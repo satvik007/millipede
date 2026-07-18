@@ -8,7 +8,10 @@ use std::{
 use anyhow::anyhow;
 use async_trait::async_trait;
 use futures_util::TryStreamExt;
-use http::header::{COOKIE, LOCATION, USER_AGENT};
+use http::{
+    HeaderName, HeaderValue,
+    header::{COOKIE, LOCATION, USER_AGENT},
+};
 use millipede_core::{
     http_client::{HttpClient, HttpClientError, HttpRequest, HttpResponse, StreamingResponse},
     request::{Method, RequestBody},
@@ -43,6 +46,8 @@ pub struct ReqwestClientOptions {
     pub max_cached_clients: usize,
     /// User-Agent inserted when a request does not already contain one.
     pub default_user_agent: Option<String>,
+    /// Generator used for deterministic browser-like request headers.
+    pub header_generator: Arc<millipede_fingerprint::HeaderGenerator>,
 }
 
 impl Default for ReqwestClientOptions {
@@ -54,6 +59,7 @@ impl Default for ReqwestClientOptions {
             default_user_agent: Some(
                 "millipede/0.1 (+https://github.com/satvik007/millipede)".to_owned(),
             ),
+            header_generator: Arc::new(millipede_fingerprint::HeaderGenerator::new()),
         }
     }
 }
@@ -80,6 +86,15 @@ impl ReqwestClientOptions {
     /// Sets or disables the default User-Agent.
     pub fn with_default_user_agent(mut self, user_agent: Option<String>) -> Self {
         self.default_user_agent = user_agent;
+        self
+    }
+
+    /// Replaces the deterministic browser-like header generator.
+    pub fn with_header_generator(
+        mut self,
+        generator: Arc<millipede_fingerprint::HeaderGenerator>,
+    ) -> Self {
+        self.header_generator = generator;
         self
     }
 }
@@ -174,6 +189,28 @@ impl ReqwestClient {
         loop {
             let client = self.client_for(request.proxy.as_ref())?;
             let mut headers = request.headers.clone();
+            if request.use_header_generator {
+                let seed = request
+                    .session_token
+                    .as_ref()
+                    .map(|token| token.as_str().to_owned())
+                    .unwrap_or_else(|| current_url.as_str().to_owned());
+                let profile = self.options.header_generator.generate(&seed);
+                if !headers.contains_key(USER_AGENT) {
+                    if let Ok(value) = profile.user_agent.parse() {
+                        headers.insert(USER_AGENT, value);
+                    }
+                }
+                for (name, value) in profile.headers {
+                    if let (Ok(name), Ok(value)) =
+                        (name.parse::<HeaderName>(), value.parse::<HeaderValue>())
+                    {
+                        if !headers.contains_key(&name) {
+                            headers.insert(name, value);
+                        }
+                    }
+                }
+            }
             if !headers.contains_key(USER_AGENT) {
                 if let Some(user_agent) = &self.options.default_user_agent {
                     let value = user_agent.parse().map_err(|error| {

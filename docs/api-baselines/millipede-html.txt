@@ -63,9 +63,14 @@ pub struct millipede_html::prelude::HtmlKindBuilder
 impl millipede_html::HtmlKindBuilder
 pub fn millipede_html::HtmlKindBuilder::build(self) -> core::result::Result<millipede_html::HtmlKind, millipede_core::http_client::HttpClientError>
 pub fn millipede_html::HtmlKindBuilder::coalesce_in_flight(self, bool) -> Self
+pub fn millipede_html::HtmlKindBuilder::detect_anti_bot(self, alloc::sync::Arc<dyn millipede_core::antibot::AntiBotDetector>) -> Self
+pub fn millipede_html::HtmlKindBuilder::detect_anti_bot_default(self) -> Self
 pub fn millipede_html::HtmlKindBuilder::disable_sessions(self) -> Self
+pub fn millipede_html::HtmlKindBuilder::header_generator(self, bool) -> Self
 pub fn millipede_html::HtmlKindBuilder::http_client(self, alloc::sync::Arc<dyn millipede_core::http_client::HttpClient>) -> Self
 pub fn millipede_html::HtmlKindBuilder::max_redirects(self, u32) -> Self
+pub fn millipede_html::HtmlKindBuilder::post_navigation_hook<F>(self, F) -> Self where F: for<'a> core::ops::function::Fn(millipede_http::nav::HttpPostHookCtx<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_html::HtmlKindBuilder::pre_navigation_hook<F>(self, F) -> Self where F: for<'a> core::ops::function::Fn(millipede_http::nav::HttpPreHookCtx<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + core::marker::Sync + 'static
 pub fn millipede_html::HtmlKindBuilder::proxy(self, millipede_core::proxy::ProxyConfiguration) -> Self
 pub fn millipede_html::HtmlKindBuilder::proxy_buckets(self, millipede_core::proxy::ProxyBuckets) -> Self
 pub fn millipede_html::HtmlKindBuilder::proxy_strategy<S: millipede_core::proxy::ProxyStrategy>(self, S) -> Self
@@ -75,6 +80,7 @@ pub fn millipede_html::HtmlKindBuilder::retry_status_codes(self, impl core::iter
 pub fn millipede_html::HtmlKindBuilder::session_pool(self, millipede_core::session::SessionPoolOptions) -> Self
 pub fn millipede_html::HtmlKindBuilder::session_status_codes(self, impl core::iter::traits::collect::IntoIterator<Item = u16>) -> Self
 pub fn millipede_html::HtmlKindBuilder::shared_session_pool(self, alloc::sync::Arc<millipede_core::session::SessionPool>) -> Self
+pub fn millipede_html::HtmlKindBuilder::snapshot_errors_on_failure(self, bool) -> Self
 pub fn millipede_html::HtmlKindBuilder::user_agents<I, U>(self, I) -> Self where I: core::iter::traits::collect::IntoIterator<Item = U>, U: core::convert::Into<alloc::string::String>
 impl core::default::Default for millipede_html::HtmlKindBuilder
 pub fn millipede_html::HtmlKindBuilder::default() -> Self
@@ -161,9 +167,14 @@ pub struct millipede_html::HtmlKindBuilder
 impl millipede_html::HtmlKindBuilder
 pub fn millipede_html::HtmlKindBuilder::build(self) -> core::result::Result<millipede_html::HtmlKind, millipede_core::http_client::HttpClientError>
 pub fn millipede_html::HtmlKindBuilder::coalesce_in_flight(self, bool) -> Self
+pub fn millipede_html::HtmlKindBuilder::detect_anti_bot(self, alloc::sync::Arc<dyn millipede_core::antibot::AntiBotDetector>) -> Self
+pub fn millipede_html::HtmlKindBuilder::detect_anti_bot_default(self) -> Self
 pub fn millipede_html::HtmlKindBuilder::disable_sessions(self) -> Self
+pub fn millipede_html::HtmlKindBuilder::header_generator(self, bool) -> Self
 pub fn millipede_html::HtmlKindBuilder::http_client(self, alloc::sync::Arc<dyn millipede_core::http_client::HttpClient>) -> Self
 pub fn millipede_html::HtmlKindBuilder::max_redirects(self, u32) -> Self
+pub fn millipede_html::HtmlKindBuilder::post_navigation_hook<F>(self, F) -> Self where F: for<'a> core::ops::function::Fn(millipede_http::nav::HttpPostHookCtx<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_html::HtmlKindBuilder::pre_navigation_hook<F>(self, F) -> Self where F: for<'a> core::ops::function::Fn(millipede_http::nav::HttpPreHookCtx<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + core::marker::Sync + 'static
 pub fn millipede_html::HtmlKindBuilder::proxy(self, millipede_core::proxy::ProxyConfiguration) -> Self
 pub fn millipede_html::HtmlKindBuilder::proxy_buckets(self, millipede_core::proxy::ProxyBuckets) -> Self
 pub fn millipede_html::HtmlKindBuilder::proxy_strategy<S: millipede_core::proxy::ProxyStrategy>(self, S) -> Self
@@ -173,6 +184,7 @@ pub fn millipede_html::HtmlKindBuilder::retry_status_codes(self, impl core::iter
 pub fn millipede_html::HtmlKindBuilder::session_pool(self, millipede_core::session::SessionPoolOptions) -> Self
 pub fn millipede_html::HtmlKindBuilder::session_status_codes(self, impl core::iter::traits::collect::IntoIterator<Item = u16>) -> Self
 pub fn millipede_html::HtmlKindBuilder::shared_session_pool(self, alloc::sync::Arc<millipede_core::session::SessionPool>) -> Self
+pub fn millipede_html::HtmlKindBuilder::snapshot_errors_on_failure(self, bool) -> Self
 pub fn millipede_html::HtmlKindBuilder::user_agents<I, U>(self, I) -> Self where I: core::iter::traits::collect::IntoIterator<Item = U>, U: core::convert::Into<alloc::string::String>
 impl core::default::Default for millipede_html::HtmlKindBuilder
 pub fn millipede_html::HtmlKindBuilder::default() -> Self

@@ -6,6 +6,7 @@ use std::{
 
 use futures_util::future::BoxFuture;
 use millipede_core::{
+    antibot::AntiBotDetector,
     crawler::{
         AttemptObservation, Crawler, CrawlerEnv, CrawlerHandle, CrawlerKind, RequestEnv,
         RequestOutcome, RequestPrep,
@@ -19,7 +20,7 @@ use millipede_core::{
     session::{Session, SessionPool, SessionPoolOptions},
     storage::StorageHandle,
 };
-use millipede_http::{HttpContext, HttpKind, HttpKindBuilder};
+use millipede_http::{HttpContext, HttpKind, HttpKindBuilder, HttpPostHookCtx, HttpPreHookCtx};
 
 use crate::HtmlLinkExtractor;
 
@@ -301,6 +302,58 @@ impl HtmlKindBuilder {
     /// Sets the maximum number of redirects followed for one request.
     pub fn max_redirects(mut self, maximum: u32) -> Self {
         self.http = self.http.max_redirects(maximum);
+        self
+    }
+
+    /// Enables response inspection with a caller-supplied anti-bot detector.
+    pub fn detect_anti_bot(mut self, detector: Arc<dyn AntiBotDetector>) -> Self {
+        self.http = self.http.detect_anti_bot(detector);
+        self
+    }
+
+    /// Opts into the default anti-bot detector.
+    pub fn detect_anti_bot_default(mut self) -> Self {
+        self.http = self.http.detect_anti_bot_default();
+        self
+    }
+
+    /// Enables or disables deterministic browser-like request headers.
+    pub fn header_generator(mut self, enabled: bool) -> Self {
+        self.http = self.http.header_generator(enabled);
+        self
+    }
+
+    /// Enables or disables response-body snapshots when handlers fail.
+    pub fn snapshot_errors_on_failure(mut self, enabled: bool) -> Self {
+        self.http = self.http.snapshot_errors_on_failure(enabled);
+        self
+    }
+
+    /// Registers an HTTP hook that runs immediately before navigation.
+    pub fn pre_navigation_hook<F>(mut self, hook: F) -> Self
+    where
+        F: for<'a> Fn(
+                HttpPreHookCtx<'a>,
+            ) -> futures_util::future::BoxFuture<'a, Result<(), CrawlError>>
+            + Send
+            + Sync
+            + 'static,
+    {
+        self.http = self.http.pre_navigation_hook(hook);
+        self
+    }
+
+    /// Registers an HTTP hook that runs after navigation.
+    pub fn post_navigation_hook<F>(mut self, hook: F) -> Self
+    where
+        F: for<'a> Fn(
+                HttpPostHookCtx<'a>,
+            ) -> futures_util::future::BoxFuture<'a, Result<(), CrawlError>>
+            + Send
+            + Sync
+            + 'static,
+    {
+        self.http = self.http.post_navigation_hook(hook);
         self
     }
 

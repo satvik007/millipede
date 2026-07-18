@@ -13,6 +13,7 @@ use anyhow::anyhow;
 use futures_util::future::BoxFuture;
 use http::{HeaderValue, StatusCode, header::USER_AGENT};
 use millipede_core::{
+    antibot::{AntiBotDetector, AntiBotSignals, DefaultAntiBotDetector},
     crawler::{
         AttemptObservation, Crawler, CrawlerEnv, CrawlerHandle, CrawlerKind, RequestEnv,
         RequestOutcome,
@@ -156,6 +157,11 @@ pub struct HttpKind {
     session_status_codes: Vec<u16>,
     request_timeout: Duration,
     max_redirects: u32,
+    detect_anti_bot: Option<Arc<dyn AntiBotDetector>>,
+    header_generator: bool,
+    snapshot_errors: bool,
+    pre_hooks: Vec<crate::nav::HttpPreNavigationHook>,
+    post_hooks: Vec<crate::nav::HttpPostNavigationHook>,
     storage: OnceLock<StorageHandle>,
     persist_task: Mutex<Option<tokio::task::JoinHandle<()>>>,
 }
@@ -255,6 +261,11 @@ pub struct HttpKindBuilder {
     session_status_codes: Vec<u16>,
     request_timeout: Duration,
     max_redirects: u32,
+    detect_anti_bot: Option<Arc<dyn AntiBotDetector>>,
+    header_generator: bool,
+    snapshot_errors: bool,
+    pre_hooks: Vec<crate::nav::HttpPreNavigationHook>,
+    post_hooks: Vec<crate::nav::HttpPostNavigationHook>,
 }
 
 impl Default for HttpKindBuilder {
@@ -272,6 +283,11 @@ impl Default for HttpKindBuilder {
             session_status_codes: vec![401, 403],
             request_timeout: Duration::from_secs(30),
             max_redirects: 10,
+            detect_anti_bot: None,
+            header_generator: false,
+            snapshot_errors: false,
+            pre_hooks: Vec::new(),
+            post_hooks: Vec::new(),
         }
     }
 }
@@ -371,6 +387,59 @@ impl HttpKindBuilder {
         self
     }
 
+    /// Enables response inspection with a caller-supplied anti-bot detector.
+    pub fn detect_anti_bot(mut self, detector: Arc<dyn AntiBotDetector>) -> Self {
+        self.detect_anti_bot = Some(detector);
+        self
+    }
+
+    /// Opts into the default anti-bot detector.
+    ///
+    /// Detection is off by default so SmartKind promotion and default crawls are unaffected.
+    pub fn detect_anti_bot_default(self) -> Self {
+        self.detect_anti_bot(Arc::new(DefaultAntiBotDetector::new()))
+    }
+
+    /// Enables or disables deterministic browser-like request headers.
+    pub fn header_generator(mut self, enabled: bool) -> Self {
+        self.header_generator = enabled;
+        self
+    }
+
+    /// Enables or disables response-body snapshots when handlers fail.
+    pub fn snapshot_errors_on_failure(mut self, enabled: bool) -> Self {
+        self.snapshot_errors = enabled;
+        self
+    }
+
+    /// Registers an HTTP hook that runs immediately before navigation.
+    pub fn pre_navigation_hook<F>(mut self, hook: F) -> Self
+    where
+        F: for<'a> Fn(
+                crate::nav::HttpPreHookCtx<'a>,
+            ) -> futures_util::future::BoxFuture<'a, Result<(), CrawlError>>
+            + Send
+            + Sync
+            + 'static,
+    {
+        self.pre_hooks.push(Arc::new(hook));
+        self
+    }
+
+    /// Registers an HTTP hook that runs after navigation.
+    pub fn post_navigation_hook<F>(mut self, hook: F) -> Self
+    where
+        F: for<'a> Fn(
+                crate::nav::HttpPostHookCtx<'a>,
+            ) -> futures_util::future::BoxFuture<'a, Result<(), CrawlError>>
+            + Send
+            + Sync
+            + 'static,
+    {
+        self.post_hooks.push(Arc::new(hook));
+        self
+    }
+
     /// Builds the kind, constructing a typed-error [`ReqwestClient`] when none was injected.
     pub fn build(self) -> Result<HttpKind, HttpClientError> {
         let client = match self.http_client {
@@ -401,6 +470,11 @@ impl HttpKindBuilder {
             session_status_codes: self.session_status_codes,
             request_timeout: self.request_timeout,
             max_redirects: self.max_redirects,
+            detect_anti_bot: self.detect_anti_bot,
+            header_generator: self.header_generator,
+            snapshot_errors: self.snapshot_errors,
+            pre_hooks: self.pre_hooks,
+            post_hooks: self.post_hooks,
             storage: OnceLock::new(),
             persist_task: Mutex::new(None),
         })
@@ -533,11 +607,56 @@ impl CrawlerKind for HttpKind {
                 http_request.headers.insert(USER_AGENT, value);
             }
 
+            if self.header_generator {
+                let token = if let Some(session) = &session {
+                    millipede_core::session::SessionToken::from(session.id())
+                } else {
+                    millipede_core::session::SessionToken::new(env.request.unique_key.clone())
+                };
+                http_request = http_request.use_header_generator(true).session_token(token);
+            }
+
+            for hook in &self.pre_hooks {
+                hook(crate::nav::HttpPreHookCtx {
+                    request: &env.request,
+                    http_request: &mut http_request,
+                    session: session.as_deref(),
+                    proxy: proxy_info.as_ref(),
+                })
+                .await?;
+            }
+
             let response = self
                 .client
                 .send(http_request)
                 .await
                 .map_err(Self::classify_client_error)?;
+            if let Some(detector) = &self.detect_anti_bot {
+                let signals = AntiBotSignals::new(
+                    response.status,
+                    &response.headers,
+                    &response.body,
+                    &response.url,
+                );
+                if let Some(tech) = detector.detect(&signals) {
+                    if let Some(session) = &session {
+                        session.mark_bad().await;
+                    }
+                    return Err(CrawlError::AntiBotDetected {
+                        tech,
+                        source: anyhow!("response body matched a known anti-bot challenge marker"),
+                    });
+                }
+            }
+            for hook in &self.post_hooks {
+                hook(crate::nav::HttpPostHookCtx {
+                    request: &env.request,
+                    response: &response,
+                    session: session.as_deref(),
+                    proxy: proxy_info.as_ref(),
+                })
+                .await?;
+            }
             let retry_after = parse_retry_after(&response.headers, time::OffsetDateTime::now_utc());
             self.classify_status(
                 response.status,
@@ -582,6 +701,29 @@ impl CrawlerKind for HttpKind {
                 if error.rotates_session() {
                     if let Some(session) = &ctx.session {
                         session.mark_bad().await;
+                    }
+                }
+                if self.snapshot_errors {
+                    let snapshotter = millipede_core::snapshot::ErrorSnapshotter::new(
+                        ctx.storage.key_value_store().clone(),
+                    );
+                    let content_type = ctx
+                        .response
+                        .headers
+                        .get(http::header::CONTENT_TYPE)
+                        .and_then(|value| value.to_str().ok())
+                        .unwrap_or("application/octet-stream")
+                        .to_owned();
+                    if let Err(snapshot_error) = snapshotter
+                        .capture(
+                            &ctx.request,
+                            "body",
+                            ctx.response.body.clone(),
+                            &content_type,
+                        )
+                        .await
+                    {
+                        tracing::warn!(%snapshot_error, "error snapshot capture failed");
                     }
                 }
             }

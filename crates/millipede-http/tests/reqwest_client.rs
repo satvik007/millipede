@@ -7,6 +7,7 @@ use http::{HeaderMap, HeaderValue, Method, StatusCode, header::USER_AGENT};
 use millipede_core::{
     cookies::CookieJar,
     http_client::{HttpClient, HttpClientError, HttpRequest},
+    session::SessionToken,
 };
 use millipede_http::{ReqwestClient, ReqwestClientOptions};
 use url::Url;
@@ -224,6 +225,65 @@ async fn preserves_explicit_user_agent_and_applies_default_when_absent() {
         .unwrap();
     assert_eq!(explicit.headers.get(USER_AGENT).unwrap(), "explicit-agent");
     assert_eq!(defaulted.headers.get(USER_AGENT).unwrap(), "millipede-test");
+}
+
+#[tokio::test]
+async fn header_generator_applies_deterministic_profile() {
+    let server = MockServer::start().await;
+    Mock::given(any())
+        .respond_with(ResponseTemplate::new(200))
+        .mount(&server)
+        .await;
+    let client = ReqwestClient::new().unwrap();
+
+    for path in ["/generated-a", "/generated-b"] {
+        client
+            .send(
+                HttpRequest::new(url(&server, path))
+                    .use_header_generator(true)
+                    .session_token(SessionToken::new("seed-a")),
+            )
+            .await
+            .unwrap();
+    }
+
+    let mut headers = HeaderMap::new();
+    headers.insert(USER_AGENT, HeaderValue::from_static("explicit-agent"));
+    client
+        .send(
+            HttpRequest::new(url(&server, "/explicit"))
+                .headers(headers)
+                .use_header_generator(true)
+                .session_token(SessionToken::new("seed-a")),
+        )
+        .await
+        .unwrap();
+
+    let requests = server.received_requests().await.unwrap();
+    let generated_a = requests
+        .iter()
+        .find(|request| request.url.path() == "/generated-a")
+        .unwrap();
+    let generated_b = requests
+        .iter()
+        .find(|request| request.url.path() == "/generated-b")
+        .unwrap();
+    let explicit = requests
+        .iter()
+        .find(|request| request.url.path() == "/explicit")
+        .unwrap();
+
+    assert!(
+        generated_a
+            .headers
+            .get("accept-language")
+            .is_some_and(|value| !value.as_bytes().is_empty())
+    );
+    assert_eq!(
+        generated_a.headers.get(USER_AGENT),
+        generated_b.headers.get(USER_AGENT)
+    );
+    assert_eq!(explicit.headers.get(USER_AGENT).unwrap(), "explicit-agent");
 }
 
 #[tokio::test]

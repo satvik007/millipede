@@ -1,4 +1,31 @@
 pub mod millipede_http
+pub mod millipede_http::nav
+#[non_exhaustive] pub struct millipede_http::nav::HttpPostHookCtx<'a>
+pub millipede_http::nav::HttpPostHookCtx::proxy: core::option::Option<&'a millipede_core::proxy::ProxyInfo>
+pub millipede_http::nav::HttpPostHookCtx::request: &'a millipede_core::request::Request
+pub millipede_http::nav::HttpPostHookCtx::response: &'a millipede_core::http_client::HttpResponse
+pub millipede_http::nav::HttpPostHookCtx::session: core::option::Option<&'a millipede_core::session::Session>
+impl<'a> core::marker::Freeze for millipede_http::nav::HttpPostHookCtx<'a>
+impl<'a> core::marker::Send for millipede_http::nav::HttpPostHookCtx<'a>
+impl<'a> core::marker::Sync for millipede_http::nav::HttpPostHookCtx<'a>
+impl<'a> core::marker::Unpin for millipede_http::nav::HttpPostHookCtx<'a>
+impl<'a> core::marker::UnsafeUnpin for millipede_http::nav::HttpPostHookCtx<'a>
+impl<'a> !core::panic::unwind_safe::RefUnwindSafe for millipede_http::nav::HttpPostHookCtx<'a>
+impl<'a> !core::panic::unwind_safe::UnwindSafe for millipede_http::nav::HttpPostHookCtx<'a>
+#[non_exhaustive] pub struct millipede_http::nav::HttpPreHookCtx<'a>
+pub millipede_http::nav::HttpPreHookCtx::http_request: &'a mut millipede_core::http_client::HttpRequest
+pub millipede_http::nav::HttpPreHookCtx::proxy: core::option::Option<&'a millipede_core::proxy::ProxyInfo>
+pub millipede_http::nav::HttpPreHookCtx::request: &'a millipede_core::request::Request
+pub millipede_http::nav::HttpPreHookCtx::session: core::option::Option<&'a millipede_core::session::Session>
+impl<'a> core::marker::Freeze for millipede_http::nav::HttpPreHookCtx<'a>
+impl<'a> core::marker::Send for millipede_http::nav::HttpPreHookCtx<'a>
+impl<'a> core::marker::Sync for millipede_http::nav::HttpPreHookCtx<'a>
+impl<'a> core::marker::Unpin for millipede_http::nav::HttpPreHookCtx<'a>
+impl<'a> core::marker::UnsafeUnpin for millipede_http::nav::HttpPreHookCtx<'a>
+impl<'a> !core::panic::unwind_safe::RefUnwindSafe for millipede_http::nav::HttpPreHookCtx<'a>
+impl<'a> !core::panic::unwind_safe::UnwindSafe for millipede_http::nav::HttpPreHookCtx<'a>
+pub type millipede_http::nav::HttpPostNavigationHook = alloc::sync::Arc<(dyn for<'a> core::ops::function::Fn(millipede_http::nav::HttpPostHookCtx<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + core::marker::Sync)>
+pub type millipede_http::nav::HttpPreNavigationHook = alloc::sync::Arc<(dyn for<'a> core::ops::function::Fn(millipede_http::nav::HttpPreHookCtx<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + core::marker::Sync)>
 pub mod millipede_http::prelude
 pub struct millipede_http::prelude::CoalescingClient
 impl millipede_http::CoalescingClient
@@ -58,9 +85,14 @@ pub struct millipede_http::prelude::HttpKindBuilder
 impl millipede_http::HttpKindBuilder
 pub fn millipede_http::HttpKindBuilder::build(self) -> core::result::Result<millipede_http::HttpKind, millipede_core::http_client::HttpClientError>
 pub fn millipede_http::HttpKindBuilder::coalesce_in_flight(self, bool) -> Self
+pub fn millipede_http::HttpKindBuilder::detect_anti_bot(self, alloc::sync::Arc<dyn millipede_core::antibot::AntiBotDetector>) -> Self
+pub fn millipede_http::HttpKindBuilder::detect_anti_bot_default(self) -> Self
 pub fn millipede_http::HttpKindBuilder::disable_sessions(self) -> Self
+pub fn millipede_http::HttpKindBuilder::header_generator(self, bool) -> Self
 pub fn millipede_http::HttpKindBuilder::http_client(self, alloc::sync::Arc<dyn millipede_core::http_client::HttpClient>) -> Self
 pub fn millipede_http::HttpKindBuilder::max_redirects(self, u32) -> Self
+pub fn millipede_http::HttpKindBuilder::post_navigation_hook<F>(self, F) -> Self where F: for<'a> core::ops::function::Fn(millipede_http::nav::HttpPostHookCtx<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_http::HttpKindBuilder::pre_navigation_hook<F>(self, F) -> Self where F: for<'a> core::ops::function::Fn(millipede_http::nav::HttpPreHookCtx<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + core::marker::Sync + 'static
 pub fn millipede_http::HttpKindBuilder::proxy(self, millipede_core::proxy::ProxyConfiguration) -> Self
 pub fn millipede_http::HttpKindBuilder::proxy_buckets(self, millipede_core::proxy::ProxyBuckets) -> Self
 pub fn millipede_http::HttpKindBuilder::proxy_strategy<S: millipede_core::proxy::ProxyStrategy>(self, S) -> Self
@@ -70,6 +102,7 @@ pub fn millipede_http::HttpKindBuilder::retry_status_codes(self, impl core::iter
 pub fn millipede_http::HttpKindBuilder::session_pool(self, millipede_core::session::SessionPoolOptions) -> Self
 pub fn millipede_http::HttpKindBuilder::session_status_codes(self, impl core::iter::traits::collect::IntoIterator<Item = u16>) -> Self
 pub fn millipede_http::HttpKindBuilder::shared_session_pool(self, alloc::sync::Arc<millipede_core::session::SessionPool>) -> Self
+pub fn millipede_http::HttpKindBuilder::snapshot_errors_on_failure(self, bool) -> Self
 pub fn millipede_http::HttpKindBuilder::user_agents<I, U>(self, I) -> Self where I: core::iter::traits::collect::IntoIterator<Item = U>, U: core::convert::Into<alloc::string::String>
 impl core::default::Default for millipede_http::HttpKindBuilder
 pub fn millipede_http::HttpKindBuilder::default() -> Self
@@ -80,6 +113,30 @@ impl core::marker::Unpin for millipede_http::HttpKindBuilder
 impl core::marker::UnsafeUnpin for millipede_http::HttpKindBuilder
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_http::HttpKindBuilder
 impl !core::panic::unwind_safe::UnwindSafe for millipede_http::HttpKindBuilder
+#[non_exhaustive] pub struct millipede_http::prelude::HttpPostHookCtx<'a>
+pub millipede_http::prelude::HttpPostHookCtx::proxy: core::option::Option<&'a millipede_core::proxy::ProxyInfo>
+pub millipede_http::prelude::HttpPostHookCtx::request: &'a millipede_core::request::Request
+pub millipede_http::prelude::HttpPostHookCtx::response: &'a millipede_core::http_client::HttpResponse
+pub millipede_http::prelude::HttpPostHookCtx::session: core::option::Option<&'a millipede_core::session::Session>
+impl<'a> core::marker::Freeze for millipede_http::nav::HttpPostHookCtx<'a>
+impl<'a> core::marker::Send for millipede_http::nav::HttpPostHookCtx<'a>
+impl<'a> core::marker::Sync for millipede_http::nav::HttpPostHookCtx<'a>
+impl<'a> core::marker::Unpin for millipede_http::nav::HttpPostHookCtx<'a>
+impl<'a> core::marker::UnsafeUnpin for millipede_http::nav::HttpPostHookCtx<'a>
+impl<'a> !core::panic::unwind_safe::RefUnwindSafe for millipede_http::nav::HttpPostHookCtx<'a>
+impl<'a> !core::panic::unwind_safe::UnwindSafe for millipede_http::nav::HttpPostHookCtx<'a>
+#[non_exhaustive] pub struct millipede_http::prelude::HttpPreHookCtx<'a>
+pub millipede_http::prelude::HttpPreHookCtx::http_request: &'a mut millipede_core::http_client::HttpRequest
+pub millipede_http::prelude::HttpPreHookCtx::proxy: core::option::Option<&'a millipede_core::proxy::ProxyInfo>
+pub millipede_http::prelude::HttpPreHookCtx::request: &'a millipede_core::request::Request
+pub millipede_http::prelude::HttpPreHookCtx::session: core::option::Option<&'a millipede_core::session::Session>
+impl<'a> core::marker::Freeze for millipede_http::nav::HttpPreHookCtx<'a>
+impl<'a> core::marker::Send for millipede_http::nav::HttpPreHookCtx<'a>
+impl<'a> core::marker::Sync for millipede_http::nav::HttpPreHookCtx<'a>
+impl<'a> core::marker::Unpin for millipede_http::nav::HttpPreHookCtx<'a>
+impl<'a> core::marker::UnsafeUnpin for millipede_http::nav::HttpPreHookCtx<'a>
+impl<'a> !core::panic::unwind_safe::RefUnwindSafe for millipede_http::nav::HttpPreHookCtx<'a>
+impl<'a> !core::panic::unwind_safe::UnwindSafe for millipede_http::nav::HttpPreHookCtx<'a>
 pub struct millipede_http::prelude::ReqwestClient
 impl millipede_http::ReqwestClient
 pub fn millipede_http::ReqwestClient::new() -> core::result::Result<Self, millipede_core::http_client::HttpClientError>
@@ -100,11 +157,13 @@ impl core::panic::unwind_safe::UnwindSafe for millipede_http::ReqwestClient
 pub millipede_http::prelude::ReqwestClientOptions::connect_timeout: core::time::Duration
 pub millipede_http::prelude::ReqwestClientOptions::default_timeout: core::time::Duration
 pub millipede_http::prelude::ReqwestClientOptions::default_user_agent: core::option::Option<alloc::string::String>
+pub millipede_http::prelude::ReqwestClientOptions::header_generator: alloc::sync::Arc<millipede_fingerprint::header_generator::HeaderGenerator>
 pub millipede_http::prelude::ReqwestClientOptions::max_cached_clients: usize
 impl millipede_http::ReqwestClientOptions
 pub fn millipede_http::ReqwestClientOptions::with_connect_timeout(self, core::time::Duration) -> Self
 pub fn millipede_http::ReqwestClientOptions::with_default_timeout(self, core::time::Duration) -> Self
 pub fn millipede_http::ReqwestClientOptions::with_default_user_agent(self, core::option::Option<alloc::string::String>) -> Self
+pub fn millipede_http::ReqwestClientOptions::with_header_generator(self, alloc::sync::Arc<millipede_fingerprint::header_generator::HeaderGenerator>) -> Self
 pub fn millipede_http::ReqwestClientOptions::with_max_cached_clients(self, usize) -> Self
 impl core::clone::Clone for millipede_http::ReqwestClientOptions
 pub fn millipede_http::ReqwestClientOptions::clone(&self) -> millipede_http::ReqwestClientOptions
@@ -120,6 +179,8 @@ impl core::marker::UnsafeUnpin for millipede_http::ReqwestClientOptions
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_http::ReqwestClientOptions
 impl core::panic::unwind_safe::UnwindSafe for millipede_http::ReqwestClientOptions
 pub type millipede_http::prelude::HttpCrawler = millipede_core::crawler::Crawler<millipede_http::HttpKind>
+pub type millipede_http::prelude::HttpPostNavigationHook = alloc::sync::Arc<(dyn for<'a> core::ops::function::Fn(millipede_http::nav::HttpPostHookCtx<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + core::marker::Sync)>
+pub type millipede_http::prelude::HttpPreNavigationHook = alloc::sync::Arc<(dyn for<'a> core::ops::function::Fn(millipede_http::nav::HttpPreHookCtx<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + core::marker::Sync)>
 pub struct millipede_http::CoalescingClient
 impl millipede_http::CoalescingClient
 pub fn millipede_http::CoalescingClient::new(alloc::sync::Arc<dyn millipede_core::http_client::HttpClient>) -> Self
@@ -178,9 +239,14 @@ pub struct millipede_http::HttpKindBuilder
 impl millipede_http::HttpKindBuilder
 pub fn millipede_http::HttpKindBuilder::build(self) -> core::result::Result<millipede_http::HttpKind, millipede_core::http_client::HttpClientError>
 pub fn millipede_http::HttpKindBuilder::coalesce_in_flight(self, bool) -> Self
+pub fn millipede_http::HttpKindBuilder::detect_anti_bot(self, alloc::sync::Arc<dyn millipede_core::antibot::AntiBotDetector>) -> Self
+pub fn millipede_http::HttpKindBuilder::detect_anti_bot_default(self) -> Self
 pub fn millipede_http::HttpKindBuilder::disable_sessions(self) -> Self
+pub fn millipede_http::HttpKindBuilder::header_generator(self, bool) -> Self
 pub fn millipede_http::HttpKindBuilder::http_client(self, alloc::sync::Arc<dyn millipede_core::http_client::HttpClient>) -> Self
 pub fn millipede_http::HttpKindBuilder::max_redirects(self, u32) -> Self
+pub fn millipede_http::HttpKindBuilder::post_navigation_hook<F>(self, F) -> Self where F: for<'a> core::ops::function::Fn(millipede_http::nav::HttpPostHookCtx<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + core::marker::Sync + 'static
+pub fn millipede_http::HttpKindBuilder::pre_navigation_hook<F>(self, F) -> Self where F: for<'a> core::ops::function::Fn(millipede_http::nav::HttpPreHookCtx<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + core::marker::Sync + 'static
 pub fn millipede_http::HttpKindBuilder::proxy(self, millipede_core::proxy::ProxyConfiguration) -> Self
 pub fn millipede_http::HttpKindBuilder::proxy_buckets(self, millipede_core::proxy::ProxyBuckets) -> Self
 pub fn millipede_http::HttpKindBuilder::proxy_strategy<S: millipede_core::proxy::ProxyStrategy>(self, S) -> Self
@@ -190,6 +256,7 @@ pub fn millipede_http::HttpKindBuilder::retry_status_codes(self, impl core::iter
 pub fn millipede_http::HttpKindBuilder::session_pool(self, millipede_core::session::SessionPoolOptions) -> Self
 pub fn millipede_http::HttpKindBuilder::session_status_codes(self, impl core::iter::traits::collect::IntoIterator<Item = u16>) -> Self
 pub fn millipede_http::HttpKindBuilder::shared_session_pool(self, alloc::sync::Arc<millipede_core::session::SessionPool>) -> Self
+pub fn millipede_http::HttpKindBuilder::snapshot_errors_on_failure(self, bool) -> Self
 pub fn millipede_http::HttpKindBuilder::user_agents<I, U>(self, I) -> Self where I: core::iter::traits::collect::IntoIterator<Item = U>, U: core::convert::Into<alloc::string::String>
 impl core::default::Default for millipede_http::HttpKindBuilder
 pub fn millipede_http::HttpKindBuilder::default() -> Self
@@ -200,6 +267,30 @@ impl core::marker::Unpin for millipede_http::HttpKindBuilder
 impl core::marker::UnsafeUnpin for millipede_http::HttpKindBuilder
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_http::HttpKindBuilder
 impl !core::panic::unwind_safe::UnwindSafe for millipede_http::HttpKindBuilder
+#[non_exhaustive] pub struct millipede_http::HttpPostHookCtx<'a>
+pub millipede_http::HttpPostHookCtx::proxy: core::option::Option<&'a millipede_core::proxy::ProxyInfo>
+pub millipede_http::HttpPostHookCtx::request: &'a millipede_core::request::Request
+pub millipede_http::HttpPostHookCtx::response: &'a millipede_core::http_client::HttpResponse
+pub millipede_http::HttpPostHookCtx::session: core::option::Option<&'a millipede_core::session::Session>
+impl<'a> core::marker::Freeze for millipede_http::nav::HttpPostHookCtx<'a>
+impl<'a> core::marker::Send for millipede_http::nav::HttpPostHookCtx<'a>
+impl<'a> core::marker::Sync for millipede_http::nav::HttpPostHookCtx<'a>
+impl<'a> core::marker::Unpin for millipede_http::nav::HttpPostHookCtx<'a>
+impl<'a> core::marker::UnsafeUnpin for millipede_http::nav::HttpPostHookCtx<'a>
+impl<'a> !core::panic::unwind_safe::RefUnwindSafe for millipede_http::nav::HttpPostHookCtx<'a>
+impl<'a> !core::panic::unwind_safe::UnwindSafe for millipede_http::nav::HttpPostHookCtx<'a>
+#[non_exhaustive] pub struct millipede_http::HttpPreHookCtx<'a>
+pub millipede_http::HttpPreHookCtx::http_request: &'a mut millipede_core::http_client::HttpRequest
+pub millipede_http::HttpPreHookCtx::proxy: core::option::Option<&'a millipede_core::proxy::ProxyInfo>
+pub millipede_http::HttpPreHookCtx::request: &'a millipede_core::request::Request
+pub millipede_http::HttpPreHookCtx::session: core::option::Option<&'a millipede_core::session::Session>
+impl<'a> core::marker::Freeze for millipede_http::nav::HttpPreHookCtx<'a>
+impl<'a> core::marker::Send for millipede_http::nav::HttpPreHookCtx<'a>
+impl<'a> core::marker::Sync for millipede_http::nav::HttpPreHookCtx<'a>
+impl<'a> core::marker::Unpin for millipede_http::nav::HttpPreHookCtx<'a>
+impl<'a> core::marker::UnsafeUnpin for millipede_http::nav::HttpPreHookCtx<'a>
+impl<'a> !core::panic::unwind_safe::RefUnwindSafe for millipede_http::nav::HttpPreHookCtx<'a>
+impl<'a> !core::panic::unwind_safe::UnwindSafe for millipede_http::nav::HttpPreHookCtx<'a>
 pub struct millipede_http::ReqwestClient
 impl millipede_http::ReqwestClient
 pub fn millipede_http::ReqwestClient::new() -> core::result::Result<Self, millipede_core::http_client::HttpClientError>
@@ -220,11 +311,13 @@ impl core::panic::unwind_safe::UnwindSafe for millipede_http::ReqwestClient
 pub millipede_http::ReqwestClientOptions::connect_timeout: core::time::Duration
 pub millipede_http::ReqwestClientOptions::default_timeout: core::time::Duration
 pub millipede_http::ReqwestClientOptions::default_user_agent: core::option::Option<alloc::string::String>
+pub millipede_http::ReqwestClientOptions::header_generator: alloc::sync::Arc<millipede_fingerprint::header_generator::HeaderGenerator>
 pub millipede_http::ReqwestClientOptions::max_cached_clients: usize
 impl millipede_http::ReqwestClientOptions
 pub fn millipede_http::ReqwestClientOptions::with_connect_timeout(self, core::time::Duration) -> Self
 pub fn millipede_http::ReqwestClientOptions::with_default_timeout(self, core::time::Duration) -> Self
 pub fn millipede_http::ReqwestClientOptions::with_default_user_agent(self, core::option::Option<alloc::string::String>) -> Self
+pub fn millipede_http::ReqwestClientOptions::with_header_generator(self, alloc::sync::Arc<millipede_fingerprint::header_generator::HeaderGenerator>) -> Self
 pub fn millipede_http::ReqwestClientOptions::with_max_cached_clients(self, usize) -> Self
 impl core::clone::Clone for millipede_http::ReqwestClientOptions
 pub fn millipede_http::ReqwestClientOptions::clone(&self) -> millipede_http::ReqwestClientOptions
@@ -240,3 +333,5 @@ impl core::marker::UnsafeUnpin for millipede_http::ReqwestClientOptions
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_http::ReqwestClientOptions
 impl core::panic::unwind_safe::UnwindSafe for millipede_http::ReqwestClientOptions
 pub type millipede_http::HttpCrawler = millipede_core::crawler::Crawler<millipede_http::HttpKind>
+pub type millipede_http::HttpPostNavigationHook = alloc::sync::Arc<(dyn for<'a> core::ops::function::Fn(millipede_http::nav::HttpPostHookCtx<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + core::marker::Sync)>
+pub type millipede_http::HttpPreNavigationHook = alloc::sync::Arc<(dyn for<'a> core::ops::function::Fn(millipede_http::nav::HttpPreHookCtx<'a>) -> futures_core::future::BoxFuture<'a, core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + core::marker::Sync)>
