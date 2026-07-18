@@ -1,0 +1,17 @@
+[package]
+name = "{{project-name}}"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+
+[dependencies]
+millipede = { version = "0.1" }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+anyhow = "1"
+
+[workspace]
+
+# Local development only: uncomment and point this at the umbrella crate in a
+# Millipede checkout. Remove this entire block after Millipede 0.1.0 is on crates.io.
+# [patch.crates-io]
+# millipede = { path = "/path/to/millipede/millipede" }
