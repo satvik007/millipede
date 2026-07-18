@@ -1548,6 +1548,7 @@ dependencies = [
  "millipede-http",
  "millipede-storage-fs",
  "millipede-storage-memory",
+ "serde",
  "serde_json",
  "tempfile",
  "tokio",
