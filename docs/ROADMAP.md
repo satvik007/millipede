@@ -313,7 +313,7 @@ The phase that makes Millipede usable for "real" scraping projects.
 - Audit public API for consistency (naming, async signature uniformity).
 - Run `cargo public-api` and lock the surface; document everything.
 - README per crate, with examples.
-- One canonical book-style guide in `docs/guide/`.
+- One canonical book-style guide in `docs/guide/`. Author these as clean standalone Markdown — Phase 9 ports them into the fumadocs site as MDX, so avoid GitHub-only constructs that won't survive the port.
 - **`docs/guide/migrating-from-crawlee.md`** (ChatGPT Pro review #5). Side-by-side mapping covering: typed `CrawlError` vs. Crawlee's string-based dispatch, router label+method semantics, `enqueue_links` builder API, `kvs.auto_saved` ⇒ `useState` mapping, and the FS storage layer's on-disk compatibility (a Crawlee project's `./storage/` is openable by `FsStorageClient`). Hard requirement, not stretch.
 - **`docs/guide/extras.md`** (ChatGPT Pro review #6). Policy doc for the community `millipede-extras` crate: scope (utility helpers like `infinite_scroll`, `save_snapshot`, `enqueue_links_by_click_elements`), semver bar (looser than core, separate cadence), governance, and the contribution path for moving a helper from extras into core. The extras crate itself ships after 1.0; the policy doc ships at 1.0 so contributors know where to send PRs.
 - Migrate `INTERFACE.md` "Open Questions" to resolved decisions or filed issues.
@@ -334,6 +334,43 @@ The phase that makes Millipede usable for "real" scraping projects.
 - `cargo generate --git millipede-template basic-http` produces a runnable project against the published `0.1.0`.
 - README badges green.
 - A 1-paragraph announcement post is drafted.
+
+---
+
+## Phase 9 — Fumadocs Documentation Site  (target: 2–3 weeks)
+
+> Added after Phase 7 close. Phase 8 ships the *content* (book-style guide, per-crate READMEs, migration guide); it deliberately does not include a documentation website. Phase 9 builds that site. The method is explicit: **clone the Crawlee documentation, study it, and build a fumadocs site inspired by it** — same spirit as the library itself (reference Crawlee, don't transliterate).
+
+### Step 1 — Clone and study the Crawlee docs (the reference corpus)
+
+- Clone `apify/crawlee` and inspect its `website/` directory (Docusaurus): sidebar structure, guide ordering, example gallery, versioning approach. Clone `apify/crawlee-python` too — its docs were written second and fixed several IA mistakes; note the deltas.
+- Produce a short written IA audit in `docs/decisions/` (ADR or note): the Crawlee sidebar tree, which pages earn their place, which are Apify-platform-specific (dropped), and the mapping from each kept page to its Millipede equivalent. This document is the contract for Step 2 — content work doesn't start until it exists.
+- Explicitly out of scope to copy: prose. We take structure, page inventory, and pedagogical ordering (quick start → first crawler → concepts → guides → examples), never wording. Crawlee is Apache-2.0, but the docs must read as Millipede's own.
+
+### Step 2 — Build the fumadocs site
+
+- New `website/` app at the repo root (Next.js + `fumadocs-ui` + `fumadocs-mdx`, pnpm), fully outside the cargo workspace; Rust CI is untouched by it.
+- Content sections (mirroring the audited Crawlee IA, adapted to Rust):
+  - **Quick start** — one page per crawler kind: `HttpCrawler`, `HtmlCrawler`, `BrowserCrawler`, smart HTTP-first promotion.
+  - **Introduction course** — the Crawlee "first crawler → crawl all links → scrape data → save data" progression, rewritten around `Router`, `EnqueueLinker`, and `Dataset`.
+  - **Guides** — ported from `docs/guide/` (autoscaler tuning, fingerprinting, migrating-from-crawlee, extras policy) plus new pages Crawlee's inventory says we owe: request storage, sessions & proxies, error handling & retries, browser pools, sitemap crawling, FS storage layout / Crawlee compatibility.
+  - **Examples** — one page per `examples/*.rs`, embedding the real source (not pasted copies).
+  - **API reference** — links out to docs.rs per crate; we do not duplicate rustdoc.
+- Code snippets must not rot: every Rust snippet is included from a file that `cargo build --examples` or a doc-test actually compiles (fumadocs remote/include mechanism or a small sync script with a CI staleness check).
+- Site CI job: install, build, internal-link check. Deployment target (Vercel vs. Cloudflare Pages vs. GitHub Pages) is decided in this phase and recorded in the ADR; `crawlee.dev`-style custom domain is optional and can trail.
+
+### Tests / Quality Gates
+
+- `pnpm build` green in CI on every PR touching `website/`.
+- Link checker passes (internal links + docs.rs links).
+- Snippet-staleness check fails CI if an embedded example diverges from `examples/`.
+- IA parity checklist from the Step 1 audit: every "keep" page exists or has a tracked issue.
+
+### Exit Criteria
+
+- The site builds and deploys; every guide from `docs/guide/` is ported (the Markdown originals become pointers or are removed to avoid dual-maintenance).
+- A newcomer can go from `cargo add millipede` to a working `HtmlCrawler` using only the site.
+- The Crawlee-docs IA audit is committed; each dropped page has a one-line reason.
 
 ---
 
@@ -400,6 +437,7 @@ A full CI run executes: build, clippy `-D warnings`, fmt check, test, doc, MSRV 
 | **M5: Browser** | Phase 6 | ~4 weeks | Chromium-based crawling. |
 | **M6: Polish** | Phase 7 | ~2 weeks | Fingerprinting limits, anti-bot catalog, snapshots. |
 | **M7: 0.1.0** | Phase 8 | ~2 weeks | Published crates. |
+| **M8: Docs site** | Phase 9 | ~2–3 weeks | Crawlee-inspired fumadocs site live. |
 
 Total estimate: ~19–21 weeks of focused work to `0.1.0`. With part-time effort or contributions, scale accordingly.
 
