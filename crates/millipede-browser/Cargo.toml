@@ -13,6 +13,7 @@ workspace = true
 
 [dependencies]
 millipede-core = { path = "../millipede-core", version = "0.1.0" }
+millipede-fingerprint = { path = "../millipede-fingerprint", version = "0.1.0" }
 millipede-http = { path = "../millipede-http", version = "0.1.0" }
 millipede-html = { path = "../millipede-html", version = "0.1.0" }
 async-trait.workspace = true

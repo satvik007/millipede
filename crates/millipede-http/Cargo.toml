@@ -13,6 +13,7 @@ workspace = true
 
 [dependencies]
 millipede-core = { path = "../millipede-core", version = "0.1.0" }
+millipede-fingerprint = { path = "../millipede-fingerprint", version = "0.1.0" }
 reqwest = { workspace = true }
 http = { workspace = true }
 bytes = { workspace = true }
