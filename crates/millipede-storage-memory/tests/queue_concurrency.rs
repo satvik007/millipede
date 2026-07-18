@@ -25,7 +25,7 @@ async fn concurrent_dedup_has_no_double_handling() {
                 let request = Request::get(format!("https://example.com/item/{index}"))
                     .build()
                     .unwrap();
-                queue.add(request, AddOptions::default()).await.unwrap();
+                let _ = queue.add(request, AddOptions::default()).await.unwrap();
             }
         }));
     }

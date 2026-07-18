@@ -7,6 +7,7 @@ use serde::{Serialize, de::DeserializeOwned};
 /// Options controlling dataset listing order and pagination.
 #[derive(Debug, Clone, Default)]
 #[non_exhaustive]
+#[must_use = "list options do nothing unless passed to Dataset::list"]
 pub struct ListOptions {
     /// Number of items to skip.
     pub offset: u64,

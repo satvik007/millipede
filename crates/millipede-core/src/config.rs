@@ -57,6 +57,7 @@ impl fmt::Display for LogLevel {
 
 /// Errors produced while resolving crawler configuration.
 #[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
 pub enum ConfigError {
     /// An environment variable contains an invalid value.
     #[error("invalid value {value:?} for {name}: {message}")]
@@ -78,6 +79,7 @@ pub enum ConfigError {
 
 /// Builds a resolved [`Configuration`].
 #[derive(Default, Clone)]
+#[must_use = "builders do nothing unless consumed by build"]
 pub struct ConfigurationBuilder {
     default_dataset_id: Option<String>,
     default_key_value_store_id: Option<String>,

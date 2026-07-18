@@ -25,8 +25,9 @@ pub use millipede_browser::{
     BrowserPage, BrowserPool, BrowserPoolOptions, BrowserPostHookCtx, BrowserPostNavigationHook,
     BrowserPreHookCtx, BrowserPreNavigationHook, BrowserPromotionDetector, BrowserProvider,
     BrowserResponse, DefaultPromotionDetector, GotoOptions, HttpAttemptSnapshot, LaunchContext,
-    PageHandle, PageId, PageOpts, PromotionReason, ScreenshotOptions, SmartContext, SmartCrawler,
-    SmartKind, SmartKindBuilder, WaitUntil,
+    PageClosedHook, PageHandle, PageHook, PageId, PageOptions, PagePrepHook, PreLaunchHook,
+    PromotionReason, ScreenshotOptions, SmartContext, SmartCrawler, SmartKind, SmartKindBuilder,
+    WaitUntil,
 };
 #[cfg(feature = "browser-chromiumoxide")]
 pub use millipede_browser_chromiumoxide::discovery::find_browser;
@@ -42,7 +43,7 @@ pub use millipede_core::autoscale::{
     MemoryLoadSignal, MemoryLoadSignalOptions, ScaleDecision, Snapshotter, SnapshotterOptions,
     SystemStatus, SystemStatusOptions, TokioRuntimeLoadSignal, TokioRuntimeLoadSignalOptions,
 };
-pub use millipede_core::config::{Configuration, ConfigurationBuilder, LogLevel};
+pub use millipede_core::config::{ConfigError, Configuration, ConfigurationBuilder, LogLevel};
 pub use millipede_core::cookies::{Cookie, CookieJar, CookieJarError, SameSite};
 pub use millipede_core::crawler::{
     AttemptObservation, AutoscalerSnapshot, BasicContext, BasicCrawler, BasicKind, Crawler,
@@ -71,8 +72,8 @@ pub use millipede_core::proxy::{
     ProxyRouteContext, ProxyStrategy, RotationStrategy,
 };
 pub use millipede_core::request::{
-    HeaderMap, IntoUrl, Method, Request, RequestBody, RequestBuilder, RequestId, RequestState,
-    UserData,
+    HeaderMap, IntoUrl, Method, Request, RequestBody, RequestBuildError, RequestBuilder, RequestId,
+    RequestState, UserData,
 };
 pub use millipede_core::retry_strategy::{
     AttemptOutcome, AttemptOverrides, RetryDirective, RetryStrategy, SessionRetryAction,
@@ -91,13 +92,16 @@ pub use millipede_core::statistics::{
     FinalStatistics, STATISTICS_PERSIST_KEY, StatisticsHandle, StatisticsSnapshot,
 };
 pub use millipede_core::storage::{
-    AddOptions, AutoSaved, Dataset, DatasetExt, KeyValueStore, KeyValueStoreExt, Lease, LeaseId,
-    ListOptions, ProcessedRequest, QueueOpInfo, RateLimitReportingClient, ReclaimOptions,
-    RequestQueue, RequestSource, StorageClient, StorageError, StorageHandle, StorageResult,
+    AddOptions, AddRequestsBatchedResult, AutoSaved, BatchAddHandle, Dataset, DatasetExt,
+    DatasetInfo, KeyInfo, KeyList, KeyValueStore, KeyValueStoreExt, KvEntry, Lease, LeaseId,
+    ListKeysOptions, ListOptions, Page, ProcessedRequest, QueueOpInfo, RateLimitReportingClient,
+    ReclaimOptions, RequestQueue, RequestSource, StorageClient, StorageError, StorageHandle,
+    StorageResult,
 };
 #[cfg(feature = "html")]
 pub use millipede_html::{
     HtmlContext, HtmlCrawler, HtmlError, HtmlKind, HtmlKindBuilder, HtmlLinkExtractor,
+    SynchronizedHtml,
 };
 #[cfg(feature = "http")]
 pub use millipede_http::{
@@ -106,9 +110,12 @@ pub use millipede_http::{
     ReqwestClientOptions,
 };
 #[cfg(feature = "storage-fs")]
-pub use millipede_storage_fs::{FsRequestQueue, FsStorageClient};
+pub use millipede_storage_fs::{FsDataset, FsKeyValueStore, FsRequestQueue, FsStorageClient};
 #[cfg(feature = "storage-memory")]
-pub use millipede_storage_memory::{MemoryQueuePolicy, MemoryRequestQueue, MemoryStorageClient};
+pub use millipede_storage_memory::{
+    DomainRoundRobin, MemoryDataset, MemoryKeyValueStore, MemoryQueuePolicy, MemoryRequestQueue,
+    MemoryStorageClient,
+};
 
 /// Commonly used items across all enabled Millipede crates.
 pub mod prelude {

@@ -15,6 +15,8 @@ use tokio_util::sync::CancellationToken;
 
 /// Configuration for concurrency scaling and request politeness limits.
 #[derive(Debug, Clone)]
+#[non_exhaustive]
+#[must_use = "autoscaled pool options do nothing unless passed to AutoscaledPool::new"]
 pub struct AutoscaledPoolOptions {
     /// Pins concurrency and disables all autoscaling when set.
     pub fixed_concurrency: Option<usize>,
@@ -75,6 +77,7 @@ impl Default for AutoscaledPoolOptions {
 
 /// Strategy used to adjust desired concurrency.
 #[derive(Debug, Clone)]
+#[non_exhaustive]
 pub enum AutoscaleMode {
     /// Deterministic additive-increase, multiplicative-decrease scaling.
     Aimd {

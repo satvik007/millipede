@@ -12,6 +12,7 @@ use std::{sync::Arc, time::Duration};
 
 /// An error produced while building a crawler.
 #[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
 pub enum CrawlerBuildError {
     /// No request handler was supplied.
     #[error("a request handler is required")]
@@ -41,6 +42,7 @@ pub enum CrawlerBuildError {
 }
 
 /// Builds a [`Crawler`] around a crawler kind.
+#[must_use = "builders do nothing unless consumed by build"]
 pub struct CrawlerBuilder<K: CrawlerKind> {
     kind: K,
     handler: Option<Arc<dyn RequestHandler<K::Context>>>,

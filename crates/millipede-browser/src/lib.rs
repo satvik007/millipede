@@ -29,7 +29,7 @@ pub use nav::{
     BrowserPostHookCtx, BrowserPostNavigationHook, BrowserPreHookCtx, BrowserPreNavigationHook,
 };
 pub use page::{
-    BrowserPage, BrowserResponse, GotoOptions, PageId, PageOpts, ScreenshotOptions, WaitUntil,
+    BrowserPage, BrowserResponse, GotoOptions, PageId, PageOptions, ScreenshotOptions, WaitUntil,
 };
 pub use pool::{BrowserPool, BrowserPoolOptions, PageHandle};
 pub use provider::{BrowserProvider, LaunchContext};
@@ -43,7 +43,7 @@ pub mod prelude {
         BrowserPostNavigationHook, BrowserPreHookCtx, BrowserPreNavigationHook,
         BrowserPromotionDetector, BrowserProvider, BrowserResponse, DefaultPromotionDetector,
         GotoOptions, HttpAttemptSnapshot, LaunchContext, PageClosedHook, PageHandle, PageHook,
-        PageId, PageOpts, PagePrepHook, PreLaunchHook, PromotionReason, ScreenshotOptions,
+        PageId, PageOptions, PagePrepHook, PreLaunchHook, PromotionReason, ScreenshotOptions,
         SmartContext, SmartCrawler, SmartKind, SmartKindBuilder, WaitUntil,
     };
 }

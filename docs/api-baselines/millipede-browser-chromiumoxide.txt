@@ -11,14 +11,14 @@ pub millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::request_time
 pub millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::user_data_dir: core::option::Option<std::path::PathBuf>
 pub millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::window_size: core::option::Option<(u32, u32)>
 impl millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
-pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::arg(self, impl core::convert::Into<alloc::string::String>) -> Self
-pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::args<I, S>(self, I) -> Self where I: core::iter::traits::collect::IntoIterator<Item = S>, S: core::convert::Into<alloc::string::String>
-pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::headless(self, bool) -> Self
-pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::launch_timeout(self, core::time::Duration) -> Self
-pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::request_timeout(self, core::time::Duration) -> Self
-pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::user_data_dir(self, impl core::convert::Into<std::path::PathBuf>) -> Self
-pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::window_size(self, u32, u32) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_arg(self, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_args<I, S>(self, I) -> Self where I: core::iter::traits::collect::IntoIterator<Item = S>, S: core::convert::Into<alloc::string::String>
 pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_executable(self, impl core::convert::Into<std::path::PathBuf>) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_headless(self, bool) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_launch_timeout(self, core::time::Duration) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_request_timeout(self, core::time::Duration) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_user_data_dir(self, impl core::convert::Into<std::path::PathBuf>) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_window_size(self, u32, u32) -> Self
 impl core::clone::Clone for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
 pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::clone(&self) -> millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
 impl core::default::Default for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
@@ -72,14 +72,14 @@ pub millipede_browser_chromiumoxide::prelude::ChromiumLaunchOptions::request_tim
 pub millipede_browser_chromiumoxide::prelude::ChromiumLaunchOptions::user_data_dir: core::option::Option<std::path::PathBuf>
 pub millipede_browser_chromiumoxide::prelude::ChromiumLaunchOptions::window_size: core::option::Option<(u32, u32)>
 impl millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
-pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::arg(self, impl core::convert::Into<alloc::string::String>) -> Self
-pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::args<I, S>(self, I) -> Self where I: core::iter::traits::collect::IntoIterator<Item = S>, S: core::convert::Into<alloc::string::String>
-pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::headless(self, bool) -> Self
-pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::launch_timeout(self, core::time::Duration) -> Self
-pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::request_timeout(self, core::time::Duration) -> Self
-pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::user_data_dir(self, impl core::convert::Into<std::path::PathBuf>) -> Self
-pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::window_size(self, u32, u32) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_arg(self, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_args<I, S>(self, I) -> Self where I: core::iter::traits::collect::IntoIterator<Item = S>, S: core::convert::Into<alloc::string::String>
 pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_executable(self, impl core::convert::Into<std::path::PathBuf>) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_headless(self, bool) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_launch_timeout(self, core::time::Duration) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_request_timeout(self, core::time::Duration) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_user_data_dir(self, impl core::convert::Into<std::path::PathBuf>) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_window_size(self, u32, u32) -> Self
 impl core::clone::Clone for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
 pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::clone(&self) -> millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
 impl core::default::Default for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
@@ -185,14 +185,14 @@ pub millipede_browser_chromiumoxide::ChromiumLaunchOptions::request_timeout: cor
 pub millipede_browser_chromiumoxide::ChromiumLaunchOptions::user_data_dir: core::option::Option<std::path::PathBuf>
 pub millipede_browser_chromiumoxide::ChromiumLaunchOptions::window_size: core::option::Option<(u32, u32)>
 impl millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
-pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::arg(self, impl core::convert::Into<alloc::string::String>) -> Self
-pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::args<I, S>(self, I) -> Self where I: core::iter::traits::collect::IntoIterator<Item = S>, S: core::convert::Into<alloc::string::String>
-pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::headless(self, bool) -> Self
-pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::launch_timeout(self, core::time::Duration) -> Self
-pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::request_timeout(self, core::time::Duration) -> Self
-pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::user_data_dir(self, impl core::convert::Into<std::path::PathBuf>) -> Self
-pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::window_size(self, u32, u32) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_arg(self, impl core::convert::Into<alloc::string::String>) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_args<I, S>(self, I) -> Self where I: core::iter::traits::collect::IntoIterator<Item = S>, S: core::convert::Into<alloc::string::String>
 pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_executable(self, impl core::convert::Into<std::path::PathBuf>) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_headless(self, bool) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_launch_timeout(self, core::time::Duration) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_request_timeout(self, core::time::Duration) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_user_data_dir(self, impl core::convert::Into<std::path::PathBuf>) -> Self
+pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::with_window_size(self, u32, u32) -> Self
 impl core::clone::Clone for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
 pub fn millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions::clone(&self) -> millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions
 impl core::default::Default for millipede_browser_chromiumoxide::launch::ChromiumLaunchOptions

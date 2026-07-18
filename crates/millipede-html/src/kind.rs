@@ -172,6 +172,7 @@ impl fmt::Debug for HtmlContext {
 
 /// Errors specific to HTML response processing.
 #[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
 pub enum HtmlError {
     /// The response declares a media type that cannot be parsed as HTML.
     #[error("unsupported content type for HTML parsing: {content_type}")]
@@ -204,6 +205,7 @@ impl HtmlKind {
 }
 
 /// Configures [`HtmlKind`] by delegating HTTP settings to [`HttpKindBuilder`].
+#[must_use = "builders do nothing unless consumed by build"]
 pub struct HtmlKindBuilder {
     http: HttpKindBuilder,
 }

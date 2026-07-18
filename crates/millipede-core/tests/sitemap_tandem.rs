@@ -294,7 +294,7 @@ async fn manual_and_sitemap_duplicates_are_handled_once() -> anyhow::Result<()> 
         Arc::new(MemoryRequestQueue::new("dedupe")),
         sitemap_list(client, "https://example.com/sitemap.xml"),
     );
-    queue
+    let _ = queue
         .add(
             Request::get("https://example.com/1").build()?,
             AddOptions::default(),

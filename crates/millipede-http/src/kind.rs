@@ -248,6 +248,7 @@ impl HttpKind {
 }
 
 /// Configures [`HttpKind`].
+#[must_use = "builders do nothing unless consumed by build"]
 pub struct HttpKindBuilder {
     http_client: Option<Arc<dyn HttpClient>>,
     coalesce_in_flight: bool,
@@ -542,7 +543,7 @@ impl CrawlerKind for HttpKind {
     ) -> BoxFuture<'a, Result<Self::Context, CrawlError>> {
         Box::pin(async move {
             let session = if let Some(pool) = self.session_pool() {
-                Some(pool.get_session(None).await)
+                Some(pool.session(None).await)
             } else {
                 None
             };

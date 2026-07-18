@@ -42,11 +42,11 @@ async fn dedup_tracks_pending_and_handled() {
 async fn forefront_precedes_fifo() {
     let queue = MemoryRequestQueue::new("front");
     for url in ["https://example.com/1", "https://example.com/2"] {
-        queue.add(req(url), AddOptions::default()).await.unwrap();
+        let _ = queue.add(req(url), AddOptions::default()).await.unwrap();
     }
     let mut forefront = AddOptions::default();
     forefront.forefront = true;
-    queue
+    let _ = queue
         .add(req("https://example.com/3"), forefront)
         .await
         .unwrap();
@@ -60,7 +60,7 @@ async fn forefront_precedes_fifo() {
 #[tokio::test]
 async fn lease_lifecycle_and_renewal() {
     let queue = MemoryRequestQueue::new("lease");
-    queue
+    let _ = queue
         .add(req("https://example.com/1"), AddOptions::default())
         .await
         .unwrap();
@@ -86,7 +86,7 @@ async fn reclaim_controls_retry_and_position() {
     let queue = MemoryRequestQueue::new("reclaim");
     let first = req("https://example.com/first");
     let key = first.unique_key.clone();
-    queue.add(first, AddOptions::default()).await.unwrap();
+    let _ = queue.add(first, AddOptions::default()).await.unwrap();
     let lease = queue.fetch_next().await.unwrap().unwrap();
     queue
         .reclaim(lease, ReclaimOptions::default())
@@ -98,7 +98,7 @@ async fn reclaim_controls_retry_and_position() {
     let mut no_increment = ReclaimOptions::default();
     no_increment.increment_retry = false;
     queue.reclaim(lease, no_increment).await.unwrap();
-    queue
+    let _ = queue
         .add(req("https://example.com/second"), AddOptions::default())
         .await
         .unwrap();
@@ -123,7 +123,7 @@ async fn reclaim_controls_retry_and_position() {
 #[tokio::test]
 async fn abandon_does_not_increment_retry() {
     let queue = MemoryRequestQueue::new("abandon");
-    queue
+    let _ = queue
         .add(req("https://example.com/1"), AddOptions::default())
         .await
         .unwrap();
@@ -146,7 +146,7 @@ async fn abandon_does_not_increment_retry() {
 #[tokio::test]
 async fn reclaim_persists_lease_request_mutations() {
     let queue = MemoryRequestQueue::new("reclaim-mutations");
-    queue
+    let _ = queue
         .add(req("https://example.com/1"), AddOptions::default())
         .await
         .unwrap();
@@ -170,7 +170,7 @@ async fn reclaim_persists_lease_request_mutations() {
 #[tokio::test]
 async fn abandon_persists_lease_request_mutations() {
     let queue = MemoryRequestQueue::new("abandon-mutations");
-    queue
+    let _ = queue
         .add(req("https://example.com/1"), AddOptions::default())
         .await
         .unwrap();
@@ -212,7 +212,7 @@ async fn add_batch_is_inline_and_flags_duplicate() {
 async fn domain_round_robin_alternates() {
     let queue = MemoryRequestQueue::with_policy("fair", MemoryQueuePolicy::DomainRoundRobin);
     for url in ["https://a.com/1", "https://a.com/2", "https://b.com/1"] {
-        queue.add(req(url), AddOptions::default()).await.unwrap();
+        let _ = queue.add(req(url), AddOptions::default()).await.unwrap();
     }
     for host in ["a.com", "b.com", "a.com"] {
         let lease = queue.fetch_next().await.unwrap().unwrap();

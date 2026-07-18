@@ -236,7 +236,7 @@ async fn urls_only_enqueue_handles_the_second_page() -> Result<(), Box<dyn std::
                         .expect("handled mutex poisoned")
                         .push(ctx.request.url.path().to_owned());
                     if ctx.request.url.path() == "/a" {
-                        ctx.enqueue.urls([page_b]).await?;
+                        let _ = ctx.enqueue.urls([page_b]).await?;
                     }
                     Ok(())
                 }
@@ -348,11 +348,11 @@ async fn shared_session_pool_reaches_http_layer() -> Result<(), Box<dyn std::err
     .build()
     .await?;
 
-    crawler
+    let _ = crawler
         .run([Url::parse(&format!("{}/page", server.uri()))?])
         .await?;
 
-    let session = pool.get_session(None).await;
+    let session = pool.session(None).await;
     assert!(session.cookie_jar().cookie_count() > 0);
     Ok(())
 }

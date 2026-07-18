@@ -4,17 +4,17 @@ use std::{fmt, sync::Arc};
 
 use futures_util::future::BoxFuture;
 
-use crate::{BrowserError, BrowserPage, LaunchContext, PageId, PageOpts};
+use crate::{BrowserError, BrowserPage, LaunchContext, PageId, PageOptions};
 
 /// Synchronous hook run before a browser launches.
 pub type PreLaunchHook = Arc<dyn Fn(&mut LaunchContext) + Send + Sync>;
 
 /// Synchronous hook that prepares per-page creation context.
-pub type PagePrepHook = Arc<dyn Fn(&mut PageOpts) + Send + Sync>;
+pub type PagePrepHook = Arc<dyn Fn(&mut PageOptions) + Send + Sync>;
 
 /// Asynchronous hook operating on a provider-erased page and its creation context.
 pub type PageHook = Arc<
-    dyn for<'a> Fn(&'a dyn BrowserPage, &'a PageOpts) -> BoxFuture<'a, Result<(), BrowserError>>
+    dyn for<'a> Fn(&'a dyn BrowserPage, &'a PageOptions) -> BoxFuture<'a, Result<(), BrowserError>>
         + Send
         + Sync,
 >;
@@ -30,6 +30,7 @@ pub type PageClosedHook = Arc<dyn Fn(PageId) + Send + Sync>;
 /// are deferred. Phase 7 fingerprint installation uses [`Self::post_page_create`], as directed by
 /// INTERFACE §12 and ADR-0006.
 #[derive(Clone, Default)]
+#[must_use = "browser hooks do nothing unless installed on a browser builder"]
 pub struct BrowserHooks {
     /// Hooks that mutate launch context before provider launch.
     pub pre_launch: Vec<PreLaunchHook>,
@@ -61,7 +62,7 @@ impl BrowserHooks {
     /// Appends a page-context preparation hook.
     pub fn push_pre_page_create(
         mut self,
-        hook: impl Fn(&mut PageOpts) + Send + Sync + 'static,
+        hook: impl Fn(&mut PageOptions) + Send + Sync + 'static,
     ) -> Self {
         self.pre_page_create.push(Arc::new(hook));
         self
@@ -70,7 +71,10 @@ impl BrowserHooks {
     /// Appends a post-page-creation hook.
     pub fn push_post_page_create<F>(mut self, hook: F) -> Self
     where
-        F: for<'a> Fn(&'a dyn BrowserPage, &'a PageOpts) -> BoxFuture<'a, Result<(), BrowserError>>
+        F: for<'a> Fn(
+                &'a dyn BrowserPage,
+                &'a PageOptions,
+            ) -> BoxFuture<'a, Result<(), BrowserError>>
             + Send
             + Sync
             + 'static,
@@ -82,7 +86,10 @@ impl BrowserHooks {
     /// Appends a pre-page-close hook.
     pub fn push_pre_page_close<F>(mut self, hook: F) -> Self
     where
-        F: for<'a> Fn(&'a dyn BrowserPage, &'a PageOpts) -> BoxFuture<'a, Result<(), BrowserError>>
+        F: for<'a> Fn(
+                &'a dyn BrowserPage,
+                &'a PageOptions,
+            ) -> BoxFuture<'a, Result<(), BrowserError>>
             + Send
             + Sync
             + 'static,

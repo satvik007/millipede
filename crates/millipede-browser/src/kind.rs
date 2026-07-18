@@ -28,7 +28,7 @@ use millipede_core::{
 use crate::{
     BrowserError, BrowserHooks, BrowserPool, BrowserPoolOptions, BrowserPostHookCtx,
     BrowserPostNavigationHook, BrowserPreHookCtx, BrowserPreNavigationHook, BrowserProvider,
-    BrowserResponse, GotoOptions, PageHandle, PageOpts, WaitUntil,
+    BrowserResponse, GotoOptions, PageHandle, PageOptions, WaitUntil,
 };
 
 struct BrowserLinkExtractor {
@@ -187,9 +187,9 @@ impl<P: BrowserProvider> BrowserKind<P> {
         env: RequestEnv<'_>,
         session: Option<Arc<Session>>,
     ) -> Result<BrowserContext, CrawlError> {
-        let mut page_opts = PageOpts::new();
+        let mut page_opts = PageOptions::new();
         if let Some(session) = &session {
-            page_opts = page_opts.session(Arc::clone(session));
+            page_opts = page_opts.with_session(Arc::clone(session));
         }
         let page = self
             .pool
@@ -268,6 +268,7 @@ impl<P: BrowserProvider> BrowserKind<P> {
 }
 
 /// Configures a [`BrowserKind`].
+#[must_use = "builders do nothing unless consumed by build"]
 pub struct BrowserKindBuilder<P: BrowserProvider> {
     provider: P,
     pool_options: BrowserPoolOptions<P::LaunchOptions>,
@@ -286,8 +287,8 @@ pub struct BrowserKindBuilder<P: BrowserProvider> {
 
 impl<P: BrowserProvider> BrowserKindBuilder<P> {
     fn new(provider: P) -> Self {
-        let pool_options =
-            BrowserPoolOptions::default().hooks(BrowserHooks::default().with_session_cookie_sync());
+        let pool_options = BrowserPoolOptions::default()
+            .with_hooks(BrowserHooks::default().with_session_cookie_sync());
         Self {
             provider,
             pool_options,
@@ -457,8 +458,8 @@ impl<P: BrowserProvider> BrowserKindBuilder<P> {
             retry_server_errors: self.retry_server_errors,
             session_status_codes: self.session_status_codes,
             goto: GotoOptions::default()
-                .timeout(self.navigation_timeout)
-                .wait_until(self.wait_until),
+                .with_timeout(self.navigation_timeout)
+                .with_wait_until(self.wait_until),
             pre_hooks: self.pre_hooks,
             post_hooks: self.post_hooks,
             snapshot_errors: self.snapshot_errors,
@@ -529,7 +530,7 @@ impl<P: BrowserProvider> CrawlerKind for BrowserKind<P> {
     ) -> BoxFuture<'a, Result<Self::Context, CrawlError>> {
         Box::pin(async move {
             let session = if let Some(pool) = self.session_pool() {
-                Some(pool.get_session(None).await)
+                Some(pool.session(None).await)
             } else {
                 None
             };

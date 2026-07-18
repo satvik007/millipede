@@ -367,7 +367,7 @@ async fn sticky_promotion_skips_http_on_second_request() {
             .build()
             .await
             .unwrap();
-        crawler
+        let _ = crawler
             .run([url(&server, "/shell"), url(&server, "/shell?p=2")])
             .await
             .unwrap();
@@ -402,7 +402,7 @@ async fn sticky_promotion_skips_http_on_second_request() {
             .build()
             .await
             .unwrap();
-        crawler
+        let _ = crawler
             .run([url(&server, "/shell?nonsticky=1"), url(&server, "/static")])
             .await
             .unwrap();
@@ -441,7 +441,7 @@ async fn custom_detector_required_selector() {
             .build()
             .await
             .unwrap();
-        crawler.run([url(&server, "/static")]).await.unwrap();
+        let _ = crawler.run([url(&server, "/static")]).await.unwrap();
         assert_eq!(provider.stats.lock().unwrap().gotos.len(), 1);
     })
     .await

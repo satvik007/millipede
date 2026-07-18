@@ -127,6 +127,7 @@ mod session_token_tests {
 /// ```
 #[derive(Debug, Clone)]
 #[non_exhaustive]
+#[must_use = "session configuration does nothing unless used to create a session"]
 pub struct SessionConfig {
     /// Blocking threshold, scaled by 1,000.
     pub max_error_score_scaled: u32,
@@ -321,6 +322,7 @@ pub const SESSION_POOL_PERSIST_KEY: &str = "SDK_SESSION_POOL_STATE";
 /// ```
 #[derive(Debug, Clone)]
 #[non_exhaustive]
+#[must_use = "pool options do nothing unless passed to SessionPool::new"]
 pub struct SessionPoolOptions {
     /// Maximum number of retained sessions.
     pub max_pool_size: usize,
@@ -385,7 +387,7 @@ impl SessionPool {
         *self.kvs.lock().unwrap_or_else(|e| e.into_inner()) = Some(kvs);
     }
     /// Checks out a sticky usable session, creates one while below capacity, or rotates at random.
-    pub async fn get_session(&self, sticky: Option<&SessionId>) -> Arc<Session> {
+    pub async fn session(&self, sticky: Option<&SessionId>) -> Arc<Session> {
         let mut sessions = self.sessions.lock().await;
         if let Some(session) = sticky
             .and_then(|id| sessions.iter().find(|session| session.id() == id))

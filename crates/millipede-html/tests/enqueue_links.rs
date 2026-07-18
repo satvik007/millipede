@@ -100,7 +100,7 @@ async fn same_hostname_filters_and_queue_deduplicates_fragment()
         .storage_client(Arc::new(MemoryStorageClient::new()))
         .build()
         .await?;
-    crawler.run([url(&server, "/")]).await?;
+    let _ = crawler.run([url(&server, "/")]).await?;
 
     let result = result.lock().expect("result mutex poisoned");
     let result = result.as_ref().expect("root result captured");
@@ -157,7 +157,8 @@ async fn selector_glob_and_base_href_find_exact_products() -> Result<(), Box<dyn
                 let seen = Arc::clone(&seen);
                 async move {
                     if ctx.request.url.path().starts_with("/categories/") {
-                        ctx.enqueue
+                        let _ = ctx
+                            .enqueue
                             .options()
                             .selector("a.product")
                             .globs(["**/products/*"])
@@ -222,7 +223,7 @@ async fn relative_links_resolve_against_final_response_url_after_redirect()
                 let seen = Arc::clone(&seen);
                 async move {
                     if ctx.request.crawl_depth == 0 {
-                        ctx.enqueue.same_hostname().await?;
+                        let _ = ctx.enqueue.same_hostname().await?;
                     } else {
                         seen.lock()
                             .expect("seen mutex poisoned")
@@ -235,7 +236,7 @@ async fn relative_links_resolve_against_final_response_url_after_redirect()
         .storage_client(Arc::new(MemoryStorageClient::new()))
         .build()
         .await?;
-    crawler.run([url(&server, "/redirect/original")]).await?;
+    let _ = crawler.run([url(&server, "/redirect/original")]).await?;
 
     assert_eq!(
         *seen.lock().expect("seen mutex poisoned"),
@@ -256,7 +257,8 @@ async fn per_pattern_override_labels_products_only() -> Result<(), Box<dyn std::
                 let seen = Arc::clone(&seen);
                 async move {
                     if ctx.request.url.path() == "/categories/2" && ctx.request.crawl_depth == 0 {
-                        ctx.enqueue
+                        let _ = ctx
+                            .enqueue
                             .options()
                             .globs([
                                 GlobPattern::from(UrlMatch::new("**/products/*").label("detail")),
@@ -276,7 +278,7 @@ async fn per_pattern_override_labels_products_only() -> Result<(), Box<dyn std::
         .storage_client(Arc::new(MemoryStorageClient::new()))
         .build()
         .await?;
-    crawler.run([url(&server, "/categories/2")]).await?;
+    let _ = crawler.run([url(&server, "/categories/2")]).await?;
 
     let seen = seen.lock().expect("seen mutex poisoned");
     assert_eq!(seen.get("/products/2-a"), Some(&Some("detail".to_owned())));
@@ -348,7 +350,7 @@ async fn transform_and_policy_report_rejections() -> Result<(), Box<dyn std::err
         .storage_client(Arc::new(MemoryStorageClient::new()))
         .build()
         .await?;
-    crawler.run([url(&server, "/")]).await?;
+    let _ = crawler.run([url(&server, "/")]).await?;
 
     let counts = *counts.lock().expect("counts mutex poisoned");
     assert_eq!(counts.0, 1);
@@ -386,7 +388,8 @@ async fn router_crawls_four_products_once() -> Result<(), Box<dyn std::error::Er
     let storage = Arc::new(MemoryStorageClient::new());
     let router = Router::<HtmlContext>::new()
         .route("category", |ctx: HtmlContext| async move {
-            ctx.enqueue
+            let _ = ctx
+                .enqueue
                 .options()
                 .selector("a.product")
                 .globs(["**/products/*"])
@@ -408,7 +411,8 @@ async fn router_crawls_four_products_once() -> Result<(), Box<dyn std::error::Er
             Ok(())
         })
         .default(|ctx: HtmlContext| async move {
-            ctx.enqueue
+            let _ = ctx
+                .enqueue
                 .options()
                 .globs(["**/categories/*"])
                 .label("category")

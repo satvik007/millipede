@@ -17,11 +17,12 @@ use millipede_core::proxy::{ProxyConfiguration, ProxyInfo, ProxyResolveContext};
 use tokio::sync::{Mutex, Notify, mpsc, oneshot};
 
 use crate::{
-    BrowserError, BrowserHooks, BrowserPage, BrowserProvider, LaunchContext, PageId, PageOpts,
+    BrowserError, BrowserHooks, BrowserPage, BrowserProvider, LaunchContext, PageId, PageOptions,
 };
 
 /// Configuration for a [`BrowserPool`].
 #[non_exhaustive]
+#[must_use = "browser pool options do nothing unless passed to BrowserPool::new"]
 pub struct BrowserPoolOptions<L> {
     /// Maximum number of simultaneously open pages in one browser.
     pub max_open_pages_per_browser: usize,
@@ -62,43 +63,43 @@ impl<L: Default> BrowserPoolOptions<L> {
 
 impl<L> BrowserPoolOptions<L> {
     /// Sets the maximum number of simultaneously open pages in one browser.
-    pub fn max_open_pages_per_browser(mut self, value: usize) -> Self {
+    pub fn with_max_open_pages_per_browser(mut self, value: usize) -> Self {
         self.max_open_pages_per_browser = value;
         self
     }
 
     /// Sets the page count after which a browser is retired.
-    pub fn retire_browser_after_page_count(mut self, value: u64) -> Self {
+    pub fn with_retire_browser_after_page_count(mut self, value: u64) -> Self {
         self.retire_browser_after_page_count = value;
         self
     }
 
     /// Sets the maximum number of live or launching browsers.
-    pub fn max_browsers(mut self, value: Option<usize>) -> Self {
+    pub fn with_max_browsers(mut self, value: Option<usize>) -> Self {
         self.max_browsers = value;
         self
     }
 
     /// Sets the maximum duration allowed for page acquisition.
-    pub fn page_acquire_timeout(mut self, value: Duration) -> Self {
+    pub fn with_page_acquire_timeout(mut self, value: Duration) -> Self {
         self.page_acquire_timeout = value;
         self
     }
 
     /// Replaces the provider-specific browser launch options.
-    pub fn launch_options(mut self, value: L) -> Self {
+    pub fn with_launch_options(mut self, value: L) -> Self {
         self.launch_options = value;
         self
     }
 
     /// Sets the proxy configuration used for browser launches.
-    pub fn proxy(mut self, value: Option<ProxyConfiguration>) -> Self {
+    pub fn with_proxy(mut self, value: Option<ProxyConfiguration>) -> Self {
         self.proxy = value;
         self
     }
 
     /// Replaces the browser lifecycle hooks.
-    pub fn hooks(mut self, value: BrowserHooks) -> Self {
+    pub fn with_hooks(mut self, value: BrowserHooks) -> Self {
         self.hooks = value;
         self
     }
@@ -169,7 +170,7 @@ struct BrowserSlot<P: BrowserProvider> {
 struct PageEntry<P: BrowserProvider> {
     page: P::Page,
     browser_id: u64,
-    opts: PageOpts,
+    opts: PageOptions,
     closing: bool,
     close_notify: Arc<Notify>,
 }
@@ -391,7 +392,7 @@ impl<P: BrowserProvider> BrowserPool<P> {
     }
 
     /// Acquires a page, launching or waiting for browser capacity as needed.
-    pub async fn new_page(&self, opts: PageOpts) -> Result<PageHandle, BrowserError> {
+    pub async fn new_page(&self, opts: PageOptions) -> Result<PageHandle, BrowserError> {
         self.start_close_worker();
         let timeout = self.inner.options.page_acquire_timeout;
         match tokio::time::timeout(timeout, self.acquire_page(opts)).await {
@@ -403,7 +404,7 @@ impl<P: BrowserProvider> BrowserPool<P> {
         }
     }
 
-    async fn acquire_page(&self, opts: PageOpts) -> Result<PageHandle, BrowserError> {
+    async fn acquire_page(&self, opts: PageOptions) -> Result<PageHandle, BrowserError> {
         loop {
             let notified = self.inner.capacity.notified();
             tokio::pin!(notified);

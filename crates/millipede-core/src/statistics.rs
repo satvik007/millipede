@@ -97,6 +97,7 @@ pub struct StatisticsSnapshot {
 
 /// Crawl statistics returned when a run finishes.
 #[derive(Debug, Clone, PartialEq, Serialize)]
+#[must_use = "final statistics summarize the completed crawler run"]
 pub struct FinalStatistics {
     /// Number of successfully completed requests.
     pub requests_finished: u64,
@@ -333,7 +334,6 @@ impl StatisticsHandle {
     }
 
     /// Returns the current statistics in their final run-result form.
-    #[must_use]
     pub fn finalize(&self) -> FinalStatistics {
         self.snapshot().into()
     }

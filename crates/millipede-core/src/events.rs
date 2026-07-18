@@ -22,6 +22,7 @@ pub struct HandledRequest {
 
 /// A request's terminal processing state.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum RequestFinalState {
     /// The request completed successfully.
     Succeeded,
@@ -47,6 +48,7 @@ pub struct SystemSnapshot {
 
 /// A control-plane event emitted during a crawler run.
 #[derive(Debug, Clone)]
+#[non_exhaustive]
 pub enum CrawlerEvent {
     /// Requests that subscribers persist crawler state.
     PersistState {

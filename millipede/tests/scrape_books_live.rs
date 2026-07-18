@@ -21,8 +21,9 @@ async fn scrapes_books_over_the_live_network() -> anyhow::Result<()> {
     let storage = Arc::new(MemoryStorageClient::new());
     let router = Router::<HtmlContext>::new()
         .default(|ctx: HtmlContext| async move {
-            ctx.enqueue.options().selector("ul.pager a").send().await?;
-            ctx.enqueue
+            let _ = ctx.enqueue.options().selector("ul.pager a").send().await?;
+            let _ = ctx
+                .enqueue
                 .options()
                 .selector("article.product_pod h3 a")
                 .globs(["**/catalogue/**"])
@@ -82,7 +83,7 @@ async fn crawls_without_trivial_bot_blocks() -> anyhow::Result<()> {
         )
         .max_concurrency(5)
         .request_handler(|ctx: HtmlContext| async move {
-            ctx.enqueue.options().selector("a").send().await?;
+            let _ = ctx.enqueue.options().selector("a").send().await?;
             Ok(())
         })
         .failed_request_handler({

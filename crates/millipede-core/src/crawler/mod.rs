@@ -82,7 +82,7 @@ impl<K: CrawlerKind> Crawler<K> {
             )
             .await
             .map_err(|_| CrawlError::retry(anyhow::anyhow!("queue add timed out")))??;
-            batch.wait().await?;
+            let _ = batch.wait().await?;
             self.shared.notify.notify_waiters();
             Engine {
                 kind: self.kind.clone(),
@@ -111,7 +111,7 @@ impl<K: CrawlerKind> Crawler<K> {
         &self,
         reqs: impl IntoIterator<Item = Request> + Send,
     ) -> Result<(), CrawlError> {
-        self.handle().add_requests(reqs).await?.wait().await?;
+        let _ = self.handle().add_requests(reqs).await?.wait().await?;
         Ok(())
     }
     /// Subscribes to terminal request snapshots.

@@ -53,6 +53,8 @@ impl SnapshotHistory {
 
 /// Options for periodic system CPU load sampling.
 #[derive(Debug, Clone)]
+#[non_exhaustive]
+#[must_use = "CPU load signal options do nothing unless passed to CpuLoadSignal::new"]
 pub struct CpuLoadSignalOptions {
     /// Maximum used CPU fraction before the signal reports overload.
     pub max_used_cpu_ratio: f32,
@@ -158,6 +160,8 @@ impl LoadSignal for CpuLoadSignal {
 
 /// Options for periodic system memory load sampling.
 #[derive(Debug, Clone)]
+#[non_exhaustive]
+#[must_use = "memory load signal options do nothing unless passed to MemoryLoadSignal::new"]
 pub struct MemoryLoadSignalOptions {
     /// Maximum used memory fraction before the signal reports overload.
     pub max_used_memory_ratio: f32,
@@ -263,6 +267,8 @@ impl LoadSignal for MemoryLoadSignal {
 
 /// Options for detecting Tokio executor scheduling lag.
 #[derive(Debug, Clone)]
+#[non_exhaustive]
+#[must_use = "Tokio load signal options do nothing unless passed to TokioRuntimeLoadSignal::new"]
 pub struct TokioRuntimeLoadSignalOptions {
     /// Maximum scheduling lag before the signal reports overload.
     pub max_lag: Duration,

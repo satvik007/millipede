@@ -287,7 +287,7 @@ async fn redirect_cookie_is_reused_by_enqueued_request() -> Result<(), Box<dyn s
             if ctx.response.url.path() == "/landing"
                 && ctx.response.body.as_ref() == b"redirect-complete"
             {
-                ctx.enqueue.urls([needs_cookie]).await?;
+                let _ = ctx.enqueue.urls([needs_cookie]).await?;
             }
             Ok(())
         }
@@ -407,7 +407,7 @@ async fn stop_persists_default_session_pool() -> Result<(), Box<dyn std::error::
         .storage_client(storage.clone())
         .build()
         .await?;
-    crawler.run([url(&server, "/page")]).await?;
+    let _ = crawler.run([url(&server, "/page")]).await?;
 
     let kvs = storage.open_key_value_store(Some(&default_kvs_id)).await?;
     let persisted = kvs
@@ -444,9 +444,9 @@ async fn shared_session_pool_is_used_but_not_persisted() -> Result<(), Box<dyn s
     .build()
     .await?;
 
-    crawler.run([url(&server, "/page")]).await?;
+    let _ = crawler.run([url(&server, "/page")]).await?;
 
-    let session = pool.get_session(None).await;
+    let session = pool.session(None).await;
     assert!(session.cookie_jar().cookie_count() > 0);
     let kvs = storage.open_key_value_store(Some(&default_kvs_id)).await?;
     assert!(kvs.get_bytes(SESSION_POOL_PERSIST_KEY).await?.is_none());

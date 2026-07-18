@@ -44,6 +44,7 @@ pub struct Lease {
 /// Options controlling insertion of requests.
 #[derive(Debug, Clone, Default)]
 #[non_exhaustive]
+#[must_use = "add options do nothing unless passed to RequestQueue::add"]
 pub struct AddOptions {
     /// Whether to insert at the front of the queue.
     pub forefront: bool,
@@ -52,6 +53,7 @@ pub struct AddOptions {
 /// Options controlling return of a leased request to the queue.
 #[derive(Debug, Clone)]
 #[non_exhaustive]
+#[must_use = "reclaim options do nothing unless passed to RequestQueue::reclaim"]
 pub struct ReclaimOptions {
     /// Whether to reinsert at the front of the queue.
     pub forefront: bool,
@@ -70,6 +72,7 @@ impl Default for ReclaimOptions {
 
 /// Result metadata for adding one request.
 #[derive(Debug, Clone)]
+#[must_use = "queue insertion results report deduplication state"]
 pub struct ProcessedRequest {
     /// Stable request identifier.
     pub request_id: RequestId,
@@ -105,12 +108,14 @@ impl From<Request> for RequestSource {
 /// Completion result for a batched request addition.
 #[derive(Debug, Clone)]
 #[non_exhaustive]
+#[must_use = "batched insertion results report processed requests"]
 pub struct AddRequestsBatchedResult {
     /// All processed requests.
     pub processed: Vec<ProcessedRequest>,
 }
 
 /// Handle for observing completion of a batched request addition.
+#[must_use = "batch handles must be awaited to observe completion"]
 pub struct BatchAddHandle {
     /// Requests added synchronously.
     pub added: Vec<ProcessedRequest>,

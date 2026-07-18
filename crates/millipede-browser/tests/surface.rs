@@ -7,7 +7,7 @@ use std::{
 
 use bytes::Bytes;
 use millipede_browser::{
-    BrowserError, BrowserHooks, BrowserPage, GotoOptions, LaunchContext, PageOpts,
+    BrowserError, BrowserHooks, BrowserPage, GotoOptions, LaunchContext, PageOptions,
     ScreenshotOptions, WaitUntil,
 };
 use millipede_core::{
@@ -169,9 +169,23 @@ fn option_defaults_match_browser_contract() {
     assert_eq!(goto.timeout, Duration::from_secs(30));
     assert_eq!(goto.wait_until, WaitUntil::Load);
 
-    let page = PageOpts::default();
+    let page = PageOptions::default();
     assert!(page.session.is_none());
     assert!(page.extra_headers.is_empty());
+}
+
+#[test]
+fn option_setters_update_browser_contract() {
+    let goto = GotoOptions::default()
+        .with_timeout(Duration::from_secs(45))
+        .with_wait_until(WaitUntil::DomContentLoaded);
+    assert_eq!(goto.timeout, Duration::from_secs(45));
+    assert_eq!(goto.wait_until, WaitUntil::DomContentLoaded);
+
+    let mut headers = http::HeaderMap::new();
+    headers.insert("x-millipede-test", http::HeaderValue::from_static("set"));
+    let page = PageOptions::new().with_extra_headers(headers.clone());
+    assert_eq!(page.extra_headers, headers);
 }
 
 #[tokio::test]
@@ -187,7 +201,7 @@ async fn session_cookie_hooks_synchronize_both_directions() {
 
     let page_cookie = Cookie::new("browser", "from-page", "example.com");
     let page = FakeSurfacePage::with_cookies(vec![page_cookie.clone()]);
-    let opts = PageOpts::new().session(Arc::clone(&session));
+    let opts = PageOptions::new().with_session(Arc::clone(&session));
     let hooks = BrowserHooks::default().with_session_cookie_sync();
 
     for hook in &hooks.post_page_create {

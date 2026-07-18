@@ -4,6 +4,8 @@ use std::{fmt, sync::Arc, time::Duration};
 
 /// Configuration for a collection of load signals and their sampling window.
 #[derive(Clone)]
+#[non_exhaustive]
+#[must_use = "snapshotter options do nothing unless passed to Snapshotter::new"]
 pub struct SnapshotterOptions {
     /// Signals evaluated by the autoscaler.
     pub signals: Vec<Arc<dyn LoadSignal>>,

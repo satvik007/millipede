@@ -128,6 +128,7 @@ fn same_domain(parent: &Url, candidate: &Url) -> bool {
 /// assert!(matches!(pattern, UrlPattern::Glob(_)));
 /// ```
 #[derive(Debug, Clone)]
+#[non_exhaustive]
 pub enum UrlPattern {
     /// A minimatch-style glob matched against the complete URL string.
     Glob(String),
@@ -178,6 +179,7 @@ pub(crate) fn compile_globs(patterns: &[String]) -> Result<GlobSet, LinkPatternE
 
 /// An error produced while compiling link patterns.
 #[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
 pub enum LinkPatternError {
     /// A glob cannot be parsed or compiled.
     #[error("invalid glob pattern {pattern:?}: {source}")]
@@ -379,6 +381,7 @@ pub trait LinkExtractor: Send + Sync {
 
 /// The outcome of transforming a candidate request before enqueueing.
 #[derive(Debug)]
+#[non_exhaustive]
 pub enum TransformResult {
     /// Enqueue the candidate, including any mutations made by the transform.
     Enqueue,

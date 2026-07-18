@@ -1024,7 +1024,7 @@ mod tests {
         let queue = storage.open_request_queue(None).await.unwrap();
         let kvs = storage.open_key_value_store(None).await.unwrap();
         for index in 0..n_requests {
-            queue
+            let _ = queue
                 .add(
                     Request::get(format!("https://example.invalid/{index}"))
                         .build()
@@ -1094,7 +1094,7 @@ mod tests {
             }
         };
         let (engine, _) = engine_with(16, 4, handler, |_| {}).await;
-        engine.run().await.unwrap();
+        let _ = engine.run().await.unwrap();
         assert_eq!(peak.load(Ordering::SeqCst), 4);
     }
 
@@ -1177,7 +1177,7 @@ mod tests {
             })),
         );
 
-        engine.run().await.unwrap();
+        let _ = engine.run().await.unwrap();
         let peak = peak.load(Ordering::SeqCst);
         assert!(
             peak > 2,
@@ -1210,7 +1210,7 @@ mod tests {
             })),
         );
 
-        engine.run().await.unwrap();
+        let _ = engine.run().await.unwrap();
         let times = times.lock().unwrap();
         assert_eq!(times.len(), 2);
         assert!(times[1].duration_since(times[0]) >= Duration::from_millis(200));
@@ -1233,7 +1233,7 @@ mod tests {
             }
         };
         let (mut engine, _) = engine_with(2, 3, handler, |_| {}).await;
-        engine
+        let _ = engine
             .shared
             .queue
             .add(
@@ -1253,7 +1253,7 @@ mod tests {
         );
         let started = Instant::now();
 
-        engine.run().await.unwrap();
+        let _ = engine.run().await.unwrap();
         let times = times.lock().unwrap();
         let other = times
             .iter()
@@ -1287,7 +1287,7 @@ mod tests {
             }
         };
         let (mut engine, _) = engine_with(3, 2, handler, |_| {}).await;
-        engine
+        let _ = engine
             .shared
             .queue
             .add(
@@ -1307,7 +1307,7 @@ mod tests {
         );
         let started = Instant::now();
 
-        engine.run().await.unwrap();
+        let _ = engine.run().await.unwrap();
         let starts = starts.lock().unwrap();
         let b_start = starts
             .iter()
@@ -1359,7 +1359,7 @@ mod tests {
         assert!(second.duration_since(started) >= Duration::from_secs(30));
         let third = rx.recv().await.unwrap();
         assert!(third.duration_since(started) >= Duration::from_secs(60));
-        run.await.unwrap().unwrap();
+        let _ = run.await.unwrap().unwrap();
     }
 
     #[tokio::test(start_paused = true)]
@@ -1409,7 +1409,7 @@ mod tests {
         tokio::time::advance(Duration::from_secs(31)).await;
         tokio::task::yield_now().await;
         tokio::time::advance(Duration::from_secs(9)).await;
-        handle
+        let _ = handle
             .add_requests([Request::get("https://example.invalid/late")
                 .build()
                 .unwrap()])
@@ -1425,7 +1425,7 @@ mod tests {
             .unwrap();
         assert!(second.duration_since(started) < Duration::from_secs(41));
         handle.stop();
-        run.await.unwrap().unwrap();
+        let _ = run.await.unwrap().unwrap();
     }
 
     struct HealthySignal {
@@ -1475,7 +1475,7 @@ mod tests {
         options.snapshotter.signals.push(signal);
         replace_pool(&mut engine, Arc::new(AutoscaledPool::new(options)));
 
-        engine.run().await.unwrap();
+        let _ = engine.run().await.unwrap();
         tokio::time::timeout(Duration::from_secs(1), stopped_rx.recv())
             .await
             .expect("background signal was not stopped")
@@ -1520,7 +1520,7 @@ mod tests {
         options.snapshotter.signals.push(signal);
         replace_pool(&mut engine, Arc::new(AutoscaledPool::new(options)));
 
-        tokio::time::timeout(Duration::from_secs(1), engine.run())
+        let _ = tokio::time::timeout(Duration::from_secs(1), engine.run())
             .await
             .expect("scale change did not wake the blocked dispatcher")
             .unwrap();
@@ -1567,7 +1567,7 @@ mod tests {
         )
         .await;
         let mut results = shared.results_tx.subscribe();
-        engine.run().await.unwrap();
+        let _ = engine.run().await.unwrap();
         let result = results.recv().await.unwrap();
         assert_eq!(result.request.session_rotation_count, 1);
         assert_eq!(result.retry_count, 0);
@@ -1729,7 +1729,7 @@ mod tests {
         let stopped = Instant::now();
         shared.drain.cancel();
         shared.notify.notify_waiters();
-        tokio::time::timeout(Duration::from_secs(2), run)
+        let _ = tokio::time::timeout(Duration::from_secs(2), run)
             .await
             .unwrap()
             .unwrap()
@@ -1799,7 +1799,7 @@ mod tests {
         results.recv().await.unwrap();
         shared.cancel.cancel();
         shared.notify.notify_waiters();
-        run.await.unwrap().unwrap();
+        let _ = run.await.unwrap().unwrap();
 
         assert_eq!(shared.queue.pending_count().await.unwrap(), 2);
     }
@@ -1825,7 +1825,7 @@ mod tests {
         shared.drain.cancel();
         shared.notify.notify_waiters();
         let stopped = Instant::now();
-        run.await.unwrap().unwrap();
+        let _ = run.await.unwrap().unwrap();
 
         assert!(stopped.elapsed() < Duration::from_secs(1));
         assert_eq!(shared.queue.pending_count().await.unwrap(), 2);
@@ -1907,7 +1907,7 @@ mod tests {
         )
         .await;
         let mut results = shared.results_tx.subscribe();
-        engine.run().await.unwrap();
+        let _ = engine.run().await.unwrap();
         assert!(results.recv().await.unwrap().duration >= Duration::from_millis(60));
     }
 
@@ -1924,7 +1924,7 @@ mod tests {
                 Ok(())
             }
         }));
-        engine.run().await.unwrap();
+        let _ = engine.run().await.unwrap();
         assert!(errors.lock().unwrap()[0].contains("missing route"));
     }
 
@@ -1942,7 +1942,7 @@ mod tests {
         .await;
         let kvs = engine.kvs.clone().unwrap();
         let mut events = shared.events.subscribe();
-        engine.run().await.unwrap();
+        let _ = engine.run().await.unwrap();
         let mut persisted = false;
         while let Ok(event) = events.try_recv() {
             persisted |= matches!(
@@ -2023,7 +2023,7 @@ mod tests {
             opts: basic.opts,
         };
         let mut results = shared.results_tx.subscribe();
-        engine.run().await.unwrap();
+        let _ = engine.run().await.unwrap();
         let result = results.recv().await.unwrap();
         assert_eq!(result.retry_count, 1);
         assert_eq!(result.request.headers["x-engine-marker"], "first-attempt");
@@ -2116,7 +2116,7 @@ mod tests {
             kvs: None,
             opts: basic.opts,
         };
-        engine.run().await.unwrap();
+        let _ = engine.run().await.unwrap();
         assert_eq!(handled.load(Ordering::SeqCst), 1);
         assert_eq!(handler_failed.load(Ordering::SeqCst), 2);
         assert_eq!(execute_failed.load(Ordering::SeqCst), 2);
@@ -2174,7 +2174,7 @@ mod tests {
         )
         .await;
         let mut results = shared.results_tx.subscribe();
-        engine.run().await.unwrap();
+        let _ = engine.run().await.unwrap();
         let mut keys = HashSet::new();
         let mut succeeded = 0;
         let mut failed = 0;
@@ -2226,7 +2226,7 @@ mod tests {
         let mut results = shared.results_tx.subscribe();
         let run = tokio::spawn(engine.run());
         tokio::time::sleep(Duration::from_millis(20)).await;
-        handle
+        let _ = handle
             .add_requests([Request::get("https://example.invalid/late")
                 .build()
                 .unwrap()])
@@ -2300,7 +2300,7 @@ mod tests {
         tokio::time::timeout(Duration::from_secs(1), empty_check_started.notified())
             .await
             .expect("engine should reach the empty-queue idle check");
-        handle
+        let _ = handle
             .add_requests([Request::get("https://example.invalid/late-idle")
                 .build()
                 .unwrap()])
@@ -2373,7 +2373,7 @@ mod tests {
         empty_check_started.notified().await;
         release_empty_check.notify_one();
         tokio::task::yield_now().await;
-        shared
+        let _ = shared
             .queue
             .add(
                 Request::get("https://example.invalid/no-notify")
@@ -2390,6 +2390,6 @@ mod tests {
         assert_eq!(completed.load(Ordering::SeqCst), 2);
 
         handle.stop();
-        run.await.unwrap().unwrap();
+        let _ = run.await.unwrap().unwrap();
     }
 }

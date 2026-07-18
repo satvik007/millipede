@@ -90,7 +90,7 @@ async fn main() -> anyhow::Result<()> {
                     "title": title,
                 }))
                 .await?;
-            ctx.enqueue.same_hostname().await?;
+            let _ = ctx.enqueue.same_hostname().await?;
             Ok(())
         })
         .build()

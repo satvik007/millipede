@@ -234,6 +234,7 @@ struct PendingHeader {
 
 /// Builds a [`Request`] while deferring parsing and serialization errors.
 #[derive(Debug, Default)]
+#[must_use = "builders do nothing unless consumed by build"]
 pub struct RequestBuilder {
     url: Option<Result<Url, url::ParseError>>,
     method: Option<Method>,
@@ -436,6 +437,7 @@ impl RequestBuilder {
 
 /// Errors encountered while building a request.
 #[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
 pub enum RequestBuildError {
     /// The builder has no URL.
     #[error("request URL is missing")]

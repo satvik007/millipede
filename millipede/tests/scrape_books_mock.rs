@@ -124,8 +124,9 @@ fn element_text(ctx: &HtmlContext, selector: &millipede_html::scraper::Selector)
 fn book_router() -> Router<HtmlContext> {
     Router::<HtmlContext>::new()
         .default(|ctx: HtmlContext| async move {
-            ctx.enqueue.options().selector("ul.pager a").send().await?;
-            ctx.enqueue
+            let _ = ctx.enqueue.options().selector("ul.pager a").send().await?;
+            let _ = ctx
+                .enqueue
                 .options()
                 .selector("article.product_pod h3 a")
                 .globs(["**/catalogue/**"])

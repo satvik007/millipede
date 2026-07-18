@@ -110,7 +110,7 @@ impl RequestQueue for RequestQueueWithSitemap {
                     .as_ref()
                     .expect("pending sitemap request exists")
                     .clone();
-                self.inner.add(request, AddOptions::default()).await?;
+                let _ = self.inner.add(request, AddOptions::default()).await?;
                 drain.pending_add = None;
             }
             self.persist_after_batch().await;

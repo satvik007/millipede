@@ -17,6 +17,7 @@ pub struct KvEntry {
 /// Options controlling key pagination.
 #[derive(Debug, Clone, Default)]
 #[non_exhaustive]
+#[must_use = "list options do nothing unless passed to KeyValueStore::list_keys"]
 pub struct ListKeysOptions {
     /// Maximum number of keys to return.
     pub limit: Option<usize>,

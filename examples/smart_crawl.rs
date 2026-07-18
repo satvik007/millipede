@@ -93,7 +93,7 @@ async fn main() -> anyhow::Result<()> {
         .request_handler(move |ctx: millipede::SmartContext| {
             let handler_paths = Arc::clone(&handler_paths);
             async move {
-                ctx.enqueue().same_hostname().await?;
+                let _ = ctx.enqueue().same_hostname().await?;
                 match ctx {
                     millipede::SmartContext::Http(http) => {
                         let selector = millipede::html::scraper::Selector::parse("title")
@@ -124,6 +124,7 @@ async fn main() -> anyhow::Result<()> {
                             .1
                             .push(browser.request.url.to_string());
                     }
+                    _ => unreachable!("unsupported smart crawler context variant"),
                 }
                 Ok(())
             }

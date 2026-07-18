@@ -250,7 +250,7 @@ async fn backoff_delays_next_attempt() -> Result<(), Box<dyn std::error::Error>>
         })
         .build()
         .await?;
-    crawler.run(["http://example.local/"]).await?;
+    let _ = crawler.run(["http://example.local/"]).await?;
     assert!(started.elapsed() >= Duration::from_secs(5));
     Ok(())
 }

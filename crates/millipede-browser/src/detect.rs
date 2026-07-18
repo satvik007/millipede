@@ -92,6 +92,7 @@ pub trait BrowserPromotionDetector: Send + Sync + 'static {
 ///
 /// Anti-bot classification is delegated to the configured core detector.
 #[derive(Debug, Clone)]
+#[must_use = "detector configuration does nothing unless the detector is installed"]
 pub struct DefaultPromotionDetector {
     required_selector: Option<String>,
     min_visible_text: usize,

@@ -16,6 +16,7 @@ pub trait HasRequest {
 
 /// Restricts a route to selected HTTP methods.
 #[derive(Debug, Clone)]
+#[non_exhaustive]
 pub enum MethodFilter {
     /// Matches every HTTP method.
     Any,

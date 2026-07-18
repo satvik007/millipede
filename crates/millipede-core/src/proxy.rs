@@ -24,6 +24,7 @@ use crate::{errors::CrawlError, request::Request, session::SessionId};
 /// assert_eq!(RotationStrategy::default(), RotationStrategy::RoundRobin);
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[non_exhaustive]
 pub enum RotationStrategy {
     /// Selects proxies in stable cyclic order.
     #[default]
@@ -402,6 +403,7 @@ pub enum ProxyKind {
 /// assert!(ProxyBuckets::new().for_kind(&ProxyKind::Default).is_none());
 /// ```
 #[derive(Default)]
+#[must_use = "proxy buckets do nothing unless installed on a crawler"]
 pub struct ProxyBuckets {
     default_bucket: Option<ProxyConfiguration>,
     media: Option<ProxyConfiguration>,

@@ -214,7 +214,7 @@ async fn results_stream_via_public_api() -> Result<(), Box<dyn std::error::Error
         (first.id.clone(), first.url.clone()),
         (second.id.clone(), second.url.clone()),
     ]);
-    crawler.run([first, second]).await?;
+    let _ = crawler.run([first, second]).await?;
 
     let mut received = HashMap::new();
     for _ in 0..expected.len() {
@@ -397,7 +397,7 @@ async fn crawler_add_requests_wakes_engine_after_deferred_completion()
         queue.complete_deferred.notify_one();
 
         tokio::time::timeout(Duration::from_secs(2), async {
-            batch.wait().await?;
+            let _ = batch.wait().await?;
             let stats = running.await??;
             assert_eq!(stats.requests_finished, 2);
             Ok::<_, Box<dyn std::error::Error>>(())
@@ -428,7 +428,7 @@ async fn config_events_and_ids_are_honored() -> Result<(), Box<dyn std::error::E
         })
         .build()
         .await?;
-    crawler
+    let _ = crawler
         .run(["https://example.com/1", "https://example.com/2"])
         .await?;
     let mut saw = false;
@@ -533,7 +533,7 @@ async fn run_twice_errors() -> Result<(), Box<dyn std::error::Error>> {
         .request_handler(|_ctx: BasicContext| async { Ok(()) })
         .build()
         .await?;
-    crawler.run(["https://example.com"]).await?;
+    let _ = crawler.run(["https://example.com"]).await?;
     assert!(
         crawler
             .run(["https://example.com"])

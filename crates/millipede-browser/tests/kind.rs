@@ -265,7 +265,7 @@ async fn browser_crawler_crawls_and_enqueues_dom_links() {
         let crawler = Crawler::builder(kind(provider.clone()))
             .storage_client(storage())
             .request_handler(|ctx: BrowserContext| async move {
-                ctx.enqueue.all().await?;
+                let _ = ctx.enqueue.all().await?;
                 Ok(())
             })
             .build()
@@ -378,7 +378,7 @@ async fn fingerprint_hook_installs_headers() {
             millipede_fingerprint::BrowserFingerprintGenerator::new(),
         ));
         let browser_kind = BrowserKind::builder(provider.clone())
-            .pool_options(BrowserPoolOptions::default().hooks(hooks))
+            .pool_options(BrowserPoolOptions::default().with_hooks(hooks))
             .build()
             .unwrap();
         let crawler = Crawler::builder(browser_kind)
@@ -388,7 +388,7 @@ async fn fingerprint_hook_installs_headers() {
             .await
             .unwrap();
 
-        crawler
+        let _ = crawler
             .run(["https://example.com/fingerprint"])
             .await
             .unwrap();
@@ -434,7 +434,7 @@ async fn pre_navigation_hook_runs() {
             .await
             .unwrap();
 
-        crawler.run(["https://example.com/pre-hook"]).await.unwrap();
+        let _ = crawler.run(["https://example.com/pre-hook"]).await.unwrap();
 
         assert_eq!(
             *calls.lock().unwrap_or_else(|error| error.into_inner()),
@@ -776,11 +776,9 @@ async fn task_timeout_cancellation_recovers_page_via_guard() {
                 ..FakeBehavior::default()
             },
         )]));
-        let options = AutoscaledPoolOptions {
-            fixed_concurrency: Some(1),
-            task_timeout: Some(Duration::from_millis(200)),
-            ..AutoscaledPoolOptions::default()
-        };
+        let mut options = AutoscaledPoolOptions::default();
+        options.fixed_concurrency = Some(1);
+        options.task_timeout = Some(Duration::from_millis(200));
         let page_closed_before_stop = Arc::new(Mutex::new(false));
         let observed_page_closed = Arc::clone(&page_closed_before_stop);
         let observed_provider = provider.clone();
@@ -827,7 +825,7 @@ async fn stop_shuts_down_pool() {
             .await
             .unwrap();
 
-        crawler.run(["https://example.com/"]).await.unwrap();
+        let _ = crawler.run(["https://example.com/"]).await.unwrap();
         let fake = provider
             .stats
             .lock()
@@ -849,7 +847,7 @@ async fn owned_sessions_persist_but_shared_do_not() {
             .build()
             .await
             .unwrap();
-        owned.run(["https://example.com/owned"]).await.unwrap();
+        let _ = owned.run(["https://example.com/owned"]).await.unwrap();
         let owned_kvs = owned_storage
             .open_key_value_store(Some("default"))
             .await
@@ -879,7 +877,7 @@ async fn owned_sessions_persist_but_shared_do_not() {
             .build()
             .await
             .unwrap();
-        shared.run(["https://example.com/shared"]).await.unwrap();
+        let _ = shared.run(["https://example.com/shared"]).await.unwrap();
         assert!(
             shared_kvs
                 .get::<serde_json::Value>(SESSION_POOL_PERSIST_KEY)

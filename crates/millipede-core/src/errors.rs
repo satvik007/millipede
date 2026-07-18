@@ -5,6 +5,7 @@ use std::time::Duration;
 
 /// An error produced while processing a crawl request.
 #[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
 pub enum CrawlError {
     /// A retryable error that counts against the request retry limit.
     #[error("retryable: {0}")]

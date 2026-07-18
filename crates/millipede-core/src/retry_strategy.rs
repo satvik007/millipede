@@ -77,6 +77,7 @@ pub struct AttemptOutcome<'a> {
 /// assert_ne!(action, SessionRetryAction::Keep);
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[non_exhaustive]
 pub enum SessionRetryAction {
     /// Keep the current session classification.
     #[default]

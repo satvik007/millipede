@@ -40,7 +40,7 @@ pub fn millipede_core::antibot::AntiBotDetector::detect(&self, &millipede_core::
 impl millipede_core::antibot::AntiBotDetector for millipede_core::antibot::DefaultAntiBotDetector
 pub fn millipede_core::antibot::DefaultAntiBotDetector::detect(&self, &millipede_core::antibot::AntiBotSignals<'_>) -> core::option::Option<millipede_core::errors::AntiBotTech>
 pub mod millipede_core::autoscale
-pub enum millipede_core::autoscale::AutoscaleMode
+#[non_exhaustive] pub enum millipede_core::autoscale::AutoscaleMode
 pub millipede_core::autoscale::AutoscaleMode::Aimd
 pub millipede_core::autoscale::AutoscaleMode::Aimd::decrease_factor: f32
 pub millipede_core::autoscale::AutoscaleMode::Aimd::increase_after_successes: usize
@@ -104,7 +104,7 @@ impl core::marker::Unpin for millipede_core::autoscale::AutoscaledPool
 impl core::marker::UnsafeUnpin for millipede_core::autoscale::AutoscaledPool
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::AutoscaledPool
 impl !core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::AutoscaledPool
-pub struct millipede_core::autoscale::AutoscaledPoolOptions
+#[non_exhaustive] pub struct millipede_core::autoscale::AutoscaledPoolOptions
 pub millipede_core::autoscale::AutoscaledPoolOptions::autoscale_interval: core::time::Duration
 pub millipede_core::autoscale::AutoscaledPoolOptions::desired_concurrency: core::option::Option<usize>
 pub millipede_core::autoscale::AutoscaledPoolOptions::desired_utilization_ratio: f32
@@ -184,7 +184,7 @@ impl core::marker::Unpin for millipede_core::autoscale::CpuLoadSignal
 impl core::marker::UnsafeUnpin for millipede_core::autoscale::CpuLoadSignal
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::CpuLoadSignal
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::CpuLoadSignal
-pub struct millipede_core::autoscale::CpuLoadSignalOptions
+#[non_exhaustive] pub struct millipede_core::autoscale::CpuLoadSignalOptions
 pub millipede_core::autoscale::CpuLoadSignalOptions::max_used_cpu_ratio: f32
 pub millipede_core::autoscale::CpuLoadSignalOptions::sample_interval: core::time::Duration
 impl core::clone::Clone for millipede_core::autoscale::CpuLoadSignalOptions
@@ -237,7 +237,7 @@ impl core::marker::Unpin for millipede_core::autoscale::MemoryLoadSignal
 impl core::marker::UnsafeUnpin for millipede_core::autoscale::MemoryLoadSignal
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::MemoryLoadSignal
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::MemoryLoadSignal
-pub struct millipede_core::autoscale::MemoryLoadSignalOptions
+#[non_exhaustive] pub struct millipede_core::autoscale::MemoryLoadSignalOptions
 pub millipede_core::autoscale::MemoryLoadSignalOptions::max_used_memory_ratio: f32
 pub millipede_core::autoscale::MemoryLoadSignalOptions::memory_bytes: core::option::Option<u64>
 pub millipede_core::autoscale::MemoryLoadSignalOptions::sample_interval: core::time::Duration
@@ -268,7 +268,7 @@ impl core::marker::Unpin for millipede_core::autoscale::Snapshotter
 impl core::marker::UnsafeUnpin for millipede_core::autoscale::Snapshotter
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::Snapshotter
 impl !core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::Snapshotter
-pub struct millipede_core::autoscale::SnapshotterOptions
+#[non_exhaustive] pub struct millipede_core::autoscale::SnapshotterOptions
 pub millipede_core::autoscale::SnapshotterOptions::signals: alloc::vec::Vec<alloc::sync::Arc<dyn millipede_core::autoscale::LoadSignal>>
 pub millipede_core::autoscale::SnapshotterOptions::window: core::time::Duration
 impl core::clone::Clone for millipede_core::autoscale::SnapshotterOptions
@@ -295,7 +295,7 @@ impl core::marker::Unpin for millipede_core::autoscale::SystemStatus
 impl core::marker::UnsafeUnpin for millipede_core::autoscale::SystemStatus
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::SystemStatus
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::SystemStatus
-pub struct millipede_core::autoscale::SystemStatusOptions
+#[non_exhaustive] pub struct millipede_core::autoscale::SystemStatusOptions
 pub millipede_core::autoscale::SystemStatusOptions::min_samples: usize
 impl core::clone::Clone for millipede_core::autoscale::SystemStatusOptions
 pub fn millipede_core::autoscale::SystemStatusOptions::clone(&self) -> millipede_core::autoscale::SystemStatusOptions
@@ -328,7 +328,7 @@ impl core::marker::Unpin for millipede_core::autoscale::TokioRuntimeLoadSignal
 impl core::marker::UnsafeUnpin for millipede_core::autoscale::TokioRuntimeLoadSignal
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::TokioRuntimeLoadSignal
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::TokioRuntimeLoadSignal
-pub struct millipede_core::autoscale::TokioRuntimeLoadSignalOptions
+#[non_exhaustive] pub struct millipede_core::autoscale::TokioRuntimeLoadSignalOptions
 pub millipede_core::autoscale::TokioRuntimeLoadSignalOptions::max_lag: core::time::Duration
 pub millipede_core::autoscale::TokioRuntimeLoadSignalOptions::sample_interval: core::time::Duration
 impl core::clone::Clone for millipede_core::autoscale::TokioRuntimeLoadSignalOptions
@@ -375,7 +375,7 @@ pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::sample(&self, core::ti
 pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::start<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
 pub fn millipede_core::autoscale::TokioRuntimeLoadSignal::stop<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = core::result::Result<(), millipede_core::errors::CrawlError>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
 pub mod millipede_core::config
-pub enum millipede_core::config::ConfigError
+#[non_exhaustive] pub enum millipede_core::config::ConfigError
 pub millipede_core::config::ConfigError::InvalidEnvVar
 pub millipede_core::config::ConfigError::InvalidEnvVar::message: alloc::string::String
 pub millipede_core::config::ConfigError::InvalidEnvVar::name: &'static str
@@ -478,7 +478,7 @@ impl core::marker::UnsafeUnpin for millipede_core::config::ConfigurationBuilder
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::config::ConfigurationBuilder
 impl !core::panic::unwind_safe::UnwindSafe for millipede_core::config::ConfigurationBuilder
 pub mod millipede_core::cookies
-pub enum millipede_core::cookies::CookieJarError
+#[non_exhaustive] pub enum millipede_core::cookies::CookieJarError
 pub millipede_core::cookies::CookieJarError::Deserialize(anyhow::Error)
 pub millipede_core::cookies::CookieJarError::Serialize(anyhow::Error)
 impl core::error::Error for millipede_core::cookies::CookieJarError
@@ -571,7 +571,7 @@ impl core::marker::UnsafeUnpin for millipede_core::cookies::CookieJar
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::cookies::CookieJar
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::cookies::CookieJar
 pub mod millipede_core::crawler
-pub enum millipede_core::crawler::CrawlerBuildError
+#[non_exhaustive] pub enum millipede_core::crawler::CrawlerBuildError
 pub millipede_core::crawler::CrawlerBuildError::Config(millipede_core::config::ConfigError)
 pub millipede_core::crawler::CrawlerBuildError::InvalidConcurrencyBounds
 pub millipede_core::crawler::CrawlerBuildError::MissingRequestHandler
@@ -895,7 +895,7 @@ impl core::marker::Unpin for millipede_core::enqueue::EnqueueLinker
 impl core::marker::UnsafeUnpin for millipede_core::enqueue::EnqueueLinker
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::enqueue::EnqueueLinker
 impl !core::panic::unwind_safe::UnwindSafe for millipede_core::enqueue::EnqueueLinker
-pub struct millipede_core::enqueue::EnqueueLinksOptions<'a>
+#[non_exhaustive] pub struct millipede_core::enqueue::EnqueueLinksOptions<'a>
 impl<'a> millipede_core::enqueue::EnqueueLinksOptions<'a>
 pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::base_url(self, url::Url) -> Self
 pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::exclude<P: core::convert::Into<millipede_core::link_extraction::UrlPattern>>(self, impl core::iter::traits::collect::IntoIterator<Item = P>) -> Self
@@ -972,7 +972,7 @@ impl core::marker::Unpin for millipede_core::errors::AntiBotTech
 impl core::marker::UnsafeUnpin for millipede_core::errors::AntiBotTech
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::errors::AntiBotTech
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::errors::AntiBotTech
-pub enum millipede_core::errors::CrawlError
+#[non_exhaustive] pub enum millipede_core::errors::CrawlError
 pub millipede_core::errors::CrawlError::AntiBotDetected
 pub millipede_core::errors::CrawlError::AntiBotDetected::source: anyhow::Error
 pub millipede_core::errors::CrawlError::AntiBotDetected::tech: millipede_core::errors::AntiBotTech
@@ -1020,7 +1020,7 @@ impl core::marker::UnsafeUnpin for millipede_core::errors::CrawlError
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::errors::CrawlError
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::errors::CrawlError
 pub mod millipede_core::events
-pub enum millipede_core::events::CrawlerEvent
+#[non_exhaustive] pub enum millipede_core::events::CrawlerEvent
 pub millipede_core::events::CrawlerEvent::Aborting
 pub millipede_core::events::CrawlerEvent::Exiting
 pub millipede_core::events::CrawlerEvent::PersistState
@@ -1041,7 +1041,7 @@ impl core::marker::Unpin for millipede_core::events::CrawlerEvent
 impl core::marker::UnsafeUnpin for millipede_core::events::CrawlerEvent
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::events::CrawlerEvent
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::events::CrawlerEvent
-pub enum millipede_core::events::RequestFinalState
+#[non_exhaustive] pub enum millipede_core::events::RequestFinalState
 pub millipede_core::events::RequestFinalState::Failed
 pub millipede_core::events::RequestFinalState::Skipped
 pub millipede_core::events::RequestFinalState::Succeeded
@@ -1307,7 +1307,7 @@ impl core::marker::Unpin for millipede_core::link_extraction::EnqueueStrategy
 impl core::marker::UnsafeUnpin for millipede_core::link_extraction::EnqueueStrategy
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::link_extraction::EnqueueStrategy
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::link_extraction::EnqueueStrategy
-pub enum millipede_core::link_extraction::LinkPatternError
+#[non_exhaustive] pub enum millipede_core::link_extraction::LinkPatternError
 pub millipede_core::link_extraction::LinkPatternError::InvalidGlob
 pub millipede_core::link_extraction::LinkPatternError::InvalidGlob::pattern: alloc::string::String
 pub millipede_core::link_extraction::LinkPatternError::InvalidGlob::source: globset::Error
@@ -1324,7 +1324,7 @@ impl core::marker::Unpin for millipede_core::link_extraction::LinkPatternError
 impl core::marker::UnsafeUnpin for millipede_core::link_extraction::LinkPatternError
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::link_extraction::LinkPatternError
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::link_extraction::LinkPatternError
-pub enum millipede_core::link_extraction::TransformResult
+#[non_exhaustive] pub enum millipede_core::link_extraction::TransformResult
 pub millipede_core::link_extraction::TransformResult::Enqueue
 pub millipede_core::link_extraction::TransformResult::Skip
 pub millipede_core::link_extraction::TransformResult::Skip::reason: alloc::string::String
@@ -1337,7 +1337,7 @@ impl core::marker::Unpin for millipede_core::link_extraction::TransformResult
 impl core::marker::UnsafeUnpin for millipede_core::link_extraction::TransformResult
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::link_extraction::TransformResult
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::link_extraction::TransformResult
-pub enum millipede_core::link_extraction::UrlPattern
+#[non_exhaustive] pub enum millipede_core::link_extraction::UrlPattern
 pub millipede_core::link_extraction::UrlPattern::Glob(alloc::string::String)
 pub millipede_core::link_extraction::UrlPattern::Regex(regex::regex::string::Regex)
 impl core::clone::Clone for millipede_core::link_extraction::UrlPattern
@@ -1472,7 +1472,7 @@ impl core::marker::Unpin for millipede_core::errors::AntiBotTech
 impl core::marker::UnsafeUnpin for millipede_core::errors::AntiBotTech
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::errors::AntiBotTech
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::errors::AntiBotTech
-pub enum millipede_core::prelude::AutoscaleMode
+#[non_exhaustive] pub enum millipede_core::prelude::AutoscaleMode
 pub millipede_core::prelude::AutoscaleMode::Aimd
 pub millipede_core::prelude::AutoscaleMode::Aimd::decrease_factor: f32
 pub millipede_core::prelude::AutoscaleMode::Aimd::increase_after_successes: usize
@@ -1488,7 +1488,28 @@ impl core::marker::Unpin for millipede_core::autoscale::AutoscaleMode
 impl core::marker::UnsafeUnpin for millipede_core::autoscale::AutoscaleMode
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::AutoscaleMode
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::AutoscaleMode
-pub enum millipede_core::prelude::CookieJarError
+#[non_exhaustive] pub enum millipede_core::prelude::ConfigError
+pub millipede_core::prelude::ConfigError::InvalidEnvVar
+pub millipede_core::prelude::ConfigError::InvalidEnvVar::message: alloc::string::String
+pub millipede_core::prelude::ConfigError::InvalidEnvVar::name: &'static str
+pub millipede_core::prelude::ConfigError::InvalidEnvVar::value: alloc::string::String
+pub millipede_core::prelude::ConfigError::InvalidLogLevel(alloc::string::String)
+pub millipede_core::prelude::ConfigError::ZeroPersistStateInterval
+impl core::convert::From<millipede_core::config::ConfigError> for millipede_core::crawler::CrawlerBuildError
+pub fn millipede_core::crawler::CrawlerBuildError::from(millipede_core::config::ConfigError) -> Self
+impl core::error::Error for millipede_core::config::ConfigError
+impl core::fmt::Debug for millipede_core::config::ConfigError
+pub fn millipede_core::config::ConfigError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::config::ConfigError
+pub fn millipede_core::config::ConfigError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Freeze for millipede_core::config::ConfigError
+impl core::marker::Send for millipede_core::config::ConfigError
+impl core::marker::Sync for millipede_core::config::ConfigError
+impl core::marker::Unpin for millipede_core::config::ConfigError
+impl core::marker::UnsafeUnpin for millipede_core::config::ConfigError
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::config::ConfigError
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::config::ConfigError
+#[non_exhaustive] pub enum millipede_core::prelude::CookieJarError
 pub millipede_core::prelude::CookieJarError::Deserialize(anyhow::Error)
 pub millipede_core::prelude::CookieJarError::Serialize(anyhow::Error)
 impl core::error::Error for millipede_core::cookies::CookieJarError
@@ -1504,7 +1525,7 @@ impl core::marker::Unpin for millipede_core::cookies::CookieJarError
 impl core::marker::UnsafeUnpin for millipede_core::cookies::CookieJarError
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::cookies::CookieJarError
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::cookies::CookieJarError
-pub enum millipede_core::prelude::CrawlError
+#[non_exhaustive] pub enum millipede_core::prelude::CrawlError
 pub millipede_core::prelude::CrawlError::AntiBotDetected
 pub millipede_core::prelude::CrawlError::AntiBotDetected::source: anyhow::Error
 pub millipede_core::prelude::CrawlError::AntiBotDetected::tech: millipede_core::errors::AntiBotTech
@@ -1551,7 +1572,7 @@ impl core::marker::Unpin for millipede_core::errors::CrawlError
 impl core::marker::UnsafeUnpin for millipede_core::errors::CrawlError
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::errors::CrawlError
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::errors::CrawlError
-pub enum millipede_core::prelude::CrawlerBuildError
+#[non_exhaustive] pub enum millipede_core::prelude::CrawlerBuildError
 pub millipede_core::prelude::CrawlerBuildError::Config(millipede_core::config::ConfigError)
 pub millipede_core::prelude::CrawlerBuildError::InvalidConcurrencyBounds
 pub millipede_core::prelude::CrawlerBuildError::MissingRequestHandler
@@ -1576,7 +1597,7 @@ impl core::marker::Unpin for millipede_core::crawler::CrawlerBuildError
 impl core::marker::UnsafeUnpin for millipede_core::crawler::CrawlerBuildError
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::crawler::CrawlerBuildError
 impl !core::panic::unwind_safe::UnwindSafe for millipede_core::crawler::CrawlerBuildError
-pub enum millipede_core::prelude::CrawlerEvent
+#[non_exhaustive] pub enum millipede_core::prelude::CrawlerEvent
 pub millipede_core::prelude::CrawlerEvent::Aborting
 pub millipede_core::prelude::CrawlerEvent::Exiting
 pub millipede_core::prelude::CrawlerEvent::PersistState
@@ -1653,7 +1674,7 @@ impl core::marker::Unpin for millipede_core::http_client::HttpClientError
 impl core::marker::UnsafeUnpin for millipede_core::http_client::HttpClientError
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::http_client::HttpClientError
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::http_client::HttpClientError
-pub enum millipede_core::prelude::LinkPatternError
+#[non_exhaustive] pub enum millipede_core::prelude::LinkPatternError
 pub millipede_core::prelude::LinkPatternError::InvalidGlob
 pub millipede_core::prelude::LinkPatternError::InvalidGlob::pattern: alloc::string::String
 pub millipede_core::prelude::LinkPatternError::InvalidGlob::source: globset::Error
@@ -1698,7 +1719,7 @@ impl core::marker::Unpin for millipede_core::config::LogLevel
 impl core::marker::UnsafeUnpin for millipede_core::config::LogLevel
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::config::LogLevel
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::config::LogLevel
-pub enum millipede_core::prelude::MethodFilter
+#[non_exhaustive] pub enum millipede_core::prelude::MethodFilter
 pub millipede_core::prelude::MethodFilter::Any
 pub millipede_core::prelude::MethodFilter::Only(alloc::vec::Vec<http::method::Method>)
 impl millipede_core::router::MethodFilter
@@ -1761,7 +1782,7 @@ impl core::marker::Unpin for millipede_core::request::RequestBody
 impl core::marker::UnsafeUnpin for millipede_core::request::RequestBody
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::request::RequestBody
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::request::RequestBody
-pub enum millipede_core::prelude::RequestBuildError
+#[non_exhaustive] pub enum millipede_core::prelude::RequestBuildError
 pub millipede_core::prelude::RequestBuildError::InvalidHeader
 pub millipede_core::prelude::RequestBuildError::InvalidHeader::message: alloc::string::String
 pub millipede_core::prelude::RequestBuildError::InvalidHeader::name: alloc::string::String
@@ -1787,7 +1808,7 @@ impl core::marker::Unpin for millipede_core::request::RequestBuildError
 impl core::marker::UnsafeUnpin for millipede_core::request::RequestBuildError
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::request::RequestBuildError
 impl !core::panic::unwind_safe::UnwindSafe for millipede_core::request::RequestBuildError
-pub enum millipede_core::prelude::RequestFinalState
+#[non_exhaustive] pub enum millipede_core::prelude::RequestFinalState
 pub millipede_core::prelude::RequestFinalState::Failed
 pub millipede_core::prelude::RequestFinalState::Skipped
 pub millipede_core::prelude::RequestFinalState::Succeeded
@@ -1868,7 +1889,7 @@ impl core::marker::Unpin for millipede_core::request::RequestState
 impl core::marker::UnsafeUnpin for millipede_core::request::RequestState
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::request::RequestState
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::request::RequestState
-pub enum millipede_core::prelude::RotationStrategy
+#[non_exhaustive] pub enum millipede_core::prelude::RotationStrategy
 pub millipede_core::prelude::RotationStrategy::Random
 pub millipede_core::prelude::RotationStrategy::RoundRobin
 impl core::clone::Clone for millipede_core::proxy::RotationStrategy
@@ -1933,7 +1954,7 @@ impl core::marker::Unpin for millipede_core::autoscale::ScaleDecision
 impl core::marker::UnsafeUnpin for millipede_core::autoscale::ScaleDecision
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::ScaleDecision
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::ScaleDecision
-pub enum millipede_core::prelude::SessionRetryAction
+#[non_exhaustive] pub enum millipede_core::prelude::SessionRetryAction
 pub millipede_core::prelude::SessionRetryAction::Keep
 pub millipede_core::prelude::SessionRetryAction::Retire
 pub millipede_core::prelude::SessionRetryAction::Rotate
@@ -2017,7 +2038,7 @@ impl core::marker::Unpin for millipede_core::storage::StorageError
 impl core::marker::UnsafeUnpin for millipede_core::storage::StorageError
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::StorageError
 impl !core::panic::unwind_safe::UnwindSafe for millipede_core::storage::StorageError
-pub enum millipede_core::prelude::TransformResult
+#[non_exhaustive] pub enum millipede_core::prelude::TransformResult
 pub millipede_core::prelude::TransformResult::Enqueue
 pub millipede_core::prelude::TransformResult::Skip
 pub millipede_core::prelude::TransformResult::Skip::reason: alloc::string::String
@@ -2030,7 +2051,7 @@ impl core::marker::Unpin for millipede_core::link_extraction::TransformResult
 impl core::marker::UnsafeUnpin for millipede_core::link_extraction::TransformResult
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::link_extraction::TransformResult
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::link_extraction::TransformResult
-pub enum millipede_core::prelude::UrlPattern
+#[non_exhaustive] pub enum millipede_core::prelude::UrlPattern
 pub millipede_core::prelude::UrlPattern::Glob(alloc::string::String)
 pub millipede_core::prelude::UrlPattern::Regex(regex::regex::string::Regex)
 impl core::clone::Clone for millipede_core::link_extraction::UrlPattern
@@ -2188,7 +2209,7 @@ impl core::marker::Unpin for millipede_core::autoscale::AutoscaledPool
 impl core::marker::UnsafeUnpin for millipede_core::autoscale::AutoscaledPool
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::AutoscaledPool
 impl !core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::AutoscaledPool
-pub struct millipede_core::prelude::AutoscaledPoolOptions
+#[non_exhaustive] pub struct millipede_core::prelude::AutoscaledPoolOptions
 pub millipede_core::prelude::AutoscaledPoolOptions::autoscale_interval: core::time::Duration
 pub millipede_core::prelude::AutoscaledPoolOptions::desired_concurrency: core::option::Option<usize>
 pub millipede_core::prelude::AutoscaledPoolOptions::desired_utilization_ratio: f32
@@ -2445,7 +2466,7 @@ impl core::marker::Unpin for millipede_core::autoscale::CpuLoadSignal
 impl core::marker::UnsafeUnpin for millipede_core::autoscale::CpuLoadSignal
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::CpuLoadSignal
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::CpuLoadSignal
-pub struct millipede_core::prelude::CpuLoadSignalOptions
+#[non_exhaustive] pub struct millipede_core::prelude::CpuLoadSignalOptions
 pub millipede_core::prelude::CpuLoadSignalOptions::max_used_cpu_ratio: f32
 pub millipede_core::prelude::CpuLoadSignalOptions::sample_interval: core::time::Duration
 impl core::clone::Clone for millipede_core::autoscale::CpuLoadSignalOptions
@@ -2631,7 +2652,7 @@ impl core::marker::Unpin for millipede_core::enqueue::EnqueueLinker
 impl core::marker::UnsafeUnpin for millipede_core::enqueue::EnqueueLinker
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::enqueue::EnqueueLinker
 impl !core::panic::unwind_safe::UnwindSafe for millipede_core::enqueue::EnqueueLinker
-pub struct millipede_core::prelude::EnqueueLinksOptions<'a>
+#[non_exhaustive] pub struct millipede_core::prelude::EnqueueLinksOptions<'a>
 impl<'a> millipede_core::enqueue::EnqueueLinksOptions<'a>
 pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::base_url(self, url::Url) -> Self
 pub fn millipede_core::enqueue::EnqueueLinksOptions<'a>::exclude<P: core::convert::Into<millipede_core::link_extraction::UrlPattern>>(self, impl core::iter::traits::collect::IntoIterator<Item = P>) -> Self
@@ -3050,7 +3071,7 @@ impl core::marker::Unpin for millipede_core::autoscale::MemoryLoadSignal
 impl core::marker::UnsafeUnpin for millipede_core::autoscale::MemoryLoadSignal
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::MemoryLoadSignal
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::MemoryLoadSignal
-pub struct millipede_core::prelude::MemoryLoadSignalOptions
+#[non_exhaustive] pub struct millipede_core::prelude::MemoryLoadSignalOptions
 pub millipede_core::prelude::MemoryLoadSignalOptions::max_used_memory_ratio: f32
 pub millipede_core::prelude::MemoryLoadSignalOptions::memory_bytes: core::option::Option<u64>
 pub millipede_core::prelude::MemoryLoadSignalOptions::sample_interval: core::time::Duration
@@ -3513,11 +3534,11 @@ impl core::panic::unwind_safe::UnwindSafe for millipede_core::session::SessionId
 pub struct millipede_core::prelude::SessionPool
 impl millipede_core::session::SessionPool
 pub fn millipede_core::session::SessionPool::attach_persistence(&self, alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>)
-pub async fn millipede_core::session::SessionPool::get_session(&self, core::option::Option<&millipede_core::session::SessionId>) -> alloc::sync::Arc<millipede_core::session::Session>
 pub fn millipede_core::session::SessionPool::new(millipede_core::session::SessionPoolOptions) -> Self
 pub async fn millipede_core::session::SessionPool::persist(&self) -> core::result::Result<(), millipede_core::errors::CrawlError>
 pub async fn millipede_core::session::SessionPool::restore(&self) -> core::result::Result<(), millipede_core::errors::CrawlError>
 pub async fn millipede_core::session::SessionPool::retire_session(&self, &millipede_core::session::SessionId)
+pub async fn millipede_core::session::SessionPool::session(&self, core::option::Option<&millipede_core::session::SessionId>) -> alloc::sync::Arc<millipede_core::session::Session>
 pub async fn millipede_core::session::SessionPool::session_count(&self) -> usize
 impl !core::marker::Freeze for millipede_core::session::SessionPool
 impl core::marker::Send for millipede_core::session::SessionPool
@@ -3547,6 +3568,41 @@ impl core::marker::Unpin for millipede_core::session::SessionPoolOptions
 impl core::marker::UnsafeUnpin for millipede_core::session::SessionPoolOptions
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::session::SessionPoolOptions
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::session::SessionPoolOptions
+pub struct millipede_core::prelude::SessionToken(_)
+impl millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::as_str(&self) -> &str
+pub fn millipede_core::session::SessionToken::new(impl core::convert::Into<alloc::string::String>) -> Self
+impl core::clone::Clone for millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::clone(&self) -> millipede_core::session::SessionToken
+impl core::cmp::Eq for millipede_core::session::SessionToken
+impl core::cmp::PartialEq for millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::eq(&self, &millipede_core::session::SessionToken) -> bool
+impl core::convert::From<&millipede_core::session::SessionId> for millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::from(&millipede_core::session::SessionId) -> Self
+impl core::convert::From<&str> for millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::from(&str) -> Self
+impl core::convert::From<alloc::string::String> for millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::from(alloc::string::String) -> Self
+impl core::convert::From<millipede_core::session::SessionId> for millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::from(millipede_core::session::SessionId) -> Self
+impl core::fmt::Debug for millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::hash<__H: core::hash::Hasher>(&self, &mut __H)
+impl core::marker::StructuralPartialEq for millipede_core::session::SessionToken
+impl serde_core::ser::Serialize for millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl<'de> serde_core::de::Deserialize<'de> for millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::deserialize<__D>(__D) -> core::result::Result<Self, <__D as serde_core::de::Deserializer>::Error> where __D: serde_core::de::Deserializer<'de>
+impl core::marker::Freeze for millipede_core::session::SessionToken
+impl core::marker::Send for millipede_core::session::SessionToken
+impl core::marker::Sync for millipede_core::session::SessionToken
+impl core::marker::Unpin for millipede_core::session::SessionToken
+impl core::marker::UnsafeUnpin for millipede_core::session::SessionToken
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::session::SessionToken
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::session::SessionToken
 pub struct millipede_core::prelude::SitemapEntry
 pub millipede_core::prelude::SitemapEntry::changefreq: core::option::Option<alloc::string::String>
 pub millipede_core::prelude::SitemapEntry::lastmod: core::option::Option<alloc::string::String>
@@ -3626,7 +3682,7 @@ impl core::marker::Unpin for millipede_core::autoscale::Snapshotter
 impl core::marker::UnsafeUnpin for millipede_core::autoscale::Snapshotter
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::Snapshotter
 impl !core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::Snapshotter
-pub struct millipede_core::prelude::SnapshotterOptions
+#[non_exhaustive] pub struct millipede_core::prelude::SnapshotterOptions
 pub millipede_core::prelude::SnapshotterOptions::signals: alloc::vec::Vec<alloc::sync::Arc<dyn millipede_core::autoscale::LoadSignal>>
 pub millipede_core::prelude::SnapshotterOptions::window: core::time::Duration
 impl core::clone::Clone for millipede_core::autoscale::SnapshotterOptions
@@ -3745,7 +3801,7 @@ impl core::marker::Unpin for millipede_core::autoscale::SystemStatus
 impl core::marker::UnsafeUnpin for millipede_core::autoscale::SystemStatus
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::SystemStatus
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::SystemStatus
-pub struct millipede_core::prelude::SystemStatusOptions
+#[non_exhaustive] pub struct millipede_core::prelude::SystemStatusOptions
 pub millipede_core::prelude::SystemStatusOptions::min_samples: usize
 impl core::clone::Clone for millipede_core::autoscale::SystemStatusOptions
 pub fn millipede_core::autoscale::SystemStatusOptions::clone(&self) -> millipede_core::autoscale::SystemStatusOptions
@@ -3778,7 +3834,7 @@ impl core::marker::Unpin for millipede_core::autoscale::TokioRuntimeLoadSignal
 impl core::marker::UnsafeUnpin for millipede_core::autoscale::TokioRuntimeLoadSignal
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::autoscale::TokioRuntimeLoadSignal
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::TokioRuntimeLoadSignal
-pub struct millipede_core::prelude::TokioRuntimeLoadSignalOptions
+#[non_exhaustive] pub struct millipede_core::prelude::TokioRuntimeLoadSignalOptions
 pub millipede_core::prelude::TokioRuntimeLoadSignalOptions::max_lag: core::time::Duration
 pub millipede_core::prelude::TokioRuntimeLoadSignalOptions::sample_interval: core::time::Duration
 impl core::clone::Clone for millipede_core::autoscale::TokioRuntimeLoadSignalOptions
@@ -4062,7 +4118,7 @@ impl core::marker::Unpin for millipede_core::proxy::ProxyKind
 impl core::marker::UnsafeUnpin for millipede_core::proxy::ProxyKind
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::proxy::ProxyKind
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::proxy::ProxyKind
-pub enum millipede_core::proxy::RotationStrategy
+#[non_exhaustive] pub enum millipede_core::proxy::RotationStrategy
 pub millipede_core::proxy::RotationStrategy::Random
 pub millipede_core::proxy::RotationStrategy::RoundRobin
 impl core::clone::Clone for millipede_core::proxy::RotationStrategy
@@ -4215,7 +4271,7 @@ impl core::marker::Unpin for millipede_core::request::RequestBody
 impl core::marker::UnsafeUnpin for millipede_core::request::RequestBody
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::request::RequestBody
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::request::RequestBody
-pub enum millipede_core::request::RequestBuildError
+#[non_exhaustive] pub enum millipede_core::request::RequestBuildError
 pub millipede_core::request::RequestBuildError::InvalidHeader
 pub millipede_core::request::RequestBuildError::InvalidHeader::message: alloc::string::String
 pub millipede_core::request::RequestBuildError::InvalidHeader::name: alloc::string::String
@@ -4416,7 +4472,7 @@ pub fn alloc::string::String::into_url(self) -> core::result::Result<url::Url, u
 impl millipede_core::request::IntoUrl for url::Url
 pub fn url::Url::into_url(self) -> core::result::Result<url::Url, url::parser::ParseError>
 pub mod millipede_core::retry_strategy
-pub enum millipede_core::retry_strategy::SessionRetryAction
+#[non_exhaustive] pub enum millipede_core::retry_strategy::SessionRetryAction
 pub millipede_core::retry_strategy::SessionRetryAction::Keep
 pub millipede_core::retry_strategy::SessionRetryAction::Retire
 pub millipede_core::retry_strategy::SessionRetryAction::Rotate
@@ -4501,7 +4557,7 @@ pub trait millipede_core::retry_strategy::RetryStrategy: core::marker::Send + co
 pub fn millipede_core::retry_strategy::RetryStrategy::max_retries(&self) -> u32
 pub fn millipede_core::retry_strategy::RetryStrategy::on_retry(&self, &millipede_core::retry_strategy::AttemptOutcome<'_>) -> millipede_core::retry_strategy::RetryDirective
 pub mod millipede_core::router
-pub enum millipede_core::router::MethodFilter
+#[non_exhaustive] pub enum millipede_core::router::MethodFilter
 pub millipede_core::router::MethodFilter::Any
 pub millipede_core::router::MethodFilter::Only(alloc::vec::Vec<http::method::Method>)
 impl millipede_core::router::MethodFilter
@@ -4625,11 +4681,11 @@ impl core::panic::unwind_safe::UnwindSafe for millipede_core::session::SessionId
 pub struct millipede_core::session::SessionPool
 impl millipede_core::session::SessionPool
 pub fn millipede_core::session::SessionPool::attach_persistence(&self, alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>)
-pub async fn millipede_core::session::SessionPool::get_session(&self, core::option::Option<&millipede_core::session::SessionId>) -> alloc::sync::Arc<millipede_core::session::Session>
 pub fn millipede_core::session::SessionPool::new(millipede_core::session::SessionPoolOptions) -> Self
 pub async fn millipede_core::session::SessionPool::persist(&self) -> core::result::Result<(), millipede_core::errors::CrawlError>
 pub async fn millipede_core::session::SessionPool::restore(&self) -> core::result::Result<(), millipede_core::errors::CrawlError>
 pub async fn millipede_core::session::SessionPool::retire_session(&self, &millipede_core::session::SessionId)
+pub async fn millipede_core::session::SessionPool::session(&self, core::option::Option<&millipede_core::session::SessionId>) -> alloc::sync::Arc<millipede_core::session::Session>
 pub async fn millipede_core::session::SessionPool::session_count(&self) -> usize
 impl !core::marker::Freeze for millipede_core::session::SessionPool
 impl core::marker::Send for millipede_core::session::SessionPool

@@ -15,5 +15,6 @@ pub use scraper;
 pub mod prelude {
     pub use crate::{
         HtmlContext, HtmlCrawler, HtmlError, HtmlKind, HtmlKindBuilder, HtmlLinkExtractor,
+        SynchronizedHtml,
     };
 }

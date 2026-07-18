@@ -15,6 +15,8 @@ pub enum ScaleDecision {
 
 /// Options controlling load-history evaluation.
 #[derive(Debug, Clone, Default)]
+#[non_exhaustive]
+#[must_use = "system status options do nothing unless passed to SystemStatus::new"]
 pub struct SystemStatusOptions {
     /// Minimum observations a signal needs before it contributes to scale-up.
     pub min_samples: usize,

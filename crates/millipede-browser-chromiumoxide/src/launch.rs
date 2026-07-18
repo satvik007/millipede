@@ -8,6 +8,7 @@ use std::{
 /// Options used to launch one Chromium process.
 #[derive(Debug, Clone)]
 #[non_exhaustive]
+#[must_use = "launch options do nothing unless passed to a browser builder"]
 pub struct ChromiumLaunchOptions {
     /// Explicit browser executable, bypassing discovery.
     pub executable: Option<PathBuf>,
@@ -33,13 +34,13 @@ impl ChromiumLaunchOptions {
     }
 
     /// Sets headless operation.
-    pub fn headless(mut self, headless: bool) -> Self {
+    pub fn with_headless(mut self, headless: bool) -> Self {
         self.headless = headless;
         self
     }
 
     /// Replaces additional Chromium arguments.
-    pub fn args<I, S>(mut self, args: I) -> Self
+    pub fn with_args<I, S>(mut self, args: I) -> Self
     where
         I: IntoIterator<Item = S>,
         S: Into<String>,
@@ -49,31 +50,31 @@ impl ChromiumLaunchOptions {
     }
 
     /// Appends one additional Chromium argument.
-    pub fn arg(mut self, argument: impl Into<String>) -> Self {
+    pub fn with_arg(mut self, argument: impl Into<String>) -> Self {
         self.args.push(argument.into());
         self
     }
 
     /// Sets a persistent profile directory.
-    pub fn user_data_dir(mut self, user_data_dir: impl Into<PathBuf>) -> Self {
+    pub fn with_user_data_dir(mut self, user_data_dir: impl Into<PathBuf>) -> Self {
         self.user_data_dir = Some(user_data_dir.into());
         self
     }
 
     /// Sets browser window dimensions.
-    pub fn window_size(mut self, width: u32, height: u32) -> Self {
+    pub fn with_window_size(mut self, width: u32, height: u32) -> Self {
         self.window_size = Some((width, height));
         self
     }
 
     /// Sets the CDP request timeout.
-    pub fn request_timeout(mut self, request_timeout: Duration) -> Self {
+    pub fn with_request_timeout(mut self, request_timeout: Duration) -> Self {
         self.request_timeout = request_timeout;
         self
     }
 
     /// Sets the browser launch timeout.
-    pub fn launch_timeout(mut self, launch_timeout: Duration) -> Self {
+    pub fn with_launch_timeout(mut self, launch_timeout: Duration) -> Self {
         self.launch_timeout = launch_timeout;
         self
     }
@@ -124,6 +125,7 @@ impl Default for ChromiumLaunchOptions {
 #[cfg(test)]
 mod tests {
     use super::ChromiumLaunchOptions;
+    use std::time::Duration;
 
     fn assert_launch_options<T: Default + Clone + Send + Sync + 'static>() {}
 
@@ -141,11 +143,13 @@ mod tests {
     fn chainable_setters_update_state() {
         let options = ChromiumLaunchOptions::default()
             .with_executable("/browser")
-            .headless(false)
-            .arg("first")
-            .args(["second", "third"])
-            .user_data_dir("/profile")
-            .window_size(1024, 768);
+            .with_headless(false)
+            .with_arg("first")
+            .with_args(["second", "third"])
+            .with_user_data_dir("/profile")
+            .with_window_size(1024, 768)
+            .with_request_timeout(Duration::from_secs(12))
+            .with_launch_timeout(Duration::from_secs(34));
 
         assert_eq!(
             options.executable_path(),
@@ -158,5 +162,7 @@ mod tests {
             Some(std::path::Path::new("/profile"))
         );
         assert_eq!(options.viewport(), Some((1024, 768)));
+        assert_eq!(options.cdp_request_timeout(), Duration::from_secs(12));
+        assert_eq!(options.browser_launch_timeout(), Duration::from_secs(34));
     }
 }

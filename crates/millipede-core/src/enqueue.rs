@@ -28,13 +28,15 @@ type Transform = dyn for<'r> Fn(&'r mut Request) -> BoxFuture<'r, TransformResul
 ///
 /// # async fn enqueue_children(ctx: BasicContext) -> Result<(), Box<dyn std::error::Error>> {
 /// let enqueue = EnqueueLinker::new(ctx.crawler.clone(), &ctx.request);
-/// enqueue
+/// let result = enqueue
 ///     .urls([Url::parse("https://example.com/child")?])
 ///     .await?;
+/// assert_eq!(result.added.len() + result.skipped.len(), 1);
 /// # Ok(())
 /// # }
 /// ```
 #[derive(Clone)]
+#[must_use = "enqueue pipelines do nothing unless send is awaited"]
 pub struct EnqueueLinker {
     crawler: CrawlerHandle,
     parent_url: Url,
@@ -138,7 +140,7 @@ impl fmt::Debug for EnqueueLinker {
 /// use url::Url;
 ///
 /// # async fn enqueue_children(ctx: BasicContext) -> Result<(), Box<dyn std::error::Error>> {
-/// EnqueueLinker::new(ctx.crawler.clone(), &ctx.request)
+/// let result = EnqueueLinker::new(ctx.crawler.clone(), &ctx.request)
 ///     .options()
 ///     .raw_urls(["child", "/about"])
 ///     .base_url(Url::parse("https://example.com/docs/")?)
@@ -146,9 +148,12 @@ impl fmt::Debug for EnqueueLinker {
 ///     .limit(10)
 ///     .send()
 ///     .await?;
+/// assert!(result.added.len() + result.skipped.len() <= 2);
 /// # Ok(())
 /// # }
 /// ```
+#[non_exhaustive]
+#[must_use = "enqueue options do nothing unless passed through the enqueue pipeline"]
 pub struct EnqueueLinksOptions<'a> {
     linker: &'a EnqueueLinker,
     candidates: Vec<UrlCandidate>,
@@ -642,6 +647,7 @@ fn resolve_raw_url(base: &Url, raw: &str) -> Result<Url, url::ParseError> {
 /// ```
 #[derive(Debug)]
 #[non_exhaustive]
+#[must_use = "enqueue results report both accepted and skipped URLs"]
 pub struct EnqueueResult {
     /// Newly accepted requests.
     pub added: Vec<ProcessedRequest>,

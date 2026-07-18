@@ -10,7 +10,7 @@ use std::{
 
 use millipede_browser::{
     BrowserError, BrowserHooks, BrowserPage, BrowserPool, BrowserPoolOptions, BrowserProvider,
-    BrowserResponse, GotoOptions, LaunchContext, PageHandle, PageOpts, ScreenshotOptions,
+    BrowserResponse, GotoOptions, LaunchContext, PageHandle, PageOptions, ScreenshotOptions,
 };
 use millipede_core::{
     cookies::Cookie,
@@ -261,11 +261,11 @@ fn stats(provider: &FakeProvider) -> std::sync::MutexGuard<'_, FakeStats> {
 async fn max_open_pages_per_browser_spills_to_second_browser() {
     tokio::time::timeout(Duration::from_secs(30), async {
         let provider = FakeProvider::new();
-        let options = BrowserPoolOptions::new().max_open_pages_per_browser(2);
+        let options = BrowserPoolOptions::new().with_max_open_pages_per_browser(2);
         let pool = BrowserPool::new(provider.clone(), options);
-        let _p1 = pool.new_page(PageOpts::new()).await.unwrap();
-        let _p2 = pool.new_page(PageOpts::new()).await.unwrap();
-        let _p3 = pool.new_page(PageOpts::new()).await.unwrap();
+        let _p1 = pool.new_page(PageOptions::new()).await.unwrap();
+        let _p2 = pool.new_page(PageOptions::new()).await.unwrap();
+        let _p3 = pool.new_page(PageOptions::new()).await.unwrap();
         assert_eq!(stats(&provider).launches, 2);
         pool.shutdown().await.unwrap();
     })
@@ -278,14 +278,14 @@ async fn retire_browser_after_page_count_launches_replacement_and_closes_retiree
     tokio::time::timeout(Duration::from_secs(30), async {
         let provider = FakeProvider::new();
         let options = BrowserPoolOptions::new()
-            .retire_browser_after_page_count(2)
-            .max_open_pages_per_browser(10);
+            .with_retire_browser_after_page_count(2)
+            .with_max_open_pages_per_browser(10);
         let pool = BrowserPool::new(provider.clone(), options);
-        let p1 = pool.new_page(PageOpts::new()).await.unwrap();
-        let p2 = pool.new_page(PageOpts::new()).await.unwrap();
+        let p1 = pool.new_page(PageOptions::new()).await.unwrap();
+        let p2 = pool.new_page(PageOptions::new()).await.unwrap();
         p1.close().await.unwrap();
         p2.close().await.unwrap();
-        let p3 = pool.new_page(PageOpts::new()).await.unwrap();
+        let p3 = pool.new_page(PageOptions::new()).await.unwrap();
         {
             let stats = stats(&provider);
             assert_eq!(stats.launches, 2);
@@ -303,12 +303,13 @@ async fn max_browsers_waits_then_wakes_on_close() {
     tokio::time::timeout(Duration::from_secs(30), async {
         let provider = FakeProvider::new();
         let options = BrowserPoolOptions::new()
-            .max_browsers(Some(1))
-            .max_open_pages_per_browser(1);
+            .with_max_browsers(Some(1))
+            .with_max_open_pages_per_browser(1);
         let pool = BrowserPool::new(provider, options);
-        let p1 = pool.new_page(PageOpts::new()).await.unwrap();
+        let p1 = pool.new_page(PageOptions::new()).await.unwrap();
         let waiting_pool = pool.clone();
-        let mut waiting = tokio::spawn(async move { waiting_pool.new_page(PageOpts::new()).await });
+        let mut waiting =
+            tokio::spawn(async move { waiting_pool.new_page(PageOptions::new()).await });
         assert!(
             tokio::time::timeout(Duration::from_millis(100), &mut waiting)
                 .await
@@ -328,12 +329,12 @@ async fn page_acquire_timeout_errors_when_capacity_never_frees() {
     tokio::time::timeout(Duration::from_secs(30), async {
         let provider = FakeProvider::new();
         let options = BrowserPoolOptions::new()
-            .max_browsers(Some(1))
-            .max_open_pages_per_browser(1)
-            .page_acquire_timeout(Duration::from_millis(200));
+            .with_max_browsers(Some(1))
+            .with_max_open_pages_per_browser(1)
+            .with_page_acquire_timeout(Duration::from_millis(200));
         let pool = BrowserPool::new(provider, options);
-        let p1 = pool.new_page(PageOpts::new()).await.unwrap();
-        let error = pool.new_page(PageOpts::new()).await.unwrap_err();
+        let p1 = pool.new_page(PageOptions::new()).await.unwrap();
+        let error = pool.new_page(PageOptions::new()).await.unwrap_err();
         assert!(matches!(&error, BrowserError::PageCreate(_)));
         assert!(error.classify().is_retryable());
         p1.close().await.unwrap();
@@ -349,16 +350,16 @@ async fn launch_timeout_rolls_back_placeholder_capacity() {
         let provider = FakeProvider::new();
         provider.block_next_launch();
         let options = BrowserPoolOptions::new()
-            .max_browsers(Some(1))
-            .max_open_pages_per_browser(1)
-            .page_acquire_timeout(Duration::from_millis(100));
+            .with_max_browsers(Some(1))
+            .with_max_open_pages_per_browser(1)
+            .with_page_acquire_timeout(Duration::from_millis(100));
         let pool = BrowserPool::new(provider.clone(), options);
 
         assert!(matches!(
-            pool.new_page(PageOpts::new()).await,
+            pool.new_page(PageOptions::new()).await,
             Err(BrowserError::PageCreate(_))
         ));
-        let page = pool.new_page(PageOpts::new()).await.unwrap();
+        let page = pool.new_page(PageOptions::new()).await.unwrap();
         assert_eq!(stats(&provider).launches, 2);
         page.close().await.unwrap();
         pool.shutdown().await.unwrap();
@@ -372,15 +373,15 @@ async fn abort_during_page_creation_rolls_back_page_reservation() {
     tokio::time::timeout(Duration::from_secs(30), async {
         let provider = FakeProvider::new();
         let options = BrowserPoolOptions::new()
-            .max_browsers(Some(1))
-            .max_open_pages_per_browser(1);
+            .with_max_browsers(Some(1))
+            .with_max_open_pages_per_browser(1);
         let pool = BrowserPool::new(provider.clone(), options);
-        let first = pool.new_page(PageOpts::new()).await.unwrap();
+        let first = pool.new_page(PageOptions::new()).await.unwrap();
         first.close().await.unwrap();
 
         provider.block_next_page();
         let task_pool = pool.clone();
-        let task = tokio::spawn(async move { task_pool.new_page(PageOpts::new()).await });
+        let task = tokio::spawn(async move { task_pool.new_page(PageOptions::new()).await });
         for _ in 0..100 {
             if stats(&provider).page_create_attempts == 2 {
                 break;
@@ -391,7 +392,7 @@ async fn abort_during_page_creation_rolls_back_page_reservation() {
         task.abort();
         assert!(task.await.unwrap_err().is_cancelled());
 
-        let replacement = pool.new_page(PageOpts::new()).await.unwrap();
+        let replacement = pool.new_page(PageOptions::new()).await.unwrap();
         assert_eq!(stats(&provider).launches, 1);
         replacement.close().await.unwrap();
         pool.shutdown().await.unwrap();
@@ -405,15 +406,15 @@ async fn failed_in_flight_reservation_unretires_reusable_browser() {
     tokio::time::timeout(Duration::from_secs(30), async {
         let provider = FakeProvider::new();
         let options = BrowserPoolOptions::new()
-            .max_browsers(Some(1))
-            .max_open_pages_per_browser(2)
-            .retire_browser_after_page_count(2);
+            .with_max_browsers(Some(1))
+            .with_max_open_pages_per_browser(2)
+            .with_retire_browser_after_page_count(2);
         let pool = BrowserPool::new(provider.clone(), options);
-        let first = pool.new_page(PageOpts::new()).await.unwrap();
+        let first = pool.new_page(PageOptions::new()).await.unwrap();
 
         provider.block_next_page();
         let task_pool = pool.clone();
-        let task = tokio::spawn(async move { task_pool.new_page(PageOpts::new()).await });
+        let task = tokio::spawn(async move { task_pool.new_page(PageOptions::new()).await });
         for _ in 0..100 {
             if stats(&provider).page_create_attempts == 2 {
                 break;
@@ -424,7 +425,7 @@ async fn failed_in_flight_reservation_unretires_reusable_browser() {
         task.abort();
         assert!(task.await.unwrap_err().is_cancelled());
 
-        let replacement = pool.new_page(PageOpts::new()).await.unwrap();
+        let replacement = pool.new_page(PageOptions::new()).await.unwrap();
         assert_eq!(stats(&provider).launches, 1);
         replacement.close().await.unwrap();
         pool.shutdown().await.unwrap();
@@ -438,12 +439,12 @@ async fn shutdown_rejects_page_created_by_in_flight_acquisition() {
     tokio::time::timeout(Duration::from_secs(30), async {
         let provider = FakeProvider::new();
         let pool = BrowserPool::new(provider.clone(), BrowserPoolOptions::new());
-        let first = pool.new_page(PageOpts::new()).await.unwrap();
+        let first = pool.new_page(PageOptions::new()).await.unwrap();
         first.close().await.unwrap();
 
         provider.block_next_page();
         let task_pool = pool.clone();
-        let task = tokio::spawn(async move { task_pool.new_page(PageOpts::new()).await });
+        let task = tokio::spawn(async move { task_pool.new_page(PageOptions::new()).await });
         for _ in 0..100 {
             if stats(&provider).page_create_attempts == 2 {
                 break;
@@ -477,7 +478,7 @@ async fn shutdown_waits_for_in_flight_launch_and_closes_its_browser() {
         let pool = BrowserPool::new(provider.clone(), BrowserPoolOptions::new());
 
         let task_pool = pool.clone();
-        let acquisition = tokio::spawn(async move { task_pool.new_page(PageOpts::new()).await });
+        let acquisition = tokio::spawn(async move { task_pool.new_page(PageOptions::new()).await });
         for _ in 0..100 {
             if stats(&provider).launches == 1 {
                 break;
@@ -523,18 +524,18 @@ async fn cancelled_acquisition_keeps_capacity_until_created_page_is_closed() {
         });
         let provider = FakeProvider::new();
         let options = BrowserPoolOptions::new()
-            .hooks(hooks)
-            .max_browsers(Some(1))
-            .max_open_pages_per_browser(1)
-            .page_acquire_timeout(Duration::from_millis(300));
+            .with_hooks(hooks)
+            .with_max_browsers(Some(1))
+            .with_max_open_pages_per_browser(1)
+            .with_page_acquire_timeout(Duration::from_millis(300));
         let pool = BrowserPool::new(provider.clone(), options);
-        let warmup = pool.new_page(PageOpts::new()).await.unwrap();
+        let warmup = pool.new_page(PageOptions::new()).await.unwrap();
         warmup.close().await.unwrap();
 
         stall_next_hook.store(true, Ordering::SeqCst);
         provider.block_next_close();
         assert!(matches!(
-            pool.new_page(PageOpts::new()).await,
+            pool.new_page(PageOptions::new()).await,
             Err(BrowserError::PageCreate(_))
         ));
         for _ in 0..100 {
@@ -547,7 +548,7 @@ async fn cancelled_acquisition_keeps_capacity_until_created_page_is_closed() {
 
         let task_pool = pool.clone();
         let mut replacement =
-            tokio::spawn(async move { task_pool.new_page(PageOpts::new()).await });
+            tokio::spawn(async move { task_pool.new_page(PageOptions::new()).await });
         assert!(
             tokio::time::timeout(Duration::from_millis(100), &mut replacement)
                 .await
@@ -571,8 +572,8 @@ async fn explicit_close_is_not_serialized_behind_a_blocked_drop_close() {
     tokio::time::timeout(Duration::from_secs(30), async {
         let provider = FakeProvider::new();
         let pool = BrowserPool::new(provider.clone(), BrowserPoolOptions::new());
-        let dropped = pool.new_page(PageOpts::new()).await.unwrap();
-        let explicit = pool.new_page(PageOpts::new()).await.unwrap();
+        let dropped = pool.new_page(PageOptions::new()).await.unwrap();
+        let explicit = pool.new_page(PageOptions::new()).await.unwrap();
 
         provider.block_next_close();
         drop(dropped);
@@ -614,9 +615,12 @@ async fn close_hook_can_cascade_to_another_explicit_close() {
             })
         });
         let provider = FakeProvider::new();
-        let pool = BrowserPool::new(provider.clone(), BrowserPoolOptions::new().hooks(hooks));
-        let first = pool.new_page(PageOpts::new()).await.unwrap();
-        let second = pool.new_page(PageOpts::new()).await.unwrap();
+        let pool = BrowserPool::new(
+            provider.clone(),
+            BrowserPoolOptions::new().with_hooks(hooks),
+        );
+        let first = pool.new_page(PageOptions::new()).await.unwrap();
+        let second = pool.new_page(PageOptions::new()).await.unwrap();
         *cascade.lock().unwrap_or_else(|error| error.into_inner()) = Some(second);
 
         tokio::time::timeout(Duration::from_secs(1), first.close())
@@ -635,7 +639,7 @@ async fn cancelled_shutdown_does_not_poison_page_close_state() {
     tokio::time::timeout(Duration::from_secs(30), async {
         let provider = FakeProvider::new();
         let pool = BrowserPool::new(provider.clone(), BrowserPoolOptions::new());
-        let page = pool.new_page(PageOpts::new()).await.unwrap();
+        let page = pool.new_page(PageOptions::new()).await.unwrap();
         provider.block_next_close();
 
         let shutdown_pool = pool.clone();
@@ -678,9 +682,12 @@ async fn background_worker_continues_after_close_hook_panic() {
             })
         });
         let provider = FakeProvider::new();
-        let pool = BrowserPool::new(provider.clone(), BrowserPoolOptions::new().hooks(hooks));
-        let dropped = pool.new_page(PageOpts::new()).await.unwrap();
-        let second = pool.new_page(PageOpts::new()).await.unwrap();
+        let pool = BrowserPool::new(
+            provider.clone(),
+            BrowserPoolOptions::new().with_hooks(hooks),
+        );
+        let dropped = pool.new_page(PageOptions::new()).await.unwrap();
+        let second = pool.new_page(PageOptions::new()).await.unwrap();
 
         drop(dropped);
         for _ in 0..100 {
@@ -717,8 +724,11 @@ async fn explicit_close_reports_task_panic_and_can_be_retried() {
             })
         });
         let provider = FakeProvider::new();
-        let pool = BrowserPool::new(provider.clone(), BrowserPoolOptions::new().hooks(hooks));
-        let page = pool.new_page(PageOpts::new()).await.unwrap();
+        let pool = BrowserPool::new(
+            provider.clone(),
+            BrowserPoolOptions::new().with_hooks(hooks),
+        );
+        let page = pool.new_page(PageOptions::new()).await.unwrap();
 
         assert!(matches!(
             page.close().await,
@@ -738,7 +748,7 @@ async fn shutdown_aborts_a_worker_stuck_in_drop_close() {
     tokio::time::timeout(Duration::from_secs(30), async {
         let provider = FakeProvider::new();
         let pool = BrowserPool::new(provider.clone(), BrowserPoolOptions::new());
-        let page = pool.new_page(PageOpts::new()).await.unwrap();
+        let page = pool.new_page(PageOptions::new()).await.unwrap();
         provider.block_next_close();
         drop(page);
         for _ in 0..100 {
@@ -782,10 +792,10 @@ async fn cancelled_page_acquisition_can_drop_outside_a_runtime() {
                 .unwrap();
             let pool = BrowserPool::new(
                 thread_provider.clone(),
-                BrowserPoolOptions::new().hooks(hooks),
+                BrowserPoolOptions::new().with_hooks(hooks),
             );
             runtime.spawn(async move {
-                let _ = pool.new_page(PageOpts::new()).await;
+                let _ = pool.new_page(PageOptions::new()).await;
             });
             runtime.block_on(async {
                 for _ in 0..100 {
@@ -813,7 +823,7 @@ async fn aborting_explicit_close_still_closes_page_once() {
     tokio::time::timeout(Duration::from_secs(30), async {
         let provider = FakeProvider::new();
         let pool = BrowserPool::new(provider.clone(), BrowserPoolOptions::new());
-        let page = pool.new_page(PageOpts::new()).await.unwrap();
+        let page = pool.new_page(PageOptions::new()).await.unwrap();
         provider.block_next_close();
         let closing_page = page.clone();
         let task = tokio::spawn(async move { closing_page.close().await });
@@ -846,7 +856,7 @@ async fn dropping_pool_before_last_handle_closes_page_and_browser() {
     tokio::time::timeout(Duration::from_secs(30), async {
         let provider = FakeProvider::new();
         let pool = BrowserPool::new(provider.clone(), BrowserPoolOptions::new());
-        let page = pool.new_page(PageOpts::new()).await.unwrap();
+        let page = pool.new_page(PageOptions::new()).await.unwrap();
         drop(pool);
         drop(page);
         for _ in 0..100 {
@@ -874,7 +884,7 @@ async fn dropped_handle_closes_via_background_worker() {
         let pool = BrowserPool::new(provider.clone(), BrowserPoolOptions::new());
         let task_pool = pool.clone();
         let task = tokio::spawn(async move {
-            let page = task_pool.new_page(PageOpts::new()).await.unwrap();
+            let page = task_pool.new_page(PageOptions::new()).await.unwrap();
             page.goto(
                 &url::Url::parse("https://example.com").unwrap(),
                 GotoOptions::default(),
@@ -909,7 +919,7 @@ async fn explicit_close_prevents_background_double_close() {
     tokio::time::timeout(Duration::from_secs(30), async {
         let provider = FakeProvider::new();
         let pool = BrowserPool::new(provider.clone(), BrowserPoolOptions::new());
-        let page = pool.new_page(PageOpts::new()).await.unwrap();
+        let page = pool.new_page(PageOptions::new()).await.unwrap();
         let clone = page.clone();
         page.close().await.unwrap();
         drop(page);
@@ -928,15 +938,15 @@ async fn hooks_fire_on_create_and_close() {
         let imported = Cookie::new("imported", "one", "example.com");
         let exported = Cookie::new("exported", "two", "example.com");
         let provider = FakeProvider::with_cookies(vec![exported.clone()]);
-        let options =
-            BrowserPoolOptions::new().hooks(BrowserHooks::default().with_session_cookie_sync());
+        let options = BrowserPoolOptions::new()
+            .with_hooks(BrowserHooks::default().with_session_cookie_sync());
         let pool = BrowserPool::new(provider.clone(), options);
         let session = Arc::new(Session::new(SessionConfig::default()));
         session
             .cookie_jar()
             .import_cookies(std::slice::from_ref(&imported));
         let page = pool
-            .new_page(PageOpts::new().session(Arc::clone(&session)))
+            .new_page(PageOptions::new().with_session(Arc::clone(&session)))
             .await
             .unwrap();
         assert_eq!(
@@ -962,10 +972,10 @@ async fn pre_launch_proxy_and_args_reach_the_provider() {
         let provider = FakeProvider::new();
         let proxy_url = url::Url::parse("http://proxy.example:8080").unwrap();
         let options = BrowserPoolOptions::new()
-            .proxy(Some(ProxyConfiguration::round_robin([proxy_url.clone()])))
-            .hooks(BrowserHooks::default().with_launch_args(vec!["--lang=en-US".into()]));
+            .with_proxy(Some(ProxyConfiguration::round_robin([proxy_url.clone()])))
+            .with_hooks(BrowserHooks::default().with_launch_args(vec!["--lang=en-US".into()]));
         let pool = BrowserPool::new(provider.clone(), options);
-        let page = pool.new_page(PageOpts::new()).await.unwrap();
+        let page = pool.new_page(PageOptions::new()).await.unwrap();
         {
             let stats = stats(&provider);
             assert_eq!(
@@ -991,8 +1001,8 @@ async fn shutdown_closes_everything_and_rejects_new_pages() {
     tokio::time::timeout(Duration::from_secs(30), async {
         let provider = FakeProvider::new();
         let pool = BrowserPool::new(provider.clone(), BrowserPoolOptions::new());
-        let _p1 = pool.new_page(PageOpts::new()).await.unwrap();
-        let _p2 = pool.new_page(PageOpts::new()).await.unwrap();
+        let _p1 = pool.new_page(PageOptions::new()).await.unwrap();
+        let _p2 = pool.new_page(PageOptions::new()).await.unwrap();
         pool.shutdown().await.unwrap();
         {
             let stats = stats(&provider);
@@ -1000,7 +1010,7 @@ async fn shutdown_closes_everything_and_rejects_new_pages() {
             assert!(stats.browsers_closed >= 1);
         }
         assert!(matches!(
-            pool.new_page(PageOpts::new()).await,
+            pool.new_page(PageOptions::new()).await,
             Err(BrowserError::Shutdown)
         ));
     })

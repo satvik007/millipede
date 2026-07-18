@@ -20,7 +20,7 @@ async fn rescanning_request_files_recovers_outstanding_leases_without_retries() 
         let client = FsStorageClient::new(root.path());
         let queue = client.open_request_queue(Some("resume")).await.unwrap();
         for index in 0..10 {
-            queue.add(req(index), AddOptions::default()).await.unwrap();
+            let _ = queue.add(req(index), AddOptions::default()).await.unwrap();
         }
         for _ in 0..4 {
             let lease = queue.fetch_next().await.unwrap().unwrap();
@@ -67,7 +67,7 @@ async fn fresh_clients_resume_to_completion_without_duplicates() {
     let first_run = FsStorageClient::new(root.path());
     let queue = first_run.open_request_queue(None).await.unwrap();
     for index in 0..24 {
-        queue.add(req(index), AddOptions::default()).await.unwrap();
+        let _ = queue.add(req(index), AddOptions::default()).await.unwrap();
     }
     let mut first_run_handled = HashSet::new();
     for _ in 0..7 {

@@ -37,6 +37,7 @@ use url::Url;
 /// ```
 #[derive(Debug, Clone)]
 #[non_exhaustive]
+#[must_use = "client options do nothing unless passed to ReqwestClient::with_options"]
 pub struct ReqwestClientOptions {
     /// Maximum time allowed while establishing a connection.
     pub connect_timeout: Duration,

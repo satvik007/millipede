@@ -45,7 +45,7 @@ async fn purge_empties_existing_dataset_store_and_queue_handles() {
         .set_bytes("key", Bytes::from_static(b"value"), "text/plain")
         .await
         .unwrap();
-    queue
+    let _ = queue
         .add(
             Request::get("https://example.com/purged").build().unwrap(),
             AddOptions::default(),

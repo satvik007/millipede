@@ -274,7 +274,7 @@ async fn ready_batch_and_builder_enqueue_preserve_payloads_and_forefront() {
     }
 
     let queue = NoopQueue::default();
-    Request::get("https://example.com/forefront")
+    let _ = Request::get("https://example.com/forefront")
         .forefront(true)
         .enqueue(&queue)
         .await
@@ -285,7 +285,7 @@ async fn ready_batch_and_builder_enqueue_preserve_payloads_and_forefront() {
 #[tokio::test]
 async fn builder_enqueue_uses_default_non_forefront_option() {
     let queue = NoopQueue::default();
-    Request::get("https://example.com/default")
+    let _ = Request::get("https://example.com/default")
         .enqueue(&queue)
         .await
         .unwrap();

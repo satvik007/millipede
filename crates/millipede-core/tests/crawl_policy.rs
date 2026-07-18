@@ -31,7 +31,7 @@ async fn skipped_handler_observes_mixed_pipeline_reasons() -> Result<(), Box<dyn
         .crawl_policy(policy)
         .request_handler(|ctx: BasicContext| async move {
             if ctx.request.url.path() == "/root" {
-                EnqueueLinker::new(ctx.crawler.clone(), &ctx.request)
+                let _ = EnqueueLinker::new(ctx.crawler.clone(), &ctx.request)
                     .options()
                     .raw_urls(["::bad::", "https://outside.test/a", "/reject", "/ok"])
                     .transform(|request| {
@@ -52,7 +52,7 @@ async fn skipped_handler_observes_mixed_pipeline_reasons() -> Result<(), Box<dyn
         })
         .build()
         .await?;
-    crawler.run(["http://example.local/root"]).await?;
+    let _ = crawler.run(["http://example.local/root"]).await?;
     let reasons = reasons.lock().unwrap();
     assert_eq!(reasons.len(), 3);
     assert!(reasons.contains(&SkipReason::InvalidUrl));

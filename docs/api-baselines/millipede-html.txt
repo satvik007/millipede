@@ -1,7 +1,7 @@
 pub mod millipede_html
 pub use millipede_html::scraper
 pub mod millipede_html::prelude
-pub enum millipede_html::prelude::HtmlError
+#[non_exhaustive] pub enum millipede_html::prelude::HtmlError
 pub millipede_html::prelude::HtmlError::UnsupportedContentType
 pub millipede_html::prelude::HtmlError::UnsupportedContentType::content_type: alloc::string::String
 impl core::error::Error for millipede_html::HtmlError
@@ -103,9 +103,24 @@ impl core::marker::Unpin for millipede_html::HtmlLinkExtractor
 impl core::marker::UnsafeUnpin for millipede_html::HtmlLinkExtractor
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_html::HtmlLinkExtractor
 impl core::panic::unwind_safe::UnwindSafe for millipede_html::HtmlLinkExtractor
+pub struct millipede_html::prelude::SynchronizedHtml
+impl millipede_html::SynchronizedHtml
+pub fn millipede_html::SynchronizedHtml::lock(&self) -> std::sync::poison::mutex::MutexGuard<'_, scraper::html::Html>
+pub fn millipede_html::SynchronizedHtml::select<T, F>(&self, &scraper::selector::Selector, F) -> alloc::vec::Vec<T> where F: for<'a> core::ops::function::FnMut(scraper::element_ref::ElementRef<'a>) -> T
+pub fn millipede_html::SynchronizedHtml::select_first<T, F>(&self, &scraper::selector::Selector, F) -> core::option::Option<T> where F: for<'a> core::ops::function::FnOnce(scraper::element_ref::ElementRef<'a>) -> T
+pub fn millipede_html::SynchronizedHtml::with_html<R>(&self, impl core::ops::function::FnOnce(&scraper::html::Html) -> R) -> R
+impl core::fmt::Debug for millipede_html::SynchronizedHtml
+pub fn millipede_html::SynchronizedHtml::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl !core::marker::Freeze for millipede_html::SynchronizedHtml
+impl core::marker::Send for millipede_html::SynchronizedHtml
+impl core::marker::Sync for millipede_html::SynchronizedHtml
+impl core::marker::Unpin for millipede_html::SynchronizedHtml
+impl core::marker::UnsafeUnpin for millipede_html::SynchronizedHtml
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_html::SynchronizedHtml
+impl core::panic::unwind_safe::UnwindSafe for millipede_html::SynchronizedHtml
 pub type millipede_html::prelude::HtmlCrawler = millipede_core::crawler::Crawler<millipede_html::HtmlKind>
 pub macro millipede_html::selectors!
-pub enum millipede_html::HtmlError
+#[non_exhaustive] pub enum millipede_html::HtmlError
 pub millipede_html::HtmlError::UnsupportedContentType
 pub millipede_html::HtmlError::UnsupportedContentType::content_type: alloc::string::String
 impl core::error::Error for millipede_html::HtmlError

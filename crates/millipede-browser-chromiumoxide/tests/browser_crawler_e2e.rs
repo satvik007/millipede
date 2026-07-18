@@ -232,7 +232,7 @@ async fn browser_crawler_crawls_local_site_end_to_end() -> Result<()> {
                 .dataset()
                 .push(&json!({ "url": ctx.request.url, "title": title }))
                 .await?;
-            ctx.enqueue.same_hostname().await?;
+            let _ = ctx.enqueue.same_hostname().await?;
             Ok(())
         })
         .storage_client(storage.clone())
@@ -324,7 +324,7 @@ async fn pool_limits_hold_with_real_browser() -> Result<()> {
     let crawler = BrowserCrawler::builder(kind)
         .max_concurrency(2)
         .request_handler(|ctx: BrowserContext| async move {
-            ctx.enqueue.same_hostname().await?;
+            let _ = ctx.enqueue.same_hostname().await?;
             Ok(())
         })
         .storage_client(Arc::new(MemoryStorageClient::new()))

@@ -34,7 +34,7 @@ async fn fifo_order() {
     let root = tempfile::tempdir().unwrap();
     let queue = queue(&root, "fifo").await;
     for url in ["https://example.com/1", "https://example.com/2"] {
-        queue.add(req(url), AddOptions::default()).await.unwrap();
+        let _ = queue.add(req(url), AddOptions::default()).await.unwrap();
     }
     for path in ["/1", "/2"] {
         let lease = queue.fetch_next().await.unwrap().unwrap();
@@ -48,11 +48,11 @@ async fn forefront_jumps_the_queue() {
     let root = tempfile::tempdir().unwrap();
     let queue = queue(&root, "front").await;
     for url in ["https://example.com/1", "https://example.com/2"] {
-        queue.add(req(url), AddOptions::default()).await.unwrap();
+        let _ = queue.add(req(url), AddOptions::default()).await.unwrap();
     }
     let mut forefront = AddOptions::default();
     forefront.forefront = true;
-    queue
+    let _ = queue
         .add(req("https://example.com/3"), forefront)
         .await
         .unwrap();
@@ -94,7 +94,7 @@ async fn unique_key_dedup_tracks_pending_and_handled() {
 async fn reclaim_and_abandon_preserve_request_state_and_retry_rules() {
     let root = tempfile::tempdir().unwrap();
     let queue = queue(&root, "retry").await;
-    queue
+    let _ = queue
         .add(req("https://example.com/1"), AddOptions::default())
         .await
         .unwrap();
@@ -131,11 +131,11 @@ async fn reclaim_and_abandon_preserve_request_state_and_retry_rules() {
 async fn reclaim_position_and_increment_are_configurable() {
     let root = tempfile::tempdir().unwrap();
     let queue = queue(&root, "reclaim-position").await;
-    queue
+    let _ = queue
         .add(req("https://example.com/first"), AddOptions::default())
         .await
         .unwrap();
-    queue
+    let _ = queue
         .add(req("https://example.com/second"), AddOptions::default())
         .await
         .unwrap();
@@ -158,7 +158,7 @@ async fn renewal_rejects_unknown_or_completed_leases() {
         Err(StorageError::LeaseNotFound { .. })
     ));
 
-    queue
+    let _ = queue
         .add(req("https://example.com/1"), AddOptions::default())
         .await
         .unwrap();
@@ -180,7 +180,7 @@ async fn counts_remain_consistent_across_a_mixed_workload() {
     let root = tempfile::tempdir().unwrap();
     let queue = queue(&root, "counts").await;
     for index in 0..4 {
-        queue
+        let _ = queue
             .add(
                 req(&format!("https://example.com/{index}")),
                 AddOptions::default(),
@@ -240,7 +240,7 @@ async fn concurrent_adds_and_fetches_do_not_deadlock_or_double_lease() {
     let producer_queue = Arc::clone(&queue);
     let producer = async move {
         for index in 0..200 {
-            producer_queue
+            let _ = producer_queue
                 .add(
                     req(&format!("https://example.com/item/{}", index % 100)),
                     AddOptions::default(),

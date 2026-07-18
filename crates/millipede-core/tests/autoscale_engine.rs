@@ -126,23 +126,24 @@ fn load_options(
     desired: usize,
     interval: Duration,
 ) -> AutoscaledPoolOptions {
-    AutoscaledPoolOptions {
-        fixed_concurrency: None,
-        min_concurrency: min,
-        max_concurrency: max,
-        desired_concurrency: Some(desired),
-        scale_up_step_ratio: 1.0,
-        scale_down_step_ratio: 1.0,
-        desired_utilization_ratio: 0.5,
-        autoscale_interval: interval,
-        mode: AutoscaleMode::LoadSignals,
-        snapshotter: SnapshotterOptions {
-            signals: vec![signal],
-            window: Duration::from_secs(1),
-        },
-        system_status: SystemStatusOptions { min_samples: 1 },
-        ..AutoscaledPoolOptions::default()
-    }
+    let mut snapshotter = SnapshotterOptions::default();
+    snapshotter.signals = vec![signal];
+    snapshotter.window = Duration::from_secs(1);
+    let mut system_status = SystemStatusOptions::default();
+    system_status.min_samples = 1;
+    let mut options = AutoscaledPoolOptions::default();
+    options.fixed_concurrency = None;
+    options.min_concurrency = min;
+    options.max_concurrency = max;
+    options.desired_concurrency = Some(desired);
+    options.scale_up_step_ratio = 1.0;
+    options.scale_down_step_ratio = 1.0;
+    options.desired_utilization_ratio = 0.5;
+    options.autoscale_interval = interval;
+    options.mode = AutoscaleMode::LoadSignals;
+    options.snapshotter = snapshotter;
+    options.system_status = system_status;
+    options
 }
 
 async fn finish_run(task: JoinHandle<Result<FinalStatistics, CrawlError>>) -> FinalStatistics {
@@ -353,6 +354,18 @@ async fn fixed_concurrency_never_starts_signal_loops() {
     let handler_calls = calls.clone();
     let handler_active = active.clone();
     let handler_peak = peak.clone();
+    let mut snapshotter = SnapshotterOptions::default();
+    snapshotter.signals = vec![Arc::new(StartStopTrackingSignal {
+        started: started.clone(),
+        stopped: stopped.clone(),
+    })];
+    let mut autoscaled_pool = AutoscaledPoolOptions::default();
+    autoscaled_pool.fixed_concurrency = Some(3);
+    autoscaled_pool.min_concurrency = 1;
+    autoscaled_pool.max_concurrency = 3;
+    autoscaled_pool.desired_concurrency = Some(3);
+    autoscaled_pool.mode = AutoscaleMode::LoadSignals;
+    autoscaled_pool.snapshotter = snapshotter;
     let crawler = Arc::new(
         Crawler::builder(BasicKind)
             .storage_client(Arc::new(MemoryStorageClient::new()))
@@ -370,21 +383,7 @@ async fn fixed_concurrency_never_starts_signal_loops() {
                     Ok(())
                 }
             })
-            .autoscaled_pool_options(AutoscaledPoolOptions {
-                fixed_concurrency: Some(3),
-                min_concurrency: 1,
-                max_concurrency: 3,
-                desired_concurrency: Some(3),
-                mode: AutoscaleMode::LoadSignals,
-                snapshotter: SnapshotterOptions {
-                    signals: vec![Arc::new(StartStopTrackingSignal {
-                        started: started.clone(),
-                        stopped: stopped.clone(),
-                    })],
-                    ..SnapshotterOptions::default()
-                },
-                ..AutoscaledPoolOptions::default()
-            })
+            .autoscaled_pool_options(autoscaled_pool)
             .build()
             .await
             .expect("crawler should build"),

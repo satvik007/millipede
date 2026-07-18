@@ -49,6 +49,7 @@ pub enum WaitUntil {
 /// Options controlling a page navigation.
 #[derive(Debug, Clone)]
 #[non_exhaustive]
+#[must_use = "navigation options do nothing unless passed to goto"]
 pub struct GotoOptions {
     /// Maximum duration allowed for navigation.
     pub timeout: Duration,
@@ -58,13 +59,13 @@ pub struct GotoOptions {
 
 impl GotoOptions {
     /// Sets the navigation timeout.
-    pub fn timeout(mut self, timeout: Duration) -> Self {
+    pub fn with_timeout(mut self, timeout: Duration) -> Self {
         self.timeout = timeout;
         self
     }
 
     /// Sets the lifecycle event awaited after navigation.
-    pub fn wait_until(mut self, wait_until: WaitUntil) -> Self {
+    pub fn with_wait_until(mut self, wait_until: WaitUntil) -> Self {
         self.wait_until = wait_until;
         self
     }
@@ -97,6 +98,7 @@ pub struct BrowserResponse {
 /// Options controlling screenshot capture.
 #[derive(Debug, Clone, Default)]
 #[non_exhaustive]
+#[must_use = "screenshot options do nothing unless passed to BrowserPage::screenshot"]
 pub struct ScreenshotOptions {
     /// Capture the complete scrollable page instead of only the viewport.
     pub full_page: bool,
@@ -105,36 +107,37 @@ pub struct ScreenshotOptions {
 /// Per-page creation context consumed by browser hooks.
 #[derive(Clone, Default)]
 #[non_exhaustive]
-pub struct PageOpts {
+#[must_use = "page options do nothing unless passed to BrowserPool::new_page"]
+pub struct PageOptions {
     /// Session whose cookies should be synchronized with the page.
     pub session: Option<Arc<Session>>,
     /// Headers to install on the page before navigation.
     pub extra_headers: http::HeaderMap,
 }
 
-impl PageOpts {
+impl PageOptions {
     /// Creates an empty page context.
     pub fn new() -> Self {
         Self::default()
     }
 
     /// Sets the session associated with the page.
-    pub fn session(mut self, session: Arc<Session>) -> Self {
+    pub fn with_session(mut self, session: Arc<Session>) -> Self {
         self.session = Some(session);
         self
     }
 
     /// Replaces the page's extra request headers.
-    pub fn extra_headers(mut self, extra_headers: http::HeaderMap) -> Self {
+    pub fn with_extra_headers(mut self, extra_headers: http::HeaderMap) -> Self {
         self.extra_headers = extra_headers;
         self
     }
 }
 
-impl fmt::Debug for PageOpts {
+impl fmt::Debug for PageOptions {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter
-            .debug_struct("PageOpts")
+            .debug_struct("PageOptions")
             .field(
                 "session_id",
                 &self.session.as_ref().map(|session| session.id()),

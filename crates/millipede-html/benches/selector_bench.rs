@@ -138,7 +138,7 @@ fn synchronize_documents(documents: &[Document]) -> Vec<Arc<SynchronizedHtml>> {
             .build()
             .await
             .unwrap();
-        crawler.run(urls).await.unwrap();
+        let _ = crawler.run(urls).await.unwrap();
     });
     Arc::into_inner(synchronized).unwrap().into_inner().unwrap()
 }

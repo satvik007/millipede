@@ -32,6 +32,7 @@ use crate::{
 
 /// A context produced by either the HTTP/HTML or browser execution path.
 #[derive(Clone)]
+#[non_exhaustive]
 pub enum SmartContext {
     /// Successful HTTP response with parsed HTML.
     Http(HtmlContext),
@@ -153,6 +154,7 @@ impl<P: BrowserProvider> SmartKind<P> {
 }
 
 /// Configures [`SmartKind`].
+#[must_use = "builders do nothing unless consumed by build"]
 pub struct SmartKindBuilder<P: BrowserProvider> {
     html: HtmlKindBuilder,
     browser: BrowserKindBuilder<P>,

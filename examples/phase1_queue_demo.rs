@@ -33,7 +33,7 @@ async fn main() -> anyhow::Result<()> {
     let priority = Request::get("https://example.com/priority").build()?;
     let mut priority_options = AddOptions::default();
     priority_options.forefront = true;
-    queue.add(priority, priority_options).await?;
+    let _ = queue.add(priority, priority_options).await?;
     println!("/priority queued at forefront; the first worker to fetch receives it first");
 
     let handled = Arc::new(Mutex::new(0_u64));

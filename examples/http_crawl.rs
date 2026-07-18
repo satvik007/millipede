@@ -40,7 +40,7 @@ async fn main() -> anyhow::Result<()> {
             let body = ctx.response.text().into_owned();
             let links = extract_links(&body);
             if !links.is_empty() {
-                ctx.enqueue.options().raw_urls(links).send().await?;
+                let _ = ctx.enqueue.options().raw_urls(links).send().await?;
             }
             Ok(())
         })

@@ -46,6 +46,7 @@ pub struct SitemapEntry {
 
 /// Configures a streaming [`SitemapRequestList`].
 #[derive(Default)]
+#[must_use = "builders do nothing unless consumed by build"]
 pub struct SitemapRequestListBuilder {
     sitemap_urls: Vec<Url>,
     http_client: Option<Arc<dyn HttpClient>>,

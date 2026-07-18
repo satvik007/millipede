@@ -42,6 +42,7 @@ pub trait AntiBotDetector: Send + Sync + std::fmt::Debug + 'static {
 
 /// A conservative detector using bounded, vendor-specific static markers.
 #[derive(Debug, Clone)]
+#[must_use = "detector configuration does nothing unless the detector is installed"]
 pub struct DefaultAntiBotDetector {
     inspection_limit: usize,
     custom_markers: Vec<(String, AntiBotTech)>,
@@ -60,14 +61,12 @@ impl DefaultAntiBotDetector {
     }
 
     /// Sets the maximum number of response-body bytes to inspect.
-    #[must_use]
     pub fn with_inspection_limit(mut self, inspection_limit: usize) -> Self {
         self.inspection_limit = inspection_limit;
         self
     }
 
     /// Adds a case-insensitive body marker with a custom technology label.
-    #[must_use]
     pub fn with_custom_marker(
         mut self,
         marker: impl Into<String>,

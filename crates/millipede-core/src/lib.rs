@@ -82,7 +82,7 @@ pub mod prelude {
         MemoryLoadSignal, MemoryLoadSignalOptions, ScaleDecision, Snapshotter, SnapshotterOptions,
         SystemStatus, SystemStatusOptions, TokioRuntimeLoadSignal, TokioRuntimeLoadSignalOptions,
     };
-    pub use crate::config::{Configuration, ConfigurationBuilder, LogLevel};
+    pub use crate::config::{ConfigError, Configuration, ConfigurationBuilder, LogLevel};
     pub use crate::cookies::{Cookie, CookieJar, CookieJarError, SameSite};
     pub use crate::crawler::{
         AttemptObservation, AutoscalerSnapshot, BasicContext, BasicCrawler, BasicKind, Crawler,
@@ -120,7 +120,7 @@ pub mod prelude {
     pub use crate::router::{HasRequest, MethodFilter, Router};
     pub use crate::session::{
         SESSION_POOL_PERSIST_KEY, Session, SessionConfig, SessionId, SessionPool,
-        SessionPoolOptions,
+        SessionPoolOptions, SessionToken,
     };
     pub use crate::sitemap::{
         RequestQueueWithSitemap, SITEMAP_STATE_KEY, SitemapEntry, SitemapRequestList,

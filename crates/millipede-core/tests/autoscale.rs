@@ -216,10 +216,16 @@ fn signal(name: &'static str, now: Instant, overloaded: &[bool]) -> Arc<dyn Load
 }
 
 fn snapshotter(signals: Vec<Arc<dyn LoadSignal>>) -> Snapshotter {
-    Snapshotter::new(SnapshotterOptions {
-        signals,
-        window: Duration::from_secs(30),
-    })
+    let mut options = SnapshotterOptions::default();
+    options.signals = signals;
+    options.window = Duration::from_secs(30);
+    Snapshotter::new(options)
+}
+
+fn system_status(min_samples: usize) -> SystemStatus {
+    let mut options = SystemStatusOptions::default();
+    options.min_samples = min_samples;
+    SystemStatus::new(options)
 }
 
 #[tokio::test(start_paused = true)]
@@ -229,7 +235,7 @@ async fn system_status_scales_down_on_any_current_overload() {
         signal("healthy", now, &[false, false, false]),
         signal("overloaded", now, &[false, false, true]),
     ]);
-    let status = SystemStatus::new(SystemStatusOptions { min_samples: 3 });
+    let status = system_status(3);
     assert_eq!(
         status.evaluate(&snapshotter, 0.9, now),
         ScaleDecision::ScaleDown
@@ -252,7 +258,7 @@ async fn system_status_uses_latest_snapshot_even_when_timestamp_is_after_now() {
             },
         ],
     })]);
-    let status = SystemStatus::new(SystemStatusOptions { min_samples: 2 });
+    let status = system_status(2);
 
     assert_eq!(
         status.evaluate(&snapshotter, 0.9, now),
@@ -263,7 +269,7 @@ async fn system_status_uses_latest_snapshot_even_when_timestamp_is_after_now() {
 #[tokio::test(start_paused = true)]
 async fn system_status_scales_up_only_when_sustained_healthy_ratio_met() {
     let now = Instant::now();
-    let status = SystemStatus::new(SystemStatusOptions { min_samples: 4 });
+    let status = system_status(4);
     let healthy = snapshotter(vec![signal(
         "healthy-enough",
         now,
@@ -283,14 +289,14 @@ async fn system_status_scales_up_only_when_sustained_healthy_ratio_met() {
 async fn system_status_holds_below_min_samples() {
     let now = Instant::now();
     let snapshotter = snapshotter(vec![signal("cold", now, &[false, false])]);
-    let status = SystemStatus::new(SystemStatusOptions { min_samples: 3 });
+    let status = system_status(3);
     assert_eq!(status.evaluate(&snapshotter, 0.5, now), ScaleDecision::Hold);
 }
 
 #[tokio::test(start_paused = true)]
 async fn system_status_ordering_is_monotonic_with_signal_direction() {
     let now = Instant::now();
-    let status = SystemStatus::new(SystemStatusOptions { min_samples: 4 });
+    let status = system_status(4);
     let overloaded = snapshotter(vec![signal("overloaded", now, &[true, true, true, true])]);
     let mixed = snapshotter(vec![signal("mixed", now, &[true, true, false, false])]);
     let healthy = snapshotter(vec![signal("healthy", now, &[false, false, false, false])]);
@@ -320,11 +326,11 @@ async fn system_status_ordering_is_monotonic_with_signal_direction() {
 async fn client_signal_drives_scale_down_then_recovers() {
     let signal = Arc::new(ClientLoadSignal::new());
     let handle = signal.handle();
-    let snapshotter = Snapshotter::new(SnapshotterOptions {
-        signals: vec![signal],
-        window: Duration::from_secs(5),
-    });
-    let status = SystemStatus::new(SystemStatusOptions { min_samples: 1 });
+    let mut snapshotter_options = SnapshotterOptions::default();
+    snapshotter_options.signals = vec![signal];
+    snapshotter_options.window = Duration::from_secs(5);
+    let snapshotter = Snapshotter::new(snapshotter_options);
+    let status = system_status(1);
 
     handle.record_rate_limited();
     assert_eq!(
@@ -341,14 +347,12 @@ async fn client_signal_drives_scale_down_then_recovers() {
 
 #[tokio::test(start_paused = true)]
 async fn cpu_and_memory_signals_lifecycle() {
-    let cpu = CpuLoadSignal::new(CpuLoadSignalOptions {
-        sample_interval: Duration::ZERO,
-        ..CpuLoadSignalOptions::default()
-    });
-    let memory = MemoryLoadSignal::new(MemoryLoadSignalOptions {
-        sample_interval: Duration::ZERO,
-        ..MemoryLoadSignalOptions::default()
-    });
+    let mut cpu_options = CpuLoadSignalOptions::default();
+    cpu_options.sample_interval = Duration::ZERO;
+    let cpu = CpuLoadSignal::new(cpu_options);
+    let mut memory_options = MemoryLoadSignalOptions::default();
+    memory_options.sample_interval = Duration::ZERO;
+    let memory = MemoryLoadSignal::new(memory_options);
 
     cpu.start().await.unwrap();
     memory.start().await.unwrap();
@@ -378,10 +382,10 @@ async fn cpu_and_memory_signals_lifecycle() {
 
 #[tokio::test(start_paused = true)]
 async fn tokio_runtime_signal_healthy_under_paused_clock() {
-    let signal = TokioRuntimeLoadSignal::new(TokioRuntimeLoadSignalOptions {
-        max_lag: Duration::from_millis(50),
-        sample_interval: Duration::ZERO,
-    });
+    let mut options = TokioRuntimeLoadSignalOptions::default();
+    options.max_lag = Duration::from_millis(50);
+    options.sample_interval = Duration::ZERO;
+    let signal = TokioRuntimeLoadSignal::new(options);
     assert!(signal.overload_threshold().is_finite());
     signal.start().await.unwrap();
     tokio::task::yield_now().await;

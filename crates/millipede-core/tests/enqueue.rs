@@ -263,7 +263,7 @@ async fn queue_duplicates_consume_candidate_limit_slots() -> Result<(), Box<dyn 
         .build()
         .await?;
     let parent = Request::get("http://example.local/root").build()?;
-    EnqueueLinker::new(crawler.handle(), &parent)
+    let _ = EnqueueLinker::new(crawler.handle(), &parent)
         .options()
         .raw_urls(["/duplicate-a", "/duplicate-b"])
         .send()
@@ -405,7 +405,7 @@ async fn base_url_override_is_used() -> Result<(), Box<dyn std::error::Error>> {
                 let observed = observed.clone();
                 async move {
                     if ctx.request.url.path() == "/root" {
-                        EnqueueLinker::new(ctx.crawler.clone(), &ctx.request)
+                        let _ = EnqueueLinker::new(ctx.crawler.clone(), &ctx.request)
                             .options()
                             .raw_urls(["x"])
                             .base_url(Url::parse("http://base.local/sub/").unwrap())
@@ -422,7 +422,7 @@ async fn base_url_override_is_used() -> Result<(), Box<dyn std::error::Error>> {
         })
         .build()
         .await?;
-    crawler.run(["http://example.local/root"]).await?;
+    let _ = crawler.run(["http://example.local/root"]).await?;
     assert!(*observed.lock().unwrap());
     Ok(())
 }
@@ -501,7 +501,7 @@ async fn limit_preserves_interleaved_candidate_call_order() -> Result<(), Box<dy
                 let seen = seen.clone();
                 async move {
                     if ctx.request.url.path() == "/dir/root" {
-                        EnqueueLinker::new(ctx.crawler.clone(), &ctx.request)
+                        let _ = EnqueueLinker::new(ctx.crawler.clone(), &ctx.request)
                             .options()
                             .raw_urls(["first"])
                             .urls([Url::parse("http://example.local/second").unwrap()])
@@ -541,14 +541,14 @@ async fn label_and_user_data_are_explicit_and_not_inherited()
                         let linker = EnqueueLinker::new(ctx.crawler.clone(), &ctx.request);
                         let mut data = UserData::default();
                         data.set_typed("id", &7_u32)?;
-                        linker
+                        let _ = linker
                             .options()
                             .urls([Url::parse("http://example.local/labeled").unwrap()])
                             .label("detail")
                             .user_data(data)
                             .send()
                             .await?;
-                        linker
+                        let _ = linker
                             .urls([Url::parse("http://example.local/plain").unwrap()])
                             .await?;
                     } else {
@@ -569,7 +569,7 @@ async fn label_and_user_data_are_explicit_and_not_inherited()
     let root = Request::get("http://example.local/root")
         .label("parent")
         .build()?;
-    crawler.run([root]).await?;
+    let _ = crawler.run([root]).await?;
     let observations = observations.lock().unwrap();
     assert_eq!(observations.len(), 2);
     assert_eq!(
@@ -594,10 +594,10 @@ async fn forefront_children_run_before_normal_children() -> Result<(), Box<dyn s
                     match ctx.request.url.path() {
                         "/root" => {
                             let linker = EnqueueLinker::new(ctx.crawler.clone(), &ctx.request);
-                            linker
+                            let _ = linker
                                 .urls([Url::parse("http://example.local/a").unwrap()])
                                 .await?;
-                            linker
+                            let _ = linker
                                 .options()
                                 .urls([Url::parse("http://example.local/b").unwrap()])
                                 .forefront(true)
@@ -612,7 +612,7 @@ async fn forefront_children_run_before_normal_children() -> Result<(), Box<dyn s
         })
         .build()
         .await?;
-    crawler.run(["http://example.local/root"]).await?;
+    let _ = crawler.run(["http://example.local/root"]).await?;
     assert_eq!(*order.lock().unwrap(), vec!["/b", "/a"]);
     Ok(())
 }
@@ -723,7 +723,7 @@ async fn extractor_conveniences_apply_strategy_and_default_selector()
     .all()
     .await?;
     assert_eq!(all.added_count(), 1);
-    EnqueueLinker::with_extractor(
+    let _ = EnqueueLinker::with_extractor(
         crawler.handle(),
         &parent,
         Arc::new(FakeExtractor {
@@ -819,7 +819,7 @@ async fn patterns_overrides_transform_dedupe_and_counts() -> Result<(), Box<dyn 
         })
         .build()
         .await?;
-    crawler.run(["http://example.local/root"]).await?;
+    let _ = crawler.run(["http://example.local/root"]).await?;
     let result = enqueue_result.lock().unwrap().take().unwrap();
     assert_eq!(result.added_count(), 2);
     assert_eq!(result.skipped_count(), 3, "{:#?}", result.skipped);
@@ -878,7 +878,7 @@ async fn regex_only_include_and_depth_limit_report_reasons()
         })
         .build()
         .await?;
-    crawler.run(["http://example.local/root"]).await?;
+    let _ = crawler.run(["http://example.local/root"]).await?;
     let result = result.lock().unwrap().take().unwrap();
     assert_eq!(result.added_count(), 0);
     assert_eq!(result.skipped_count(), 2);

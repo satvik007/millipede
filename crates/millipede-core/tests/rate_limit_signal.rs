@@ -171,7 +171,7 @@ async fn successful_queue_operation_reports_healthy() {
     let wrapped = signal.instrument_storage(Arc::new(FakeClient(Arc::new(HealthyQueue))));
     let queue = wrapped.open_request_queue(None).await.unwrap();
     let samples_before_add = LoadSignal::sample(&signal, Duration::from_secs(60));
-    queue
+    let _ = queue
         .add(
             Request::get("https://example.com/").build().unwrap(),
             AddOptions::default(),

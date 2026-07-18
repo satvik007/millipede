@@ -335,6 +335,7 @@ impl fmt::Debug for CookieJar {
 /// assert!(result.is_err());
 /// ```
 #[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
 pub enum CookieJarError {
     /// Cookie JSON serialization failed.
     #[error("failed to serialize cookie jar: {0}")]
