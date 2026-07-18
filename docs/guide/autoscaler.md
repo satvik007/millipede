@@ -1,11 +1,5 @@
 # Autoscaler guide
 
-> **API status:** This guide follows the shipped public API. Builder ordering and
-> `CrawlerBuilder::autoscale_mode`, the built-in signal option types and
-> `ClientLoadSignalHandle`, `AutoscaledPool::set_domain_delay_floor`, `AutoscalerSnapshot`, and the
-> crawler snapshot methods are newer than the public-surface lists in `docs/INTERFACE.md`. That file
-> needs a follow-up update; these APIs are nevertheless present in the current code.
-
 ## 1. How scaling works
 
 The crawler has one dispatch actor. At the start of each dispatch pass it reads
@@ -92,12 +86,15 @@ Register `Arc<dyn LoadSignal>` values in `SnapshotterOptions.signals`, put those
 | `cpu` | Aggregate system CPU used fraction, refreshed with `sysinfo`. | `CpuLoadSignalOptions`; `max_used_cpu_ratio: 0.95` (samples every `1s`). |
 | `memory` | Used system memory divided by `memory_bytes`, or total system memory when no budget is set. | `MemoryLoadSignalOptions`; `max_used_memory_ratio: 0.9` (samples every `1s`). |
 | `tokio-runtime` | Tokio timer scheduling lag using stable timer APIs. | `TokioRuntimeLoadSignalOptions`; `max_lag: 50ms` (probes every `250ms`). |
-| `client` | Manually recorded downstream rate-limit or healthy observations. | No options struct; `ClientLoadSignal::overload_threshold()` returns `1.0`. |
+| `client` | Successful or rate-limited downstream client observations, recorded by a storage wrapper or manually. | No options struct; `ClientLoadSignal::overload_threshold()` returns `1.0`. |
 
 For all four, overload is determined when the signal records each snapshot; `SystemStatus` consumes
 the resulting boolean. `TokioRuntimeLoadSignal` deliberately uses stable timer-lag sampling and
-does not require `tokio_unstable`. `ClientLoadSignal` must currently be fed through its
-`ClientLoadSignalHandle`; automatic `StorageClient` wiring is reserved for Phase 7.
+does not require `tokio_unstable`. For storage activity, call
+`ClientLoadSignal::instrument_storage(storage)` and pass the returned `StorageClient` to the crawler.
+The wrapper automatically records successful storage operations as healthy and storage
+rate-limit errors as overloaded. For other downstream clients, use `ClientLoadSignal::handle()` and
+call `ClientLoadSignalHandle::record_healthy()` or `record_rate_limited()` manually.
 
 If `LoadSignals` is selected with an empty signal list, the pool emits a warning and falls back to
 AIMD with `increase_after_successes: 10` and `decrease_factor: 0.5`.
@@ -115,13 +112,13 @@ by a `CrawlError` by extending the host's next-allowed instant.
 
 `millipede-http` parses `Retry-After` as either delta-seconds or an HTTP date, attaches the duration
 to its status error, and trust-caps parsed values at ten minutes. The engine passes that duration to
-the host limiter. Likewise, robots.txt `Crawl-delay` integration is Phase 5 work; the pool exposes
-`AutoscaledPool::set_domain_delay_floor(host, duration)` for supplying a persistent host floor.
+the host limiter. `AutoscaledPool::set_domain_delay_floor(host, duration)` supplies a persistent
+host floor when another policy source provides one.
 
 Politeness-delayed requests are parked by the dispatcher and do not occupy concurrency slots, so a
 throttled host does not consume the slots that ready work can use. Held deferred leases are bounded
 to `max(max_concurrency, 32)`. The current queue fetch order can still leave later hosts behind a
-single-host flood once that buffer is full; Phase 5's domain-aware frontier is the planned follow-up.
+single-host flood once that buffer is full.
 
 ## 6. Observing it
 
@@ -139,11 +136,10 @@ Whenever the dispatcher observes a changed desired target, it emits a debug even
 example, use `RUST_LOG=millipede_core=debug` for crate-wide debugging or
 `RUST_LOG=millipede::concurrency=debug` for this target.
 
-These values are intended to mirror the future `millipede.concurrency.current` and
-`millipede.concurrency.desired` gauge series described in `INTERFACE.md` section 19.3. The optional
-metrics feature and those exports are **not implemented yet**.
+The snapshot and tracing event are the shipped ways to observe desired concurrency. They do not
+require a metrics exporter.
 
-See `examples/autoscale_demo.rs` for a live AIMD sampler that polls the handle while crawling a
+See `millipede/examples/autoscale_demo.rs` for a live AIMD sampler that polls the handle while crawling a
 transiently failing mock server.
 
 ## 7. When to use `fixed_concurrency`
@@ -169,5 +165,3 @@ mode simply gives it an invariant target.
 | Global start budget is exceeded | Set or lower `max_tasks_per_minute`; it controls starts, including retry attempts. |
 | AIMD oscillates | Require a wider success streak with `increase_after_successes` and use a `decrease_factor` closer to `1.0`. |
 | LoadSignals never scales up | Ensure `snapshotter.signals` is nonempty, each signal has at least `system_status.min_samples.max(1)` observations, and `snapshotter.window` retains them. Scale-up occurs only when the contributing signals' mean healthy ratio is at least `desired_utilization_ratio`; otherwise the decision is hold. |
-
-The full autoscaler tuning chapter ships with Phase 8.
