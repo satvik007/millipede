@@ -64,6 +64,8 @@ pub mod router;
 pub mod session;
 /// Streaming sitemap ingestion.
 pub mod sitemap;
+/// Failure-artifact capture and reload support.
+pub mod snapshot;
 /// Crawl statistics, rates, and persistence.
 pub mod statistics;
 /// Object-safe storage abstractions and typed convenience wrappers.
@@ -124,6 +126,7 @@ pub mod prelude {
         RequestQueueWithSitemap, SITEMAP_STATE_KEY, SitemapEntry, SitemapRequestList,
         SitemapRequestListBuilder,
     };
+    pub use crate::snapshot::{ErrorSnapshot, ErrorSnapshotter};
     pub use crate::statistics::{
         FinalStatistics, STATISTICS_PERSIST_KEY, StatisticsHandle, StatisticsSnapshot,
     };

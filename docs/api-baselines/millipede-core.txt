@@ -2659,6 +2659,36 @@ impl core::marker::Unpin for millipede_core::enqueue::EnqueueResult
 impl core::marker::UnsafeUnpin for millipede_core::enqueue::EnqueueResult
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::enqueue::EnqueueResult
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::enqueue::EnqueueResult
+#[non_exhaustive] pub struct millipede_core::prelude::ErrorSnapshot
+pub millipede_core::prelude::ErrorSnapshot::bytes: bytes::bytes::Bytes
+pub millipede_core::prelude::ErrorSnapshot::content_type: alloc::string::String
+impl core::clone::Clone for millipede_core::snapshot::ErrorSnapshot
+pub fn millipede_core::snapshot::ErrorSnapshot::clone(&self) -> millipede_core::snapshot::ErrorSnapshot
+impl core::cmp::PartialEq for millipede_core::snapshot::ErrorSnapshot
+pub fn millipede_core::snapshot::ErrorSnapshot::eq(&self, &millipede_core::snapshot::ErrorSnapshot) -> bool
+impl core::fmt::Debug for millipede_core::snapshot::ErrorSnapshot
+pub fn millipede_core::snapshot::ErrorSnapshot::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_core::snapshot::ErrorSnapshot
+impl !core::marker::Freeze for millipede_core::snapshot::ErrorSnapshot
+impl core::marker::Send for millipede_core::snapshot::ErrorSnapshot
+impl core::marker::Sync for millipede_core::snapshot::ErrorSnapshot
+impl core::marker::Unpin for millipede_core::snapshot::ErrorSnapshot
+impl core::marker::UnsafeUnpin for millipede_core::snapshot::ErrorSnapshot
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::snapshot::ErrorSnapshot
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::snapshot::ErrorSnapshot
+pub struct millipede_core::prelude::ErrorSnapshotter
+impl millipede_core::snapshot::ErrorSnapshotter
+pub fn millipede_core::snapshot::ErrorSnapshotter::base_key(&millipede_core::request::Request) -> alloc::string::String
+pub async fn millipede_core::snapshot::ErrorSnapshotter::capture(&self, &millipede_core::request::Request, &str, bytes::bytes::Bytes, &str) -> millipede_core::storage::StorageResult<alloc::string::String>
+pub async fn millipede_core::snapshot::ErrorSnapshotter::load(&self, &str) -> millipede_core::storage::StorageResult<core::option::Option<millipede_core::snapshot::ErrorSnapshot>>
+pub fn millipede_core::snapshot::ErrorSnapshotter::new(alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>) -> Self
+impl core::marker::Freeze for millipede_core::snapshot::ErrorSnapshotter
+impl core::marker::Send for millipede_core::snapshot::ErrorSnapshotter
+impl core::marker::Sync for millipede_core::snapshot::ErrorSnapshotter
+impl core::marker::Unpin for millipede_core::snapshot::ErrorSnapshotter
+impl core::marker::UnsafeUnpin for millipede_core::snapshot::ErrorSnapshotter
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::snapshot::ErrorSnapshotter
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::snapshot::ErrorSnapshotter
 pub struct millipede_core::prelude::EventBus
 impl millipede_core::events::EventBus
 pub fn millipede_core::events::EventBus::emit(&self, millipede_core::events::CrawlerEvent)
@@ -4664,6 +4694,37 @@ impl core::marker::UnsafeUnpin for millipede_core::sitemap::SitemapRequestListBu
 impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::sitemap::SitemapRequestListBuilder
 impl !core::panic::unwind_safe::UnwindSafe for millipede_core::sitemap::SitemapRequestListBuilder
 pub const millipede_core::sitemap::SITEMAP_STATE_KEY: &str
+pub mod millipede_core::snapshot
+#[non_exhaustive] pub struct millipede_core::snapshot::ErrorSnapshot
+pub millipede_core::snapshot::ErrorSnapshot::bytes: bytes::bytes::Bytes
+pub millipede_core::snapshot::ErrorSnapshot::content_type: alloc::string::String
+impl core::clone::Clone for millipede_core::snapshot::ErrorSnapshot
+pub fn millipede_core::snapshot::ErrorSnapshot::clone(&self) -> millipede_core::snapshot::ErrorSnapshot
+impl core::cmp::PartialEq for millipede_core::snapshot::ErrorSnapshot
+pub fn millipede_core::snapshot::ErrorSnapshot::eq(&self, &millipede_core::snapshot::ErrorSnapshot) -> bool
+impl core::fmt::Debug for millipede_core::snapshot::ErrorSnapshot
+pub fn millipede_core::snapshot::ErrorSnapshot::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for millipede_core::snapshot::ErrorSnapshot
+impl !core::marker::Freeze for millipede_core::snapshot::ErrorSnapshot
+impl core::marker::Send for millipede_core::snapshot::ErrorSnapshot
+impl core::marker::Sync for millipede_core::snapshot::ErrorSnapshot
+impl core::marker::Unpin for millipede_core::snapshot::ErrorSnapshot
+impl core::marker::UnsafeUnpin for millipede_core::snapshot::ErrorSnapshot
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::snapshot::ErrorSnapshot
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::snapshot::ErrorSnapshot
+pub struct millipede_core::snapshot::ErrorSnapshotter
+impl millipede_core::snapshot::ErrorSnapshotter
+pub fn millipede_core::snapshot::ErrorSnapshotter::base_key(&millipede_core::request::Request) -> alloc::string::String
+pub async fn millipede_core::snapshot::ErrorSnapshotter::capture(&self, &millipede_core::request::Request, &str, bytes::bytes::Bytes, &str) -> millipede_core::storage::StorageResult<alloc::string::String>
+pub async fn millipede_core::snapshot::ErrorSnapshotter::load(&self, &str) -> millipede_core::storage::StorageResult<core::option::Option<millipede_core::snapshot::ErrorSnapshot>>
+pub fn millipede_core::snapshot::ErrorSnapshotter::new(alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>) -> Self
+impl core::marker::Freeze for millipede_core::snapshot::ErrorSnapshotter
+impl core::marker::Send for millipede_core::snapshot::ErrorSnapshotter
+impl core::marker::Sync for millipede_core::snapshot::ErrorSnapshotter
+impl core::marker::Unpin for millipede_core::snapshot::ErrorSnapshotter
+impl core::marker::UnsafeUnpin for millipede_core::snapshot::ErrorSnapshotter
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::snapshot::ErrorSnapshotter
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::snapshot::ErrorSnapshotter
 pub mod millipede_core::statistics
 pub struct millipede_core::statistics::FinalStatistics
 pub millipede_core::statistics::FinalStatistics::crawler_runtime: core::time::Duration
