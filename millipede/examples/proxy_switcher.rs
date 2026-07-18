@@ -1,2 +1,109 @@
-//! Placeholder for the Phase 8 proxy_switcher example; filled in by a follow-up commit.
-fn main() {}
+//! Demonstrates round-robin proxy resolution directly and across an offline HTTP crawl.
+//!
+//! Run with: `cargo run -p millipede --example proxy_switcher`
+
+use std::sync::Arc;
+
+use millipede::{
+    Crawler, HttpContext, HttpKind, MemoryStorageClient, ProxyConfiguration, ProxyResolveContext,
+};
+use url::Url;
+use wiremock::{Mock, MockServer, ResponseTemplate, matchers::any};
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    resolver_level_demo().await?;
+    crawl_level_demo().await?;
+    Ok(())
+}
+
+async fn resolver_level_demo() -> anyhow::Result<()> {
+    let urls = [
+        Url::parse("http://proxy-a.invalid:8001")?,
+        Url::parse("http://proxy-b.invalid:8002")?,
+        Url::parse("http://proxy-c.invalid:8003")?,
+    ];
+    let config = ProxyConfiguration::round_robin(urls.clone());
+    let mut observed = Vec::new();
+
+    for index in 0..6 {
+        let context = ProxyResolveContext::new().attempt(index);
+        let selected = if index % 2 == 0 {
+            config
+                .new_url(context)
+                .await?
+                .ok_or_else(|| anyhow::anyhow!("round-robin resolver returned direct mode"))?
+        } else {
+            config
+                .new_proxy_info(context)
+                .await?
+                .ok_or_else(|| anyhow::anyhow!("round-robin resolver returned no proxy info"))?
+                .url
+        };
+        println!("resolver selection {} -> {selected}", index + 1);
+        observed.push(selected);
+    }
+
+    let expected = urls.iter().cycle().take(6).cloned().collect::<Vec<_>>();
+    anyhow::ensure!(
+        observed == expected,
+        "expected A/B/C/A/B/C, got {observed:?}"
+    );
+    let target = Url::parse("http://target.invalid/")?;
+    config.report_success(&target);
+    config.report_blocked(&target);
+    println!("reported one success and one blocked result to the resolver");
+    Ok(())
+}
+
+async fn crawl_level_demo() -> anyhow::Result<()> {
+    let proxy_a = MockServer::start().await;
+    let proxy_b = MockServer::start().await;
+    let proxy_c = MockServer::start().await;
+    for proxy in [&proxy_a, &proxy_b, &proxy_c] {
+        Mock::given(any())
+            .respond_with(ResponseTemplate::new(200).set_body_string("stand-in proxy"))
+            .mount(proxy)
+            .await;
+    }
+
+    let proxies = [&proxy_a, &proxy_b, &proxy_c]
+        .into_iter()
+        .map(|proxy| Url::parse(&proxy.uri()))
+        .collect::<Result<Vec<_>, _>>()?;
+    let kind = HttpKind::builder()
+        .proxy(ProxyConfiguration::round_robin(proxies))
+        .build()?;
+    let crawler = Crawler::builder(kind)
+        .max_concurrency(3)
+        .storage_client(Arc::new(MemoryStorageClient::new()))
+        .request_handler(|ctx: HttpContext| async move {
+            println!(
+                "{} reached {:?}",
+                ctx.request.url,
+                ctx.proxy_info.as_ref().map(|info| &info.url)
+            );
+            Ok(())
+        })
+        .build()
+        .await?;
+    let targets = (0..9)
+        .map(|index| format!("http://target-{index}.invalid/"))
+        .collect::<Vec<_>>();
+    let stats = crawler.run(targets).await?;
+
+    anyhow::ensure!(
+        stats.requests_finished == 9 && stats.requests_failed == 0,
+        "expected all nine requests to be intercepted by proxies, got {stats:#?}"
+    );
+    for (name, proxy) in [("A", &proxy_a), ("B", &proxy_b), ("C", &proxy_c)] {
+        let count = proxy
+            .received_requests()
+            .await
+            .ok_or_else(|| anyhow::anyhow!("proxy {name} request recording is unavailable"))?
+            .len();
+        println!("proxy {name} received {count} requests");
+        anyhow::ensure!(count == 3, "proxy {name} expected 3 requests, got {count}");
+    }
+    Ok(())
+}

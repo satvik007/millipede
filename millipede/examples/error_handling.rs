@@ -1,2 +1,138 @@
-//! Placeholder for the Phase 8 error_handling example; filled in by a follow-up commit.
-fn main() {}
+//! Demonstrates retryable HTTP statuses, anti-bot detection, and typed `CrawlError` dispatch.
+//!
+//! Run with: `cargo run -p millipede --example error_handling`
+
+use std::sync::{
+    Arc,
+    atomic::{AtomicUsize, Ordering},
+};
+
+use millipede::{
+    CrawlError, Crawler, FailedRequestContext, HttpContext, HttpKind, MemoryStorageClient,
+};
+use wiremock::{
+    Mock, MockServer, ResponseTemplate,
+    matchers::{method, path},
+};
+
+fn variant_name(error: &CrawlError) -> &'static str {
+    match error {
+        CrawlError::Retry(_) => "Retry",
+        CrawlError::Session(_) => "Session",
+        CrawlError::ForceRetry(_) => "ForceRetry",
+        CrawlError::NonRetryable(_) => "NonRetryable",
+        CrawlError::Critical(_) => "Critical",
+        CrawlError::MissingRoute { label, method } => {
+            println!("missing route details: label={label:?}, method={method}");
+            "MissingRoute"
+        }
+        CrawlError::AntiBotDetected { tech, source } => {
+            println!("anti-bot details: tech={tech:?}, source={source}");
+            "AntiBotDetected"
+        }
+        _ => "unknown future CrawlError variant",
+    }
+}
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(path("/ok"))
+        .respond_with(ResponseTemplate::new(200).set_body_string("ok"))
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(path("/flaky"))
+        .respond_with(ResponseTemplate::new(500).set_body_string("try again"))
+        .up_to_n_times(2)
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(path("/flaky"))
+        .respond_with(ResponseTemplate::new(200).set_body_string("recovered"))
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(path("/blocked"))
+        .respond_with(ResponseTemplate::new(403).set_body_raw(
+            "<html><head><title>Just a moment...</title></head></html>",
+            "text/html",
+        ))
+        .mount(&server)
+        .await;
+
+    let failures = Arc::new(AtomicUsize::new(0));
+    let anti_bot_failures = Arc::new(AtomicUsize::new(0));
+    let kind = HttpKind::builder()
+        .retry_status_codes([500, 502, 503])
+        .detect_anti_bot_default()
+        .build()?;
+    let crawler = Crawler::builder(kind)
+        .max_request_retries(2)
+        // AntiBotDetected rotates sessions, so this is its corresponding terminal retry cap.
+        .max_session_rotations(2)
+        .storage_client(Arc::new(MemoryStorageClient::new()))
+        .request_handler(|ctx: HttpContext| async move {
+            println!("success: {} ({})", ctx.request.url, ctx.response.status);
+            Ok(())
+        })
+        .failed_request_handler({
+            let failures = Arc::clone(&failures);
+            let anti_bot_failures = Arc::clone(&anti_bot_failures);
+            move |ctx: FailedRequestContext| {
+                let failures = Arc::clone(&failures);
+                let anti_bot_failures = Arc::clone(&anti_bot_failures);
+                async move {
+                    failures.fetch_add(1, Ordering::SeqCst);
+                    let variant = variant_name(ctx.error.as_ref());
+                    if matches!(ctx.error.as_ref(), CrawlError::AntiBotDetected { .. }) {
+                        anti_bot_failures.fetch_add(1, Ordering::SeqCst);
+                    }
+                    println!(
+                        "failed: {} variant={variant} ignores_max_retries={} retry_count={}",
+                        ctx.request.url,
+                        ctx.error.ignores_max_retries(),
+                        ctx.retry_count
+                    );
+                    Ok(())
+                }
+            }
+        })
+        .build()
+        .await?;
+
+    let base = server.uri();
+    let stats = crawler
+        .run([
+            format!("{base}/ok"),
+            format!("{base}/flaky"),
+            format!("{base}/blocked"),
+        ])
+        .await?;
+
+    anyhow::ensure!(
+        stats.requests_finished == 2,
+        "expected /ok and /flaky to succeed, got {stats:#?}"
+    );
+    anyhow::ensure!(
+        stats.requests_failed == 1,
+        "expected only /blocked to fail, got {stats:#?}"
+    );
+    anyhow::ensure!(
+        stats.requests_retries == 4,
+        "expected two /flaky retries and two /blocked rotations, got {stats:#?}"
+    );
+    anyhow::ensure!(
+        failures.load(Ordering::SeqCst) == 1,
+        "the failed-request handler did not fire exactly once"
+    );
+    anyhow::ensure!(
+        anti_bot_failures.load(Ordering::SeqCst) == 1,
+        "the /blocked terminal error was not AntiBotDetected"
+    );
+    println!(
+        "summary: /ok succeeded, /flaky succeeded after two retries, /blocked reached the typed failure handler"
+    );
+    Ok(())
+}

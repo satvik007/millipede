@@ -60,6 +60,11 @@ jobs:
       - run: cargo run -p millipede --example phase1_queue_demo
       - run: cargo run -p millipede --example basic_engine
       - run: cargo run -p millipede --example autoscale_demo
+      - run: cargo run -p millipede --example basic
+      - run: cargo run -p millipede --example error_handling
+      - run: cargo run -p millipede --example rate_limit
+      - run: cargo run -p millipede --example proxy_switcher
+      # hackernews is live-network only and is intentionally excluded from CI smoke runs.
       - run: cargo run -p millipede --features http,fingerprint,storage-memory --example fingerprint_crawl
 
   # Browser tests run on Linux + macOS only; Windows is intentionally excluded
