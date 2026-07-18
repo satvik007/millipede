@@ -43,6 +43,7 @@ vendor_fixture_test!(
 vendor_fixture_test!(kasada_fixture, "kasada.html", AntiBotTech::Kasada);
 vendor_fixture_test!(imperva_fixture, "imperva.html", AntiBotTech::Imperva);
 vendor_fixture_test!(akamai_fixture, "akamai.html", AntiBotTech::Akamai);
+vendor_fixture_test!(unknown_fixture, "unknown.html", AntiBotTech::Unknown);
 
 #[test]
 fn benign_contentful_page_is_not_detected() {
@@ -79,6 +80,36 @@ fn detects_kasada_from_header_only() {
     assert_eq!(
         detect(&DefaultAntiBotDetector::new(), &headers, b""),
         Some(AntiBotTech::Kasada)
+    );
+}
+
+#[test]
+fn detects_datadome_from_header_only() {
+    let mut headers = HeaderMap::new();
+    headers.insert("x-datadome", HeaderValue::from_static("fixture"));
+    assert_eq!(
+        detect(&DefaultAntiBotDetector::new(), &headers, b""),
+        Some(AntiBotTech::DataDome)
+    );
+}
+
+#[test]
+fn detects_perimeterx_from_header_only() {
+    let mut headers = HeaderMap::new();
+    headers.insert(SET_COOKIE, HeaderValue::from_static("_px=fixture; Path=/"));
+    assert_eq!(
+        detect(&DefaultAntiBotDetector::new(), &headers, b""),
+        Some(AntiBotTech::PerimeterX)
+    );
+}
+
+#[test]
+fn detects_imperva_from_header_only() {
+    let mut headers = HeaderMap::new();
+    headers.insert("x-iinfo", HeaderValue::from_static("fixture"));
+    assert_eq!(
+        detect(&DefaultAntiBotDetector::new(), &headers, b""),
+        Some(AntiBotTech::Imperva)
     );
 }
 

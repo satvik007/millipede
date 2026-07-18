@@ -342,6 +342,51 @@ mod tests {
         );
     }
 
+    macro_rules! shared_vendor_fixture_test {
+        ($name:ident, $fixture:literal, $expected:expr) => {
+            #[test]
+            fn $name() {
+                let body = include_str!(concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/../millipede-core/tests/fixtures/antibot/",
+                    $fixture
+                ));
+                let request = request();
+                let headers = http::HeaderMap::new();
+                assert_eq!(
+                    DefaultPromotionDetector::new().should_promote(&snapshot(
+                        &request,
+                        &headers,
+                        body.as_bytes(),
+                        http::StatusCode::OK,
+                    )),
+                    Some(PromotionReason::KnownAntiBot($expected))
+                );
+            }
+        };
+    }
+
+    shared_vendor_fixture_test!(
+        datadome_fixture_is_promoted,
+        "datadome.html",
+        AntiBotTech::DataDome
+    );
+    shared_vendor_fixture_test!(
+        kasada_fixture_is_promoted,
+        "kasada.html",
+        AntiBotTech::Kasada
+    );
+    shared_vendor_fixture_test!(
+        akamai_fixture_is_promoted,
+        "akamai.html",
+        AntiBotTech::Akamai
+    );
+    shared_vendor_fixture_test!(
+        unknown_fixture_is_promoted,
+        "unknown.html",
+        AntiBotTech::Unknown
+    );
+
     #[test]
     fn benign_contentful_fixture_stays_http() {
         let body = include_str!(concat!(

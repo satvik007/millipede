@@ -8,45 +8,74 @@ use std::sync::{
 };
 
 use millipede::StorageClient;
-use wiremock::{Mock, MockServer, Request, Respond, ResponseTemplate, matchers::path};
 
 const DETECTED_CHALLENGE_BODY: &str = "<html><title>Just a moment...</title><body>Checking your browser before accessing the site.</body></html>";
 const CHALLENGE_BODY: &str =
     "<html><body>The Cloudflare challenge route recovered after session rotation.</body></html>";
 
-struct ChallengeThenRecovery {
+struct OfflineClient {
     attempts: AtomicUsize,
 }
 
-impl Respond for ChallengeThenRecovery {
-    fn respond(&self, _request: &Request) -> ResponseTemplate {
-        if self.attempts.fetch_add(1, Ordering::SeqCst) == 0 {
-            ResponseTemplate::new(200).set_body_raw(DETECTED_CHALLENGE_BODY, "text/html")
-        } else {
-            ResponseTemplate::new(200).set_body_raw(CHALLENGE_BODY, "text/html")
+#[async_trait::async_trait]
+impl millipede::HttpClient for OfflineClient {
+    async fn send(
+        &self,
+        request: millipede::HttpRequest,
+    ) -> Result<millipede::HttpResponse, millipede::HttpClientError> {
+        if !request.use_header_generator {
+            return Err(millipede::HttpClientError::other(anyhow::anyhow!(
+                "header generation was not enabled"
+            )));
         }
+        let token = request.session_token.as_ref().ok_or_else(|| {
+            millipede::HttpClientError::other(anyhow::anyhow!("session token was not supplied"))
+        })?;
+        let profile = millipede::HeaderGenerator::new().generate(token.as_str());
+        if profile.user_agent.is_empty() || profile.headers.is_empty() {
+            return Err(millipede::HttpClientError::other(anyhow::anyhow!(
+                "generated header profile was empty"
+            )));
+        }
+
+        let body = if request.url.path() == "/challenge"
+            && self.attempts.fetch_add(1, Ordering::SeqCst) == 0
+        {
+            DETECTED_CHALLENGE_BODY
+        } else if request.url.path() == "/challenge" {
+            CHALLENGE_BODY
+        } else {
+            "<html><body>Ready to crawl.</body></html>"
+        };
+        let mut headers = millipede::HeaderMap::new();
+        headers.insert(
+            "content-type",
+            "text/html"
+                .parse()
+                .expect("static content type should parse"),
+        );
+        Ok(millipede::HttpResponse::new(
+            request.url,
+            200_u16.try_into().expect("static status code should parse"),
+            headers,
+            body.into(),
+        ))
+    }
+
+    async fn stream(
+        &self,
+        _request: millipede::HttpRequest,
+    ) -> Result<millipede::StreamingResponse, millipede::HttpClientError> {
+        Err(millipede::HttpClientError::other(anyhow::anyhow!(
+            "streaming is not used by this example"
+        )))
     }
 }
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let server = MockServer::start().await;
-    Mock::given(path("/normal"))
-        .respond_with(
-            ResponseTemplate::new(200)
-                .set_body_raw("<html><body>Ready to crawl.</body></html>", "text/html"),
-        )
-        .mount(&server)
-        .await;
-    Mock::given(path("/challenge"))
-        .respond_with(ChallengeThenRecovery {
-            attempts: AtomicUsize::new(0),
-        })
-        .mount(&server)
-        .await;
-
-    let normal_url = format!("{}/normal", server.uri());
-    let challenge_url = format!("{}/challenge", server.uri());
+    let normal_url = "https://offline.example/normal";
+    let challenge_url = "https://offline.example/challenge";
     let normal_request = millipede::Request::get(normal_url).build()?;
     let challenge_request = millipede::Request::get(challenge_url).build()?;
     let snapshot_key = format!(
@@ -56,6 +85,9 @@ async fn main() -> anyhow::Result<()> {
     let storage = Arc::new(millipede::MemoryStorageClient::new());
     let crawler = millipede::Crawler::builder(
         millipede::HttpKind::builder()
+            .http_client(Arc::new(OfflineClient {
+                attempts: AtomicUsize::new(0),
+            }))
             .header_generator(true)
             .detect_anti_bot_default()
             .snapshot_errors_on_failure(true)

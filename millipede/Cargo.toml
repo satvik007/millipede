@@ -23,6 +23,7 @@ millipede-fingerprint = { path = "../crates/millipede-fingerprint", version = "0
 
 [dev-dependencies]
 anyhow = { workspace = true }
+async-trait = { workspace = true }
 flate2 = { workspace = true }
 tokio = { workspace = true }
 wiremock = { workspace = true }

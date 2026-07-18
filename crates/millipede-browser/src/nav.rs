@@ -11,7 +11,8 @@ use crate::{BrowserResponse, PageHandle};
 ///
 /// Unlike the INTERFACE §18 sketch, `request` is immutable because execution owns an
 /// [`Arc<Request>`]. The proposed `log` field is omitted because no `Log` type exists; use
-/// `tracing` macros instead.
+/// `tracing` macros instead. This context is non-exhaustive so `log` can be added later without a
+/// breaking change.
 #[non_exhaustive]
 pub struct BrowserPreHookCtx<'a> {
     /// Request about to be navigated.
@@ -27,7 +28,8 @@ pub struct BrowserPreHookCtx<'a> {
 /// Context supplied to browser post-navigation hooks.
 ///
 /// The proposed INTERFACE §18 `log` field is omitted because no `Log` type exists; use `tracing`
-/// macros instead.
+/// macros instead. This context is non-exhaustive so `log` can be added later without a breaking
+/// change.
 #[non_exhaustive]
 pub struct BrowserPostHookCtx<'a> {
     /// Request that was navigated.

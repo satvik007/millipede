@@ -11,6 +11,7 @@ use millipede_core::{
     crawler::Crawler,
     errors::CrawlError,
     handler::FailedRequestContext,
+    http_client::{HttpClient, HttpClientError, HttpRequest, HttpResponse, StreamingResponse},
     proxy::{ProxyBuckets, ProxyConfiguration, ProxyKind, ProxyRouteContext, ProxyStrategy},
     request::Request,
     retry_strategy::{AttemptOutcome, RetryDirective, RetryStrategy},
@@ -33,6 +34,26 @@ fn url(server: &MockServer, path: &str) -> Url {
 #[derive(Clone)]
 struct RetryOnceResponder {
     arrivals: Arc<Mutex<Vec<Instant>>>,
+}
+
+struct StaticOkClient;
+
+#[async_trait::async_trait]
+impl HttpClient for StaticOkClient {
+    async fn send(&self, request: HttpRequest) -> Result<HttpResponse, HttpClientError> {
+        Ok(HttpResponse::new(
+            request.url,
+            StatusCode::OK,
+            http::HeaderMap::new(),
+            bytes::Bytes::from_static(b"ok"),
+        ))
+    }
+
+    async fn stream(&self, _request: HttpRequest) -> Result<StreamingResponse, HttpClientError> {
+        Err(HttpClientError::other(anyhow::anyhow!(
+            "streaming is not used by this test"
+        )))
+    }
 }
 
 impl Respond for RetryOnceResponder {
@@ -611,6 +632,90 @@ async fn pre_navigation_hook_mutates_headers() -> Result<(), Box<dyn std::error:
 
     assert_eq!(stats.requests_finished, 1);
     server.verify().await;
+    Ok(())
+}
+
+#[tokio::test]
+async fn navigation_hooks_run_in_order_and_errors_short_circuit() -> anyhow::Result<()> {
+    let calls = Arc::new(Mutex::new(Vec::new()));
+    let kind = HttpKind::builder()
+        .http_client(Arc::new(StaticOkClient))
+        .pre_navigation_hook({
+            let calls = Arc::clone(&calls);
+            move |_| {
+                let calls = Arc::clone(&calls);
+                Box::pin(async move {
+                    calls.lock().expect("calls mutex poisoned").push("pre-1");
+                    Ok(())
+                })
+            }
+        })
+        .pre_navigation_hook({
+            let calls = Arc::clone(&calls);
+            move |_| {
+                let calls = Arc::clone(&calls);
+                Box::pin(async move {
+                    calls.lock().expect("calls mutex poisoned").push("pre-2");
+                    Ok(())
+                })
+            }
+        })
+        .post_navigation_hook({
+            let calls = Arc::clone(&calls);
+            move |_| {
+                let calls = Arc::clone(&calls);
+                Box::pin(async move {
+                    calls.lock().expect("calls mutex poisoned").push("post-1");
+                    Ok(())
+                })
+            }
+        })
+        .post_navigation_hook({
+            let calls = Arc::clone(&calls);
+            move |_| {
+                let calls = Arc::clone(&calls);
+                Box::pin(async move {
+                    calls.lock().expect("calls mutex poisoned").push("post-2");
+                    Err(CrawlError::non_retryable(anyhow::anyhow!(
+                        "stop navigation hooks"
+                    )))
+                })
+            }
+        })
+        .post_navigation_hook({
+            let calls = Arc::clone(&calls);
+            move |_| {
+                let calls = Arc::clone(&calls);
+                Box::pin(async move {
+                    calls.lock().expect("calls mutex poisoned").push("post-3");
+                    Ok(())
+                })
+            }
+        })
+        .build()?;
+    let crawler = Crawler::builder(kind)
+        .max_request_retries(0)
+        .request_handler({
+            let calls = Arc::clone(&calls);
+            move |_: HttpContext| {
+                let calls = Arc::clone(&calls);
+                async move {
+                    calls.lock().expect("calls mutex poisoned").push("handler");
+                    Ok(())
+                }
+            }
+        })
+        .storage_client(Arc::new(MemoryStorageClient::new()))
+        .build()
+        .await?;
+
+    let stats = crawler.run(["https://example.test/hooks"]).await?;
+
+    assert_eq!(stats.requests_failed, 1);
+    assert_eq!(
+        *calls.lock().expect("calls mutex poisoned"),
+        vec!["pre-1", "pre-2", "post-1", "post-2"]
+    );
     Ok(())
 }
 

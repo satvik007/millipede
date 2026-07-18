@@ -446,6 +446,116 @@ async fn pre_navigation_hook_runs() {
 }
 
 #[tokio::test]
+async fn navigation_hooks_run_in_order_and_errors_short_circuit() {
+    tokio::time::timeout(Duration::from_secs(30), async {
+        let calls = Arc::new(Mutex::new(Vec::new()));
+        let provider = FakeProvider::new(HashMap::new());
+        let browser_kind = BrowserKind::builder(provider)
+            .pre_navigation_hook({
+                let calls = Arc::clone(&calls);
+                move |_| {
+                    let calls = Arc::clone(&calls);
+                    Box::pin(async move {
+                        calls
+                            .lock()
+                            .unwrap_or_else(|error| error.into_inner())
+                            .push("pre-1");
+                        Ok(())
+                    })
+                }
+            })
+            .pre_navigation_hook({
+                let calls = Arc::clone(&calls);
+                move |_| {
+                    let calls = Arc::clone(&calls);
+                    Box::pin(async move {
+                        calls
+                            .lock()
+                            .unwrap_or_else(|error| error.into_inner())
+                            .push("pre-2");
+                        Ok(())
+                    })
+                }
+            })
+            .post_navigation_hook({
+                let calls = Arc::clone(&calls);
+                move |_| {
+                    let calls = Arc::clone(&calls);
+                    Box::pin(async move {
+                        calls
+                            .lock()
+                            .unwrap_or_else(|error| error.into_inner())
+                            .push("post-1");
+                        Ok(())
+                    })
+                }
+            })
+            .post_navigation_hook({
+                let calls = Arc::clone(&calls);
+                move |_| {
+                    let calls = Arc::clone(&calls);
+                    Box::pin(async move {
+                        calls
+                            .lock()
+                            .unwrap_or_else(|error| error.into_inner())
+                            .push("post-2");
+                        Err(CrawlError::non_retryable(anyhow::anyhow!(
+                            "stop navigation hooks"
+                        )))
+                    })
+                }
+            })
+            .post_navigation_hook({
+                let calls = Arc::clone(&calls);
+                move |_| {
+                    let calls = Arc::clone(&calls);
+                    Box::pin(async move {
+                        calls
+                            .lock()
+                            .unwrap_or_else(|error| error.into_inner())
+                            .push("post-3");
+                        Ok(())
+                    })
+                }
+            })
+            .build()
+            .unwrap();
+        let crawler = Crawler::builder(browser_kind)
+            .storage_client(storage())
+            .max_request_retries(0)
+            .request_handler({
+                let calls = Arc::clone(&calls);
+                move |_ctx: BrowserContext| {
+                    let calls = Arc::clone(&calls);
+                    async move {
+                        calls
+                            .lock()
+                            .unwrap_or_else(|error| error.into_inner())
+                            .push("handler");
+                        Ok(())
+                    }
+                }
+            })
+            .build()
+            .await
+            .unwrap();
+
+        let stats = crawler
+            .run(["https://example.com/ordered-hooks"])
+            .await
+            .unwrap();
+
+        assert_eq!(stats.requests_failed, 1);
+        assert_eq!(
+            *calls.lock().unwrap_or_else(|error| error.into_inner()),
+            vec!["pre-1", "pre-2", "post-1", "post-2"]
+        );
+    })
+    .await
+    .unwrap();
+}
+
+#[tokio::test]
 async fn post_navigation_hook_error_closes_page_and_fails() {
     tokio::time::timeout(Duration::from_secs(30), async {
         let provider = FakeProvider::new(HashMap::new());

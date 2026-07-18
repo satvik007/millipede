@@ -7,10 +7,9 @@ across requests and freshly created generator instances.
 
 ## Enabling fingerprinting
 
-Later Phase 7 integration steps will expose `HttpKindBuilder::header_generator(true)` for HTTP
-requests and `BrowserHooks::with_fingerprint` for browser pages. Those integration APIs are not
-wired by this step; this crate currently supplies the deterministic profiles and generators they
-will use.
+Use `HttpKindBuilder::header_generator(true)` for HTTP requests. For browser pages, install a
+`BrowserFingerprintGenerator` with `BrowserHooks::with_fingerprint`; both paths select from the
+same committed deterministic profiles.
 
 ## Limitations
 

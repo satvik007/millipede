@@ -79,6 +79,14 @@ mod tests {
     }
 
     #[test]
+    fn same_seed_is_byte_identical_when_serialized() {
+        let first = serde_json::to_vec(&HeaderGenerator::new().generate("session-A")).unwrap();
+        let second = serde_json::to_vec(&HeaderGenerator::new().generate("session-A")).unwrap();
+
+        assert_eq!(first, second);
+    }
+
+    #[test]
     fn different_seeds_can_select_different_profiles() {
         let generator = HeaderGenerator::new();
         let profiles = (0..20)

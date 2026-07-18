@@ -1538,6 +1538,7 @@ name = "millipede"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "async-trait",
  "flate2",
  "millipede-browser",
  "millipede-browser-chromiumoxide",

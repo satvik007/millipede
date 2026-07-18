@@ -64,8 +64,6 @@ jobs:
 
   # Browser tests run on Linux + macOS only; Windows is intentionally excluded
   # (ROADMAP Phase 6 exit criteria). setup-chrome caches the Chromium download.
-  # The browser_crawl and smart_crawl examples land later in this phase and do
-  # not exist yet; CI never executes before the first push, so that is expected.
   # The workspace test job above stays unchanged: browser tests skip gracefully
   # when MILLIPEDE_CHROME is unset and no local Chrome exists. GitHub runners
   # typically have Chrome preinstalled, so those tests simply run there too.
@@ -131,7 +129,10 @@ jobs:
         run: cargo install --locked cargo-public-api --version "$CARGO_PUBLIC_API_VERSION"
       - name: Regenerate public API baselines
         run: |
-          for c in millipede millipede-core millipede-storage-memory millipede-storage-fs millipede-http millipede-html millipede-browser millipede-browser-chromiumoxide millipede-fingerprint; do
+          # The umbrella crate needs --all-features so feature-gated re-exports
+          # (browser, fingerprint, ...) are captured in its baseline.
+          cargo +"$PUBLIC_API_TOOLCHAIN" public-api -p millipede --all-features --simplified > "docs/api-baselines/millipede.txt"
+          for c in millipede-core millipede-storage-memory millipede-storage-fs millipede-http millipede-html millipede-browser millipede-browser-chromiumoxide millipede-fingerprint; do
             cargo +"$PUBLIC_API_TOOLCHAIN" public-api -p "$c" --simplified > "docs/api-baselines/$c.txt"
           done
       - run: git diff --exit-code docs/api-baselines
