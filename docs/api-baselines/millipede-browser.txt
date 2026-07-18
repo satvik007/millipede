@@ -27,6 +27,7 @@ impl core::panic::unwind_safe::UnwindSafe for millipede_browser::detect::Promoti
 pub struct millipede_browser::detect::DefaultPromotionDetector
 impl millipede_browser::detect::DefaultPromotionDetector
 pub fn millipede_browser::detect::DefaultPromotionDetector::new() -> Self
+pub fn millipede_browser::detect::DefaultPromotionDetector::with_anti_bot_detector(self, alloc::sync::Arc<dyn millipede_core::antibot::AntiBotDetector>) -> Self
 pub fn millipede_browser::detect::DefaultPromotionDetector::with_min_visible_text(self, usize) -> Self
 pub fn millipede_browser::detect::DefaultPromotionDetector::with_required_selector(self, impl core::convert::Into<alloc::string::String>) -> Self
 impl core::clone::Clone for millipede_browser::detect::DefaultPromotionDetector
@@ -42,8 +43,8 @@ impl core::marker::Send for millipede_browser::detect::DefaultPromotionDetector
 impl core::marker::Sync for millipede_browser::detect::DefaultPromotionDetector
 impl core::marker::Unpin for millipede_browser::detect::DefaultPromotionDetector
 impl core::marker::UnsafeUnpin for millipede_browser::detect::DefaultPromotionDetector
-impl core::panic::unwind_safe::RefUnwindSafe for millipede_browser::detect::DefaultPromotionDetector
-impl core::panic::unwind_safe::UnwindSafe for millipede_browser::detect::DefaultPromotionDetector
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_browser::detect::DefaultPromotionDetector
+impl !core::panic::unwind_safe::UnwindSafe for millipede_browser::detect::DefaultPromotionDetector
 #[non_exhaustive] pub struct millipede_browser::detect::HttpAttemptSnapshot<'a>
 pub millipede_browser::detect::HttpAttemptSnapshot::body: &'a [u8]
 pub millipede_browser::detect::HttpAttemptSnapshot::final_url: &'a url::Url
@@ -647,6 +648,7 @@ impl core::panic::unwind_safe::UnwindSafe for millipede_browser::page::BrowserRe
 pub struct millipede_browser::prelude::DefaultPromotionDetector
 impl millipede_browser::detect::DefaultPromotionDetector
 pub fn millipede_browser::detect::DefaultPromotionDetector::new() -> Self
+pub fn millipede_browser::detect::DefaultPromotionDetector::with_anti_bot_detector(self, alloc::sync::Arc<dyn millipede_core::antibot::AntiBotDetector>) -> Self
 pub fn millipede_browser::detect::DefaultPromotionDetector::with_min_visible_text(self, usize) -> Self
 pub fn millipede_browser::detect::DefaultPromotionDetector::with_required_selector(self, impl core::convert::Into<alloc::string::String>) -> Self
 impl core::clone::Clone for millipede_browser::detect::DefaultPromotionDetector
@@ -662,8 +664,8 @@ impl core::marker::Send for millipede_browser::detect::DefaultPromotionDetector
 impl core::marker::Sync for millipede_browser::detect::DefaultPromotionDetector
 impl core::marker::Unpin for millipede_browser::detect::DefaultPromotionDetector
 impl core::marker::UnsafeUnpin for millipede_browser::detect::DefaultPromotionDetector
-impl core::panic::unwind_safe::RefUnwindSafe for millipede_browser::detect::DefaultPromotionDetector
-impl core::panic::unwind_safe::UnwindSafe for millipede_browser::detect::DefaultPromotionDetector
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_browser::detect::DefaultPromotionDetector
+impl !core::panic::unwind_safe::UnwindSafe for millipede_browser::detect::DefaultPromotionDetector
 #[non_exhaustive] pub struct millipede_browser::prelude::GotoOptions
 pub millipede_browser::prelude::GotoOptions::timeout: core::time::Duration
 pub millipede_browser::prelude::GotoOptions::wait_until: millipede_browser::page::WaitUntil
@@ -1206,6 +1208,7 @@ impl core::panic::unwind_safe::UnwindSafe for millipede_browser::page::BrowserRe
 pub struct millipede_browser::DefaultPromotionDetector
 impl millipede_browser::detect::DefaultPromotionDetector
 pub fn millipede_browser::detect::DefaultPromotionDetector::new() -> Self
+pub fn millipede_browser::detect::DefaultPromotionDetector::with_anti_bot_detector(self, alloc::sync::Arc<dyn millipede_core::antibot::AntiBotDetector>) -> Self
 pub fn millipede_browser::detect::DefaultPromotionDetector::with_min_visible_text(self, usize) -> Self
 pub fn millipede_browser::detect::DefaultPromotionDetector::with_required_selector(self, impl core::convert::Into<alloc::string::String>) -> Self
 impl core::clone::Clone for millipede_browser::detect::DefaultPromotionDetector
@@ -1221,8 +1224,8 @@ impl core::marker::Send for millipede_browser::detect::DefaultPromotionDetector
 impl core::marker::Sync for millipede_browser::detect::DefaultPromotionDetector
 impl core::marker::Unpin for millipede_browser::detect::DefaultPromotionDetector
 impl core::marker::UnsafeUnpin for millipede_browser::detect::DefaultPromotionDetector
-impl core::panic::unwind_safe::RefUnwindSafe for millipede_browser::detect::DefaultPromotionDetector
-impl core::panic::unwind_safe::UnwindSafe for millipede_browser::detect::DefaultPromotionDetector
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_browser::detect::DefaultPromotionDetector
+impl !core::panic::unwind_safe::UnwindSafe for millipede_browser::detect::DefaultPromotionDetector
 #[non_exhaustive] pub struct millipede_browser::GotoOptions
 pub millipede_browser::GotoOptions::timeout: core::time::Duration
 pub millipede_browser::GotoOptions::wait_until: millipede_browser::page::WaitUntil

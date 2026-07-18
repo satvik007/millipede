@@ -5,8 +5,6 @@ use std::fmt;
 use millipede_core::{errors::AntiBotTech, request::Request};
 use millipede_html::{SynchronizedHtml, scraper::Selector};
 
-const INSPECTION_LIMIT: usize = 64 * 1024;
-
 /// A borrowed snapshot of one successful HTTP/HTML attempt.
 #[non_exhaustive]
 pub struct HttpAttemptSnapshot<'a> {
@@ -92,12 +90,12 @@ pub trait BrowserPromotionDetector: Send + Sync + 'static {
 
 /// Conservative built-in promotion heuristics.
 ///
-/// The multi-vendor marker catalog is Phase 7 scope. Phase 6 ships the pluggable mechanism and
-/// the single Cloudflare vendor needed by its fixtures.
+/// Anti-bot classification is delegated to the configured core detector.
 #[derive(Debug, Clone)]
 pub struct DefaultPromotionDetector {
     required_selector: Option<String>,
     min_visible_text: usize,
+    anti_bot: std::sync::Arc<dyn millipede_core::antibot::AntiBotDetector>,
 }
 
 impl DefaultPromotionDetector {
@@ -115,6 +113,15 @@ impl DefaultPromotionDetector {
     /// Sets the minimum visible body-text length for JavaScript-shell detection.
     pub fn with_min_visible_text(mut self, minimum: usize) -> Self {
         self.min_visible_text = minimum;
+        self
+    }
+
+    /// Sets the anti-bot detector used to classify response signals.
+    pub fn with_anti_bot_detector(
+        mut self,
+        detector: std::sync::Arc<dyn millipede_core::antibot::AntiBotDetector>,
+    ) -> Self {
+        self.anti_bot = detector;
         self
     }
 
@@ -157,24 +164,21 @@ impl Default for DefaultPromotionDetector {
         Self {
             required_selector: None,
             min_visible_text: 40,
+            anti_bot: std::sync::Arc::new(millipede_core::antibot::DefaultAntiBotDetector::new()),
         }
     }
 }
 
 impl BrowserPromotionDetector for DefaultPromotionDetector {
     fn should_promote(&self, attempt: &HttpAttemptSnapshot<'_>) -> Option<PromotionReason> {
-        let inspected = &attempt.body[..attempt.body.len().min(INSPECTION_LIMIT)];
-        let lowered = String::from_utf8_lossy(inspected).to_ascii_lowercase();
-        if [
-            "just a moment",
-            "cf-chl",
-            "challenges.cloudflare.com",
-            "checking your browser",
-        ]
-        .iter()
-        .any(|marker| lowered.contains(marker))
-        {
-            return Some(PromotionReason::KnownAntiBot(AntiBotTech::Cloudflare));
+        let signals = millipede_core::antibot::AntiBotSignals::new(
+            attempt.status,
+            attempt.headers,
+            attempt.body,
+            attempt.final_url,
+        );
+        if let Some(tech) = self.anti_bot.detect(&signals) {
+            return Some(PromotionReason::KnownAntiBot(tech));
         }
 
         if let Some(html) = attempt.html {
@@ -266,13 +270,91 @@ mod tests {
     fn markers_after_inspection_cap_are_ignored() {
         let request = request();
         let headers = http::HeaderMap::new();
-        let mut body = vec![b'x'; INSPECTION_LIMIT];
+        // Mirrors the core detector's default inspection window.
+        let mut body =
+            vec![b'x'; millipede_core::antibot::DefaultAntiBotDetector::DEFAULT_INSPECTION_LIMIT];
         body.extend_from_slice(b"just a moment");
         assert_eq!(
             DefaultPromotionDetector::new().should_promote(&snapshot(
                 &request,
                 &headers,
                 &body,
+                http::StatusCode::OK,
+            )),
+            None
+        );
+    }
+
+    #[test]
+    fn perimeterx_fixture_is_promoted() {
+        let body = include_str!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../millipede-core/tests/fixtures/antibot/perimeterx.html"
+        ));
+        let request = request();
+        let headers = http::HeaderMap::new();
+        assert_eq!(
+            DefaultPromotionDetector::new().should_promote(&snapshot(
+                &request,
+                &headers,
+                body.as_bytes(),
+                http::StatusCode::OK,
+            )),
+            Some(PromotionReason::KnownAntiBot(AntiBotTech::PerimeterX))
+        );
+    }
+
+    #[test]
+    fn imperva_fixture_is_promoted() {
+        let body = include_str!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../millipede-core/tests/fixtures/antibot/imperva.html"
+        ));
+        let request = request();
+        let headers = http::HeaderMap::new();
+        assert_eq!(
+            DefaultPromotionDetector::new().should_promote(&snapshot(
+                &request,
+                &headers,
+                body.as_bytes(),
+                http::StatusCode::OK,
+            )),
+            Some(PromotionReason::KnownAntiBot(AntiBotTech::Imperva))
+        );
+    }
+
+    #[test]
+    fn cloudflare_fixture_is_promoted() {
+        let body = include_str!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../millipede-core/tests/fixtures/antibot/cloudflare.html"
+        ));
+        let request = request();
+        let headers = http::HeaderMap::new();
+        assert_eq!(
+            DefaultPromotionDetector::new().should_promote(&snapshot(
+                &request,
+                &headers,
+                body.as_bytes(),
+                http::StatusCode::OK,
+            )),
+            Some(PromotionReason::KnownAntiBot(AntiBotTech::Cloudflare))
+        );
+    }
+
+    #[test]
+    fn benign_contentful_fixture_stays_http() {
+        let body = include_str!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../millipede-core/tests/fixtures/antibot/benign_contentful.html"
+        ));
+        let request = request();
+        let headers = http::HeaderMap::new();
+        assert_eq!(
+            DefaultPromotionDetector::new().should_promote(&snapshot(
+                &request,
+                &headers,
+                body.as_bytes(),
                 http::StatusCode::OK,
             )),
             None
