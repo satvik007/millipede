@@ -29,9 +29,13 @@ wiremock = { workspace = true }
 serde_json = { workspace = true }
 millipede-storage-memory = { path = "../millipede-storage-memory" }
 tokio = { workspace = true, features = ["test-util"] }
-criterion = { workspace = true }
+criterion = { workspace = true, features = ["async_tokio"] }
 lol_html = { workspace = true }
 
 [[bench]]
 name = "selector_bench"
+harness = false
+
+[[bench]]
+name = "link_extraction"
 harness = false

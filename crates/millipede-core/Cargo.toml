@@ -34,6 +34,11 @@ quick-xml = { workspace = true }
 flate2 = { workspace = true }
 
 [dev-dependencies]
+criterion = { workspace = true, features = ["async_tokio"] }
 proptest = { workspace = true }
 millipede-storage-memory = { path = "../millipede-storage-memory" }
 tokio = { workspace = true, features = ["test-util"] }
+
+[[bench]]
+name = "engine_overhead"
+harness = false

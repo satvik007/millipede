@@ -21,5 +21,10 @@ tokio = { workspace = true }
 futures-util = { workspace = true }
 
 [dev-dependencies]
+criterion = { workspace = true, features = ["async_tokio"] }
 serde = { workspace = true }
 tempfile = { workspace = true }
+
+[[bench]]
+name = "queue_ops"
+harness = false
