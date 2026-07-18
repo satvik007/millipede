@@ -131,6 +131,40 @@ impl BrowserHooks {
             })
         })
     }
+
+    /// Adds v0.1 browser fingerprint header/context consistency.
+    ///
+    /// This does not patch navigator, canvas, or WebGL properties. See
+    /// `docs/guide/fingerprinting.md` for the documented limits.
+    pub fn with_fingerprint(
+        self,
+        generator: Arc<millipede_fingerprint::BrowserFingerprintGenerator>,
+    ) -> Self {
+        self.push_post_page_create(move |page, opts| {
+            let generator = Arc::clone(&generator);
+            Box::pin(async move {
+                let seed = opts
+                    .session
+                    .as_ref()
+                    .map(|session| session.id().as_str().to_owned())
+                    .unwrap_or_else(|| "anonymous".to_owned());
+                let profile = generator.generate(&seed);
+                let mut headers = http::HeaderMap::new();
+                if let Ok(user_agent) = http::HeaderValue::from_str(&profile.user_agent) {
+                    headers.insert(http::header::USER_AGENT, user_agent);
+                }
+                for (name, value) in profile.headers {
+                    if let Ok(name) = http::HeaderName::from_bytes(name.as_bytes()) {
+                        if let Ok(value) = http::HeaderValue::from_str(&value) {
+                            headers.insert(name, value);
+                        }
+                    }
+                }
+                page.set_extra_headers(&headers).await?;
+                Ok(())
+            })
+        })
+    }
 }
 
 impl fmt::Debug for BrowserHooks {

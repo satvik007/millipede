@@ -7,8 +7,8 @@ use std::{
 };
 
 use millipede_browser::{
-    BrowserContext, BrowserError, BrowserKind, BrowserPage, BrowserProvider, BrowserResponse,
-    GotoOptions, LaunchContext, ScreenshotOptions,
+    BrowserContext, BrowserError, BrowserHooks, BrowserKind, BrowserPage, BrowserPoolOptions,
+    BrowserProvider, BrowserResponse, GotoOptions, LaunchContext, ScreenshotOptions,
 };
 use millipede_core::{
     autoscale::AutoscaledPoolOptions,
@@ -16,7 +16,9 @@ use millipede_core::{
     crawler::Crawler,
     errors::CrawlError,
     handler::FailedRequestContext,
+    request::Request,
     session::{SESSION_POOL_PERSIST_KEY, Session, SessionConfig, SessionPool, SessionPoolOptions},
+    snapshot::ErrorSnapshotter,
     storage::{KeyValueStoreExt, StorageClient},
 };
 use millipede_storage_memory::MemoryStorageClient;
@@ -40,6 +42,7 @@ struct FakeStats {
     open_pages: i64,
     gotos: Vec<String>,
     set_cookie_calls: Vec<(u64, Vec<Cookie>)>,
+    set_header_calls: Vec<(u64, http::HeaderMap)>,
 }
 
 #[derive(Clone)]
@@ -142,7 +145,12 @@ impl BrowserPage for FakePage {
         Ok(())
     }
 
-    async fn set_extra_headers(&self, _headers: &http::HeaderMap) -> Result<(), BrowserError> {
+    async fn set_extra_headers(&self, headers: &http::HeaderMap) -> Result<(), BrowserError> {
+        self.stats
+            .lock()
+            .unwrap_or_else(|error| error.into_inner())
+            .set_header_calls
+            .push((self.serial, headers.clone()));
         Ok(())
     }
 
@@ -357,6 +365,173 @@ async fn cookie_persistence_across_page_recycles() {
                     .iter()
                     .any(|cookie| cookie.name == "k" && cookie.value == "v")
         }));
+    })
+    .await
+    .unwrap();
+}
+
+#[tokio::test]
+async fn fingerprint_hook_installs_headers() {
+    tokio::time::timeout(Duration::from_secs(30), async {
+        let provider = FakeProvider::new(HashMap::new());
+        let hooks = BrowserHooks::defaults().with_fingerprint(Arc::new(
+            millipede_fingerprint::BrowserFingerprintGenerator::new(),
+        ));
+        let browser_kind = BrowserKind::builder(provider.clone())
+            .pool_options(BrowserPoolOptions::default().hooks(hooks))
+            .build()
+            .unwrap();
+        let crawler = Crawler::builder(browser_kind)
+            .storage_client(storage())
+            .request_handler(|_ctx: BrowserContext| async { Ok(()) })
+            .build()
+            .await
+            .unwrap();
+
+        crawler
+            .run(["https://example.com/fingerprint"])
+            .await
+            .unwrap();
+
+        let fake = provider
+            .stats
+            .lock()
+            .unwrap_or_else(|error| error.into_inner());
+        assert!(!fake.set_header_calls.is_empty());
+        assert!(
+            fake.set_header_calls
+                .iter()
+                .any(|(_, headers)| headers.contains_key(http::header::USER_AGENT))
+        );
+    })
+    .await
+    .unwrap();
+}
+
+#[tokio::test]
+async fn pre_navigation_hook_runs() {
+    tokio::time::timeout(Duration::from_secs(30), async {
+        let provider = FakeProvider::new(HashMap::new());
+        let calls = Arc::new(Mutex::new(Vec::<&'static str>::new()));
+        let observed = Arc::clone(&calls);
+        let browser_kind = BrowserKind::builder(provider)
+            .pre_navigation_hook(move |_ctx| {
+                let observed = Arc::clone(&observed);
+                Box::pin(async move {
+                    observed
+                        .lock()
+                        .unwrap_or_else(|error| error.into_inner())
+                        .push("pre");
+                    Ok(())
+                })
+            })
+            .build()
+            .unwrap();
+        let crawler = Crawler::builder(browser_kind)
+            .storage_client(storage())
+            .request_handler(|_ctx: BrowserContext| async { Ok(()) })
+            .build()
+            .await
+            .unwrap();
+
+        crawler.run(["https://example.com/pre-hook"]).await.unwrap();
+
+        assert_eq!(
+            *calls.lock().unwrap_or_else(|error| error.into_inner()),
+            vec!["pre"]
+        );
+    })
+    .await
+    .unwrap();
+}
+
+#[tokio::test]
+async fn post_navigation_hook_error_closes_page_and_fails() {
+    tokio::time::timeout(Duration::from_secs(30), async {
+        let provider = FakeProvider::new(HashMap::new());
+        let failed = Arc::new(Mutex::new(false));
+        let observed = Arc::clone(&failed);
+        let browser_kind = BrowserKind::builder(provider.clone())
+            .post_navigation_hook(|_ctx| {
+                Box::pin(async { Err(CrawlError::non_retryable(anyhow::anyhow!("blocked"))) })
+            })
+            .build()
+            .unwrap();
+        let crawler = Crawler::builder(browser_kind)
+            .storage_client(storage())
+            .request_handler(|_ctx: BrowserContext| async { Ok(()) })
+            .failed_request_handler(move |_ctx: FailedRequestContext| {
+                let observed = Arc::clone(&observed);
+                async move {
+                    *observed.lock().unwrap_or_else(|error| error.into_inner()) = true;
+                    Ok(())
+                }
+            })
+            .build()
+            .await
+            .unwrap();
+
+        let stats = crawler
+            .run(["https://example.com/post-hook"])
+            .await
+            .unwrap();
+
+        assert_eq!(stats.requests_failed, 1);
+        assert!(*failed.lock().unwrap_or_else(|error| error.into_inner()));
+        assert!(
+            provider
+                .stats
+                .lock()
+                .unwrap_or_else(|error| error.into_inner())
+                .pages_closed
+                > 0
+        );
+    })
+    .await
+    .unwrap();
+}
+
+#[tokio::test]
+async fn snapshot_errors_persists_html_and_png() {
+    tokio::time::timeout(Duration::from_secs(30), async {
+        let storage = storage();
+        let request = Request::get("https://example.com/snapshot")
+            .build()
+            .unwrap();
+        let base_key = ErrorSnapshotter::base_key(&request);
+        let browser_kind = BrowserKind::builder(FakeProvider::new(HashMap::new()))
+            .snapshot_errors_on_failure(true)
+            .build()
+            .unwrap();
+        let crawler = Crawler::builder(browser_kind)
+            .storage_client(Arc::clone(&storage))
+            .max_request_retries(0)
+            .request_handler(|_ctx: BrowserContext| async {
+                Err(CrawlError::non_retryable(anyhow::anyhow!("handler failed")))
+            })
+            .build()
+            .await
+            .unwrap();
+
+        let stats = crawler.run([request]).await.unwrap();
+        assert_eq!(stats.requests_failed, 1);
+
+        let kvs = storage.open_key_value_store(Some("default")).await.unwrap();
+        let snapshotter = ErrorSnapshotter::new(kvs);
+        let html = snapshotter
+            .load(&format!("{base_key}.html"))
+            .await
+            .unwrap()
+            .expect("HTML snapshot should exist");
+        let png = snapshotter
+            .load(&format!("{base_key}.png"))
+            .await
+            .unwrap()
+            .expect("PNG snapshot should exist");
+        assert_eq!(html.bytes, bytes::Bytes::from_static(b"<html></html>"));
+        assert_eq!(html.content_type, "text/html");
+        assert_eq!(png.bytes, bytes::Bytes::new());
+        assert_eq!(png.content_type, "image/png");
     })
     .await
     .unwrap();

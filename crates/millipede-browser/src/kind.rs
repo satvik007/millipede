@@ -26,8 +26,9 @@ use millipede_core::{
 };
 
 use crate::{
-    BrowserError, BrowserHooks, BrowserPool, BrowserPoolOptions, BrowserProvider, BrowserResponse,
-    GotoOptions, PageHandle, PageOpts, WaitUntil,
+    BrowserError, BrowserHooks, BrowserPool, BrowserPoolOptions, BrowserPostHookCtx,
+    BrowserPostNavigationHook, BrowserPreHookCtx, BrowserPreNavigationHook, BrowserProvider,
+    BrowserResponse, GotoOptions, PageHandle, PageOpts, WaitUntil,
 };
 
 struct BrowserLinkExtractor {
@@ -129,6 +130,9 @@ pub struct BrowserKind<P: BrowserProvider> {
     retry_server_errors: bool,
     session_status_codes: Vec<u16>,
     goto: GotoOptions,
+    pre_hooks: Vec<BrowserPreNavigationHook>,
+    post_hooks: Vec<BrowserPostNavigationHook>,
+    snapshot_errors: bool,
     storage: OnceLock<StorageHandle>,
     persist_task: Mutex<Option<tokio::task::JoinHandle<()>>>,
 }
@@ -192,6 +196,19 @@ impl<P: BrowserProvider> BrowserKind<P> {
             .new_page(page_opts)
             .await
             .map_err(BrowserError::classify)?;
+        for hook in &self.pre_hooks {
+            let context = BrowserPreHookCtx {
+                request: &env.request,
+                page: &page,
+                session: session.as_deref(),
+                proxy: page.proxy_info(),
+            };
+            if let Err(error) = hook(context).await {
+                self.close_after_error(&page, "pre-navigation hook error")
+                    .await;
+                return Err(error);
+            }
+        }
         let response = match page.goto(&env.request.url, self.goto.clone()).await {
             Ok(response) => response,
             Err(error) => {
@@ -206,6 +223,20 @@ impl<P: BrowserProvider> BrowserKind<P> {
             }
         } else if let Some(session) = &session {
             session.mark_good().await;
+        }
+        for hook in &self.post_hooks {
+            let context = BrowserPostHookCtx {
+                request: &env.request,
+                page: &page,
+                response: response.as_ref(),
+                session: session.as_deref(),
+                proxy: page.proxy_info(),
+            };
+            if let Err(error) = hook(context).await {
+                self.close_after_error(&page, "post-navigation hook error")
+                    .await;
+                return Err(error);
+            }
         }
         let storage = match self.storage.get().cloned() {
             Some(storage) => storage,
@@ -248,6 +279,9 @@ pub struct BrowserKindBuilder<P: BrowserProvider> {
     session_status_codes: Vec<u16>,
     navigation_timeout: Duration,
     wait_until: WaitUntil,
+    pre_hooks: Vec<BrowserPreNavigationHook>,
+    post_hooks: Vec<BrowserPostNavigationHook>,
+    snapshot_errors: bool,
 }
 
 impl<P: BrowserProvider> BrowserKindBuilder<P> {
@@ -265,6 +299,9 @@ impl<P: BrowserProvider> BrowserKindBuilder<P> {
             session_status_codes: vec![401, 403],
             navigation_timeout: Duration::from_secs(30),
             wait_until: WaitUntil::Load,
+            pre_hooks: Vec::new(),
+            post_hooks: Vec::new(),
+            snapshot_errors: false,
         }
     }
 
@@ -369,6 +406,36 @@ impl<P: BrowserProvider> BrowserKindBuilder<P> {
         self
     }
 
+    /// Appends a hook that runs after page creation and before navigation.
+    pub fn pre_navigation_hook<F>(mut self, hook: F) -> Self
+    where
+        F: for<'a> Fn(BrowserPreHookCtx<'a>) -> BoxFuture<'a, Result<(), CrawlError>>
+            + Send
+            + Sync
+            + 'static,
+    {
+        self.pre_hooks.push(Arc::new(hook));
+        self
+    }
+
+    /// Appends a hook that runs after navigation and status classification.
+    pub fn post_navigation_hook<F>(mut self, hook: F) -> Self
+    where
+        F: for<'a> Fn(BrowserPostHookCtx<'a>) -> BoxFuture<'a, Result<(), CrawlError>>
+            + Send
+            + Sync
+            + 'static,
+    {
+        self.post_hooks.push(Arc::new(hook));
+        self
+    }
+
+    /// Controls whether handler failures persist page HTML and a PNG screenshot.
+    pub fn snapshot_errors_on_failure(mut self, enabled: bool) -> Self {
+        self.snapshot_errors = enabled;
+        self
+    }
+
     /// Builds the kind, constructing a typed-error HTTP client when none was injected.
     pub fn build(self) -> Result<BrowserKind<P>, HttpClientError> {
         let send_request = match self.http_client {
@@ -392,6 +459,9 @@ impl<P: BrowserProvider> BrowserKindBuilder<P> {
             goto: GotoOptions::default()
                 .timeout(self.navigation_timeout)
                 .wait_until(self.wait_until),
+            pre_hooks: self.pre_hooks,
+            post_hooks: self.post_hooks,
+            snapshot_errors: self.snapshot_errors,
             storage: OnceLock::new(),
             persist_task: Mutex::new(None),
         })
@@ -496,6 +566,46 @@ impl<P: BrowserProvider> CrawlerKind for BrowserKind<P> {
                     if error.rotates_session() {
                         if let Some(session) = &ctx.session {
                             session.mark_bad().await;
+                        }
+                    }
+                    if self.snapshot_errors {
+                        let snapshotter = millipede_core::snapshot::ErrorSnapshotter::new(
+                            ctx.storage.key_value_store().clone(),
+                        );
+                        match ctx.page.content().await {
+                            Ok(html) => {
+                                if let Err(error) = snapshotter
+                                    .capture(
+                                        &ctx.request,
+                                        "html",
+                                        bytes::Bytes::from(html),
+                                        "text/html",
+                                    )
+                                    .await
+                                {
+                                    tracing::warn!(%error, "error HTML snapshot capture failed");
+                                }
+                            }
+                            Err(error) => {
+                                tracing::warn!(%error, "error snapshot content() failed");
+                            }
+                        }
+                        match ctx
+                            .page
+                            .screenshot(crate::ScreenshotOptions::default())
+                            .await
+                        {
+                            Ok(png) => {
+                                if let Err(error) = snapshotter
+                                    .capture(&ctx.request, "png", png, "image/png")
+                                    .await
+                                {
+                                    tracing::warn!(%error, "error screenshot capture failed");
+                                }
+                            }
+                            Err(error) => {
+                                tracing::warn!(%error, "error snapshot screenshot() failed");
+                            }
                         }
                     }
                     if let Err(error) = ctx.page.close().await {

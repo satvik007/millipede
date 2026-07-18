@@ -8,6 +8,8 @@ pub mod error;
 pub mod hooks;
 /// Browser-backed crawler kind and handler context.
 pub mod kind;
+/// Browser pre- and post-navigation hook contexts.
+pub mod nav;
 /// Provider-erased browser page operations and page options.
 pub mod page;
 /// Browser pool and provider-erased RAII page handles.
@@ -23,6 +25,9 @@ pub use detect::{
 pub use error::BrowserError;
 pub use hooks::{BrowserHooks, PageClosedHook, PageHook, PagePrepHook, PreLaunchHook};
 pub use kind::{BrowserContext, BrowserCrawler, BrowserKind, BrowserKindBuilder};
+pub use nav::{
+    BrowserPostHookCtx, BrowserPostNavigationHook, BrowserPreHookCtx, BrowserPreNavigationHook,
+};
 pub use page::{
     BrowserPage, BrowserResponse, GotoOptions, PageId, PageOpts, ScreenshotOptions, WaitUntil,
 };
@@ -34,10 +39,11 @@ pub use smart::{SmartContext, SmartCrawler, SmartKind, SmartKindBuilder};
 pub mod prelude {
     pub use crate::{
         BrowserContext, BrowserCrawler, BrowserError, BrowserHooks, BrowserKind,
-        BrowserKindBuilder, BrowserPage, BrowserPool, BrowserPoolOptions, BrowserPromotionDetector,
-        BrowserProvider, BrowserResponse, DefaultPromotionDetector, GotoOptions,
-        HttpAttemptSnapshot, LaunchContext, PageClosedHook, PageHandle, PageHook, PageId, PageOpts,
-        PagePrepHook, PreLaunchHook, PromotionReason, ScreenshotOptions, SmartContext,
-        SmartCrawler, SmartKind, SmartKindBuilder, WaitUntil,
+        BrowserKindBuilder, BrowserPage, BrowserPool, BrowserPoolOptions, BrowserPostHookCtx,
+        BrowserPostNavigationHook, BrowserPreHookCtx, BrowserPreNavigationHook,
+        BrowserPromotionDetector, BrowserProvider, BrowserResponse, DefaultPromotionDetector,
+        GotoOptions, HttpAttemptSnapshot, LaunchContext, PageClosedHook, PageHandle, PageHook,
+        PageId, PageOpts, PagePrepHook, PreLaunchHook, PromotionReason, ScreenshotOptions,
+        SmartContext, SmartCrawler, SmartKind, SmartKindBuilder, WaitUntil,
     };
 }
