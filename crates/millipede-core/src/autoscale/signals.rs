@@ -379,8 +379,9 @@ impl LoadSignal for TokioRuntimeLoadSignal {
 
 /// A manually-fed signal representing downstream client throttling.
 ///
-/// Automatic `StorageClient` rate-limit wiring arrives in Phase 7. Until then,
-/// callers must feed observations through [`ClientLoadSignalHandle`].
+/// Use [`ClientLoadSignal::instrument_storage`] to automatically record successful storage
+/// operations and backend rate-limit errors. Callers can also feed observations directly through
+/// [`ClientLoadSignalHandle`].
 pub struct ClientLoadSignal {
     history: Arc<SnapshotHistory>,
 }
@@ -398,6 +399,14 @@ impl ClientLoadSignal {
         ClientLoadSignalHandle {
             history: Arc::clone(&self.history),
         }
+    }
+
+    /// Wraps a storage client so its successful and rate-limited operations feed this signal.
+    pub fn instrument_storage(
+        &self,
+        client: std::sync::Arc<dyn crate::storage::StorageClient>,
+    ) -> std::sync::Arc<dyn crate::storage::StorageClient> {
+        crate::storage::RateLimitReportingClient::new(client, self.handle())
     }
 }
 

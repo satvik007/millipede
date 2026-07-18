@@ -133,7 +133,8 @@ pub mod prelude {
     pub use crate::storage::{
         AddOptions, AddRequestsBatchedResult, AutoSaved, BatchAddHandle, Dataset, DatasetExt,
         DatasetInfo, KeyInfo, KeyList, KeyValueStore, KeyValueStoreExt, KvEntry, Lease, LeaseId,
-        ListKeysOptions, ListOptions, Page, ProcessedRequest, QueueOpInfo, ReclaimOptions,
-        RequestQueue, RequestSource, StorageClient, StorageError, StorageHandle, StorageResult,
+        ListKeysOptions, ListOptions, Page, ProcessedRequest, QueueOpInfo,
+        RateLimitReportingClient, ReclaimOptions, RequestQueue, RequestSource, StorageClient,
+        StorageError, StorageHandle, StorageResult,
     };
 }

@@ -142,9 +142,8 @@ impl HttpClientError {
 
 /// A backend-independent HTTP request.
 ///
-/// `use_header_generator` and `session_token` are deliberately omitted until
-/// `millipede-fingerprint` lands in Phase 7. This type is `#[non_exhaustive]`,
-/// so those fields can be added later without breaking downstream code.
+/// Fingerprint-aware clients can generate browser-like headers when requested and use the
+/// optional session token to keep those headers consistent across related requests.
 ///
 /// # Examples
 ///
@@ -177,6 +176,10 @@ pub struct HttpRequest {
     pub timeout: Option<Duration>,
     /// Maximum number of redirects to follow.
     pub max_redirects: u32,
+    /// Whether the HTTP client should generate browser-like request headers.
+    pub use_header_generator: bool,
+    /// Token used to keep generated headers consistent across a session.
+    pub session_token: Option<crate::session::SessionToken>,
 }
 
 impl HttpRequest {
@@ -191,6 +194,8 @@ impl HttpRequest {
             proxy: None,
             timeout: None,
             max_redirects: 10,
+            use_header_generator: false,
+            session_token: None,
         }
     }
 
@@ -246,6 +251,18 @@ impl HttpRequest {
     /// Sets the maximum number of redirects to follow.
     pub fn max_redirects(mut self, max_redirects: u32) -> Self {
         self.max_redirects = max_redirects;
+        self
+    }
+
+    /// Enables or disables browser-like header generation.
+    pub fn use_header_generator(mut self, enabled: bool) -> Self {
+        self.use_header_generator = enabled;
+        self
+    }
+
+    /// Sets the token used for consistent per-session header generation.
+    pub fn session_token(mut self, token: crate::session::SessionToken) -> Self {
+        self.session_token = Some(token);
         self
     }
 }

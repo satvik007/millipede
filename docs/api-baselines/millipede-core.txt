@@ -136,6 +136,7 @@ impl !core::panic::unwind_safe::UnwindSafe for millipede_core::autoscale::Autosc
 pub struct millipede_core::autoscale::ClientLoadSignal
 impl millipede_core::autoscale::ClientLoadSignal
 pub fn millipede_core::autoscale::ClientLoadSignal::handle(&self) -> millipede_core::autoscale::ClientLoadSignalHandle
+pub fn millipede_core::autoscale::ClientLoadSignal::instrument_storage(&self, alloc::sync::Arc<dyn millipede_core::storage::StorageClient>) -> alloc::sync::Arc<dyn millipede_core::storage::StorageClient>
 pub fn millipede_core::autoscale::ClientLoadSignal::new() -> Self
 impl core::default::Default for millipede_core::autoscale::ClientLoadSignal
 pub fn millipede_core::autoscale::ClientLoadSignal::default() -> Self
@@ -1189,8 +1190,10 @@ pub millipede_core::http_client::HttpRequest::headers: http::header::map::Header
 pub millipede_core::http_client::HttpRequest::max_redirects: u32
 pub millipede_core::http_client::HttpRequest::method: http::method::Method
 pub millipede_core::http_client::HttpRequest::proxy: core::option::Option<url::Url>
+pub millipede_core::http_client::HttpRequest::session_token: core::option::Option<millipede_core::session::SessionToken>
 pub millipede_core::http_client::HttpRequest::timeout: core::option::Option<core::time::Duration>
 pub millipede_core::http_client::HttpRequest::url: url::Url
+pub millipede_core::http_client::HttpRequest::use_header_generator: bool
 impl millipede_core::http_client::HttpRequest
 pub fn millipede_core::http_client::HttpRequest::body(self, millipede_core::request::RequestBody) -> Self
 pub fn millipede_core::http_client::HttpRequest::cookie_jar(self, alloc::sync::Arc<millipede_core::cookies::CookieJar>) -> Self
@@ -1200,7 +1203,9 @@ pub fn millipede_core::http_client::HttpRequest::max_redirects(self, u32) -> Sel
 pub fn millipede_core::http_client::HttpRequest::method(self, http::method::Method) -> Self
 pub fn millipede_core::http_client::HttpRequest::new(url::Url) -> Self
 pub fn millipede_core::http_client::HttpRequest::proxy(self, url::Url) -> Self
+pub fn millipede_core::http_client::HttpRequest::session_token(self, millipede_core::session::SessionToken) -> Self
 pub fn millipede_core::http_client::HttpRequest::timeout(self, core::time::Duration) -> Self
+pub fn millipede_core::http_client::HttpRequest::use_header_generator(self, bool) -> Self
 impl core::clone::Clone for millipede_core::http_client::HttpRequest
 pub fn millipede_core::http_client::HttpRequest::clone(&self) -> millipede_core::http_client::HttpRequest
 impl core::fmt::Debug for millipede_core::http_client::HttpRequest
@@ -1985,8 +1990,12 @@ pub millipede_core::prelude::StorageError::Backend(anyhow::Error)
 pub millipede_core::prelude::StorageError::Io(core::io::error::Error)
 pub millipede_core::prelude::StorageError::LeaseNotFound
 pub millipede_core::prelude::StorageError::LeaseNotFound::lease_id: millipede_core::storage::LeaseId
+pub millipede_core::prelude::StorageError::RateLimited
+pub millipede_core::prelude::StorageError::RateLimited::retry_after: core::option::Option<core::time::Duration>
 pub millipede_core::prelude::StorageError::Serialization(serde_json::error::Error)
 pub millipede_core::prelude::StorageError::Unsupported(&'static str)
+impl millipede_core::storage::StorageError
+pub fn millipede_core::storage::StorageError::is_rate_limited(&self) -> bool
 impl core::convert::From<core::io::error::Error> for millipede_core::storage::StorageError
 pub fn millipede_core::storage::StorageError::from(core::io::error::Error) -> Self
 impl core::convert::From<millipede_core::storage::StorageError> for millipede_core::crawler::CrawlerBuildError
@@ -2283,6 +2292,7 @@ impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::BatchAddH
 pub struct millipede_core::prelude::ClientLoadSignal
 impl millipede_core::autoscale::ClientLoadSignal
 pub fn millipede_core::autoscale::ClientLoadSignal::handle(&self) -> millipede_core::autoscale::ClientLoadSignalHandle
+pub fn millipede_core::autoscale::ClientLoadSignal::instrument_storage(&self, alloc::sync::Arc<dyn millipede_core::storage::StorageClient>) -> alloc::sync::Arc<dyn millipede_core::storage::StorageClient>
 pub fn millipede_core::autoscale::ClientLoadSignal::new() -> Self
 impl core::default::Default for millipede_core::autoscale::ClientLoadSignal
 pub fn millipede_core::autoscale::ClientLoadSignal::default() -> Self
@@ -2816,8 +2826,10 @@ pub millipede_core::prelude::HttpRequest::headers: http::header::map::HeaderMap
 pub millipede_core::prelude::HttpRequest::max_redirects: u32
 pub millipede_core::prelude::HttpRequest::method: http::method::Method
 pub millipede_core::prelude::HttpRequest::proxy: core::option::Option<url::Url>
+pub millipede_core::prelude::HttpRequest::session_token: core::option::Option<millipede_core::session::SessionToken>
 pub millipede_core::prelude::HttpRequest::timeout: core::option::Option<core::time::Duration>
 pub millipede_core::prelude::HttpRequest::url: url::Url
+pub millipede_core::prelude::HttpRequest::use_header_generator: bool
 impl millipede_core::http_client::HttpRequest
 pub fn millipede_core::http_client::HttpRequest::body(self, millipede_core::request::RequestBody) -> Self
 pub fn millipede_core::http_client::HttpRequest::cookie_jar(self, alloc::sync::Arc<millipede_core::cookies::CookieJar>) -> Self
@@ -2827,7 +2839,9 @@ pub fn millipede_core::http_client::HttpRequest::max_redirects(self, u32) -> Sel
 pub fn millipede_core::http_client::HttpRequest::method(self, http::method::Method) -> Self
 pub fn millipede_core::http_client::HttpRequest::new(url::Url) -> Self
 pub fn millipede_core::http_client::HttpRequest::proxy(self, url::Url) -> Self
+pub fn millipede_core::http_client::HttpRequest::session_token(self, millipede_core::session::SessionToken) -> Self
 pub fn millipede_core::http_client::HttpRequest::timeout(self, core::time::Duration) -> Self
+pub fn millipede_core::http_client::HttpRequest::use_header_generator(self, bool) -> Self
 impl core::clone::Clone for millipede_core::http_client::HttpRequest
 pub fn millipede_core::http_client::HttpRequest::clone(&self) -> millipede_core::http_client::HttpRequest
 impl core::fmt::Debug for millipede_core::http_client::HttpRequest
@@ -3186,6 +3200,21 @@ impl<'a> core::marker::Unpin for millipede_core::proxy::ProxyRouteContext<'a>
 impl<'a> core::marker::UnsafeUnpin for millipede_core::proxy::ProxyRouteContext<'a>
 impl<'a> core::panic::unwind_safe::RefUnwindSafe for millipede_core::proxy::ProxyRouteContext<'a>
 impl<'a> core::panic::unwind_safe::UnwindSafe for millipede_core::proxy::ProxyRouteContext<'a>
+pub struct millipede_core::prelude::RateLimitReportingClient
+impl millipede_core::storage::rate_limit::RateLimitReportingClient
+pub fn millipede_core::storage::rate_limit::RateLimitReportingClient::new(alloc::sync::Arc<dyn millipede_core::storage::StorageClient>, millipede_core::autoscale::ClientLoadSignalHandle) -> alloc::sync::Arc<dyn millipede_core::storage::StorageClient>
+impl millipede_core::storage::StorageClient for millipede_core::storage::rate_limit::RateLimitReportingClient
+pub fn millipede_core::storage::rate_limit::RateLimitReportingClient::open_dataset<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::Dataset>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::storage::rate_limit::RateLimitReportingClient::open_key_value_store<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::storage::rate_limit::RateLimitReportingClient::open_request_queue<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::RequestQueue>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::storage::rate_limit::RateLimitReportingClient::purge<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+impl core::marker::Freeze for millipede_core::storage::rate_limit::RateLimitReportingClient
+impl core::marker::Send for millipede_core::storage::rate_limit::RateLimitReportingClient
+impl core::marker::Sync for millipede_core::storage::rate_limit::RateLimitReportingClient
+impl core::marker::Unpin for millipede_core::storage::rate_limit::RateLimitReportingClient
+impl core::marker::UnsafeUnpin for millipede_core::storage::rate_limit::RateLimitReportingClient
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::rate_limit::RateLimitReportingClient
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::storage::rate_limit::RateLimitReportingClient
 #[non_exhaustive] pub struct millipede_core::prelude::ReclaimOptions
 pub millipede_core::prelude::ReclaimOptions::forefront: bool
 pub millipede_core::prelude::ReclaimOptions::increment_retry: bool
@@ -3457,8 +3486,12 @@ pub fn millipede_core::session::SessionId::clone(&self) -> millipede_core::sessi
 impl core::cmp::Eq for millipede_core::session::SessionId
 impl core::cmp::PartialEq for millipede_core::session::SessionId
 pub fn millipede_core::session::SessionId::eq(&self, &millipede_core::session::SessionId) -> bool
+impl core::convert::From<&millipede_core::session::SessionId> for millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::from(&millipede_core::session::SessionId) -> Self
 impl core::convert::From<alloc::string::String> for millipede_core::session::SessionId
 pub fn millipede_core::session::SessionId::from(alloc::string::String) -> Self
+impl core::convert::From<millipede_core::session::SessionId> for millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::from(millipede_core::session::SessionId) -> Self
 impl core::fmt::Debug for millipede_core::session::SessionId
 pub fn millipede_core::session::SessionId::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for millipede_core::session::SessionId
@@ -3995,6 +4028,11 @@ pub fn millipede_core::prelude::StorageClient::open_dataset<'life0, 'life1, 'asy
 pub fn millipede_core::prelude::StorageClient::open_key_value_store<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
 pub fn millipede_core::prelude::StorageClient::open_request_queue<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::RequestQueue>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
 pub fn millipede_core::prelude::StorageClient::purge<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+impl millipede_core::storage::StorageClient for millipede_core::storage::rate_limit::RateLimitReportingClient
+pub fn millipede_core::storage::rate_limit::RateLimitReportingClient::open_dataset<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::Dataset>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::storage::rate_limit::RateLimitReportingClient::open_key_value_store<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::storage::rate_limit::RateLimitReportingClient::open_request_queue<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::RequestQueue>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::storage::rate_limit::RateLimitReportingClient::purge<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
 pub type millipede_core::prelude::BasicCrawler = millipede_core::crawler::Crawler<millipede_core::crawler::BasicKind>
 pub type millipede_core::prelude::EventStream = tokio::sync::broadcast::Receiver<millipede_core::events::CrawlerEvent>
 pub type millipede_core::prelude::QueueOpInfo = millipede_core::storage::ProcessedRequest
@@ -4560,8 +4598,12 @@ pub fn millipede_core::session::SessionId::clone(&self) -> millipede_core::sessi
 impl core::cmp::Eq for millipede_core::session::SessionId
 impl core::cmp::PartialEq for millipede_core::session::SessionId
 pub fn millipede_core::session::SessionId::eq(&self, &millipede_core::session::SessionId) -> bool
+impl core::convert::From<&millipede_core::session::SessionId> for millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::from(&millipede_core::session::SessionId) -> Self
 impl core::convert::From<alloc::string::String> for millipede_core::session::SessionId
 pub fn millipede_core::session::SessionId::from(alloc::string::String) -> Self
+impl core::convert::From<millipede_core::session::SessionId> for millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::from(millipede_core::session::SessionId) -> Self
 impl core::fmt::Debug for millipede_core::session::SessionId
 pub fn millipede_core::session::SessionId::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for millipede_core::session::SessionId
@@ -4617,6 +4659,41 @@ impl core::marker::Unpin for millipede_core::session::SessionPoolOptions
 impl core::marker::UnsafeUnpin for millipede_core::session::SessionPoolOptions
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::session::SessionPoolOptions
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::session::SessionPoolOptions
+pub struct millipede_core::session::SessionToken(_)
+impl millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::as_str(&self) -> &str
+pub fn millipede_core::session::SessionToken::new(impl core::convert::Into<alloc::string::String>) -> Self
+impl core::clone::Clone for millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::clone(&self) -> millipede_core::session::SessionToken
+impl core::cmp::Eq for millipede_core::session::SessionToken
+impl core::cmp::PartialEq for millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::eq(&self, &millipede_core::session::SessionToken) -> bool
+impl core::convert::From<&millipede_core::session::SessionId> for millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::from(&millipede_core::session::SessionId) -> Self
+impl core::convert::From<&str> for millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::from(&str) -> Self
+impl core::convert::From<alloc::string::String> for millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::from(alloc::string::String) -> Self
+impl core::convert::From<millipede_core::session::SessionId> for millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::from(millipede_core::session::SessionId) -> Self
+impl core::fmt::Debug for millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::hash<__H: core::hash::Hasher>(&self, &mut __H)
+impl core::marker::StructuralPartialEq for millipede_core::session::SessionToken
+impl serde_core::ser::Serialize for millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl<'de> serde_core::de::Deserialize<'de> for millipede_core::session::SessionToken
+pub fn millipede_core::session::SessionToken::deserialize<__D>(__D) -> core::result::Result<Self, <__D as serde_core::de::Deserializer>::Error> where __D: serde_core::de::Deserializer<'de>
+impl core::marker::Freeze for millipede_core::session::SessionToken
+impl core::marker::Send for millipede_core::session::SessionToken
+impl core::marker::Sync for millipede_core::session::SessionToken
+impl core::marker::Unpin for millipede_core::session::SessionToken
+impl core::marker::UnsafeUnpin for millipede_core::session::SessionToken
+impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::session::SessionToken
+impl core::panic::unwind_safe::UnwindSafe for millipede_core::session::SessionToken
 pub const millipede_core::session::SESSION_POOL_PERSIST_KEY: &str
 pub mod millipede_core::sitemap
 pub struct millipede_core::sitemap::RequestQueueWithSitemap
@@ -4816,6 +4893,22 @@ impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::statistics::Sta
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::statistics::StatisticsSnapshot
 pub const millipede_core::statistics::STATISTICS_PERSIST_KEY: &str
 pub mod millipede_core::storage
+pub mod millipede_core::storage::rate_limit
+pub struct millipede_core::storage::rate_limit::RateLimitReportingClient
+impl millipede_core::storage::rate_limit::RateLimitReportingClient
+pub fn millipede_core::storage::rate_limit::RateLimitReportingClient::new(alloc::sync::Arc<dyn millipede_core::storage::StorageClient>, millipede_core::autoscale::ClientLoadSignalHandle) -> alloc::sync::Arc<dyn millipede_core::storage::StorageClient>
+impl millipede_core::storage::StorageClient for millipede_core::storage::rate_limit::RateLimitReportingClient
+pub fn millipede_core::storage::rate_limit::RateLimitReportingClient::open_dataset<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::Dataset>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::storage::rate_limit::RateLimitReportingClient::open_key_value_store<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::storage::rate_limit::RateLimitReportingClient::open_request_queue<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::RequestQueue>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::storage::rate_limit::RateLimitReportingClient::purge<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+impl core::marker::Freeze for millipede_core::storage::rate_limit::RateLimitReportingClient
+impl core::marker::Send for millipede_core::storage::rate_limit::RateLimitReportingClient
+impl core::marker::Sync for millipede_core::storage::rate_limit::RateLimitReportingClient
+impl core::marker::Unpin for millipede_core::storage::rate_limit::RateLimitReportingClient
+impl core::marker::UnsafeUnpin for millipede_core::storage::rate_limit::RateLimitReportingClient
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::rate_limit::RateLimitReportingClient
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::storage::rate_limit::RateLimitReportingClient
 #[non_exhaustive] pub enum millipede_core::storage::RequestSource
 pub millipede_core::storage::RequestSource::Request(millipede_core::request::Request)
 impl core::clone::Clone for millipede_core::storage::RequestSource
@@ -4836,8 +4929,12 @@ pub millipede_core::storage::StorageError::Backend(anyhow::Error)
 pub millipede_core::storage::StorageError::Io(core::io::error::Error)
 pub millipede_core::storage::StorageError::LeaseNotFound
 pub millipede_core::storage::StorageError::LeaseNotFound::lease_id: millipede_core::storage::LeaseId
+pub millipede_core::storage::StorageError::RateLimited
+pub millipede_core::storage::StorageError::RateLimited::retry_after: core::option::Option<core::time::Duration>
 pub millipede_core::storage::StorageError::Serialization(serde_json::error::Error)
 pub millipede_core::storage::StorageError::Unsupported(&'static str)
+impl millipede_core::storage::StorageError
+pub fn millipede_core::storage::StorageError::is_rate_limited(&self) -> bool
 impl core::convert::From<core::io::error::Error> for millipede_core::storage::StorageError
 pub fn millipede_core::storage::StorageError::from(core::io::error::Error) -> Self
 impl core::convert::From<millipede_core::storage::StorageError> for millipede_core::crawler::CrawlerBuildError
@@ -5081,6 +5178,21 @@ impl core::marker::Unpin for millipede_core::storage::ProcessedRequest
 impl core::marker::UnsafeUnpin for millipede_core::storage::ProcessedRequest
 impl core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::ProcessedRequest
 impl core::panic::unwind_safe::UnwindSafe for millipede_core::storage::ProcessedRequest
+pub struct millipede_core::storage::RateLimitReportingClient
+impl millipede_core::storage::rate_limit::RateLimitReportingClient
+pub fn millipede_core::storage::rate_limit::RateLimitReportingClient::new(alloc::sync::Arc<dyn millipede_core::storage::StorageClient>, millipede_core::autoscale::ClientLoadSignalHandle) -> alloc::sync::Arc<dyn millipede_core::storage::StorageClient>
+impl millipede_core::storage::StorageClient for millipede_core::storage::rate_limit::RateLimitReportingClient
+pub fn millipede_core::storage::rate_limit::RateLimitReportingClient::open_dataset<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::Dataset>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::storage::rate_limit::RateLimitReportingClient::open_key_value_store<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::storage::rate_limit::RateLimitReportingClient::open_request_queue<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::RequestQueue>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::storage::rate_limit::RateLimitReportingClient::purge<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+impl core::marker::Freeze for millipede_core::storage::rate_limit::RateLimitReportingClient
+impl core::marker::Send for millipede_core::storage::rate_limit::RateLimitReportingClient
+impl core::marker::Sync for millipede_core::storage::rate_limit::RateLimitReportingClient
+impl core::marker::Unpin for millipede_core::storage::rate_limit::RateLimitReportingClient
+impl core::marker::UnsafeUnpin for millipede_core::storage::rate_limit::RateLimitReportingClient
+impl !core::panic::unwind_safe::RefUnwindSafe for millipede_core::storage::rate_limit::RateLimitReportingClient
+impl !core::panic::unwind_safe::UnwindSafe for millipede_core::storage::rate_limit::RateLimitReportingClient
 #[non_exhaustive] pub struct millipede_core::storage::ReclaimOptions
 pub millipede_core::storage::ReclaimOptions::forefront: bool
 pub millipede_core::storage::ReclaimOptions::increment_retry: bool
@@ -5175,5 +5287,10 @@ pub fn millipede_core::storage::StorageClient::open_dataset<'life0, 'life1, 'asy
 pub fn millipede_core::storage::StorageClient::open_key_value_store<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
 pub fn millipede_core::storage::StorageClient::open_request_queue<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::RequestQueue>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
 pub fn millipede_core::storage::StorageClient::purge<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
+impl millipede_core::storage::StorageClient for millipede_core::storage::rate_limit::RateLimitReportingClient
+pub fn millipede_core::storage::rate_limit::RateLimitReportingClient::open_dataset<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::Dataset>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::storage::rate_limit::RateLimitReportingClient::open_key_value_store<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::KeyValueStore>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::storage::rate_limit::RateLimitReportingClient::open_request_queue<'life0, 'life1, 'async_trait>(&'life0 self, core::option::Option<&'life1 str>) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<alloc::sync::Arc<dyn millipede_core::storage::RequestQueue>>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait, 'life1: 'async_trait
+pub fn millipede_core::storage::rate_limit::RateLimitReportingClient::purge<'life0, 'async_trait>(&'life0 self) -> core::pin::Pin<alloc::boxed::Box<(dyn core::future::future::Future<Output = millipede_core::storage::StorageResult<()>> + core::marker::Send + 'async_trait)>> where Self: 'async_trait, 'life0: 'async_trait
 pub type millipede_core::storage::QueueOpInfo = millipede_core::storage::ProcessedRequest
 pub type millipede_core::storage::StorageResult<T> = core::result::Result<T, millipede_core::storage::StorageError>

@@ -5,6 +5,7 @@ mod dataset;
 mod handle;
 mod kvs;
 mod queue;
+pub mod rate_limit;
 
 pub use auto_saved::AutoSaved;
 pub use dataset::{Dataset, DatasetExt, DatasetInfo, ListOptions, Page};
@@ -14,6 +15,7 @@ pub use queue::{
     AddOptions, AddRequestsBatchedResult, BatchAddHandle, Lease, LeaseId, ProcessedRequest,
     QueueOpInfo, ReclaimOptions, RequestQueue, RequestSource,
 };
+pub use rate_limit::RateLimitReportingClient;
 
 use std::sync::Arc;
 
@@ -39,6 +41,19 @@ pub enum StorageError {
     /// The backend does not implement an optional operation.
     #[error("operation not supported by this backend: {0}")]
     Unsupported(&'static str),
+    /// The backend rejected an operation because its rate limit was reached.
+    #[error("storage backend rate limited")]
+    RateLimited {
+        /// Suggested delay before retrying, when supplied by the backend.
+        retry_after: Option<std::time::Duration>,
+    },
+}
+
+impl StorageError {
+    /// Returns whether this error represents backend rate limiting.
+    pub fn is_rate_limited(&self) -> bool {
+        matches!(self, StorageError::RateLimited { .. })
+    }
 }
 
 /// Result type returned by every storage operation.
@@ -54,6 +69,7 @@ impl From<StorageError> for crate::errors::CrawlError {
             }
             StorageError::Backend(error) => Self::Retry(error),
             error @ StorageError::Unsupported(_) => Self::NonRetryable(anyhow::Error::new(error)),
+            error @ StorageError::RateLimited { .. } => Self::Retry(anyhow::Error::new(error)),
         }
     }
 }

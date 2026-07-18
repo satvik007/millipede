@@ -57,6 +57,64 @@ impl From<String> for SessionId {
     }
 }
 
+/// Stable token used to keep fingerprint generation consistent within a session.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct SessionToken(String);
+
+impl SessionToken {
+    /// Creates a token from its textual representation.
+    pub fn new(value: impl Into<String>) -> Self {
+        Self(value.into())
+    }
+
+    /// Returns the token as text.
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+impl fmt::Display for SessionToken {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str(&self.0)
+    }
+}
+
+impl From<String> for SessionToken {
+    fn from(value: String) -> Self {
+        Self(value)
+    }
+}
+
+impl From<&str> for SessionToken {
+    fn from(value: &str) -> Self {
+        Self(value.to_owned())
+    }
+}
+
+impl From<&SessionId> for SessionToken {
+    fn from(id: &SessionId) -> Self {
+        Self(id.as_str().to_owned())
+    }
+}
+
+impl From<SessionId> for SessionToken {
+    fn from(id: SessionId) -> Self {
+        Self(id.as_str().to_owned())
+    }
+}
+
+#[cfg(test)]
+mod session_token_tests {
+    use super::{SessionId, SessionToken};
+
+    #[test]
+    fn session_token_from_session_id_preserves_text() {
+        let id = SessionId::from("session-stable".to_owned());
+        assert_eq!(SessionToken::from(&id).as_str(), id.as_str());
+        assert_eq!(SessionToken::from(id).as_str(), "session-stable");
+    }
+}
+
 /// Limits and scoring behavior for one session.
 ///
 /// Scores use fixed-point thousandths. `max_age` extends the three-field interface configuration
