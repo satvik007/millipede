@@ -1,0 +1,48 @@
+# Bit-rot + compliance guard for the standalone spider-bench package
+# (PLAN.md §11). Manual-only (plus an advisory monthly schedule): hosted
+# shared runners must NEVER be the source of performance claims, so this
+# workflow never triggers on push or pull_request and its numbers are never
+# publishable.
+name: bench-compare
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Monthly bit-rot check; results are advisory only.
+    - cron: "17 6 3 * *"
+
+permissions:
+  contents: read
+
+jobs:
+  bench-smoke:
+    name: bench check + deny + smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # rust-toolchain.toml pins the toolchain (currently 1.96); `rustup show`
+      # resolves and installs it, so every cargo call below uses the pin.
+      - name: Install repo-pinned toolchain
+        run: rustup show active-toolchain
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: benchmarks/spider-bench
+      - name: Check bench package
+        run: cargo check --manifest-path benchmarks/spider-bench/Cargo.toml --locked
+      - name: Install cargo-deny
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-deny
+      - name: cargo deny (bench-local deny.toml)
+        run: cargo deny --manifest-path benchmarks/spider-bench/Cargo.toml check
+      # 511 pages, 1 trial per engine, validation-only — exercises the full
+      # orchestrate/run/report path without producing publishable numbers.
+      - name: Smoke run (tree, depth 9, quick)
+        run: cargo bench-spider orchestrate --scenario tree --depth 9 --quick
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench-smoke-results
+          path: benchmarks/spider-bench/target/results/
+          if-no-files-found: ignore

@@ -1,0 +1,32 @@
+[package]
+name = "spider-bench"
+version = "0.0.0"
+edition = "2024"
+publish = false
+# no rust-version: built with the repo-pinned toolchain (rust-toolchain.toml, currently 1.96)
+
+[workspace]          # standalone; keeps spider out of the root workspace graph
+
+[dependencies]
+millipede = { path = "../../millipede", default-features = false, features = ["http", "html", "storage-memory"] }
+spider = { version = "=2.52.9", default-features = false, features = ["sync"] }
+tokio = { version = "1", features = ["full"] }
+axum = { version = "0.8", default-features = false, features = ["http1", "tokio"] }
+bytes = "1"
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+scraper = { version = "0.24", features = ["atomic"] }
+reqwest = { version = "0.12", default-features = false, features = ["gzip", "brotli", "deflate"] }
+flate2 = "1"
+anyhow = "1"
+libc = "0.2"
+url = "2"
+seahash = "4"        # cheap deterministic checksums/digests
+
+[features]
+spider-upstream-defaults = ["spider/default"]
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

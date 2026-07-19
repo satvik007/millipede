@@ -1,0 +1,61 @@
+# Bench-local cargo-deny policy: the root /deny.toml policy copied, with
+# spider-tree-specific additions documented inline. Checked by the manual
+# bench-compare workflow (this package is excluded from the root workspace, so
+# the root deny job never sees spider's transitive graph).
+
+[graph]
+all-features = true
+
+[advisories]
+yanked = "deny"
+ignore = [
+    # fxhash is unmaintained but reaches us only through the servo `selectors`
+    # stack under `scraper`; there is no maintained drop-in the upstream stack
+    # has adopted yet. Revisit when scraper/selectors move off it. (Same ignore
+    # as the root policy.)
+    "RUSTSEC-2025-0057",
+    # Root policy also ignores RUSTSEC-2026-0009 (time < 0.3.47) because the
+    # workspace MSRV 1.85 blocks the fix; this standalone package builds with
+    # the repo-pinned 1.96 toolchain, so its lockfile resolves a patched time
+    # and that ignore is unnecessary here.
+    #
+    # paste is unmaintained (archived; no fix released). Reaches this package
+    # only through spider -> statrs -> nalgebra -> simba -> paste; it is a
+    # proc-macro used at build time, not benchmark-path code. Bench-local
+    # addition; revisit when spider's stats stack moves off nalgebra/simba.
+    "RUSTSEC-2024-0436",
+]
+
+[licenses]
+allow = [
+    "MIT",
+    "Apache-2.0",
+    # File-level copyleft; standard to allow as a dependency license. Pulled
+    # in by scraper's servo stack (cssparser, selectors, dtoa-short).
+    "MPL-2.0",
+    # Permissive data license used by webpki-roots for the Mozilla CA bundle.
+    "CDLA-Permissive-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Unicode-3.0",
+    "Zlib",
+]
+confidence-threshold = 0.8
+# Bench-local addition: spider-bench itself is `publish = false` and (per the
+# PLAN.md §9 verbatim manifest) declares no license field; unpublished private
+# crates are exempted instead of widening the allowlist.
+private = { ignore = true }
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+# Path-only (versionless) deps are internal workspace wiring; cargo strips
+# them from published packages when they are dev-dependencies. Registry
+# wildcards stay denied.
+allow-wildcard-paths = true
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
