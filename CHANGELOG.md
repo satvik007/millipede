@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## millipede-core [0.1.1] - 2026-07-19
+
+### Fixed
+
+- Migrated the sitemap parser to `quick-xml` 0.41, resolving the
+  RUSTSEC-2026-0194 and RUSTSEC-2026-0195 advisories against the 0.37
+  line. Entity references in sitemap text (for example `&amp;` inside
+  `<loc>` URLs) continue to resolve under the new event model.
+
 ## [0.1.0] - 2026-07-18
 
 ### Added
