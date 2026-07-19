@@ -19,6 +19,11 @@ ignore = [
 allow = [
     "MIT",
     "Apache-2.0",
+    # File-level copyleft; standard to allow as a dependency license. Pulled
+    # in by scraper's servo stack (cssparser, selectors, dtoa-short).
+    "MPL-2.0",
+    # Permissive data license used by webpki-roots for the Mozilla CA bundle.
+    "CDLA-Permissive-2.0",
     "Apache-2.0 WITH LLVM-exception",
     "BSD-2-Clause",
     "BSD-3-Clause",
@@ -31,6 +36,10 @@ confidence-threshold = 0.8
 [bans]
 multiple-versions = "warn"
 wildcards = "deny"
+# Path-only (versionless) deps are internal workspace wiring; cargo strips
+# them from published packages when they are dev-dependencies. Registry
+# wildcards stay denied.
+allow-wildcard-paths = true
 
 [sources]
 unknown-registry = "deny"
