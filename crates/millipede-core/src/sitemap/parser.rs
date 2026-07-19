@@ -168,9 +168,14 @@ fn parse<R: io::BufRead>(reader: R, sender: mpsc::Sender<Result<SitemapEvent, Si
                 }
             }
             Ok(Event::Text(text)) => {
-                let value = match text.unescape() {
-                    Ok(value) => value.trim().to_owned(),
-                    Err(_) => {
+                let unescaped = text.decode().ok().and_then(|decoded| {
+                    quick_xml::escape::unescape(&decoded)
+                        .map(|value| value.into_owned())
+                        .ok()
+                });
+                let value = match unescaped {
+                    Some(value) => value.trim().to_owned(),
+                    None => {
                         mark_malformed(&mut entry);
                         mark_sitemap_malformed(&path, &mut sitemap_malformed);
                         buffer.clear();
@@ -178,6 +183,24 @@ fn parse<R: io::BufRead>(reader: R, sender: mpsc::Sender<Result<SitemapEvent, Si
                     }
                 };
                 assign_text(&path, value, &mut entry, &mut sitemap_loc);
+            }
+            Ok(Event::GeneralRef(entity)) => {
+                // quick-xml 0.38+ emits entity references as their own events
+                // instead of leaving them inside `Event::Text` for `unescape`.
+                let resolved = match entity.resolve_char_ref() {
+                    Ok(Some(ch)) => Some(ch.to_string()),
+                    Ok(None) => entity.decode().ok().and_then(|name| {
+                        quick_xml::escape::resolve_predefined_entity(&name).map(str::to_owned)
+                    }),
+                    Err(_) => None,
+                };
+                match resolved {
+                    Some(value) => assign_text(&path, value, &mut entry, &mut sitemap_loc),
+                    None => {
+                        mark_malformed(&mut entry);
+                        mark_sitemap_malformed(&path, &mut sitemap_malformed);
+                    }
+                }
             }
             Ok(Event::CData(text)) => {
                 let value = String::from_utf8_lossy(text.as_ref()).trim().to_owned();

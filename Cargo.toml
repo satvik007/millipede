@@ -33,7 +33,7 @@ sysinfo = { version = "0.36", default-features = false, features = ["system"] }
 globset = "0.4"
 regex = "1"
 psl = "2"
-quick-xml = "0.37"
+quick-xml = "0.41"
 flate2 = "1"
 scraper = { version = "0.24", features = ["atomic"] }
 criterion = "0.5"

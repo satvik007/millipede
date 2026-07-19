@@ -54,7 +54,14 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo build --workspace --all-features
-      - run: cargo test --workspace --all-features
+      # Chrome-driven E2E suites live in millipede-browser-chromiumoxide's
+      # integration tests and belong to the dedicated browser job below, which
+      # provisions a known-good Chrome. Runners have Chrome preinstalled, so
+      # discovery would otherwise find it here and run the E2E suites in an
+      # environment this job does not prepare (Ubuntu 24.04 AppArmor blocks the
+      # Chrome sandbox). Unit tests for that crate still run via --lib.
+      - run: cargo test --workspace --all-features --exclude millipede-browser-chromiumoxide
+      - run: cargo test -p millipede-browser-chromiumoxide --lib --all-features
       - run: cargo test -p millipede --no-default-features
       - run: cargo run -p millipede --example phase0_hello
       - run: cargo run -p millipede --example phase1_queue_demo
@@ -88,11 +95,20 @@ jobs:
         uses: browser-actions/setup-chrome@v2
         with:
           chrome-version: stable
+      # Ubuntu 24.04 restricts unprivileged user namespaces via AppArmor, which
+      # breaks Chrome's sandbox at launch ("No usable sandbox!"). Re-enable them
+      # for this job; the alternative (--no-sandbox) would leak into the library's
+      # default launch flags.
+      - name: Allow unprivileged user namespaces for the Chrome sandbox
+        if: runner.os == 'Linux'
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
       - name: Run browser integration tests
         env:
           MILLIPEDE_CHROME: ${{ steps.chrome.outputs.chrome-path }}
+        # --test-threads=1: each E2E test launches real Chrome instances; running
+        # them concurrently overloads 3-4 core runners past the tests' 120s guards.
         run: |
-          cargo test -p millipede-browser-chromiumoxide -- --nocapture
+          cargo test -p millipede-browser-chromiumoxide -- --nocapture --test-threads=1
           cargo test -p millipede-browser -- --nocapture
       - name: Run browser examples against a local site
         env:
@@ -202,7 +218,9 @@ jobs:
         with:
           tool: cargo-llvm-cov
       - uses: Swatinem/rust-cache@v2
-      - run: cargo llvm-cov --workspace --all-features --lcov --output-path lcov.info
+      # Excluded for the same reason as the test job: the crate's integration
+      # tests need a prepared Chrome and belong to the browser job.
+      - run: cargo llvm-cov --workspace --all-features --exclude millipede-browser-chromiumoxide --lcov --output-path lcov.info
       - uses: codecov/codecov-action@v4
         with:
           files: lcov.info

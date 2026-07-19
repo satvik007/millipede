@@ -3,6 +3,12 @@ all-features = true
 
 [advisories]
 yanked = "deny"
+ignore = [
+    # fxhash is unmaintained but reaches us only through the servo `selectors`
+    # stack under `scraper`; there is no maintained drop-in the upstream stack
+    # has adopted yet. Revisit when scraper/selectors move off it.
+    "RUSTSEC-2025-0057",
+]
 
 [licenses]
 allow = [
