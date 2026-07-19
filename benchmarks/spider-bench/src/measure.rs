@@ -87,7 +87,11 @@ pub fn self_usage() -> anyhow::Result<SelfUsage> {
     let mut usage = std::mem::MaybeUninit::<libc::rusage>::zeroed();
     // SAFETY: RUSAGE_SELF with a properly sized, writable rusage out-pointer.
     let rc = unsafe { libc::getrusage(libc::RUSAGE_SELF, usage.as_mut_ptr()) };
-    anyhow::ensure!(rc == 0, "getrusage failed: {}", std::io::Error::last_os_error());
+    anyhow::ensure!(
+        rc == 0,
+        "getrusage failed: {}",
+        std::io::Error::last_os_error()
+    );
     // SAFETY: getrusage returned 0, so the struct is fully initialized.
     let usage = unsafe { usage.assume_init() };
     let max_rss_raw = u64::try_from(usage.ru_maxrss).unwrap_or(0);
@@ -108,7 +112,12 @@ pub fn self_usage() -> anyhow::Result<SelfUsage> {
 
 /// Proxy environment variables that must never leak into a trial child.
 const PROXY_ENV_VARS: &[&str] = &[
-    "HTTP_PROXY", "http_proxy", "HTTPS_PROXY", "https_proxy", "ALL_PROXY", "all_proxy",
+    "HTTP_PROXY",
+    "http_proxy",
+    "HTTPS_PROXY",
+    "https_proxy",
+    "ALL_PROXY",
+    "all_proxy",
 ];
 
 /// Parent side: spawn one fresh child trial, drive the ready/spec/go
@@ -126,12 +135,12 @@ const PROXY_ENV_VARS: &[&str] = &[
 /// settings are present) guarantees identical direct-loopback transport for
 /// every engine.
 pub async fn run_child_trial(
-    exe: &std::path::Path,
+    program: &std::path::Path,
     args: &[String],
     wire_spec_json: &str,
     timeout: Duration,
 ) -> anyhow::Result<Sample> {
-    let mut command = tokio::process::Command::new(exe);
+    let mut command = tokio::process::Command::new(program);
     command
         .args(args)
         .stdin(Stdio::piped())

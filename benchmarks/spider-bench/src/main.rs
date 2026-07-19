@@ -23,7 +23,11 @@ use clap::{Parser, Subcommand};
 use engines::Engine;
 
 #[derive(Parser)]
-#[command(name = "spider-bench", version, about = "millipede vs spider benchmark harness")]
+#[command(
+    name = "spider-bench",
+    version,
+    about = "millipede vs spider benchmark harness"
+)]
 struct Cli {
     #[command(subcommand)]
     command: Cmd,
@@ -120,7 +124,15 @@ fn main() -> anyhow::Result<()> {
             nonce,
             depth,
             json: _,
-        } => cmd_run(&scenario, engine, &url, concurrency, runtime_workers, &nonce, depth),
+        } => cmd_run(
+            &scenario,
+            engine,
+            &url,
+            concurrency,
+            runtime_workers,
+            &nonce,
+            depth,
+        ),
         Cmd::Report { samples } => cmd_report(&samples),
     }
 }
@@ -200,8 +212,8 @@ fn cmd_run(
         bytes_on_wire: bytes_decoded,
         max_rss_bytes: usage.max_rss_bytes,
         ready_rss_bytes: ready_usage.max_rss_bytes,
-        cpu_user_ms: usage.cpu_user_ms,
-        cpu_sys_ms: usage.cpu_sys_ms,
+        cpu_user_ms: usage.cpu_user_ms.saturating_sub(ready_usage.cpu_user_ms),
+        cpu_sys_ms: usage.cpu_sys_ms.saturating_sub(ready_usage.cpu_sys_ms),
         valid: validation_errors.is_empty(),
         validation_errors,
     };
@@ -271,6 +283,7 @@ struct OrchestrateArgs {
 }
 
 fn cmd_orchestrate(args: OrchestrateArgs) -> anyhow::Result<()> {
+    let external = prepare_external_runners()?;
     let names: Vec<&str> = if args.scenario == "all" {
         scenarios::ALL.to_vec()
     } else {
@@ -284,11 +297,13 @@ fn cmd_orchestrate(args: OrchestrateArgs) -> anyhow::Result<()> {
                     Err(err)
                 }
             })?;
-        vec![scenarios::ALL
-            .iter()
-            .copied()
-            .find(|n| *n == args.scenario)
-            .context("scenario name not in registry")?]
+        vec![
+            scenarios::ALL
+                .iter()
+                .copied()
+                .find(|n| *n == args.scenario)
+                .context("scenario name not in registry")?,
+        ]
     };
     if args.sensitivity {
         eprintln!(
@@ -324,6 +339,7 @@ not implemented in the scaffold (PLAN.md §7)."
             &args,
             iters,
             &exe,
+            &external,
             &mut samples_file,
             &mut suite_failures,
         ))?;
@@ -355,7 +371,9 @@ not implemented in the scaffold (PLAN.md §7)."
         if args.quick {
             eprintln!("warning (quick, not publishable): {row}");
         } else {
-            suite_failures.push(format!("server-bound row must be scaled up before publication: {row}"));
+            suite_failures.push(format!(
+                "server-bound row must be scaled up before publication: {row}"
+            ));
         }
     }
 
@@ -373,6 +391,7 @@ async fn run_scenario(
     args: &OrchestrateArgs,
     iters: usize,
     exe: &std::path::Path,
+    external: &ExternalRunners,
     samples_file: &mut std::fs::File,
     suite_failures: &mut Vec<String>,
 ) -> anyhow::Result<()> {
@@ -394,7 +413,11 @@ async fn run_scenario(
     let spec = scenarios::build(name, &nonce, args.depth)?;
     let server = server::start(&spec.site, &nonce).await?;
     let root_url = format!("{}{}", server.base_url(), spec.root_path);
-    eprintln!("[{name}] server at {} ({} pages)", server.base_url(), spec.expected.pages);
+    eprintln!(
+        "[{name}] server at {} ({} pages)",
+        server.base_url(),
+        spec.expected.pages
+    );
 
     // The child never renders the site (RSS/CPU isolation): the orchestrator
     // ships the ground truth + baseline entry URLs over the handshake.
@@ -407,7 +430,13 @@ async fn run_scenario(
     warm_up(&root_url).await?;
     server.state.snapshot_and_reset();
 
-    let engines_order = [Engine::Millipede, Engine::Spider, Engine::Baseline];
+    let engines_order = [
+        Engine::Millipede,
+        Engine::Spider,
+        Engine::Gocolly,
+        Engine::Crawlee,
+        Engine::Baseline,
+    ];
     let child_timeout = Duration::from_secs(600);
     // Some scenarios are impossible for spider by construction (e.g. its SSRF
     // guard vs loopback redirects); report N/A instead of a doomed row.
@@ -431,25 +460,28 @@ async fn run_scenario(
     // One unmeasured warm-up run per engine (skipped in --quick).
     if !args.quick {
         for &engine in &active_engines {
-            let child_args = child_args(name, engine, &root_url, args, &nonce);
-            let _ = measure::run_child_trial(exe, &child_args, &wire, child_timeout)
+            let child = child_command(name, engine, &root_url, args, &nonce, exe, external);
+            let _ = measure::run_child_trial(&child.program, &child.args, &wire, child_timeout)
                 .await
                 .with_context(|| format!("[{name}] warm-up run for {}", engine.as_str()))?;
             server.state.snapshot_and_reset();
         }
     }
 
-    // Measured trials, interleaved M, S, B, M, S, B, ... (thermal/cache drift).
+    // Measured trials use a cyclically rotated engine order to spread both
+    // thermal drift and fixed-position bias across engines.
     let mut valid_counts = std::collections::BTreeMap::<&'static str, usize>::new();
     for iteration in 0..iters {
-        for &engine in &active_engines {
+        for offset in 0..active_engines.len() {
+            let engine = active_engines[(iteration + offset) % active_engines.len()];
             server.state.snapshot_and_reset();
-            let child_args = child_args(name, engine, &root_url, args, &nonce);
-            let mut sample = measure::run_child_trial(exe, &child_args, &wire, child_timeout)
-                .await
-                .with_context(|| {
-                    format!("[{name}] trial {iteration} for {}", engine.as_str())
-                })?;
+            let child = child_command(name, engine, &root_url, args, &nonce, exe, external);
+            let mut sample =
+                measure::run_child_trial(&child.program, &child.args, &wire, child_timeout)
+                    .await
+                    .with_context(|| {
+                        format!("[{name}] trial {iteration} for {}", engine.as_str())
+                    })?;
             let snap = server.state.snapshot_and_reset();
             validate_server_side(&spec, engine, &snap, &mut sample);
 
@@ -475,7 +507,12 @@ async fn run_scenario(
             let mut line = serde_json::to_value(&sample)?;
             let obj = line.as_object_mut().expect("sample serializes to object");
             obj.insert("concurrency".into(), args.concurrency.into());
-            obj.insert("runtime_workers".into(), args.runtime_workers.into());
+            let effective_workers = if engine == Engine::Crawlee {
+                1 // Cheerio handlers and parsing run on Node's event-loop thread.
+            } else {
+                args.runtime_workers
+            };
+            obj.insert("runtime_workers".into(), effective_workers.into());
             obj.insert("connections".into(), snap.connections.into());
             obj.insert("iteration".into(), iteration.into());
             obj.insert("server".into(), serde_json::to_value(&snap)?);
@@ -517,19 +554,71 @@ async fn run_scenario(
     Ok(())
 }
 
-fn child_args(
+struct ExternalRunners {
+    gocolly: PathBuf,
+    crawlee: PathBuf,
+}
+
+struct ChildCommand {
+    program: PathBuf,
+    args: Vec<String>,
+}
+
+fn prepare_external_runners() -> anyhow::Result<ExternalRunners> {
+    use std::process::Command;
+
+    let benchmarks = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .context("spider-bench must live under benchmarks/")?
+        .to_owned();
+    let go_dir = benchmarks.join("gocolly-bench");
+    let go_target = go_dir.join("target/gocolly-bench");
+    std::fs::create_dir_all(go_target.parent().expect("target has parent"))?;
+    let status = Command::new("go")
+        .args(["build", "-o"])
+        .arg(&go_target)
+        .arg(".")
+        .current_dir(&go_dir)
+        .status()
+        .context("building the gocolly benchmark runner (is Go installed?)")?;
+    anyhow::ensure!(
+        status.success(),
+        "`go build` failed for {}",
+        go_dir.display()
+    );
+
+    let crawlee_dir = benchmarks.join("crawlee-bench");
+    let status = Command::new("npm")
+        .arg("ci")
+        .arg("--no-audit")
+        .arg("--no-fund")
+        .current_dir(&crawlee_dir)
+        .status()
+        .context("installing the Crawlee benchmark runner (are Node.js and npm installed?)")?;
+    anyhow::ensure!(
+        status.success(),
+        "`npm ci` failed for {}",
+        crawlee_dir.display()
+    );
+
+    Ok(ExternalRunners {
+        gocolly: go_target,
+        crawlee: crawlee_dir.join("runner.mjs"),
+    })
+}
+
+fn child_command(
     name: &str,
     engine: Engine,
     root_url: &str,
     args: &OrchestrateArgs,
     nonce: &str,
-) -> Vec<String> {
-    let mut child = vec![
-        "run".to_owned(),
+    rust_exe: &std::path::Path,
+    external: &ExternalRunners,
+) -> ChildCommand {
+    let mut common = vec![
         "--scenario".to_owned(),
         name.to_owned(),
-        "--engine".to_owned(),
-        engine.as_str().to_owned(),
         "--url".to_owned(),
         root_url.to_owned(),
         "--concurrency".to_owned(),
@@ -541,10 +630,32 @@ fn child_args(
         "--json".to_owned(),
     ];
     if let Some(depth) = args.depth {
-        child.push("--depth".to_owned());
-        child.push(depth.to_string());
+        common.push("--depth".to_owned());
+        common.push(depth.to_string());
     }
-    child
+    match engine {
+        Engine::Millipede | Engine::Spider | Engine::Baseline => {
+            let mut rust_args = vec!["run".to_owned()];
+            rust_args.extend(common);
+            rust_args.extend(["--engine".to_owned(), engine.as_str().to_owned()]);
+            ChildCommand {
+                program: rust_exe.to_owned(),
+                args: rust_args,
+            }
+        }
+        Engine::Gocolly => ChildCommand {
+            program: external.gocolly.clone(),
+            args: common,
+        },
+        Engine::Crawlee => {
+            let mut node_args = vec![external.crawlee.display().to_string()];
+            node_args.extend(common);
+            ChildCommand {
+                program: PathBuf::from("node"),
+                args: node_args,
+            }
+        }
+    }
 }
 
 /// Server-side validation gates (PLAN.md §8, gates 1-3 and 7).
@@ -565,13 +676,19 @@ fn validate_server_side(
         ));
     }
     if snap.duplicate_page_hits != 0 {
-        push(format!("server duplicate page hits {}", snap.duplicate_page_hits));
+        push(format!(
+            "server duplicate page hits {}",
+            snap.duplicate_page_hits
+        ));
     }
     if snap.robots_hits != 0 {
         push(format!("robots.txt hits {}", snap.robots_hits));
     }
     if snap.off_host_hits != 0 {
-        push(format!("off-host (Host: localhost) hits {}", snap.off_host_hits));
+        push(format!(
+            "off-host (Host: localhost) hits {}",
+            snap.off_host_hits
+        ));
     }
     if snap.unknown_hits != 0 {
         push(format!("unknown-path hits {}", snap.unknown_hits));
@@ -605,7 +722,11 @@ async fn warm_up(root_url: &str) -> anyhow::Result<()> {
         let client = client.clone();
         let url = root_url.to_owned();
         tasks.push(tokio::spawn(async move {
-            let _ = client.get(&url).send().await.and_then(|r| r.error_for_status());
+            let _ = client
+                .get(&url)
+                .send()
+                .await
+                .and_then(|r| r.error_for_status());
         }));
     }
     for task in tasks {

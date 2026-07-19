@@ -19,6 +19,8 @@ pub mod spider;
 pub enum Engine {
     Millipede,
     Spider,
+    Gocolly,
+    Crawlee,
     Baseline,
 }
 
@@ -27,6 +29,8 @@ impl Engine {
         match self {
             Engine::Millipede => "millipede",
             Engine::Spider => "spider",
+            Engine::Gocolly => "gocolly",
+            Engine::Crawlee => "crawlee",
             Engine::Baseline => "baseline",
         }
     }
@@ -108,6 +112,12 @@ pub async fn run(
     match engine {
         Engine::Millipede => millipede::run(spec, concurrency, root_url).await,
         Engine::Spider => spider::run(spec, concurrency, root_url).await,
+        Engine::Gocolly | Engine::Crawlee => {
+            anyhow::bail!(
+                "external engine {} must be launched by the orchestrator",
+                engine.as_str()
+            )
+        }
         Engine::Baseline => baseline::run(spec, concurrency, root_url).await,
     }
 }

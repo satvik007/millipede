@@ -1,4 +1,26 @@
-# Micro-benchmark baseline
+# Benchmark reports
+
+## Cross-framework crawl benchmark
+
+The current head-to-head suite compares Millipede with Spider 2.52.9, Colly
+2.3.0, and Crawlee 3.17.0 on the same nine deterministic loopback workloads.
+At concurrency 32 and five valid fresh-process trials per engine:
+
+- Millipede led the realistic `books` DOM-extraction workload at 32,511
+  pages/s, 1.27× Colly and 1.97× Spider.
+- Millipede and Colly were within the 5% noise threshold on the Hacker News
+  extraction workload.
+- Spider led raw traversal, gzip, and large-payload scenarios through its
+  streaming link parser.
+- Millipede generally used the least crawler memory; Crawlee was substantially
+  slower and heavier in this loopback/CPU-dominated suite.
+
+See the [four-engine report](benchmarks-vs-crawlers.md) for the complete
+throughput and RSS tables, methodology limitations, versions, and analysis.
+The earlier [Millipede vs Spider report](benchmarks-vs-spider.md) remains as an
+archived two-engine run.
+
+## Micro-benchmark baseline
 
 These micro-benchmarks are for relative regression tracking only. They are **not absolute
 performance claims or service-level agreements (SLAs)**. Results vary with hardware, operating

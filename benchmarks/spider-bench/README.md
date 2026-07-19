@@ -1,7 +1,9 @@
-# spider-bench
+# Cross-language crawler benchmark harness
 
-Head-to-head benchmark harness: **millipede vs [spider](https://crates.io/crates/spider) 2.52.9**
-(plus a raw-reqwest "speed of light" baseline), per the approved plan in
+Head-to-head benchmark harness: **millipede**, [spider](https://crates.io/crates/spider)
+2.52.9, [Colly](https://github.com/gocolly/colly) 2.3.0, and
+[Crawlee](https://crawlee.dev/) 3.17.0 (plus a raw-reqwest "speed of light"
+baseline), extending the approved methodology in
 [`../PLAN.md`](../PLAN.md).
 
 This is a standalone package (own `[workspace]` table, excluded from the root
@@ -13,7 +15,7 @@ toolchain (`rust-toolchain.toml`, currently 1.96) and has no MSRV gate.
 This suite measures success-path HTTP/1.1 (plus one redirect and one
 compression scenario) crawl throughput and peak RSS against a synthetic axum
 site on loopback, with identical page sets, fixed concurrency, zero
-client-side delays, no retries, and robots disabled on both engines. It does
+client-side delays, no retries, and robots disabled on all crawler engines. It does
 **not** characterize TLS, DNS, error/retry paths, anti-bot behavior, JS
 rendering, or politeness compliance. Live-network examples are never
 benchmarked directly; their workload shapes are replicated locally. Never
@@ -32,14 +34,19 @@ cargo bench-spider orchestrate --scenario tree --quick       # 1 trial, validati
 cargo bench-spider report path/to/<ts>-samples.jsonl         # regenerate summary.md
 ```
 
+`orchestrate` prepares the external runners before measurement: it builds
+`../gocolly-bench` with Go and installs the lockfile-pinned `../crawlee-bench`
+dependencies with `npm ci`. Go, Node.js, and npm must therefore be available.
+
 Results land in `benchmarks/spider-bench/target/results/<timestamp>-{samples.jsonl,metadata.json,summary.md}`
 (override with `--out`). A row is publishable only from a release-profile run
 on an idle, AC-powered machine with ≥ 5 valid trials per engine; every trial
 must pass the exact-count/byte/checksum validation gates (PLAN.md §8) or the
 suite fails loudly.
 
-Useful flags: `--concurrency` (default 32), `--runtime-workers` (default 4,
-identical for all engines), `--depth` (depth-scalable scenarios),
+Useful flags: `--concurrency` (default 32), `--runtime-workers` (default 4;
+sets Rust's Tokio workers and Go's `GOMAXPROCS`; Crawlee runs JavaScript on
+Node's single event-loop thread), `--depth` (depth-scalable scenarios),
 `--sensitivity` (reserved for the clearly-labelled off-headline rows).
 
 The `spider-upstream-defaults` cargo feature builds spider with its default

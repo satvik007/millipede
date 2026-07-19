@@ -83,6 +83,8 @@ The browser examples require Chrome or Chromium. Set `MILLIPEDE_CHROME` to overr
 
 ## Documentation
 
+- [Benchmark overview](https://github.com/satvik007/millipede/blob/main/docs/benchmarks.md)
+- [Millipede vs Spider vs Colly vs Crawlee](https://github.com/satvik007/millipede/blob/main/docs/benchmarks-vs-crawlers.md)
 - [Autoscaler](https://github.com/satvik007/millipede/blob/main/docs/guide/autoscaler.md)
 - [Fingerprinting](https://github.com/satvik007/millipede/blob/main/docs/guide/fingerprinting.md)
 - [Crawlee storage migration](https://github.com/satvik007/millipede/blob/main/docs/guide/crawlee-storage-migration.md)

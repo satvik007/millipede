@@ -1,5 +1,12 @@
 # Millipede vs spider — head-to-head benchmark report
 
+> **Archived two-engine run.** The harness now also covers Colly and Crawlee,
+> includes stricter cross-language CPU/runtime controls, uses cyclic trial
+> ordering, and fixes Colly's asynchronous duplicate-admission and default
+> connection-pool behavior. See the current
+> [Millipede vs Spider vs Colly vs Crawlee report](benchmarks-vs-crawlers.md).
+> The numbers below are retained as historical evidence from the earlier run.
+
 **Date:** 2026-07-19 · **spider:** `=2.52.9` (features: `sync` only) · **millipede:** workspace `0.1.x`
 **Machine:** Apple M2 Pro (aarch64, 32 GiB), macOS (Darwin 24.6.0), rustc 1.96.1, release profile
 **Harness:** `benchmarks/spider-bench` (methodology in `benchmarks/PLAN.md`) · **Run:** commit `eaf507d` + uncommitted scenario implementations, results `1784470197-*`

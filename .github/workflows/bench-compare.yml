@@ -20,6 +20,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: benchmarks/gocolly-bench/go.mod
+          cache-dependency-path: benchmarks/gocolly-bench/go.sum
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: benchmarks/crawlee-bench/package-lock.json
       # rust-toolchain.toml pins the toolchain (currently 1.96); `rustup show`
       # resolves and installs it, so every cargo call below uses the pin.
       - name: Install repo-pinned toolchain

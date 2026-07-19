@@ -17,7 +17,7 @@ pub const CLAIMS_SCOPE: &str = "Scope of claims: this suite measures success-pat
 HTTP/1.1 (plus one redirect and one compression scenario) crawl throughput and \
 peak RSS against a synthetic axum site on loopback, with identical page sets, \
 fixed concurrency, zero client-side delays, no retries, and robots disabled on \
-both engines. It does NOT characterize TLS, DNS, error/retry paths, anti-bot \
+all crawler engines. It does NOT characterize TLS, DNS, error/retry paths, anti-bot \
 behavior, JS rendering, or politeness compliance. Live-network examples are \
 never benchmarked directly; their workload shapes are replicated locally. \
 Never publish a ratio without the absolute numbers and raw samples alongside.";
@@ -110,7 +110,11 @@ pub fn summarize(samples_path: &Path) -> anyhow::Result<Summary> {
         .filter(|l| !l.trim().is_empty())
         .map(|l| serde_json::from_str(l).with_context(|| format!("parsing sample line: {l}")))
         .collect::<anyhow::Result<_>>()?;
-    anyhow::ensure!(!samples.is_empty(), "no samples in {}", samples_path.display());
+    anyhow::ensure!(
+        !samples.is_empty(),
+        "no samples in {}",
+        samples_path.display()
+    );
 
     // Group by (scenario, C, engine); engine order fixed for readability.
     let mut groups: BTreeMap<(String, u64, u8, String), Vec<&Value>> = BTreeMap::new();
@@ -121,10 +125,15 @@ pub fn summarize(samples_path: &Path) -> anyhow::Result<Summary> {
         let order = match engine.as_str() {
             "millipede" => 0,
             "spider" => 1,
-            "baseline" => 2,
-            _ => 3,
+            "gocolly" => 2,
+            "crawlee" => 3,
+            "baseline" => 4,
+            _ => 5,
         };
-        groups.entry((scenario, c, order, engine)).or_default().push(sample);
+        groups
+            .entry((scenario, c, order, engine))
+            .or_default()
+            .push(sample);
     }
 
     let mut rows = Vec::new();
@@ -145,10 +154,7 @@ pub fn summarize(samples_path: &Path) -> anyhow::Result<Summary> {
         };
         let walls = sorted("wall_ms");
         let wall_median_ms = median(&walls);
-        let bytes = valid
-            .first()
-            .map(|s| u(s, "bytes_decoded"))
-            .unwrap_or(0);
+        let bytes = valid.first().map(|s| u(s, "bytes_decoded")).unwrap_or(0);
         let mib_per_sec_median = if wall_median_ms > 0.0 {
             (bytes as f64 / (1024.0 * 1024.0)) / (wall_median_ms / 1000.0)
         } else {
@@ -185,29 +191,32 @@ pub fn summarize(samples_path: &Path) -> anyhow::Result<Summary> {
 
     let mut out = String::new();
     let mut server_bound_rows = Vec::new();
-    writeln!(out, "# spider-bench summary\n")?;
+    writeln!(out, "# Cross-language crawler benchmark summary\n")?;
     writeln!(out, "{CLAIMS_SCOPE}\n")?;
     writeln!(
         out,
-        "| scenario | C | engine | pages | median wall | IQR | pages/s | MiB/s | wire MiB | enc gz/id | vs spider | peak RSS | CPU (u+s) | conns | validation |"
+        "| scenario | C | engine | pages | median wall | IQR | pages/s | MiB/s | wire MiB | enc gz/id | vs millipede | peak RSS | CPU (u+s) | conns | validation |"
     )?;
     writeln!(
         out,
         "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"
     )?;
     for row in &rows {
-        let spider_pps = rows
+        let millipede_pps = rows
             .iter()
             .find(|r| {
-                r.scenario == row.scenario && r.concurrency == row.concurrency && r.engine == "spider"
+                r.scenario == row.scenario
+                    && r.concurrency == row.concurrency
+                    && r.engine == "millipede"
             })
             .map(|r| r.pages_per_sec_median)
             .unwrap_or(0.0);
-        let vs_spider = if row.engine == "millipede" && spider_pps > 0.0 && row.pages_per_sec_median > 0.0 {
-            format!("{:.2}x", row.pages_per_sec_median / spider_pps)
-        } else {
-            "-".to_owned()
-        };
+        let vs_millipede =
+            if row.engine != "baseline" && millipede_pps > 0.0 && row.pages_per_sec_median > 0.0 {
+                format!("{:.2}x", row.pages_per_sec_median / millipede_pps)
+            } else {
+                "-".to_owned()
+            };
         // Server-bound flag: fastest crawler >= 70% of baseline throughput.
         let baseline_pps = rows
             .iter()
@@ -258,7 +267,7 @@ pub fn summarize(samples_path: &Path) -> anyhow::Result<Summary> {
             row.wire_mib_median,
             row.ae_gzip_median,
             row.ae_identity_median,
-            vs_spider,
+            vs_millipede,
             row.rss_median_bytes / (1024.0 * 1024.0),
             row.cpu_median_ms,
             row.conns_median,
@@ -292,7 +301,9 @@ annotated, not directly comparable (PLAN.md §8 gate 7)."
         .map(|r| r.scenario.as_str())
         .collect::<std::collections::BTreeSet<_>>()
     {
-        if !rows.iter().any(|r| r.scenario == scenario && r.engine == "spider")
+        if !rows
+            .iter()
+            .any(|r| r.scenario == scenario && r.engine == "spider")
             && let Some(reason) = crate::engines::spider::unsupported_reason(scenario)
         {
             writeln!(out, "NOTE {scenario}: spider N/A — {reason}.")?;
@@ -368,8 +379,17 @@ pub fn write_metadata(path: &Path, run: &RunMeta) -> anyhow::Result<()> {
         )
     } else {
         (
-            cmd_out("sh", &["-c", "grep -m1 'model name' /proc/cpuinfo | cut -d: -f2"]),
-            cmd_out("sh", &["-c", "grep -m1 MemTotal /proc/meminfo | awk '{print $2*1024}'"]),
+            cmd_out(
+                "sh",
+                &["-c", "grep -m1 'model name' /proc/cpuinfo | cut -d: -f2"],
+            ),
+            cmd_out(
+                "sh",
+                &[
+                    "-c",
+                    "grep -m1 MemTotal /proc/meminfo | awk '{print $2*1024}'",
+                ],
+            ),
         )
     };
     let git_status = cmd_out("git", &["status", "--porcelain"]);
@@ -387,16 +407,22 @@ pub fn write_metadata(path: &Path, run: &RunMeta) -> anyhow::Result<()> {
         "cpu_model": cpu_model.trim(),
         "ram_bytes": ram_bytes,
         "rustc": cmd_out("rustc", &["-V"]),
+        "go": cmd_out("go", &["version"]),
+        "node": cmd_out("node", &["--version"]),
         "git_commit": cmd_out("git", &["rev-parse", "HEAD"]),
         "git_dirty": git_dirty,
         "git_diff_digest": git_diff_digest,
         "spider_version": "2.52.9",
+        "gocolly_version": "2.3.0",
+        "crawlee_version": "3.17.0",
         "spider_features": if cfg!(feature = "spider-upstream-defaults") {
             "sync + upstream defaults (sensitivity build)"
         } else {
             "sync only (headline)"
         },
-        "runtime_workers": run.runtime_workers,
+        "rust_tokio_workers": run.runtime_workers,
+        "go_gomaxprocs": run.runtime_workers,
+        "crawlee_js_threads": 1,
         "concurrency": run.concurrency,
         "iters": run.iters,
         "quick": run.quick,
