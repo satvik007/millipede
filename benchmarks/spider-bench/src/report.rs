@@ -34,11 +34,28 @@ struct Row {
     wall_max_ms: u64,
     pages_per_sec_median: f64,
     mib_per_sec_median: f64,
+    /// Median server-reported bytes-on-wire (compressed size when gzip).
+    wire_mib_median: f64,
+    /// Median count of requests whose Accept-Encoding permitted gzip.
+    ae_gzip_median: f64,
+    /// Median count of requests negotiated as identity.
+    ae_identity_median: f64,
     rss_median_bytes: f64,
     cpu_median_ms: f64,
     conns_median: f64,
     valid: usize,
     total: usize,
+}
+
+/// Result of summarizing a samples file.
+pub struct Summary {
+    /// The rendered `summary.md` content.
+    pub markdown: String,
+    /// Human-readable descriptions of rows flagged server-bound (fastest
+    /// crawler >= 70% of the baseline ceiling). PLAN.md §5 forbids publishing
+    /// these without scaling the scenario up; the orchestrator turns each
+    /// entry into a suite failure.
+    pub server_bound: Vec<String>,
 }
 
 fn median(sorted: &[f64]) -> f64 {
@@ -74,8 +91,18 @@ fn u(value: &Value, key: &str) -> u64 {
     value.get(key).and_then(Value::as_u64).unwrap_or(0)
 }
 
-/// Generates `summary.md` content from raw sample lines.
-pub fn summarize(samples_path: &Path) -> anyhow::Result<String> {
+/// Reads a numeric field from the nested server-side snapshot object.
+fn server_f(value: &Value, key: &str) -> f64 {
+    value
+        .get("server")
+        .and_then(|s| s.get(key))
+        .and_then(Value::as_f64)
+        .unwrap_or(0.0)
+}
+
+/// Generates `summary.md` content (plus the server-bound row list) from raw
+/// sample lines.
+pub fn summarize(samples_path: &Path) -> anyhow::Result<Summary> {
     let raw = std::fs::read_to_string(samples_path)
         .with_context(|| format!("reading {}", samples_path.display()))?;
     let samples: Vec<Value> = raw
@@ -111,6 +138,11 @@ pub fn summarize(samples_path: &Path) -> anyhow::Result<String> {
             v.sort_by(f64::total_cmp);
             v
         };
+        let sorted_server = |key: &str| -> Vec<f64> {
+            let mut v: Vec<f64> = valid.iter().map(|s| server_f(s, key)).collect();
+            v.sort_by(f64::total_cmp);
+            v
+        };
         let walls = sorted("wall_ms");
         let wall_median_ms = median(&walls);
         let bytes = valid
@@ -133,6 +165,9 @@ pub fn summarize(samples_path: &Path) -> anyhow::Result<String> {
             wall_max_ms: walls.last().copied().unwrap_or(0.0) as u64,
             pages_per_sec_median: median(&sorted("pages_per_sec")),
             mib_per_sec_median,
+            wire_mib_median: median(&sorted("bytes_on_wire")) / (1024.0 * 1024.0),
+            ae_gzip_median: median(&sorted_server("accept_encoding_gzip")),
+            ae_identity_median: median(&sorted_server("accept_encoding_identity")),
             rss_median_bytes: median(&sorted("max_rss_bytes")),
             cpu_median_ms: {
                 let mut v: Vec<f64> = valid
@@ -149,15 +184,16 @@ pub fn summarize(samples_path: &Path) -> anyhow::Result<String> {
     }
 
     let mut out = String::new();
+    let mut server_bound_rows = Vec::new();
     writeln!(out, "# spider-bench summary\n")?;
     writeln!(out, "{CLAIMS_SCOPE}\n")?;
     writeln!(
         out,
-        "| scenario | C | engine | pages | median wall | IQR | pages/s | MiB/s | vs spider | peak RSS | CPU (u+s) | conns | validation |"
+        "| scenario | C | engine | pages | median wall | IQR | pages/s | MiB/s | wire MiB | enc gz/id | vs spider | peak RSS | CPU (u+s) | conns | validation |"
     )?;
     writeln!(
         out,
-        "|---|---|---|---|---|---|---|---|---|---|---|---|---|"
+        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"
     )?;
     for row in &rows {
         let spider_pps = rows
@@ -185,19 +221,32 @@ pub fn summarize(samples_path: &Path) -> anyhow::Result<String> {
         let server_bound = row.engine != "baseline"
             && baseline_pps > 0.0
             && row.pages_per_sec_median >= 0.7 * baseline_pps;
+        if server_bound {
+            server_bound_rows.push(format!(
+                "{} (C={}) engine {} at {:.0}% of the baseline ceiling",
+                row.scenario,
+                row.concurrency,
+                row.engine,
+                100.0 * row.pages_per_sec_median / baseline_pps
+            ));
+        }
         let validation = if row.valid == row.total && row.valid > 0 {
             format!(
                 "ok ({}/{}){}",
                 row.valid,
                 row.total,
-                if server_bound { " ⚠ possibly server-bound (≥70% of baseline)" } else { "" }
+                if server_bound {
+                    " ⚠ SERVER-BOUND (≥70% of baseline) — scale up before publication"
+                } else {
+                    ""
+                }
             )
         } else {
             format!("INVALID ({}/{})", row.valid, row.total)
         };
         writeln!(
             out,
-            "| {} | {} | {} | {} | {:.0} ms | {:.0} ms | {:.1} | {:.1} | {} | {:.1} MiB | {:.0} ms | {:.0} | {} |",
+            "| {} | {} | {} | {} | {:.0} ms | {:.0} ms | {:.1} | {:.1} | {:.1} | {:.0}/{:.0} | {} | {:.1} MiB | {:.0} ms | {:.0} | {} |",
             row.scenario,
             row.concurrency,
             row.engine,
@@ -206,6 +255,9 @@ pub fn summarize(samples_path: &Path) -> anyhow::Result<String> {
             row.wall_iqr_ms,
             row.pages_per_sec_median,
             row.mib_per_sec_median,
+            row.wire_mib_median,
+            row.ae_gzip_median,
+            row.ae_identity_median,
             vs_spider,
             row.rss_median_bytes / (1024.0 * 1024.0),
             row.cpu_median_ms,
@@ -214,9 +266,41 @@ pub fn summarize(samples_path: &Path) -> anyhow::Result<String> {
         )?;
     }
     writeln!(out)?;
+    // Compression-negotiation transparency (PLAN.md §4 row 7, §8 gate 7): if
+    // the engines negotiated different encodings on a gzip scenario, the wall
+    // clocks cover materially different transport workloads — say so.
+    for scenario in rows
+        .iter()
+        .map(|r| r.scenario.as_str())
+        .collect::<std::collections::BTreeSet<_>>()
+    {
+        let in_scenario: Vec<&Row> = rows.iter().filter(|r| r.scenario == scenario).collect();
+        let gzip_used = in_scenario.iter().any(|r| r.ae_gzip_median > 0.0);
+        let identity_used = in_scenario.iter().any(|r| r.ae_identity_median > 0.0);
+        if gzip_used && identity_used {
+            writeln!(
+                out,
+                "NOTE {scenario}: engines negotiated DIFFERENT encodings (see `enc gz/id` and \
+`wire MiB`); throughput numbers cover different transport workloads and are \
+annotated, not directly comparable (PLAN.md §8 gate 7)."
+            )?;
+        }
+    }
+    // Spider-N/A scenarios: rows that exist without a spider entry.
+    for scenario in rows
+        .iter()
+        .map(|r| r.scenario.as_str())
+        .collect::<std::collections::BTreeSet<_>>()
+    {
+        if !rows.iter().any(|r| r.scenario == scenario && r.engine == "spider")
+            && let Some(reason) = crate::engines::spider::unsupported_reason(scenario)
+        {
+            writeln!(out, "NOTE {scenario}: spider N/A — {reason}.")?;
+        }
+    }
     writeln!(
         out,
-        "Wall min/max per row: {}.",
+        "\nWall min/max per row: {}.",
         rows.iter()
             .map(|r| format!(
                 "{}/{}/{}: {}–{} ms",
@@ -228,11 +312,22 @@ pub fn summarize(samples_path: &Path) -> anyhow::Result<String> {
     writeln!(
         out,
         "\nDeltas under 5% are noise. Never compare RSS across OSes. Extraction \
-rows (books, hn): spider re-parses bytes with scraper in its subscriber because \
-it does not expose its internal lol_html DOM; millipede reuses its one parse. \
-The CPU column makes that extra work visible (PLAN.md §7)."
+rows (books, hn): spider re-parses bytes with scraper in its subscriber; \
+millipede reuses its one parse. This mirrors spider's native extraction path — \
+spider_utils::css_query_select_map_streamed (2.52.9) is built on spider_scraper, \
+an html5ever full-DOM parser like scraper — because spider's internal lol_html \
+pass extracts links only and exposes no DOM, so every spider extraction user \
+pays this second parse. The CPU column makes that extra work visible \
+(PLAN.md §7). Spider RSS note: \
+spider's subscription channel (sized drop-free at pages + 64) retains every \
+page until the crawl ends, because `subscribe` keeps an internal receiver that \
+never reads; its peak RSS therefore includes up to the full corpus — an \
+architectural cost of its subscription model, disclosed per PLAN.md §7."
     )?;
-    Ok(out)
+    Ok(Summary {
+        markdown: out,
+        server_bound: server_bound_rows,
+    })
 }
 
 fn cmd_out(program: &str, args: &[&str]) -> String {
@@ -245,12 +340,27 @@ fn cmd_out(program: &str, args: &[&str]) -> String {
         .unwrap_or_else(|| "unknown".to_owned())
 }
 
+/// Run parameters the orchestrator must record for reproducibility.
+pub struct RunMeta {
+    pub concurrency: usize,
+    pub runtime_workers: usize,
+    /// Measured trials per engine actually executed (1 in quick mode).
+    pub iters: usize,
+    pub quick: bool,
+    pub depth: Option<u32>,
+    pub scenarios: Vec<String>,
+    /// The exact command line that produced this run.
+    pub command: String,
+}
+
 /// Writes `metadata.json` describing the run environment (PLAN.md §8).
-pub fn write_metadata(
-    path: &Path,
-    concurrency: usize,
-    runtime_workers: usize,
-) -> anyhow::Result<()> {
+///
+/// Provenance: `git_commit` alone is not enough — the working tree may be
+/// dirty, in which case the commit cannot reproduce the results. Record a
+/// dirty flag and a digest of `git diff HEAD` (tracked changes) so published
+/// numbers are either tied to a clean commit or visibly tied to uncommitted
+/// state, plus the exact command/iterations/depth/scenario list.
+pub fn write_metadata(path: &Path, run: &RunMeta) -> anyhow::Result<()> {
     let (cpu_model, ram_bytes) = if cfg!(target_os = "macos") {
         (
             cmd_out("sysctl", &["-n", "machdep.cpu.brand_string"]),
@@ -262,6 +372,14 @@ pub fn write_metadata(
             cmd_out("sh", &["-c", "grep -m1 MemTotal /proc/meminfo | awk '{print $2*1024}'"]),
         )
     };
+    let git_status = cmd_out("git", &["status", "--porcelain"]);
+    let git_dirty = git_status != "unknown" && !git_status.is_empty();
+    let git_diff_digest = if git_dirty {
+        let diff = cmd_out("git", &["diff", "HEAD"]);
+        format!("{:016x}", seahash::hash(diff.as_bytes()))
+    } else {
+        String::new()
+    };
     let metadata = serde_json::json!({
         "os": std::env::consts::OS,
         "arch": std::env::consts::ARCH,
@@ -270,15 +388,23 @@ pub fn write_metadata(
         "ram_bytes": ram_bytes,
         "rustc": cmd_out("rustc", &["-V"]),
         "git_commit": cmd_out("git", &["rev-parse", "HEAD"]),
+        "git_dirty": git_dirty,
+        "git_diff_digest": git_diff_digest,
         "spider_version": "2.52.9",
         "spider_features": if cfg!(feature = "spider-upstream-defaults") {
             "sync + upstream defaults (sensitivity build)"
         } else {
             "sync only (headline)"
         },
-        "runtime_workers": runtime_workers,
-        "concurrency": concurrency,
+        "runtime_workers": run.runtime_workers,
+        "concurrency": run.concurrency,
+        "iters": run.iters,
+        "quick": run.quick,
+        "depth": run.depth,
+        "scenarios": run.scenarios,
+        "command": run.command,
         "profile": if cfg!(debug_assertions) { "debug (NOT publishable)" } else { "release" },
+        "publishable": !run.quick && !git_dirty && !cfg!(debug_assertions),
     });
     std::fs::write(path, serde_json::to_string_pretty(&metadata)?)?;
     Ok(())

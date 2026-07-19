@@ -1,4 +1,4 @@
-//! Generic engine drivers. Each takes a `&ScenarioSpec`, a fixed concurrency
+//! Generic engine drivers. Each takes a `&TrialSpec`, a fixed concurrency
 //! `C`, and the root URL, and returns an [`EngineOutcome`] once fully drained.
 //!
 //! ALL drivers are called AFTER the `go` signal: the timed region includes
@@ -8,7 +8,7 @@
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicU64, Ordering};
 
-use crate::scenario::{Digest, PageWork, ScenarioSpec, body_checksum};
+use crate::scenario::{Digest, PageWork, TrialSpec, body_checksum};
 
 pub mod baseline;
 pub mod millipede;
@@ -79,8 +79,15 @@ impl Accum {
         }
     }
 
-    /// Collapses the accumulator into an outcome.
-    pub fn into_outcome(self, errors: Vec<String>) -> EngineOutcome {
+    /// Reads the accumulator into an outcome.
+    ///
+    /// Takes `&self` deliberately: millipede's crawler permanently owns its
+    /// request-handler closure (`Arc<dyn RequestHandler>`), so the handler's
+    /// `Arc<Accum>` clone outlives `run()` and `Arc::into_inner` can never
+    /// succeed there. All fields are atomics (plus a mutex-guarded `Copy`
+    /// digest), so reading through the `Arc` is exact once the engine reports
+    /// that every request has finished.
+    pub fn snapshot(&self, errors: Vec<String>) -> EngineOutcome {
         EngineOutcome {
             pages: self.count.load(Ordering::Acquire),
             bytes_decoded: self.bytes.load(Ordering::Acquire),
@@ -94,7 +101,7 @@ impl Accum {
 /// Dispatches to the requested driver.
 pub async fn run(
     engine: Engine,
-    spec: &ScenarioSpec,
+    spec: &TrialSpec,
     concurrency: usize,
     root_url: &str,
 ) -> anyhow::Result<EngineOutcome> {

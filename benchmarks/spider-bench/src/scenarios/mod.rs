@@ -34,6 +34,20 @@ pub const ALL: &[&str] = &[
     "hn",
 ];
 
+/// Resolves the per-page work fn for a scenario WITHOUT building the site.
+///
+/// Child trials use this: they receive ground truth from the orchestrator
+/// (see [`crate::scenario::TrialWire`]) and must never pre-render the page
+/// bodies, which would contaminate the child's peak-RSS/CPU self-report.
+pub fn work(name: &str) -> anyhow::Result<crate::scenario::PageWork> {
+    match name {
+        "books" => Ok(crate::scenario::PageWork::Extract(books::extract)),
+        "hn" => Ok(crate::scenario::PageWork::Extract(hn::extract)),
+        other if ALL.contains(&other) => Ok(crate::scenario::PageWork::Accounting),
+        other => anyhow::bail!("unknown scenario `{other}`; known: {}", ALL.join(", ")),
+    }
+}
+
 /// Builds a scenario by registry name.
 pub fn build(name: &str, nonce: &str, depth: Option<u32>) -> anyhow::Result<ScenarioSpec> {
     match name {

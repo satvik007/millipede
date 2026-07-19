@@ -6,6 +6,21 @@
 //! fully stalled consumer. `Lagged` handling remains as defense in depth and
 //! invalidates the trial. ONE drain task performs the page work (no per-page
 //! spawning). `scrape()` is never used.
+//!
+//! **RSS disclosure (stronger than PLAN.md §7's wording):** spider's
+//! `subscribe` keeps the ORIGINAL broadcast receiver internally
+//! (`Website.channel` stores `(Sender, Arc<Receiver>)`) and that receiver
+//! never reads, so at drop-free capacity the channel retains EVERY page
+//! until `unsubscribe` drops the channel — regardless of how fast our drain
+//! keeps up. Spider's peak RSS therefore includes up to the full corpus, and
+//! the channel teardown (an O(pages) slot cleanup) runs inside the timed
+//! region. This cannot be avoided through spider's public API without giving
+//! up the drop-free guarantee: any bounded capacity smaller than the corpus
+//! reintroduces `Lagged` trials on extraction rows, where the single-task
+//! scraper re-parse (mandated by parse parity, PLAN.md §7) is deterministic-
+//! ally slower than C = 32 loopback fetches. This is disclosed in the report
+//! as spider's subscription-model cost, per the A-CRIT-1 resolution
+//! ("prevention, not detection").
 
 use std::sync::Arc;
 use std::time::Duration;
@@ -14,10 +29,29 @@ use spider::website::Website;
 use tokio::sync::broadcast::error::RecvError;
 
 use crate::engines::{Accum, EngineOutcome};
-use crate::scenario::{PageWork, ScenarioSpec};
+use crate::scenario::{PageWork, TrialSpec};
+
+/// Scenarios spider cannot run, with the reason (reported as N/A, not failed).
+///
+/// `redirects`: spider 2.52.9 screens every redirect hop through its SSRF
+/// guard (`Website::is_ssrf_redirect`) under EVERY redirect policy — `Loose`
+/// and `Strict` both refuse hops to loopback/private addresses, and `None`
+/// follows no redirects at all. The bench server lives on `127.0.0.1`, and
+/// every link in `redirects` goes through a 301 hop, so spider fetches the
+/// seed's 301, refuses the hop, and stops. No harness configuration can
+/// produce a valid trial; the row reports millipede vs baseline only.
+pub fn unsupported_reason(scenario: &str) -> Option<&'static str> {
+    match scenario {
+        "redirects" => Some(
+            "spider 2.52.9 blocks redirects to loopback addresses (SSRF guard in every \
+redirect policy); the loopback bench server cannot exercise spider's redirect path",
+        ),
+        _ => None,
+    }
+}
 
 pub async fn run(
-    spec: &ScenarioSpec,
+    spec: &TrialSpec,
     concurrency: usize,
     root_url: &str,
 ) -> anyhow::Result<EngineOutcome> {
@@ -61,9 +95,12 @@ pub async fn run(
             match rx.recv().await {
                 Ok(page) => {
                     // Raw rows: count/bytes/checksum only — NO re-parse (A-4).
-                    // Extraction rows: spider does not expose its lol_html DOM,
-                    // so the shared scraper fn must re-parse the bytes here — a
-                    // documented architectural difference (PLAN.md §7).
+                    // Extraction rows: spider's internal lol_html pass extracts
+                    // links only and exposes no DOM; its native extraction API
+                    // (spider_utils::css_query_select_map_streamed 2.52.9) also
+                    // re-parses with spider_scraper, an html5ever full-DOM
+                    // parser like scraper. Re-parsing here therefore matches
+                    // what any spider extraction user pays (PLAN.md §7).
                     let body = page.get_html_bytes_u8();
                     drain_accum.record_body(&work, body, |digest| {
                         if let PageWork::Extract(extract) = work {
@@ -83,8 +120,6 @@ pub async fn run(
     website.unsubscribe();
     let lagged = drain.await?;
 
-    let accum = Arc::into_inner(accum)
-        .ok_or_else(|| anyhow::anyhow!("drain still holds the accumulator after join"))?;
     let mut errors = Vec::new();
     if lagged {
         errors.push("spider broadcast receiver reported Lagged (trial invalid)".to_owned());
@@ -93,5 +128,6 @@ pub async fn run(
     if count != expected {
         errors.push(format!("spider drained {count} pages != expected {expected}"));
     }
-    Ok(accum.into_outcome(errors))
+    // The drain task has joined, so the snapshot is final.
+    Ok(accum.snapshot(errors))
 }

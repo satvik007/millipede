@@ -32,6 +32,7 @@ pub struct SiteSpec {
 }
 
 /// Precomputed ground truth a valid trial must reproduce exactly.
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Expected {
     /// Unique page count (redirect hops not included).
     pub pages: u64,
@@ -54,6 +55,55 @@ pub enum PageWork {
     /// against millipede's already-parsed DOM and against a fresh
     /// `scraper::Html` re-parse in spider's drain (documented asymmetry).
     Extract(fn(&scraper::Html, &mut Digest)),
+}
+
+/// What the orchestrator sends a child over stdin (one JSON line between
+/// `ready` and `go`).
+///
+/// The child must NEVER build the full [`SiteSpec`]: pre-rendering every page
+/// body in the child would push the child's `ru_maxrss` high-water mark up by
+/// the whole site size (~256 MiB for `payload`) and charge site
+/// rendering/checksum CPU to the trial process, contaminating the published
+/// RSS/CPU columns. The parent (which must render the site anyway to serve
+/// it) computes the ground truth once and ships only these few values.
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct TrialWire {
+    /// Ground truth for validation gates.
+    pub expected: Expected,
+    /// Baseline entry URLs: every unique page, entered through its redirect
+    /// source when one exists (full URLs including scheme/host/port).
+    pub entry_urls: Vec<String>,
+}
+
+/// Everything an engine driver needs for one child trial: the parent-supplied
+/// [`TrialWire`] plus the locally-resolved per-page work fn.
+pub struct TrialSpec {
+    /// Ground truth for validation gates.
+    pub expected: Expected,
+    /// Work performed per fetched page (resolved from the scenario name).
+    pub work: PageWork,
+    /// Baseline entry URL list (unused by the crawler engines).
+    pub entry_urls: Vec<String>,
+}
+
+/// Computes the baseline "speed of light" entry URL list for a site: every
+/// unique page, but entered through its redirect source when one exists, so
+/// the baseline pays the same 301 hops the crawlers pay and the per-hop
+/// server gate holds for all engines. `base` is `http://127.0.0.1:PORT`
+/// (no trailing slash).
+pub fn baseline_entry_urls(site: &SiteSpec, base: &str) -> Vec<String> {
+    let mut source_for_target: BTreeMap<&str, &str> = site
+        .redirects
+        .iter()
+        .map(|(source, target)| (target.as_str(), source.as_str()))
+        .collect();
+    site.pages
+        .keys()
+        .map(|path| {
+            let entry = source_for_target.remove(path.as_str()).unwrap_or(path);
+            format!("{base}{entry}")
+        })
+        .collect()
 }
 
 /// A complete benchmark scenario.

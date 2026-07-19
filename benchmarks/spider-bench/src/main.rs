@@ -138,8 +138,14 @@ fn cmd_run(
     nonce: &str,
     depth: Option<u32>,
 ) -> anyhow::Result<()> {
-    // Parse args + build the scenario spec BEFORE `ready` (unmeasured setup).
-    let spec = scenarios::build(scenario_name, nonce, depth)?;
+    // The child must NEVER build the full site: pre-rendering every page body
+    // here would raise this process's ru_maxrss high-water mark by the whole
+    // site size (~256 MiB for `payload`) and charge rendering/checksum CPU to
+    // the trial, contaminating the published RSS/CPU columns. Ground truth
+    // arrives from the orchestrator as a TrialWire line; only the per-page
+    // work fn is resolved locally (unmeasured setup, before `ready`).
+    let _ = (nonce, depth); // orchestrator-consistency args; unused in child mode
+    let work = scenarios::work(scenario_name)?;
     // The runtime is harness plumbing, identical for every engine; it exists
     // before `ready`. No HTTP client/crawler/Website exists yet (review A-2).
     let runtime = tokio::runtime::Builder::new_multi_thread()
@@ -147,7 +153,15 @@ fn cmd_run(
         .enable_all()
         .build()?;
 
-    measure::signal_ready_and_await_go()?;
+    let wire = measure::signal_ready_and_await_go()?;
+    let spec = scenario::TrialSpec {
+        expected: wire.expected,
+        work,
+        entry_urls: wire.entry_urls,
+    };
+    // Baseline-RSS checkpoint at `go`: no engine exists yet, so this is the
+    // harness-attributable floor under the final peak (PLAN.md §6 step 5).
+    let ready_usage = measure::self_usage()?;
     let start = Instant::now();
     // Engine construction + crawl + full drain, all inside the timed region.
     let outcome = runtime.block_on(engines::run(engine, &spec, concurrency, url));
@@ -160,7 +174,7 @@ fn cmd_run(
     let (pages, bytes_decoded) = match outcome {
         Ok(outcome) => {
             validation_errors.extend(outcome.errors.iter().cloned());
-            validate_outcome(engine, &spec, &outcome, &mut validation_errors);
+            validate_outcome(engine, &spec.expected, &outcome, &mut validation_errors);
             (outcome.pages, outcome.bytes_decoded)
         }
         Err(err) => {
@@ -185,6 +199,7 @@ fn cmd_run(
         // the authoritative server-side bytes-on-wire for the trial window.
         bytes_on_wire: bytes_decoded,
         max_rss_bytes: usage.max_rss_bytes,
+        ready_rss_bytes: ready_usage.max_rss_bytes,
         cpu_user_ms: usage.cpu_user_ms,
         cpu_sys_ms: usage.cpu_sys_ms,
         valid: validation_errors.is_empty(),
@@ -197,11 +212,10 @@ fn cmd_run(
 /// Engine-side validation gates (PLAN.md §8, gates 4-6).
 fn validate_outcome(
     engine: Engine,
-    spec: &scenario::ScenarioSpec,
+    expected: &scenario::Expected,
     outcome: &engines::EngineOutcome,
     errors: &mut Vec<String>,
 ) {
-    let expected = &spec.expected;
     if outcome.pages != expected.pages {
         errors.push(format!(
             "pages {} != expected {}",
@@ -316,12 +330,34 @@ not implemented in the scaffold (PLAN.md §7)."
     }
     drop(samples_file);
 
-    report::write_metadata(&metadata_path, args.concurrency, args.runtime_workers)?;
+    report::write_metadata(
+        &metadata_path,
+        &report::RunMeta {
+            concurrency: args.concurrency,
+            runtime_workers: args.runtime_workers,
+            iters,
+            quick: args.quick,
+            depth: args.depth,
+            scenarios: names.iter().map(|n| (*n).to_owned()).collect(),
+            command: std::env::args().collect::<Vec<_>>().join(" "),
+        },
+    )?;
     let summary = report::summarize(&samples_path)?;
-    std::fs::write(&summary_path, &summary)?;
+    std::fs::write(&summary_path, &summary.markdown)?;
     println!("samples:  {}", samples_path.display());
     println!("metadata: {}", metadata_path.display());
     println!("summary:  {}", summary_path.display());
+
+    // PLAN.md §5: a server-bound row must be scaled up before publication —
+    // enforce it as a suite failure, not a footnote (quick runs are never
+    // publishable, so they only warn).
+    for row in &summary.server_bound {
+        if args.quick {
+            eprintln!("warning (quick, not publishable): {row}");
+        } else {
+            suite_failures.push(format!("server-bound row must be scaled up before publication: {row}"));
+        }
+    }
 
     if !suite_failures.is_empty() {
         for failure in &suite_failures {
@@ -360,18 +396,43 @@ async fn run_scenario(
     let root_url = format!("{}{}", server.base_url(), spec.root_path);
     eprintln!("[{name}] server at {} ({} pages)", server.base_url(), spec.expected.pages);
 
+    // The child never renders the site (RSS/CPU isolation): the orchestrator
+    // ships the ground truth + baseline entry URLs over the handshake.
+    let wire = serde_json::to_string(&scenario::TrialWire {
+        expected: spec.expected.clone(),
+        entry_urls: scenario::baseline_entry_urls(&spec.site, &server.base_url()),
+    })?;
+
     // Warm-up burst: prime listener/accept path and page map caches.
     warm_up(&root_url).await?;
     server.state.snapshot_and_reset();
 
     let engines_order = [Engine::Millipede, Engine::Spider, Engine::Baseline];
     let child_timeout = Duration::from_secs(600);
+    // Some scenarios are impossible for spider by construction (e.g. its SSRF
+    // guard vs loopback redirects); report N/A instead of a doomed row.
+    let runs_engine = |engine: Engine| -> bool {
+        if engine != Engine::Spider {
+            return true;
+        }
+        match engines::spider::unsupported_reason(name) {
+            Some(reason) => {
+                eprintln!("[{name}] spider N/A: {reason}");
+                false
+            }
+            None => true,
+        }
+    };
+    let active_engines: Vec<Engine> = engines_order
+        .into_iter()
+        .filter(|&engine| runs_engine(engine))
+        .collect();
 
     // One unmeasured warm-up run per engine (skipped in --quick).
     if !args.quick {
-        for engine in engines_order {
+        for &engine in &active_engines {
             let child_args = child_args(name, engine, &root_url, args, &nonce);
-            let _ = measure::run_child_trial(exe, &child_args, child_timeout)
+            let _ = measure::run_child_trial(exe, &child_args, &wire, child_timeout)
                 .await
                 .with_context(|| format!("[{name}] warm-up run for {}", engine.as_str()))?;
             server.state.snapshot_and_reset();
@@ -381,10 +442,10 @@ async fn run_scenario(
     // Measured trials, interleaved M, S, B, M, S, B, ... (thermal/cache drift).
     let mut valid_counts = std::collections::BTreeMap::<&'static str, usize>::new();
     for iteration in 0..iters {
-        for engine in engines_order {
+        for &engine in &active_engines {
             server.state.snapshot_and_reset();
             let child_args = child_args(name, engine, &root_url, args, &nonce);
-            let mut sample = measure::run_child_trial(exe, &child_args, child_timeout)
+            let mut sample = measure::run_child_trial(exe, &child_args, &wire, child_timeout)
                 .await
                 .with_context(|| {
                     format!("[{name}] trial {iteration} for {}", engine.as_str())
@@ -400,6 +461,13 @@ async fn run_scenario(
                     engine.as_str(),
                     sample.validation_errors
                 );
+                // PLAN.md §6 step 8: ANY invalid measured trial fails the
+                // suite loudly — not only rows that fall under 5 valid.
+                suite_failures.push(format!(
+                    "[{name}] invalid trial (engine {}, iter {iteration}): {}",
+                    engine.as_str(),
+                    sample.validation_errors.join("; ")
+                ));
             }
             // Authoritative wire bytes come from the server window.
             sample.bytes_on_wire = snap.bytes_on_wire;
@@ -422,9 +490,11 @@ async fn run_scenario(
         }
     }
 
-    // Publication gate: >= 5 valid trials per engine (PLAN.md §6), unless --quick.
+    // Publication gate: >= 5 valid trials per engine (PLAN.md §6), unless
+    // --quick. Engines marked N/A for the scenario are exempt (reported as
+    // N/A with the reason, never as a failure).
     if !args.quick {
-        for engine in engines_order {
+        for &engine in &active_engines {
             let valid = valid_counts.get(engine.as_str()).copied().unwrap_or(0);
             if valid < 5 {
                 suite_failures.push(format!(
@@ -434,7 +504,7 @@ async fn run_scenario(
             }
         }
     } else {
-        for engine in engines_order {
+        for &engine in &active_engines {
             let valid = valid_counts.get(engine.as_str()).copied().unwrap_or(0);
             if valid < iters {
                 suite_failures.push(format!(
@@ -557,8 +627,11 @@ fn cmd_report(samples: &std::path::Path) -> anyhow::Result<()> {
             .map(|n| n.replace("samples.jsonl", "summary.md"))
             .unwrap_or_else(|| "summary.md".to_owned()),
     );
-    std::fs::write(&summary_path, &summary)?;
-    println!("{summary}");
+    std::fs::write(&summary_path, &summary.markdown)?;
+    println!("{}", summary.markdown);
+    for row in &summary.server_bound {
+        eprintln!("NOT PUBLISHABLE — server-bound row must be scaled up first: {row}");
+    }
     eprintln!("wrote {}", summary_path.display());
     Ok(())
 }

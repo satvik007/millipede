@@ -8,6 +8,13 @@
 //! pulling from a shared atomic index — behaviorally equivalent for a fixed
 //! URL list.
 //!
+//! The entry URL list is computed by the ORCHESTRATOR and delivered to the
+//! child before `go` (`TrialSpec::entry_urls`): building and allocating the
+//! full list inside the timed region would depress the measured ceiling and
+//! make the 70% server-bound publication gate artificially easy to pass.
+//! Only the HTTP client construction and the fetch loop are timed (review
+//! A-2: client construction is charged to every engine).
+//!
 //! The baseline always performs Accounting work only (count/bytes/checksum);
 //! it is a fetch ceiling, not an extraction engine, so `Expected::records`/
 //! `digest` gates do not apply to it.
@@ -17,43 +24,17 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Duration;
 
 use crate::engines::{Accum, EngineOutcome};
-use crate::scenario::{PageWork, ScenarioSpec};
+use crate::scenario::{PageWork, TrialSpec};
 
 pub async fn run(
-    spec: &ScenarioSpec,
+    spec: &TrialSpec,
     concurrency: usize,
-    root_url: &str,
+    _root_url: &str,
 ) -> anyhow::Result<EngineOutcome> {
-    let root = url::Url::parse(root_url)?;
-    let base = format!(
-        "{}://{}",
-        root.scheme(),
-        root.host_str()
-            .map(|h| match root.port() {
-                Some(p) => format!("{h}:{p}"),
-                None => h.to_owned(),
-            })
-            .ok_or_else(|| anyhow::anyhow!("root URL has no host"))?
+    anyhow::ensure!(
+        !spec.entry_urls.is_empty(),
+        "baseline requires the orchestrator-supplied entry URL list"
     );
-
-    // Exact URL list: every unique page, but entered through its redirect
-    // source when one exists, so the baseline pays the same 301 hops the
-    // crawlers pay and the per-hop server gate holds for all engines.
-    let mut source_for_target: std::collections::BTreeMap<&str, &str> = spec
-        .site
-        .redirects
-        .iter()
-        .map(|(source, target)| (target.as_str(), source.as_str()))
-        .collect();
-    let urls: Vec<String> = spec
-        .site
-        .pages
-        .keys()
-        .map(|path| {
-            let entry = source_for_target.remove(path.as_str()).unwrap_or(path);
-            format!("{base}{entry}")
-        })
-        .collect();
 
     // Client construction is INSIDE the timed region (review A-2).
     let client = reqwest::Client::builder()
@@ -64,7 +45,7 @@ pub async fn run(
 
     let accum = Arc::new(Accum::default());
     let next = Arc::new(AtomicUsize::new(0));
-    let urls = Arc::new(urls);
+    let urls = Arc::new(spec.entry_urls.clone());
     let errors = Arc::new(std::sync::Mutex::new(Vec::<String>::new()));
 
     let mut workers = Vec::with_capacity(concurrency);
@@ -95,8 +76,6 @@ pub async fn run(
         worker.await?;
     }
 
-    let accum = Arc::into_inner(accum)
-        .ok_or_else(|| anyhow::anyhow!("worker still holds the accumulator after join"))?;
     let mut errors = Arc::into_inner(errors)
         .ok_or_else(|| anyhow::anyhow!("worker still holds the error list after join"))?
         .into_inner()
@@ -106,7 +85,8 @@ pub async fn run(
     if count != expected {
         errors.push(format!("baseline fetched {count} pages != expected {expected}"));
     }
-    Ok(accum.into_outcome(errors))
+    // All workers joined, so the snapshot is final.
+    Ok(accum.snapshot(errors))
 }
 
 async fn fetch_one(client: &reqwest::Client, url: &str) -> anyhow::Result<bytes::Bytes> {

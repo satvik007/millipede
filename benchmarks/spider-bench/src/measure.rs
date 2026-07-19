@@ -1,12 +1,17 @@
 //! Ready/go handshake, wall-clock timing, and self-reported resource usage.
 //!
-//! Protocol (PLAN.md §6): the child parses args and builds its scenario spec,
-//! then prints `ready` on stdout BEFORE constructing any HTTP client, crawler,
-//! or `Website`. The parent replies `go` on the child's stdin; the child
+//! Protocol (PLAN.md §6, amended): the child parses args and resolves its
+//! per-page work fn, then prints `ready` on stdout BEFORE constructing any
+//! HTTP client, crawler, or `Website` — and WITHOUT ever pre-rendering the
+//! site (the full page-body map would contaminate the child's peak-RSS/CPU
+//! self-report). The parent replies with one JSON [`crate::scenario::TrialWire`]
+//! line (ground truth + baseline entry URLs) followed by `go`; the child
 //! starts its `Instant` on `go`. The timer stops only after the engine has
 //! fully drained; the child then calls `getrusage(RUSAGE_SELF)` itself
 //! (review A-6 — never the orchestrator, never `RUSAGE_CHILDREN`) and prints
-//! exactly one JSON line.
+//! exactly one JSON line. The child also self-reports its RSS at `go`
+//! (`ready_rss_bytes`), implementing §6 step 5's baseline-RSS checkpoint in
+//! the only process that can attribute it.
 
 use std::io::{BufRead, Write};
 use std::process::Stdio;
@@ -14,6 +19,8 @@ use std::time::Duration;
 
 use anyhow::Context as _;
 use serde::{Deserialize, Serialize};
+
+use crate::scenario::TrialWire;
 
 /// One trial result: the single JSON line a child prints (PLAN.md §6 step 7).
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -26,28 +33,40 @@ pub struct Sample {
     pub bytes_decoded: u64,
     pub bytes_on_wire: u64,
     pub max_rss_bytes: u64,
+    /// Child RSS at the `go` checkpoint, before any engine exists: the
+    /// harness-attributable floor under `max_rss_bytes` (PLAN.md §6 step 5).
+    #[serde(default)]
+    pub ready_rss_bytes: u64,
     pub cpu_user_ms: u64,
     pub cpu_sys_ms: u64,
     pub valid: bool,
     pub validation_errors: Vec<String>,
 }
 
-/// Child side: print `ready`, then block until the parent sends `go`.
-pub fn signal_ready_and_await_go() -> anyhow::Result<()> {
+/// Child side: print `ready`, receive the [`TrialWire`] spec line, then block
+/// until the parent sends `go`.
+pub fn signal_ready_and_await_go() -> anyhow::Result<TrialWire> {
     let mut stdout = std::io::stdout().lock();
     stdout.write_all(b"ready\n")?;
     stdout.flush()?;
     drop(stdout);
+    let stdin = std::io::stdin();
+    let mut lines = stdin.lock();
+    let mut spec_line = String::new();
+    lines
+        .read_line(&mut spec_line)
+        .context("reading TrialWire spec line from stdin")?;
+    let wire: TrialWire = serde_json::from_str(spec_line.trim())
+        .context("parsing TrialWire spec line from orchestrator")?;
     let mut line = String::new();
-    std::io::stdin()
-        .lock()
+    lines
         .read_line(&mut line)
         .context("reading go signal from stdin")?;
     anyhow::ensure!(
         line.trim() == "go",
         "expected `go` from orchestrator, got {line:?}"
     );
-    Ok(())
+    Ok(wire)
 }
 
 /// Resource usage self-reported by the child process.
@@ -87,21 +106,44 @@ pub fn self_usage() -> anyhow::Result<SelfUsage> {
     })
 }
 
-/// Parent side: spawn one fresh child trial, drive the ready/go handshake, and
-/// parse the child's single JSON result line.
+/// Proxy environment variables that must never leak into a trial child.
+const PROXY_ENV_VARS: &[&str] = &[
+    "HTTP_PROXY", "http_proxy", "HTTPS_PROXY", "https_proxy", "ALL_PROXY", "all_proxy",
+];
+
+/// Parent side: spawn one fresh child trial, drive the ready/spec/go
+/// handshake, and parse the child's single JSON result line.
+///
+/// `wire_spec_json` is the serialized [`TrialWire`] the parent computed from
+/// the fully rendered site; it is written to the child right after `ready`.
+///
+/// The child environment is proxy-neutral: millipede's client hard-disables
+/// proxying (`.no_proxy()`), but spider's reqwest 0.13 dependency enables the
+/// `system-proxy` feature and its client builder never opts out, so env vars
+/// or platform proxy settings could give spider a different network path.
+/// Removing `*_PROXY` and pinning `NO_PROXY=127.0.0.1,localhost` (which
+/// hyper-util's system matcher honors even when macOS/Windows system proxy
+/// settings are present) guarantees identical direct-loopback transport for
+/// every engine.
 pub async fn run_child_trial(
     exe: &std::path::Path,
     args: &[String],
+    wire_spec_json: &str,
     timeout: Duration,
 ) -> anyhow::Result<Sample> {
-    let mut child = tokio::process::Command::new(exe)
+    let mut command = tokio::process::Command::new(exe);
+    command
         .args(args)
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
-        .stderr(Stdio::inherit())
-        .spawn()
-        .context("spawning bench child process")?;
-    let result = tokio::time::timeout(timeout, drive_child(&mut child)).await;
+        .stderr(Stdio::inherit());
+    for var in PROXY_ENV_VARS {
+        command.env_remove(var);
+    }
+    command.env("NO_PROXY", "127.0.0.1,localhost");
+    command.env("no_proxy", "127.0.0.1,localhost");
+    let mut child = command.spawn().context("spawning bench child process")?;
+    let result = tokio::time::timeout(timeout, drive_child(&mut child, wire_spec_json)).await;
     match result {
         Ok(sample) => {
             let status = child.wait().await?;
@@ -116,7 +158,10 @@ pub async fn run_child_trial(
     }
 }
 
-async fn drive_child(child: &mut tokio::process::Child) -> anyhow::Result<Sample> {
+async fn drive_child(
+    child: &mut tokio::process::Child,
+    wire_spec_json: &str,
+) -> anyhow::Result<Sample> {
     use tokio::io::{AsyncBufReadExt, AsyncWriteExt};
 
     let stdout = child.stdout.take().context("child stdout not piped")?;
@@ -133,6 +178,8 @@ async fn drive_child(child: &mut tokio::process::Child) -> anyhow::Result<Sample
             break;
         }
     }
+    stdin.write_all(wire_spec_json.as_bytes()).await?;
+    stdin.write_all(b"\n").await?;
     stdin.write_all(b"go\n").await?;
     stdin.flush().await?;
 
