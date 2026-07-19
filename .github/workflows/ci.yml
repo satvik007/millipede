@@ -62,7 +62,10 @@ jobs:
       # Chrome sandbox). Unit tests for that crate still run via --lib.
       - run: cargo test --workspace --all-features --exclude millipede-browser-chromiumoxide
       - run: cargo test -p millipede-browser-chromiumoxide --lib --all-features
-      - run: cargo test -p millipede --no-default-features
+      # --lib --tests skips doctests: the README example included via
+      # #![doc = include_str!] uses default-feature APIs (HtmlCrawler, memory
+      # storage) that do not exist in a no-default-features build.
+      - run: cargo test -p millipede --no-default-features --lib --tests
       - run: cargo run -p millipede --example phase0_hello
       - run: cargo run -p millipede --example phase1_queue_demo
       - run: cargo run -p millipede --example basic_engine
@@ -75,10 +78,9 @@ jobs:
       - run: cargo run -p millipede --features http,fingerprint,storage-memory --example fingerprint_crawl
 
   # Browser tests run on Linux + macOS only; Windows is intentionally excluded
-  # (ROADMAP Phase 6 exit criteria). setup-chrome caches the Chromium download.
-  # The workspace test job above stays unchanged: browser tests skip gracefully
-  # when MILLIPEDE_CHROME is unset and no local Chrome exists. GitHub runners
-  # typically have Chrome preinstalled, so those tests simply run there too.
+  # (ROADMAP Phase 6 exit criteria). This job owns the chromiumoxide E2E
+  # suites; the workspace test job above excludes that crate so the suites run
+  # exactly once, against a Chrome this job prepares.
   browser:
     name: browser tests (${{ matrix.os }})
     strategy:
@@ -90,11 +92,26 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - name: Install Chromium (cached by the action)
+      # Linux gets a pinned stable Chrome from setup-chrome. macOS uses the
+      # runner's preinstalled branded Google Chrome instead: the "Chrome for
+      # Testing" build the action installs stalls mid-navigation under
+      # chromiumoxide on the macOS runners (E2E suites blow their 120s guards),
+      # while branded Chrome is the configuration verified on developer Macs.
+      - name: Install Chromium (Linux; cached by the action)
+        if: runner.os == 'Linux'
         id: chrome
         uses: browser-actions/setup-chrome@v2
         with:
           chrome-version: stable
+      - name: Select Chrome binary
+        id: chrome-path
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            echo "path=${{ steps.chrome.outputs.chrome-path }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "path=/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" >> "$GITHUB_OUTPUT"
+          fi
       # Ubuntu 24.04 restricts unprivileged user namespaces via AppArmor, which
       # breaks Chrome's sandbox at launch ("No usable sandbox!"). Re-enable them
       # for this job; the alternative (--no-sandbox) would leak into the library's
@@ -104,7 +121,7 @@ jobs:
         run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
       - name: Run browser integration tests
         env:
-          MILLIPEDE_CHROME: ${{ steps.chrome.outputs.chrome-path }}
+          MILLIPEDE_CHROME: ${{ steps.chrome-path.outputs.path }}
         # --test-threads=1: each E2E test launches real Chrome instances; running
         # them concurrently overloads 3-4 core runners past the tests' 120s guards.
         run: |
@@ -112,7 +129,7 @@ jobs:
           cargo test -p millipede-browser -- --nocapture
       - name: Run browser examples against a local site
         env:
-          MILLIPEDE_CHROME: ${{ steps.chrome.outputs.chrome-path }}
+          MILLIPEDE_CHROME: ${{ steps.chrome-path.outputs.path }}
         run: |
           cargo run -p millipede --features browser-chromiumoxide,storage-memory --example browser_crawl
           cargo run -p millipede --features browser-chromiumoxide,html,storage-memory --example smart_crawl
@@ -200,11 +217,18 @@ jobs:
   audit:
     name: cargo-audit
     runs-on: ubuntu-latest
+    # audit-check publishes its report as a check run.
+    permissions:
+      contents: read
+      checks: write
     steps:
       - uses: actions/checkout@v4
       - uses: rustsec/audit-check@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          # time < 0.3.47 RFC 2822 stack exhaustion via cookie_store; the fix
+          # requires Rust 1.88 and MSRV is locked at 1.85 (see deny.toml).
+          ignore: RUSTSEC-2026-0009
 
   coverage:
     name: coverage

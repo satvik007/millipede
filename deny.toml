@@ -8,6 +8,11 @@ ignore = [
     # stack under `scraper`; there is no maintained drop-in the upstream stack
     # has adopted yet. Revisit when scraper/selectors move off it.
     "RUSTSEC-2025-0057",
+    # time < 0.3.47 stack exhaustion when parsing malicious RFC 2822 input.
+    # Reaches us only via cookie_store -> cookie expiry parsing; the patched
+    # 0.3.47 requires Rust 1.88 and our MSRV is locked at 1.85 (ADR-0001), so
+    # cargo refuses the update. Lift this ignore when the MSRV moves past 1.88.
+    "RUSTSEC-2026-0009",
 ]
 
 [licenses]
