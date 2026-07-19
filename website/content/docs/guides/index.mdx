@@ -1,0 +1,39 @@
+---
+title: Guides
+description: Concepts and operating practices for building reliable Millipede crawlers.
+---
+
+Use these guides after the introduction course when you need to understand a subsystem, make a crawler durable, or tune its behavior in production.
+
+## Core concepts
+
+- [Guides overview](/docs/guides) provides the reading map from shared crawler concepts through storage, operations, and extension policy.
+- [Architecture](/docs/guides/architecture) explains how the generic engine, crawler kinds, typed contexts, handlers, and storage contracts fit together.
+- [Router](/docs/guides/router) shows how unlabeled requests, labeled routes, method filters, middleware, and the fallback handler select application code.
+- [Enqueue links](/docs/guides/enqueue-links) follows discovered URLs through extraction, filtering, transformation, crawl limits, and queue deduplication.
+
+## Storage
+
+- [Storages](/docs/guides/storages) introduces request queues, datasets, key-value stores, named stores, and typed saved state.
+- [Storage backends](/docs/guides/storage-backends) compares process-local memory with Crawlee-compatible filesystem persistence and gives a safe migration procedure.
+- [Sitemap crawling](/docs/guides/sitemap-crawling) combines a streaming sitemap request list with the normal deduplicating request queue.
+
+## Operations
+
+- [Configuration](/docs/guides/configuration) documents resolved defaults, builder precedence, storage injection, startup purging, and Crawlee-compatible environment variables.
+- [Sessions and proxies](/docs/guides/sessions-and-proxies) covers identity state, cookie continuity, proxy selection, and health reporting.
+- [Error handling](/docs/guides/error-handling) separates retryable, session-rotating, permanent, and critical failures and explains terminal failure handling.
+- [Autoscaling](/docs/guides/autoscaling) connects concurrency modes, resource signals, rate limits, and same-domain pacing.
+- [Browser pools](/docs/guides/browser-pools) describes browser reuse, page lifecycle, launch settings, and shutdown behavior.
+- [Fingerprinting](/docs/guides/fingerprinting) keeps generated HTTP headers and browser identities coherent while stating the current limits.
+
+## Meta
+
+- [Migrating from Crawlee](/docs/guides/migrating-from-crawlee) maps familiar Crawlee concepts onto Millipede's typed Rust APIs and deliberate differences.
+- [Extras policy](/docs/guides/extras-policy) defines when an integration belongs in a community helper crate and what it takes to graduate into the core workspace.
+
+## Next steps
+
+- [Review the architecture](/docs/guides/architecture)
+- [Browse runnable examples](/docs/examples)
+- [Open the API reference](/docs/api)

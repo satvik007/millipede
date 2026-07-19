@@ -1,0 +1,44 @@
+---
+title: Choose your crawler
+description: Match a Millipede crawler kind to the response data and rendering model your target requires.
+---
+
+# Choose your crawler
+
+Every Millipede crawler uses the same scheduling engine. Your first decision is the kind: it selects the transport and the typed context received by the request handler.
+
+| Need | Kind and context | Feature |
+|---|---|---|
+| Raw response bytes, status, or headers | `HttpKind` with `HttpContext` | `http` |
+| A parsed server-rendered document | `HtmlKind` with `HtmlContext` | `html` |
+| A live Chromium page with JavaScript execution | `BrowserKind<ChromiumoxideProvider>` with `BrowserContext` | `browser-chromiumoxide` |
+| HTTP by default with selective Chromium promotion | `SmartKind<ChromiumoxideProvider>` with `SmartContext` | `browser-chromiumoxide` plus `html` |
+
+The `http`, `html`, and `storage-memory` features are enabled by default. `browser-chromiumoxide` is opt-in and also enables the provider-neutral `browser` feature.
+
+## One lifecycle, four kinds
+
+The kind builder owns transport-specific choices. `Crawler::builder(kind)` adds the shared request handler, storage, policies, concurrency, and retry configuration.
+
+```text
+kind builder
+  -> Crawler::builder(kind)
+  -> request_handler
+  -> build().await
+  -> run().await
+```
+
+`run()` resolves to `FinalStatistics`. Its commonly inspected counters include `requests_finished`, `requests_failed`, and `requests_retries`.
+
+## Pick a path
+
+- [HTTP crawler](/docs/quick-start/http-crawler) for APIs, downloads, headers, and custom response processing.
+- [HTML crawler](/docs/quick-start/html-crawler) for selectors, extracted links, and server-rendered documents.
+- [Browser crawler](/docs/quick-start/browser-crawler) for JavaScript-rendered pages in Chromium.
+- [Smart crawler](/docs/quick-start/smart-crawler) for mixed sites that benefit from selective browser use.
+
+## Next steps
+
+- [Start with HTTP](/docs/quick-start/http-crawler)
+- [Parse HTML](/docs/quick-start/html-crawler)
+- [Compare browser options](/docs/quick-start/browser-crawler)

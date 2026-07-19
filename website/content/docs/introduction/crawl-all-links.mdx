@@ -1,0 +1,49 @@
+---
+title: Crawl all the links
+description: Discover same-host links while keeping the crawl frontier bounded and deduplicated.
+---
+
+The first crawler introduced a frontier: the set of discovered requests that have not yet finished.
+Every handled page can add to it, and every completed request removes work from it. A useful crawler
+must decide which links may enter that frontier and when to stop accepting more.
+
+For the common case, `ctx.enqueue.same_hostname()` extracts page links and admits only URLs whose
+hostname matches the current page. It is backed by the
+<DocsRs crate="millipede-core">EnqueueStrategy</DocsRs>`::SameHostname` strategy. The convenience
+method is a good fit when every accepted link receives the same treatment.
+
+Use the full options pipeline when discovery needs more intent:
+`ctx.enqueue.options().selector(...).label(...).send()`. The selector restricts extraction to the
+matching elements, the label marks the requests for a route, and `send()` submits the candidates.
+Strategy, glob, and per-call limit options can further narrow that set when the crawler needs them.
+
+Discovery is not the same as scheduling every link occurrence. The request queue deduplicates by a
+request's unique key. If navigation, category, and pagination elements produce 60 enqueue attempts
+but several point to the same URLs or otherwise share deduplication keys, the queue might contain
+only 40 new entries. A URL rediscovered later does not continually recreate completed work. Once
+no genuinely new unique keys appear and pending work is handled, the frontier can empty instead of
+cycling forever through repeated links.
+
+Deduplication controls repeats; a <DocsRs crate="millipede-core">CrawlPolicy</DocsRs> controls total
+scope. `CrawlPolicy::max_requests_per_crawl(...)` is a hard cap for the run. Keep that guard in
+place while developing selectors, especially before pointing the next version at the book
+catalogue.
+
+The compiled example below is a gocolly-style link-scraping demonstration. It serves a small local
+mock site, discovers its links, applies same-hostname filtering, and verifies that an external URL
+was never fetched.
+
+<include>../../../snippets/examples/basic.mdx</include>
+
+Run it from the repository root:
+
+```console
+cargo run -p millipede --example basic
+```
+
+With a safe frontier in place, the crawler is ready to distinguish catalogue navigation from the
+book pages that contain the records we want.
+
+## Next steps
+
+Continue with [scrape structured data](/docs/introduction/scrape-data).

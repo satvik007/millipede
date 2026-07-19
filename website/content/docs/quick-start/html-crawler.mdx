@@ -1,0 +1,32 @@
+---
+title: HTML crawler
+description: Parse server-rendered pages, reuse validated selectors, and route discovered links by label.
+---
+
+# HTML crawler
+
+`HtmlKind` builds on HTTP fetching and adds a synchronized parsed document to `HtmlContext`. It is a strong default for sites whose useful content and links are present in the server response, without running JavaScript.
+
+The `selectors!` macro validates CSS selectors and caches them for reuse. In a handler, `ctx.html.select_first(...)` can read from the parsed document without reparsing the response for every query.
+
+The following doc-tested excerpt comes from the `millipede-html` crate's own README and uses the individual sub-crates directly. To follow it in a new project, add those direct dependencies:
+
+```console
+cargo add millipede-core
+cargo add millipede-html
+cargo add millipede-storage-memory
+```
+
+<include>../../../snippets/readme/millipede-html.mdx</include>
+
+## Keep discovery intentional
+
+A `CrawlPolicy` places crawl-wide limits and URL rules alongside the crawler. Pairing it with `EnqueueStrategy::SameHostname` keeps automatic discovery on the starting hostname. A handler can enqueue matching links directly, while `ctx.enqueue.options().selector(...).label(...).send()` adds a label when the destination needs different processing.
+
+For multi-page scrapers, `Router<HtmlContext>` maps those labels to handlers for distinct page types. This keeps listing-page discovery separate from detail-page extraction while both routes share the crawler's queue, storage, retry policy, and statistics.
+
+## Next steps
+
+- [Follow the introduction course](/docs/introduction)
+- [Run the book scraper](/docs/examples/scrape-books)
+- [Learn enqueue links and crawl policies](/docs/guides/enqueue-links)

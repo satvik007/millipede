@@ -1,0 +1,26 @@
+---
+title: Basic engine
+description: Stress the fixed-concurrency core with synthetic retries, failures, and result snapshots.
+---
+
+This Phase 2 artifact sends 1,000 synthetic requests through `BasicKind` at fixed concurrency 32, introducing a one-time retry for indices divisible by seven and permanent failures for indices divisible by 97. It consumes all 1,000 terminal result snapshots concurrently and verifies 11 terminal failures, a matching failed-handler count, and nonzero retries.
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+<Callout type="info">
+  This is an engine-layer phase artifact below the higher-level `HttpCrawler`, `HtmlCrawler`, and `BrowserCrawler` APIs.
+</Callout>
+
+```console
+cargo run -p millipede --example basic_engine
+```
+
+<include>../../../snippets/examples/basic_engine.mdx</include>
+
+## Next steps
+
+- [Crawl with the HTTP kind](/docs/examples/http-crawl)
+- [Observe AIMD autoscaling](/docs/examples/autoscale-demo)
+- [Review crawler architecture](/docs/guides/architecture)
+
+[View source on GitHub](https://github.com/satvik007/millipede/blob/main/millipede/examples/basic_engine.rs)

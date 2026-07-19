@@ -1,0 +1,59 @@
+---
+title: Your first crawler
+description: Follow a request through an HTML handler, its queue, and a dataset.
+---
+
+A Millipede crawl is a flow of typed work. A `Request` enters a request queue, the crawler fetches
+it and dispatches it to the context type belonging to the selected crawler kind, and the handler
+can place results in storage. Any links the handler accepts become more queued requests, so the
+same flow repeats.
+
+For HTML crawling, the typed context is `HtmlContext`. It carries the current request and response,
+the parsed document in `ctx.html`, the enqueue helper, and a storage handle. The construction path
+keeps those pieces explicit:
+
+```text
+kind builder
+  -> Crawler::builder(kind)
+  -> .request_handler(...)
+  -> .build().await
+  -> .run().await
+```
+
+Here is the umbrella crate's compact HTML quick start. It uses the `#[tokio::main]` attribute and
+`serde_json::json!`, so the Tokio and `serde_json` prerequisite dependencies are required in
+addition to `millipede`:
+
+<include>../../../snippets/readme/millipede.mdx</include>
+
+Read it from the outside inward. `HtmlKind::new()?` prepares the HTML-specific request lifecycle,
+including fetching and parsing. That kind is passed to `Crawler::builder(kind)`, where the shared
+crawler settings are attached.
+
+The `.storage_client(...)` call is required even though `storage-memory` is a default Cargo
+feature. A feature makes the backend available; it does not silently choose a client for this
+crawler. If neither the builder nor its configuration supplies one, `.build().await?` returns
+<DocsRs crate="millipede-core">CrawlerBuildError</DocsRs>`::MissingStorage`.
+
+Next, `.crawl_policy(...)` installs a <DocsRs crate="millipede-core">CrawlPolicy</DocsRs>. Its
+`max_requests_per_crawl(...)` setting places a ceiling on how many requests this run may process.
+That limit is useful even in a tiny first program because a handler can discover more work than
+the seed URL suggests.
+
+The request handler receives an `HtmlContext`. It calls `ctx.storage.dataset().push(...)` after
+bringing <DocsRs crate="millipede-core">DatasetExt</DocsRs> into scope, so a serializable value
+becomes a row in the default dataset. It then calls `ctx.enqueue.same_hostname()` to discover links
+without following them onto another hostname. The returned links go through the request queue,
+not directly back into the handler.
+
+Finally, `.build().await?` validates and opens the crawler's dependencies. `.run().await?` seeds
+the queue, drives the workers until the crawl finishes, and returns `FinalStatistics`. Its
+`requests_finished`, `requests_failed`, and `requests_retries` fields distinguish completed work,
+terminal failures, and retry attempts.
+
+You now have the complete loop: seed, handle, store, enqueue, repeat. The next lesson examines how
+that loop stays within bounds as the link graph grows.
+
+## Next steps
+
+Continue with [crawl all the links](/docs/introduction/crawl-all-links).

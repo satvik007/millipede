@@ -1,0 +1,20 @@
+---
+title: Proxy switcher
+description: Verify round-robin proxy selection at resolver and crawler levels without external traffic.
+---
+
+The first half resolves three proxy URLs six times and checks the exact A/B/C/A/B/C sequence while demonstrating success and blocked-result reporting. The second half uses three wiremock servers as stand-in proxies for nine otherwise invalid targets, confirming that every request succeeds and each proxy receives exactly three requests.
+
+```console
+cargo run -p millipede --example proxy_switcher
+```
+
+<include>../../../snippets/examples/proxy_switcher.mdx</include>
+
+## Next steps
+
+- [Handle retry and anti-bot errors](/docs/examples/error-handling)
+- [Generate browser-like fingerprints](/docs/examples/fingerprint-crawl)
+- [Configure proxies](/docs/guides/sessions-and-proxies)
+
+[View source on GitHub](https://github.com/satvik007/millipede/blob/main/millipede/examples/proxy_switcher.rs)

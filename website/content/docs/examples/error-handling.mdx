@@ -1,0 +1,20 @@
+---
+title: Error handling
+description: Distinguish retryable statuses, anti-bot challenges, and terminal typed failures.
+---
+
+Three local endpoints exercise distinct outcomes: one succeeds immediately, one returns two retryable 500 responses before recovering, and one returns a 403 challenge detected as anti-bot behavior. With two request retries and two session rotations configured, the crawler reports two successes, four total retry attempts, and dispatches the blocked request once to a handler that matches the terminal `CrawlError` variant.
+
+```console
+cargo run -p millipede --example error_handling
+```
+
+<include>../../../snippets/examples/error_handling.mdx</include>
+
+## Next steps
+
+- [Recover and snapshot a challenge response](/docs/examples/fingerprint-crawl)
+- [Tune crawl throttling](/docs/examples/rate-limit)
+- [Understand retries and sessions](/docs/guides/error-handling)
+
+[View source on GitHub](https://github.com/satvik007/millipede/blob/main/millipede/examples/error_handling.rs)

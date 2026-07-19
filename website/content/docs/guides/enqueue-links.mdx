@@ -1,0 +1,67 @@
+---
+title: Enqueue links
+description: Extract, filter, transform, admit, and deduplicate child requests with EnqueueLinker.
+---
+
+Every fetching context exposes `ctx.enqueue`, an `EnqueueLinker` tied to the current request and running crawler. It converts discovered or explicit URLs into child requests and sends them through the crawler's frontier.
+
+<DocsRs crate="millipede-core">EnqueueLinker, CrawlPolicy, and EnqueueStrategy</DocsRs>
+
+## Shortcuts and the options pipeline
+
+For parsed HTML or browser content, `ctx.enqueue.same_hostname()` extracts links with the default selector and keeps URLs whose hostname matches the parent. The related `all()`, `same_domain()`, and `same_origin()` shortcuts select the other relationship rules.
+
+Use `ctx.enqueue.options()` when discovery needs more control. Its setters cover:
+
+- candidates through `urls` or `raw_urls`, with `base_url` for relative raw strings;
+- DOM selection through `selector`;
+- child metadata through `label` and `user_data`;
+- relationship filtering through `strategy`;
+- includes through `globs` and `regex`, and precedence-taking exclusions through `exclude`;
+- an async `transform` that can mutate a request or reject it;
+- per-call `limit` and queue-front placement through `forefront`.
+
+`send()` performs the work. For extracted and raw links, it resolves URLs, applies the relationship strategy, exclusions and includes, removes duplicate candidate URLs, applies the per-call cap, builds child requests, enforces crawl depth and crawl-count admission, runs the transform, and finally submits a batch to the queue. Absolute `Url` values supplied with `urls()` deliberately bypass relationship filtering because the caller already selected them; the remaining filters and limits still apply.
+
+The returned `EnqueueResult` separates newly `added` requests from `skipped` candidates. Reported reasons include invalid URLs, strategy or pattern rejection, depth and crawl-count limits, transform rejection, and a duplicate request `unique_key`. Candidate URL deduplication and truncation by `limit` are silent.
+
+## Relationship and crawl policies
+
+`EnqueueStrategy` has four variants:
+
+| Variant | Relationship required |
+|---|---|
+| `All` | Any HTTP or HTTPS URL. |
+| `SameHostname` | The same hostname, regardless of scheme or port. |
+| `SameDomain` | The same registrable domain, allowing sibling subdomains. |
+| `SameOrigin` | The same scheme, hostname, and effective port. |
+
+The default is `SameHostname`. Non-HTTP(S) candidates are rejected even under `All`.
+
+`CrawlPolicy` supplies the crawler-wide default strategy, optional `max_crawl_depth`, optional `max_requests_per_crawl`, and an `on_skipped` callback. A per-enqueue strategy overrides the policy's relationship setting for that operation, while the depth and request-count limits remain admission controls across the crawl.
+
+Robots enforcement is not present in the current `CrawlPolicy`; the shipped policy surface is limited to those four fields.
+
+## Deduplication is a queue property
+
+The request queue compares `Request::unique_key` values. A URL rediscovered from several pages can pass extraction and filtering several times, but the frontier schedules that logical request only once. `EnqueueLinker` reports the later insertions as `DuplicateUniqueKey`, which makes queue deduplication the stable backbone of cyclic and highly connected crawls.
+
+## HTTP versus DOM extraction
+
+`HttpCrawler` does not parse the response body into a DOM. Its `EnqueueLinker` supports explicit `urls()` and `raw_urls()`; requesting selector-based extraction without an HTML or browser extractor is an error. Parse links in the handler and pass the resulting strings, as the HTTP example does.
+
+`HtmlCrawler` attaches a document-aware extractor. Calling a shortcut with no selector uses the implementation's default link selector, while `.options().selector(...)` selects a specific set of elements before the common filtering pipeline begins.
+
+<include>../../../snippets/examples/http_crawl.mdx</include>
+
+Run the URLs-only example with:
+
+```console
+cargo run -p millipede --example http_crawl
+```
+
+## Next steps
+
+- [Design labeled routes](/docs/guides/router)
+- [Understand queue leases and deduplication](/docs/guides/storages)
+- [Run the HTTP crawl example](/docs/examples/http-crawl)

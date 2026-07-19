@@ -1,0 +1,146 @@
+---
+title: Migrating from Crawlee
+description: Translate Crawlee crawlers, routing, enqueueing, errors, state, and storage into Millipede's typed Rust APIs.
+---
+
+Millipede retains familiar crawler, router, queue, dataset, session, and proxy concepts, but expresses them through Rust's type system. This guide maps a Crawlee JavaScript or TypeScript project to the closest Millipede equivalent.
+
+## Concept map
+
+| Crawlee API | Millipede equivalent |
+|---|---|
+| `CheerioCrawler` | <DocsRs crate="millipede-html">HtmlCrawler</DocsRs> |
+| `PlaywrightCrawler` or `PuppeteerCrawler` | <DocsRs crate="millipede-browser">BrowserCrawler</DocsRs> with <DocsRs crate="millipede-browser-chromiumoxide">ChromiumoxideProvider</DocsRs>; no Playwright provider is available yet. |
+| `BasicCrawler` | <DocsRs crate="millipede-core">BasicCrawler</DocsRs> for no-fetch work, or <DocsRs crate="millipede-http">HttpCrawler</DocsRs> for HTTP fetching. |
+| `router.addHandler(label, handler)` | `Router::<C>::new().route(label, handler)` |
+| `enqueueLinks` | `ctx.enqueue` plus <DocsRs crate="millipede-core">EnqueueLinksOptions</DocsRs> |
+| `Dataset.pushData` | <DocsRs crate="millipede-core">DatasetExt</DocsRs> for typed values, or `Dataset::push_json` for a JSON value. |
+| `KeyValueStore.getValue` and `setValue` | <DocsRs crate="millipede-core">KeyValueStore</DocsRs> plus typed `KeyValueStoreExt::get` and `KeyValueStoreExt::set`. |
+| `useState` | `AutoSaved<T>` |
+| `ProxyConfiguration` | <DocsRs crate="millipede-core">ProxyConfiguration</DocsRs> with round-robin, rotating, or tiered selection. |
+| `SessionPool` | <DocsRs crate="millipede-core">SessionPool</DocsRs> with <DocsRs crate="millipede-core">SessionPoolOptions</DocsRs>. |
+| `log` | `tracing` macros and a tracing subscriber. |
+
+For example, Crawlee accepts an object in one dataset call:
+
+```js
+await Dataset.pushData({ url: request.url, title });
+```
+
+Millipede keeps the write as one asynchronous operation but makes the serializable item type explicit through `DatasetExt::push`, or accepts a JSON value through `push_json`. The umbrella crate's generated README example shows the canonical overall crawler shape:
+
+<include>../../../snippets/readme/millipede.mdx</include>
+
+## Typed errors instead of message dispatch
+
+A Crawlee failure handler often infers policy from a string or an attached status:
+
+```js
+failedRequestHandler: async ({ request }, error) => {
+    if (error.message.includes('blocked') || error.statusCode === 403) {
+        log.warning(`Blocked: ${request.url}`);
+    } else {
+        log.exception(error, `Failed: ${request.url}`);
+    }
+}
+```
+
+Millipede's `failed_request_handler` receives a <DocsRs crate="millipede-core">FailedRequestContext</DocsRs>. Its error is an `Arc<CrawlError>`, so code can match typed variants rather than reconstructing intent from text. `CrawlError` is non-exhaustive, but its current variants distinguish ordinary retry, session rotation, forced retry, permanent failure, crawler-critical failure, missing routes, and detected anti-bot responses.
+
+The handler receives terminal non-critical failures. An ordinary retry arrives after its request budget is exhausted; a session or anti-bot failure arrives after its rotation budget is exhausted; and a permanent error can arrive immediately. Under the default dispatcher, `ForceRetry` keeps being reclaimed regardless of `max_request_retries`, while `Critical` aborts before failed-request dispatch.
+
+Handlers create intent-bearing errors with the `retry`, `session`, `force_retry`, `non_retryable`, and `critical` constructors. `max_request_retries` controls ordinary retries. HTTP, HTML, and browser kind builders can replace their retry-status sets. `Session` and `AntiBotDetected` rotate identity under the separate session-rotation budget.
+
+Typed classification continues to work when messages change and preserves the difference between a block, a transient transport failure, a permanent input error, and a crawler-wide abort.
+
+## Routing translation
+
+Crawlee mutates a router by registering a label handler and a fallback:
+
+```js
+router.addHandler('detail', async ({ request }) => {
+    // Handle detail request.
+});
+router.addDefaultHandler(async ({ request }) => {
+    // Handle unlabeled or unmatched request.
+});
+```
+
+Millipede builds a `Router<C>` by value. `route` matches a label with any HTTP method. `route_method` and `route_methods` additionally constrain the method. Register a method-specific entry before a same-label catch-all because the first matching route wins. `default(handler)` installs the fallback, and `middleware()` appends middleware that runs before the selected handler.
+
+Without a matching route or fallback, routing returns `MissingRoute { label, method }`. Handlers are ordinary asynchronous closures over a typed context; there is no JavaScript `this` binding.
+
+Set a label on every child request that needs labeled routing. Labels are not inherited from the parent. The Crawlee form is:
+
+```js
+await enqueueLinks({ selector: 'a.product', label: 'detail' });
+```
+
+The Millipede translation starts from `ctx.enqueue.options()`, adds the selector and label, and terminates the typed builder with asynchronous `send()`.
+
+## `enqueueLinks` as a typed pipeline
+
+Crawlee combines extraction, filtering, transformation, and queue placement in one options object:
+
+```js
+await enqueueLinks({
+    selector: 'a.product',
+    globs: ['**/products/**'],
+    label: 'detail',
+    strategy: EnqueueStrategy.SameDomain,
+    transformRequestFunction: (request) => ({
+        ...request,
+        userData: { source: 'listing' },
+    }),
+});
+```
+
+Millipede exposes those stages on <DocsRs crate="millipede-core">EnqueueLinksOptions</DocsRs>, followed by `send().await`. The complete per-call setter surface is `urls`, `raw_urls`, `base_url`, `label`, `user_data`, `selector`, `strategy`, `globs`, `regex`, `exclude`, `transform`, `limit`, and `forefront`.
+
+Use `raw_urls` with `base_url` for relative strings. `urls` accepts parsed absolute URL values. <DocsRs crate="millipede-core">EnqueueStrategy</DocsRs> supports `All`, `SameHostname`, `SameDomain`, and `SameOrigin`, and filters extracted and raw links. Absolute values passed through `urls` bypass the relationship-strategy filter, while the other filters and crawl limits still apply.
+
+`send` returns an <DocsRs crate="millipede-core">EnqueueResult</DocsRs> instead of silently hiding every rejected candidate. Its skipped entries identify depth and crawl-count limits, strategy, glob, and regex exclusions, transform rejection, duplicate unique keys, and invalid URLs. `CrawlPolicy::on_skipped` can observe reported rejections across calls. Candidate-level URL deduplication and `limit` truncation are two current exceptions: they omit candidates without producing a skipped entry or invoking that callback.
+
+<DocsRs crate="millipede-core">CrawlPolicy</DocsRs> applies the configured relationship strategy and enforces maximum crawl depth and requests-per-crawl before queue insertion. Robots-file enforcement is not implemented, so Crawlee's `respectRobotsTxtFile` setting has no direct mapping today.
+
+## Persistence translation
+
+Crawlee's `useState` returns a mutable persisted object:
+
+```js
+const state = await useState('STATE', { pages: 0 });
+state.pages += 1;
+```
+
+Millipede uses the standalone typed wrapper `AutoSaved<T>`. Open it with a key-value store, key, and typed default. On HTTP, HTML, and browser contexts, the default store is available through `ctx.storage.key_value_store()`.
+
+`open` reads JSON from the key or uses the supplied default. `get` clones the in-memory value; `set` and `update` change only that in-memory value. Persistence occurs only when `persist().await` serializes the current value and writes it to the store. A key-value-store handle has no `auto_saved` method, and the crawler does not automatically register an `AutoSaved<T>` value for periodic persistence events.
+
+For configuration previously supplied through `CRAWLEE_*` environment variables, consult [configuration](/docs/guides/configuration) for Millipede's compatibility surface instead of assuming every variable maps automatically.
+
+## Storage-directory migration
+
+<DocsRs crate="millipede-storage-fs">FsStorageClient</DocsRs> can open a Crawlee-shaped storage directory, but the compatibility claim is intentionally narrower than complete wire compatibility. Repository tests verify these cases:
+
+- Reading a Crawlee-shaped dataset item and the default key-value-store `INPUT` value.
+- Opening authentic Crawlee request envelopes without Millipede's additional `json` field.
+- Counting pending and handled requests, reconstructing a pending request, resuming and handling it, and deduplicating by `uniqueKey` after reopening.
+
+Those checks support compatible dataset and key-value-store layouts plus opening, resuming, reading, and deduplicating Crawlee queue envelopes. They do not promise byte-for-byte archival compatibility. Millipede-written request files add a `json` field containing the full serialized request, and unmapped Crawlee-private metadata may not round-trip.
+
+Do not run Crawlee and Millipede writers against the same directory. Stop all writers before migration.
+
+`purge_on_start=true` is the default. Pointing a crawler at existing storage without changing it to `false` can delete managed datasets, queues, and key-value records. Back up the directory first, then follow [storage backends](/docs/guides/storage-backends) for the storage-directory migration procedure.
+
+## Not yet in Millipede
+
+- Playwright and Puppeteer providers are unavailable. Browser crawling currently uses `BrowserCrawler<ChromiumoxideProvider>`. Follow the [tracked provider work](https://github.com/satvik007/millipede/blob/main/docs/tracked-issues.md).
+- Robots-file enforcement has no direct mapping yet. Follow the [tracked limitations](https://github.com/satvik007/millipede/blob/main/docs/tracked-issues.md).
+- Infinite-scroll and snapshot-saving helpers are candidates for the future community extras layer, not current core APIs. See the [extras policy](/docs/guides/extras-policy).
+- Apify platform storage is not implemented. Follow the [tracked storage work](https://github.com/satvik007/millipede/blob/main/docs/tracked-issues.md).
+
+## Next steps
+
+- Configure local persistence through [storage backends](/docs/guides/storage-backends).
+- Review environment behavior in [configuration](/docs/guides/configuration).
+- Compare runnable crawler shapes under [examples](/docs/examples/basic).

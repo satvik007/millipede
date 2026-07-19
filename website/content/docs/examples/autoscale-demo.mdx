@@ -1,0 +1,20 @@
+---
+title: AIMD autoscaling
+description: Observe deterministic concurrency convergence under recurring transient HTTP failures.
+---
+
+This example runs 5,000 local requests against a responder that fails the first attempt for roughly every twenty-fifth URL. Its AIMD controller starts at concurrency four, adds capacity after every five successes, multiplies desired concurrency by 0.9 after setbacks, and samples the resulting saw-tooth while enforcing a ceiling of 200.
+
+```console
+cargo run -p millipede --example autoscale_demo
+```
+
+<include>../../../snippets/examples/autoscale_demo.mdx</include>
+
+## Next steps
+
+- [Apply explicit rate limits](/docs/examples/rate-limit)
+- [Exercise the fixed-concurrency engine](/docs/examples/basic-engine)
+- [Tune the autoscaler](/docs/guides/autoscaling)
+
+[View source on GitHub](https://github.com/satvik007/millipede/blob/main/millipede/examples/autoscale_demo.rs)

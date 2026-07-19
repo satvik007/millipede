@@ -1,0 +1,42 @@
+---
+title: Browser crawler
+description: Drive a local Chrome or Chromium browser for pages that require JavaScript execution.
+---
+
+# Browser crawler
+
+Choose `BrowserKind<ChromiumoxideProvider>` when the target must execute JavaScript or your handler needs a live browser page. The Chromiumoxide integration connects Millipede's provider-neutral browser crawler to Chrome or Chromium through the Chrome DevTools Protocol.
+
+Install the opt-in provider feature; it also enables the `browser` feature:
+
+```console
+cargo add millipede --features browser-chromiumoxide
+```
+
+## Find the browser executable
+
+A local Chrome or Chromium installation is required. `find_browser()` checks `MILLIPEDE_CHROME` first, then `CHROME`, then conventional installation paths for the current platform. An explicit path can be applied with `ChromiumLaunchOptions::default().with_executable(...)` before the browser kind is built.
+
+The following doc-tested excerpt comes from the `millipede-browser-chromiumoxide` crate's own README and uses the individual sub-crates directly. To follow it in a new project, add those direct dependencies and Tokio:
+
+```console
+cargo add millipede-browser
+cargo add millipede-browser-chromiumoxide
+cargo add millipede-core
+cargo add millipede-storage-memory
+cargo add tokio --features full
+```
+
+<include>../../../snippets/readme/millipede-browser-chromiumoxide.mdx</include>
+
+Run the complete workspace example with:
+
+```console
+cargo run -p millipede --features browser-chromiumoxide,storage-memory --example browser_crawl
+```
+
+## Next steps
+
+- [Configure browser pools](/docs/guides/browser-pools)
+- [Run the browser crawl example](/docs/examples/browser-crawl)
+- [Use selective browser promotion](/docs/quick-start/smart-crawler)

@@ -1,0 +1,43 @@
+---
+title: HTTP crawler
+description: Fetch response bodies and headers with Millipede's fastest crawler path.
+---
+
+# HTTP crawler
+
+Use `HttpKind` when your handler needs response bytes, status, or headers but does not need a parsed document or JavaScript execution. It is the most direct crawler path for APIs, feeds, downloads, and sites where you want to interpret the body yourself.
+
+The `http` feature is enabled by default, so the umbrella crate needs no additional feature flag:
+
+```console
+cargo add millipede
+```
+
+The `millipede-http` crate provides the <DocsRs crate="millipede-http">HttpCrawler</DocsRs> type and Millipede's reqwest-backed HTTP implementation, including redirects, cookies, sessions, proxies, retry classification, streaming responses, and request coalescing.
+
+The following doc-tested excerpt comes from the `millipede-http` crate's own README and uses the individual sub-crates directly. To follow it in a new project, add those direct dependencies and Tokio:
+
+```console
+cargo add millipede-core
+cargo add millipede-http
+cargo add millipede-storage-memory
+cargo add tokio --features full
+```
+
+<include>../../../snippets/readme/millipede-http.mdx</include>
+
+## What the handler receives
+
+`HttpContext` contains the current `request` and `response`, optional `session` and `proxy_info` values, an `enqueue` helper, a `storage` handle, and a handle back to the crawler. Sessions are enabled by default, so requests can carry a managed crawling identity without extra setup.
+
+## Where results go
+
+Storage support and storage configuration are separate concerns. Although `storage-memory` is a default feature, a crawler still requires a client supplied through `.storage_client(Arc::new(MemoryStorageClient::new()))` or through `Configuration`. Without one, `build()` fails with `CrawlerBuildError::MissingStorage`.
+
+The default `Configuration` enables `purge_on_start`. That is usually convenient for process-local memory storage, but it can erase existing state when a persistent backend is reused. Disable the purge before resuming a crawl backed by `storage-fs`. Handler output written through `ctx.storage.dataset()` lands in the dataset owned by the configured storage client.
+
+## Next steps
+
+- [Run the HTTP crawl example](/docs/examples/http-crawl)
+- [Move to parsed HTML](/docs/quick-start/html-crawler)
+- [Learn about storages](/docs/guides/storages)

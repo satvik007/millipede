@@ -1,0 +1,20 @@
+---
+title: Basic HTML crawl
+description: Extract titles and follow same-hostname links across a small local site.
+---
+
+This example mounts a three-page HTML site in wiremock, extracts each document title with a compiled selector, and prints the URL-title pair. Its enqueue strategy follows the two local links while filtering an `external.invalid` link before fetching, then verifies that exactly the three local paths were requested.
+
+```console
+cargo run -p millipede --example basic
+```
+
+<include>../../../snippets/examples/basic.mdx</include>
+
+## Next steps
+
+- [Crawl a 100-page link graph](/docs/examples/http-crawl)
+- [Store structured book records](/docs/examples/scrape-books)
+- [Learn HTML crawling](/docs/quick-start/html-crawler)
+
+[View source on GitHub](https://github.com/satvik007/millipede/blob/main/millipede/examples/basic.rs)

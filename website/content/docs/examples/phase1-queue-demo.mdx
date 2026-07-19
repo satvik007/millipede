@@ -1,0 +1,26 @@
+---
+title: Phase 1 queue demo
+description: Demonstrate deduplication, forefront priority, leasing, reclaim, and concurrent consumption.
+---
+
+The example submits 60 additions whose unique keys deduplicate to 40 queue entries, then adds one forefront request that the first successful fetch receives. Eight workers consume leases, reclaim `/page/7` once to increment its retry count, mark successful leases handled, and verify all 41 unique requests finish with exactly one observed retry.
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+<Callout type="info">
+  This is a queue-layer phase artifact below the higher-level `HttpCrawler`, `HtmlCrawler`, and `BrowserCrawler` APIs.
+</Callout>
+
+```console
+cargo run -p millipede --example phase1_queue_demo
+```
+
+<include>../../../snippets/examples/phase1_queue_demo.mdx</include>
+
+## Next steps
+
+- [Exercise the crawler engine](/docs/examples/basic-engine)
+- [See queue dedup in an HTTP graph](/docs/examples/http-crawl)
+- [Understand request queues](/docs/guides/storages)
+
+[View source on GitHub](https://github.com/satvik007/millipede/blob/main/millipede/examples/phase1_queue_demo.rs)

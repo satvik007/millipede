@@ -1,0 +1,34 @@
+---
+title: Sitemap crawling
+description: Stream sitemap URLs into Millipede's normal deduplicating request frontier.
+---
+
+Millipede models a sitemap as a lazy request source feeding the same queue used by discovered and explicitly added requests. This preserves one frontier, one deduplication authority, and one crawler lifecycle.
+
+## Build a sitemap request list
+
+`SitemapRequestList` turns one or more sitemap URLs into `Request` values as they are needed. Its builder accepts a single `sitemap_url` or several `sitemap_urls`, the HTTP client used to fetch them, an optional routing `label`, shared `user_data`, and an optional total item `limit`.
+
+The list exposes `fetch_next()`, `is_finished()`, and `processed_count()`. Fetching is lazy: constructing the list does not eagerly materialize the entire sitemap into requests.
+
+For durable progress, configure `persist(kvs, key)` with a key-value store and state key. The list also exposes explicit `persist()`, allowing the application to choose a checkpoint boundary. Without a configured persistent store, request-list progress lasts only as long as the process.
+
+## Put sitemap and queue in tandem
+
+`RequestQueueWithSitemap::new(queue, list)` wraps a normal `RequestQueue` and the sitemap list. It implements the complete request-queue trait. When the crawler asks for work and the queue needs more, the wrapper fills it from the sitemap in batches; `batch_size` controls that transfer.
+
+Pass the wrapper through `CrawlerBuilder::request_queue`. Explicit start requests, links discovered by handlers, and sitemap entries then converge on the same underlying queue.
+
+## Deduplication and restart behavior
+
+The wrapped queue remains authoritative for `unique_key` deduplication. If an explicit request or an extracted link overlaps a sitemap entry, the duplicate is known to the queue rather than scheduled twice.
+
+Queue persistence and sitemap-list progress address different parts of a restart: the queue retains work already admitted to the frontier, while the list's configured key-value checkpoint records its own progress through the sitemap source. Configure both on durable backends when a crawl must resume without rebuilding all progress from process memory.
+
+See <DocsRs crate="millipede-core">SitemapRequestList and RequestQueueWithSitemap</DocsRs> for the complete type contracts.
+
+## Next steps
+
+- [Understand request queue leases](/docs/guides/storages)
+- [Select a durable backend](/docs/guides/storage-backends)
+- [Configure storage safely](/docs/guides/configuration)

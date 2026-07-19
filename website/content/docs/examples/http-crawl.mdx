@@ -1,0 +1,20 @@
+---
+title: HTTP crawl
+description: Fan out through a deduplicated 100-page mock-site queue with concurrent HTTP workers.
+---
+
+This crawler builds a 100-page local mock site whose links form a binary tree, then fetches it with eight-way concurrency and sessions enabled by default. The handler performs URLs-only extraction and passes raw URLs to `EnqueueLinker`; queue deduplication allows the graph to fan out while ensuring every page is crawled exactly once.
+
+```console
+cargo run -p millipede --example http_crawl
+```
+
+<include>../../../snippets/examples/http_crawl.mdx</include>
+
+## Next steps
+
+- [Add DOM-aware extraction](/docs/examples/basic)
+- [Explore queue leasing directly](/docs/examples/phase1-queue-demo)
+- [Understand request queues](/docs/guides/storages)
+
+[View source on GitHub](https://github.com/satvik007/millipede/blob/main/millipede/examples/http_crawl.rs)

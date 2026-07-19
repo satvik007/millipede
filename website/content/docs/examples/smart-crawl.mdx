@@ -1,0 +1,26 @@
+---
+title: Smart crawl
+description: Keep static documents on HTTP and promote only a JavaScript shell to Chromium.
+---
+
+This local four-page crawl uses a visible-text threshold to leave the content-rich home and two static pages on the fast HTML path. The sparse `/app` shell alone is promoted to Chromium, where the handler waits for `#ready` and reads its JavaScript-rendered heading; non-sticky promotion prevents that decision from automatically spreading to other requests.
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+<Callout type="info">
+  A local Chrome or Chromium installation is required. Set `MILLIPEDE_CHROME` to the browser executable to override automatic discovery.
+</Callout>
+
+```console
+cargo run -p millipede --features browser-chromiumoxide,html,storage-memory --example smart_crawl
+```
+
+<include>../../../snippets/examples/smart_crawl.mdx</include>
+
+## Next steps
+
+- [Run every page through Chromium](/docs/examples/browser-crawl)
+- [Start with HTML crawling](/docs/examples/basic)
+- [Understand smart promotion](/docs/quick-start/smart-crawler)
+
+[View source on GitHub](https://github.com/satvik007/millipede/blob/main/millipede/examples/smart_crawl.rs)

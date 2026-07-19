@@ -1,0 +1,37 @@
+---
+title: Fingerprinting
+description: Generate deterministic browser-like header profiles for HTTP sessions and browser hooks, with explicit limits.
+---
+
+Millipede fingerprinting provides deterministic header and browser-context consistency. A stable seed—normally a session token—selects one curated browser profile containing a user agent and ordered `Accept-*` and `Sec-Ch-Ua-*` companion headers. Reusing the same seed produces the same profile, including across freshly created generator instances.
+
+<include>../../../snippets/readme/millipede-fingerprint.mdx</include>
+
+## HTTP session integration
+
+Enable generated HTTP profiles with `HttpKindBuilder::header_generator(true)`. The HTTP builder installs its default Millipede user agent before generated headers are applied, and the generator only fills headers that are absent.
+
+That precedence is important: headers supplied by the caller are preserved. Generated companion headers fill gaps, but a generated user agent does not replace the builder's already-present default user agent. The session token supplies the stable seed that keeps the selected companion profile consistent across the session's requests.
+
+## Browser-hook integration
+
+For browser pages, add a <DocsRs crate="millipede-fingerprint">BrowserFingerprintGenerator</DocsRs> to `BrowserHooks::defaults()` with `with_fingerprint(...)`, then install those hooks on the browser kind builder. Starting from `BrowserHooks::defaults()` preserves the standard bidirectional cookie synchronization while adding fingerprint headers as a post-page-create hook.
+
+The browser hook derives its seed from the attached session ID. If a page has no session, it uses the stable `anonymous` seed. It sends the generated user agent and companion headers through the provider-neutral page header interface.
+
+## Limitations
+
+This feature is a consistency layer, not complete browser impersonation.
+
+- It does not spoof JavaScript-visible `navigator`, canvas, or WebGL properties.
+- It does not spoof JA3, JA4, or other TLS fingerprints.
+
+TLS impersonation would require a different HTTP client backend. The current crate makes no JavaScript-visible or TLS fingerprint-spoofing claim.
+
+The [fingerprint crawl example](/docs/examples/fingerprint-crawl) combines deterministic headers with anti-bot recovery, normalized error statistics, and body snapshots against an offline client. Run it with `cargo run -p millipede --features http,fingerprint,storage-memory --example fingerprint_crawl`.
+
+## Next steps
+
+- See [fingerprint crawl](/docs/examples/fingerprint-crawl) for deterministic generation and failure snapshots.
+- Reuse the seed and cookie identity described in [sessions and proxies](/docs/guides/sessions-and-proxies).
+

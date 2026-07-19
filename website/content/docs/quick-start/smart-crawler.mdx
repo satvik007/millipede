@@ -1,0 +1,26 @@
+---
+title: Smart crawler
+description: Keep ordinary pages on HTTP and promote browser-only responses to Chromium.
+---
+
+# Smart crawler
+
+`SmartKind<ChromiumoxideProvider>` begins on the HTTP-and-HTML path. Its promotion detector examines the response and sends flagged pages—such as a JavaScript shell or another browser-only response—to a real Chromium browser. This preserves the lower cost of HTTP for contentful documents while still handling the pages that require rendering.
+
+`SmartContext` tells the handler which path completed the request. Its HTTP variant exposes parsed HTML for static pages; its browser variant exposes the live page for browser work such as waiting on a selector or evaluating JavaScript. The example below discovers same-host links through the shared smart context, records which variant handled each URL, keeps the home and static pages on HTTP, and promotes only the application shell.
+
+Enable `browser-chromiumoxide`; it also enables `browser`. The `html` feature is already part of the default feature set and supplies the HTTP-side parsed document used by smart crawling.
+
+<include>../../../snippets/examples/smart_crawl.mdx</include>
+
+Run the complete example with:
+
+```console
+cargo run -p millipede --features browser-chromiumoxide,html,storage-memory --example smart_crawl
+```
+
+## Next steps
+
+- [Run the smart crawl example](/docs/examples/smart-crawl)
+- [Configure browser pools](/docs/guides/browser-pools)
+- [Compare all crawler kinds](/docs/quick-start)

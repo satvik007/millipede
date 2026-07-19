@@ -1,0 +1,25 @@
+---
+title: Phase 0 hello
+description: Confirm the original workspace skeleton and umbrella prelude resolve successfully.
+---
+
+This minimal historical artifact imports the umbrella crate's prelude and prints the package version. It exists to prove that the Phase 0 workspace skeleton builds, before any crawling behavior is involved.
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+<Callout type="info">
+  This is a phase/internals artifact below the higher-level `HttpCrawler`, `HtmlCrawler`, and `BrowserCrawler` APIs.
+</Callout>
+
+```console
+cargo run -p millipede --example phase0_hello
+```
+
+<include>../../../snippets/examples/phase0_hello.mdx</include>
+
+## Next steps
+
+- [Exercise the Phase 1 queue](/docs/examples/phase1-queue-demo)
+- [Run the basic engine](/docs/examples/basic-engine)
+
+[View source on GitHub](https://github.com/satvik007/millipede/blob/main/millipede/examples/phase0_hello.rs)

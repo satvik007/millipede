@@ -1,0 +1,45 @@
+---
+title: Introduction
+description: Build a routed HTML crawler that discovers book pages and saves structured records.
+---
+
+This short course builds one crawler in four stages. It starts with a single HTML request, expands
+into link discovery, separates listing pages from book-detail pages with routing, and finishes by
+persisting a structured book dataset.
+
+The target is [Books to Scrape](https://books.toscrape.com/), an open practice site designed for
+scraping exercises. By the end, the crawler can walk its catalogue, extract each book's title,
+price, availability, and URL, then write those values as dataset rows.
+
+## The four lessons
+
+1. [Your first crawler](/docs/introduction/first-crawler) — assemble an HTML crawler and learn how a request moves through it.
+2. [Crawl all the links](/docs/introduction/crawl-all-links) — grow a bounded, deduplicated frontier without leaving the site.
+3. [Scrape structured data](/docs/introduction/scrape-data) — select book fields and route listing and detail pages to different handlers.
+4. [Save and resume data](/docs/introduction/save-data) — choose a storage backend and preserve crawl state safely.
+
+## Prerequisites
+
+Install Rust 1.85 or newer and create or open a Cargo project. The umbrella quick start used in the
+first lesson also needs Tokio for its async entry point and `serde_json` for the dataset row:
+
+```console
+cargo add millipede
+cargo add tokio --features macros,rt-multi-thread
+cargo add serde_json
+```
+
+The default features are `http`, `html`, and `storage-memory`. File-system persistence is opt-in
+through `storage-fs`; the last two lessons identify the additional feature and direct dependencies
+needed by their embedded examples. Browser support through `browser-chromiumoxide` and request
+fingerprinting through `fingerprint` are also opt-in, but this course does not need them.
+
+> **A polite practice target**
+>
+> The finished example makes a deliberately bounded crawl of the real Books to Scrape site. For
+> offline tests, local mocks, or another approved mirror, set `MILLIPEDE_BOOKS_BASE_URL` to a base
+> URL you control.
+
+## Next steps
+
+Start with [your first crawler](/docs/introduction/first-crawler).

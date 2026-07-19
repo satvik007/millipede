@@ -1,0 +1,20 @@
+---
+title: Rate limiting
+description: Combine per-domain spacing, deterministic jitter, concurrency, and throughput caps.
+---
+
+This offline crawl sends ten URLs to one wiremock server with concurrency two, a 200 ms same-domain delay, and a 600-tasks-per-minute ceiling. A pre-navigation hook derives repeatable jitter of up to 150 ms from each URL, and the example records handler entry times to verify that domain spacing materially extends the total run.
+
+```console
+cargo run -p millipede --example rate_limit
+```
+
+<include>../../../snippets/examples/rate_limit.mdx</include>
+
+## Next steps
+
+- [Watch AIMD autoscaling converge](/docs/examples/autoscale-demo)
+- [Rotate proxies](/docs/examples/proxy-switcher)
+- [Configure concurrency](/docs/guides/autoscaling)
+
+[View source on GitHub](https://github.com/satvik007/millipede/blob/main/millipede/examples/rate_limit.rs)

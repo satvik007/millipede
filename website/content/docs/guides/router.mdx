@@ -1,0 +1,52 @@
+---
+title: Router
+description: Dispatch typed crawler contexts with labels, methods, middleware, and a fallback handler.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+A crawler accepts one request handler. `Router<C>` turns that single boundary into several application paths without erasing the concrete context type.
+
+<DocsRs crate="millipede-core">Router and request-handler abstractions</DocsRs>
+
+## Default behavior and labeled work
+
+For a crawl with one behavior, pass an async closure directly to `request_handler`. Use a router when requests need distinct listing, detail, pagination, or API handlers.
+
+`Router::<HtmlContext>::new().route("LABEL", handler)` registers a label with any HTTP method. `route_method` restricts a route to one method, and `route_methods` accepts several. Routes are checked in registration order, so put a method-specific route before a same-label catch-all.
+
+If no route matches, `Router::<C>::default(handler)` runs the fallback. The spelling is deliberate parity with Crawlee's `addDefaultHandler`; `Router` intentionally does not implement Rust's `Default` trait. With no match and no fallback, the router returns `CrawlError::MissingRoute` carrying the request label and method.
+
+Middleware registered with `middleware()` runs before the selected route or fallback.
+
+## Assign labels when enqueueing
+
+A request's label chooses its route. Start requests can be built with a label, and discovered children can receive one through `ctx.enqueue.options().label("LABEL").send()`. A child does not inherit its parent's label; an unlabeled or unmatched child reaches the fallback when one exists.
+
+This makes route selection part of frontier design. A listing handler can enqueue product links as `DETAIL`, while pagination links return to `LIST`, without inspecting URL strings inside one large handler.
+
+## A real multi-route crawler
+
+The Hacker News example routes front pages and item pages separately, enqueues each child with the label for its next handler, and stores typed story and comment records.
+
+<include>../../../snippets/examples/hackernews.mdx</include>
+
+Run it with:
+
+```console
+cargo run -p millipede --example hackernews --all-features
+```
+
+<Callout type="warn">
+  This example contacts live Hacker News politely: it is capped at 30 requests and waits at least 500 milliseconds between same-domain requests. `HACKERNEWS_START_URL` changes the seed, and `HACKERNEWS_MAX_REQUESTS` can lower the cap.
+</Callout>
+
+## Failed requests are not fallback routes
+
+The router fallback handles a successfully constructed context whose label and method matched no registered route. `failed_request_handler` instead receives a `FailedRequestContext` for a terminal crawl failure after retry handling is complete. Keep recovery and reporting there; do not use it as an unlabeled-request handler.
+
+## Next steps
+
+- [Control discovered links and labels](/docs/guides/enqueue-links)
+- [Study the Hacker News example](/docs/examples/hackernews)
+- [Handle terminal failures](/docs/guides/error-handling)

@@ -1,0 +1,77 @@
+---
+title: Storage backends
+description: Choose process-local memory or Crawlee-compatible filesystem persistence safely.
+---
+
+Millipede presents one set of storage traits over two bundled backends. Choose based on whether crawl state must survive the process and whether an existing Crawlee storage directory needs to be opened.
+
+<DocsRs crate="millipede-storage-memory">MemoryStorageClient</DocsRs>
+
+<DocsRs crate="millipede-storage-fs">FsStorageClient</DocsRs>
+
+## Back up before opening Crawlee data
+
+> **Data-loss warning:** `purge_on_start` is enabled by default. Before attaching a crawler to an existing filesystem backend, stop every writer, copy the entire `storage/` directory outside the project, test against that copy, and build with `Configuration::builder().purge_on_start(false)`. Otherwise startup removes managed datasets, request queues, and every default key-value record except `INPUT`.
+
+Constructing an `FsStorageClient` or opening an object does not itself purge the directory; crawler startup performs the configured purge. The explicit `purge_on_start(false)` setting is therefore required when resuming rather than starting clean.
+
+For read-only inspection, open the copied default dataset through `StorageClient::open_dataset` and list its JSON values with `DatasetExt::list`. Keep purging disabled whenever that same client is later attached to a crawler.
+
+## Memory or filesystem
+
+| Backend | Lifetime | Best fit |
+|---|---|---|
+| `MemoryStorageClient` | Process-local; all state disappears at exit. | Tests, examples, and crawls whose frontier and results do not need restart recovery. |
+| `FsStorageClient` | Persistent files below the selected directory. | Durable local crawls and migration from Crawlee's `./storage` layout. |
+
+The default feature set includes the memory implementation, but the crawler does not create a client implicitly. Supply one through `CrawlerBuilder::storage_client` or `Configuration`.
+
+<include>../../../snippets/readme/millipede-storage-fs.mdx</include>
+
+## Crawlee-compatible layout
+
+With `./storage` as the root, the compatible structures are:
+
+```text
+storage/
+├── datasets/
+│   └── default/
+│       ├── 000000001.json
+│       └── 000000002.json
+├── key_value_stores/
+│   └── default/
+│       └── INPUT.json
+└── request_queues/
+    └── default/
+        ├── requests/
+        │   └── REQUEST_ID.json
+        └── state.json
+```
+
+Dataset items are individual pretty-printed JSON values numbered from `000000001.json`. Key-value filename extensions encode their content type: `json`, `txt`, `html`, `xml`, `png`, and `jpeg` have direct mappings, while `bin` and unknown extensions are read as `application/octet-stream`.
+
+Request files are authoritative. `state.json` is a rebuildable Millipede cache. A request envelope exposes `id`, `url`, `uniqueKey`, `method`, `retryCount`, and `orderNo`; a null `orderNo` represents handled work.
+
+## Resume a Crawlee request queue
+
+Point `FsStorageClient::new` at the copied storage root, disable startup purging, and let the crawler open the default queue. Pending envelopes become available again, handled envelopes remain handled, and deduplication continues to use `uniqueKey`.
+
+Leases are process-local. Work that was in flight when the previous process stopped becomes pending on restart, so handlers that produce external side effects should be idempotent.
+
+You can also replace the crawler's queue with `CrawlerBuilder::request_queue`. Storage still supplies the default dataset and key-value store; pair a persistent replacement queue with `purge_on_start(false)` so its backing client is not cleared first.
+
+## Compatibility limits
+
+Millipede can resume authentic Crawlee request envelopes that lack Millipede's `json` extension field. It reconstructs the request from public envelope data, including headers, payload, user data, retry state, and ordering. Millipede-authored envelopes add the complete serialized request in `json` for lossless round trips of Millipede-only state.
+
+Datasets and key-value stores use compatible layouts, but Crawlee request metadata beyond the mapped public fields is not preserved byte for byte. Treat a backup as the source archive, not a directory that can be rewritten without information loss.
+
+Concurrent Crawlee and Millipede writers against the same storage directory are unsupported; stop all writers before migrating or resuming.
+
+When startup purging is enabled, Millipede follows Crawlee's `INPUT` convention: `INPUT.<ext>` in the default key-value store is retained while other managed contents are removed.
+
+## Next steps
+
+- [Use the storage APIs](/docs/guides/storages)
+- [Configure storage and startup behavior](/docs/guides/configuration)
+- [Combine a queue with a sitemap](/docs/guides/sitemap-crawling)

@@ -1,0 +1,62 @@
+---
+title: Scrape structured data
+description: Route listing and detail pages, select book fields, and emit typed dataset records.
+---
+
+The frontier now finds pages safely, but not every page has the same job. On Books to Scrape, a
+category or catalogue page contains pagination controls and links to books. A book detail page
+contains the title, price, and availability that belong in one record. Plan selectors separately
+for those two page shapes before writing handler logic.
+
+The `millipede_html::selectors!` macro defines and caches selectors that are known ahead of time.
+That crate-direct path requires `millipede-html` as a direct dependency; enabling the umbrella
+crate's default `html` feature alone does not make the transitive crate name available. Inside a
+handler, `ctx.html.select_first(...)` applies one of those selectors and maps the first matching
+element into a value. This keeps document queries close to the fields they populate and avoids
+repeatedly parsing static selector strings.
+
+Labels connect discovery to dispatch. The listing handler uses
+`ctx.enqueue.options().selector(...).label(...).send()` for book links, assigning a label such as
+`DETAIL`. A <DocsRs crate="millipede-core">Router</DocsRs> then keeps the two page types from
+becoming one large conditional handler. A labeled route is registered with
+`Router::<HtmlContext>::new().route("DETAIL", detail_handler)`. The listing fallback is registered
+with the builder chain
+`Router::<HtmlContext>::new().default(listing_handler).route("DETAIL", detail_handler)`; it is not a
+route named `default`. Unlabeled catalogue requests then reach the listing handler while `DETAIL`
+requests reach the detail handler.
+
+The detail handler builds a typed record struct for each book. Deriving serialization for that
+record lets <DocsRs crate="millipede-core">DatasetExt</DocsRs> turn it into a dataset row while the
+Rust type keeps the expected fields visible in the program.
+
+The finished example combines the selectors, labeled discovery, routing, bounded crawl policy,
+and file-system dataset output:
+
+It is compiled as a workspace example, where its dependencies are already declared. To place the
+same source in an external project, also enable the umbrella crate's `storage-fs` feature and add
+the crate-direct selector and error dependencies (Tokio and `serde_json` come from the course
+prerequisites):
+
+```console
+cargo add millipede --features storage-fs
+cargo add millipede-html anyhow
+```
+
+<include>../../../snippets/examples/scrape_books.mdx</include>
+
+Run it from the repository root:
+
+```console
+cargo run -p millipede --example scrape_books --features storage-fs
+```
+
+It uses the real practice site by default. Set `MILLIPEDE_BOOKS_BASE_URL` to a local mock or an
+approved mirror when testing without the public network. For a larger example that separates
+multiple page shapes and typed records, see the [Hacker News crawler](/docs/examples/hackernews).
+
+The crawler now produces meaningful rows. The final lesson explains where those rows and the rest
+of the crawl state live, and how to keep persistent state from being cleared on restart.
+
+## Next steps
+
+Continue with [save and resume data](/docs/introduction/save-data).

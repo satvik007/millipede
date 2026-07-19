@@ -1,0 +1,37 @@
+---
+title: Extras policy
+description: Decide which community helpers belong in a future extras crate, which belong in core, and how proposals advance.
+---
+
+`millipede-extras` is a proposed future community crate, not a crate that exists today. This policy gives contributors a place to evaluate helper ideas without expanding Millipede's core API prematurely.
+
+## Intended scope
+
+The future crate may host reusable helpers such as infinite scrolling, snapshot saving, enqueueing links by clicking elements, and reusable login flows. A suitable extras helper composes Millipede's public API and does not require access to core internals.
+
+The future crate would be versioned independently from the core crates. During a 0.x series, minor releases could contain breaking changes, and the extras API would not be subject to the core public-API baseline gate.
+
+## Core, extras, and backend boundaries
+
+A proposal belongs in core when it must define fundamental crawler behavior or requires new core trait surface. It does not belong in extras merely to avoid designing that core contract.
+
+Alternate storage, HTTP, browser, and other backend implementations belong in dedicated backend crates. Extras is for public-API composition and reusable policy helpers, not for hiding a new backend behind a utility module.
+
+## Governance
+
+If created, the crate would live under the Millipede organization. A change would require one maintainer's approval, tests, and a documentation example. Its continuous-integration checks would mirror the core repository except for public API diffing.
+
+## Promotion into core
+
+An extras helper could be proposed for core after it demonstrates real demand, keeps a stable API across two extras releases, and has tests that meet the core standard. Promotion would use an RFC-style pull request describing use cases, API design, compatibility impact, and evidence of adoption.
+
+After acceptance, extras would re-export the core implementation for one release before removing its own copy. That transition gives users an explicit migration window while moving the long-term API to core.
+
+## Proposal path today
+
+Because the extras crate does not yet exist, open an issue in the Millipede repository. Describe the helper, the user problem, and how it composes the current public API. Maintainers can then decide whether the idea should wait for the future extras crate, requires a core change, or belongs in a dedicated backend.
+
+## Next steps
+
+- Review current porting gaps in [migrating from Crawlee](/docs/guides/migrating-from-crawlee).
+- Use [browser pools](/docs/guides/browser-pools) and other public APIs as the composition boundary for helper proposals.

@@ -1,0 +1,75 @@
+---
+title: Error handling
+description: Classify crawl failures with typed errors, control retries and session rotation, and inspect terminal failure artifacts.
+---
+
+Request handlers return errors through <DocsRs crate="millipede-core">CrawlError</DocsRs>. The variant communicates retry intent to the engine, while an optional custom retry strategy can refine the decision for non-critical failures.
+
+## Typed crawl errors
+
+`CrawlError` is non-exhaustive, so future releases may add variants. The current set, cross-checked against the guide and the runnable example, is:
+
+| Variant | Default engine behavior |
+|---|---|
+| `Retry(error)` | Retry and count the attempt against `max_request_retries`. |
+| `Session(error)` | Retry with a new session and count against `max_session_rotations`, not the ordinary retry limit. |
+| `ForceRetry(error)` | Retry without observing `max_request_retries`. |
+| `NonRetryable(error)` | Stop retrying and enter the permanent-failure path. |
+| `Critical(error)` | Abort the crawler. |
+| `MissingRoute { label, method }` | Report that no router entry matched both label and HTTP method. |
+| `AntiBotDetected { tech, source }` | Report a recognized anti-bot response and rotate the session on retry. |
+
+Constructor helpers named `retry`, `session`, `force_retry`, `non_retryable`, and `critical` accept values convertible to an `anyhow::Error`. Classification methods such as `is_retryable`, `rotates_session`, `ignores_max_retries`, `is_critical`, and `counts_against_retries` expose the same policy to custom code.
+
+<include>../../../snippets/examples/error_handling.mdx</include>
+
+Run the example with `cargo run -p millipede --example error_handling`.
+
+## Retry strategy and directives
+
+Without a custom <DocsRs crate="millipede-core">RetryStrategy</DocsRs>, the error variant supplies the default retry and session policy. A configured strategy receives an <DocsRs crate="millipede-core">AttemptOutcome</DocsRs> and returns a <DocsRs crate="millipede-core">RetryDirective</DocsRs>. The directive's `should_retry` value can stop a normally retryable error or retry a normally non-retryable error, and the strategy's `max_retries()` supplies the ordinary retry limit.
+
+Two cases bypass that authority: a `Critical` error aborts, and a request marked `no_retry` is not offered to the strategy. `ForceRetry` remains special because it ignores the normal retry maximum.
+
+The engine appends error messages to the request as attempts fail. A request enters the permanent-failure path when its applicable budget is exhausted or when the active default or custom policy decides not to retry.
+
+## HTTP status failures
+
+<DocsRs crate="millipede-http">HttpKindBuilder</DocsRs> has two independent status controls:
+
+- `retry_status_codes(...)` replaces the explicit set of retryable response codes.
+- `retry_server_errors(bool)` enables or disables retry treatment for server-error responses.
+
+Session-status codes are different. They classify a response as an identity failure, retire or rotate the current session, and consume `max_session_rotations`. That budget remains separate from `max_request_retries` so a blocked identity does not spend the transient request-failure allowance.
+
+## Failed-request handler timing
+
+Register `failed_request_handler` on the crawler builder for terminal, isolated request failures. It receives a <DocsRs crate="millipede-core">FailedRequestContext</DocsRs> containing the terminal request and error. Retryable failures reach this callback only after the relevant retry or session-rotation policy stops; permanent errors can reach it immediately.
+
+Use the callback for terminal logging, dead-letter storage, or alerts. A `Critical` error aborts the run instead of being dispatched as an isolated failed request. If the failed-request handler itself returns an error, the engine logs that error.
+
+## Anti-bot detection
+
+An <DocsRs crate="millipede-http">AntiBotDetector</DocsRs> inspects response signals and may identify an anti-bot technology. The default detector uses bounded static response markers for Cloudflare, DataDome, PerimeterX, Kasada, Imperva, and Akamai, and can also report a custom or unknown result.
+
+Enable the built-in detector with `detect_anti_bot_default()`, or install an `Arc<dyn AntiBotDetector>` with `detect_anti_bot(...)`. Before installation, the default detector can be adjusted with an inspection limit and custom markers. A detected challenge becomes `AntiBotDetected { tech, source }`; by default it is retryable and rotates the session.
+
+## Error snapshots
+
+<DocsRs crate="millipede-core">ErrorSnapshotter</DocsRs> stores failure artifacts in a key-value store. For HTTP crawling, `snapshot_errors_on_failure(true)` captures the response body when the request handler fails. An execute-time failure before a handler context exists has no response body to capture.
+
+Snapshot keys are deterministic. The base is `ERROR_SNAPSHOT_` followed by a 16-digit lowercase hexadecimal hash of the request's unique key. Capture appends a suffix; the HTTP handler-failure path uses `.body`.
+
+See [fingerprint crawl](/docs/examples/fingerprint-crawl) for anti-bot recovery, body snapshots, and snapshot loading in action.
+
+## Normalized error statistics and skipped URLs
+
+<DocsRs crate="millipede-core">StatisticsSnapshot</DocsRs> and <DocsRs crate="millipede-core">FinalStatistics</DocsRs> expose `errors` for terminal failures and `retry_errors` for retry attempts. Both group counts in `BTreeMap<String, u64>` values. Millipede normalizes the first error line by masking URLs and UUIDs, collapsing digit runs, and limiting key length, which prevents request-specific values from fragmenting the groups.
+
+Admission failures are observable before navigation. <DocsRs crate="millipede-core">EnqueueResult</DocsRs> returns skipped URLs with reasons for depth and request limits, strategy, glob, or regex exclusion, transform rejection, duplicate unique keys, and invalid URLs. A crawl policy may also observe each reported rejection through `on_skipped`.
+
+## Next steps
+
+- Configure identity recovery in [sessions and proxies](/docs/guides/sessions-and-proxies).
+- Walk through failure artifacts in [fingerprint crawl](/docs/examples/fingerprint-crawl).
+

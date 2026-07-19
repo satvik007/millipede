@@ -1,0 +1,69 @@
+---
+title: Configuration
+description: Resolve crawler defaults, storage, limits, logging, and Crawlee-compatible environment variables.
+---
+
+`Configuration` is the resolved, read-only set of process and storage defaults used by a crawler. Create it with `Configuration::builder()`, set explicit values on `ConfigurationBuilder`, then call `build()` to apply environment fallbacks and validate the result.
+
+See <DocsRs crate="millipede-core">Configuration</DocsRs> for the API contract.
+
+## Storage client placement
+
+A crawler requires a `StorageClient`; enabling a storage feature does not inject one. You can put the client in `Configuration` with `ConfigurationBuilder::storage_client`, or supply it directly through `CrawlerBuilder::storage_client`.
+
+The crawler-builder value takes precedence over the client held by configuration. If neither location contains a client, `build()` returns `CrawlerBuildError::MissingStorage`.
+
+During crawler construction, the selected client is purged when configured, then the supplied request queue is used or the default queue is opened, followed by the default key-value store. The HTTP kind opens its default dataset when `run()` starts the kind, so that dataset-open error surfaces from `run()` rather than `build()`.
+
+## Startup purging
+
+`purge_on_start` defaults to `true`. On the filesystem backend, startup purge removes managed datasets and request queues plus managed key-value records, preserving only `INPUT.<ext>` in the default key-value store. This is convenient for a fresh run but destructive when the directory contains resumable work.
+
+Set `purge_on_start(false)` before reopening persistent crawl state. The [storage backends guide](/docs/guides/storage-backends) gives the backup-first migration procedure.
+
+## Resolution precedence
+
+Each supported value resolves in this order:
+
+1. an explicit `ConfigurationBuilder` setter;
+2. its `CRAWLEE_*` environment variable;
+3. the built-in default, or no value for optional resource limits.
+
+Invalid environment values make `build()` fail instead of being ignored. Builder values bypass the corresponding environment variable.
+
+| Builder field | Environment variable | Environment format | Built-in default |
+|---|---|---|---|
+| `default_dataset_id` | `CRAWLEE_DEFAULT_DATASET_ID` | String | `default` |
+| `default_key_value_store_id` | `CRAWLEE_DEFAULT_KEY_VALUE_STORE_ID` | String | `default` |
+| `default_request_queue_id` | `CRAWLEE_DEFAULT_REQUEST_QUEUE_ID` | String | `default` |
+| `storage_dir` | `CRAWLEE_STORAGE_DIR` | Filesystem path | `./storage` |
+| `max_used_cpu_ratio` | `CRAWLEE_MAX_USED_CPU_RATIO` | Floating-point number | Unset |
+| `available_memory_ratio` | `CRAWLEE_AVAILABLE_MEMORY_RATIO` | Floating-point number | Unset |
+| `memory_bytes` | `CRAWLEE_MEMORY_MBYTES` | Unsigned integer megabytes, converted to bytes | Unset |
+| `persist_state_interval` | `CRAWLEE_PERSIST_STATE_INTERVAL_MILLIS` | Non-zero unsigned integer milliseconds | 60,000 ms |
+| `purge_on_start` | `CRAWLEE_PURGE_ON_START` | `1` or `true`; `0` or `false`, case-insensitive | `true` |
+| `log_level` | `CRAWLEE_LOG_LEVEL` | `off`, `error`, `warn`, `info`, `debug`, or `trace`, case-insensitive | `info` |
+
+These names are deliberate Crawlee compatibility points. They make storage paths and operational settings easier to carry into a Rust migration; see [Migrating from Crawlee](/docs/guides/migrating-from-crawlee) for the wider concept map.
+
+For example, a resumable filesystem run can set its environment before starting the process:
+
+```console
+export CRAWLEE_STORAGE_DIR=./storage
+export CRAWLEE_PURGE_ON_START=false
+export CRAWLEE_PERSIST_STATE_INTERVAL_MILLIS=30000
+```
+
+## Other builder controls
+
+The builder defines identifiers for all three default stores, the storage directory, maximum used CPU ratio, available-memory ratio, an absolute memory limit in bytes, the persistence-event interval, startup purging, log level, and an optional storage client.
+
+The persist interval must be greater than zero. Environment memory is expressed in mebibyte-sized units and checked while converting to bytes. `LogLevel` is a closed set from disabled logging through trace verbosity.
+
+Once the crawler is built, it holds the resolved `Configuration`; change settings by constructing a new configuration and crawler, not by mutating a running one.
+
+## Next steps
+
+- [Choose and migrate storage backends](/docs/guides/storage-backends)
+- [Understand all storage objects](/docs/guides/storages)
+- [Tune sessions and proxies](/docs/guides/sessions-and-proxies)

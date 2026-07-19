@@ -1,0 +1,26 @@
+---
+title: Scrape books
+description: Route category and detail pages into a persistent structured dataset.
+---
+
+This `HtmlCrawler` routes listing pages and labeled detail pages separately: listings enqueue pagination plus product links, while detail handlers extract title, price, availability, and URL into JSON records. It restricts discovery to the same hostname, caps the crawl at 200 requests with concurrency five, purges storage at startup, and writes a Crawlee-compatible dataset beneath `./storage`.
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+<Callout type="warn">
+  This example hits the real `books.toscrape.com` open practice site. Set `MILLIPEDE_BOOKS_BASE_URL` or pass the first CLI argument to override the base URL; it is deliberately excluded from CI's examples job, where a wiremock twin runs in the test suite instead.
+</Callout>
+
+```console
+cargo run -p millipede --example scrape_books --features storage-fs
+```
+
+<include>../../../snippets/examples/scrape_books.mdx</include>
+
+## Next steps
+
+- [Crawl live Hacker News](/docs/examples/hackernews)
+- [Learn dataset storage](/docs/guides/storages)
+- [Migrate Crawlee storage](/docs/guides/storage-backends)
+
+[View source on GitHub](https://github.com/satvik007/millipede/blob/main/millipede/examples/scrape_books.rs)

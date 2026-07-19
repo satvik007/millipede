@@ -1,0 +1,72 @@
+---
+title: Sessions and proxies
+description: Reuse cookies and identity state, rotate blocked sessions, and choose proxies without mixing rotation and retry budgets.
+---
+
+Sessions give requests a reusable crawling identity. A <DocsRs crate="millipede-core">Session</DocsRs> carries cookies, user data, an error score, a usage count, and a stable session ID. Proxy configuration is independent: it decides how a request reaches its target. The HTTP crawler connects the two systems and exposes the checked-out identity as `ctx.session` and the resolved proxy metadata as `ctx.proxy_info`.
+
+## Session lifecycle
+
+A <DocsRs crate="millipede-core">SessionPool</DocsRs> checks out a usable session for each attempt. Asking the pool for a session without an ID selects or creates one. Supplying an existing ID requests sticky reuse; if that session is missing or no longer usable, the pool selects or creates a replacement. A successful checkout increments the session's usage count.
+
+You can retire an identity through the pool or directly through the session. A session also becomes unusable when it expires, reaches its maximum usage count, reaches its error-score threshold, or has already been retired. Checkout removes unusable entries from consideration.
+
+The health methods make that lifecycle explicit:
+
+- `mark_bad()` adds one error point.
+- `mark_good()` subtracts the configured scaled decrement.
+- `is_blocked()` reports whether the error threshold has been reached.
+- `retire()` prevents further use of that identity.
+
+Configure pool size, maximum usage, error thresholds, and the persistence key with <DocsRs crate="millipede-core">SessionPoolOptions</DocsRs> and <DocsRs crate="millipede-core">SessionConfig</DocsRs>.
+
+## Persistence
+
+Session pools can exist before crawler storage is open, so storage attachment is a separate operation. Attach a <DocsRs crate="millipede-core">KeyValueStore</DocsRs>, call `restore().await` to replace in-memory state from its saved representation, and call `persist().await` at an application durability point.
+
+Persisted state includes session IDs, cookies, scores, usage counts, retirement state, and original expiry. If no store is attached, restore and persist succeed without changing storage. Unless overridden, the pool uses `SESSION_POOL_PERSIST_KEY`.
+
+## HTTP integration and separate budgets
+
+Sessions are enabled by default on <DocsRs crate="millipede-http">HttpKindBuilder</DocsRs>. The builder can own a configured pool, share an `Arc<SessionPool>` with another crawler, disable sessions, or replace the response-status set treated as session failures. The usual session-status set can be replaced with `session_status_codes(...)` when a site uses different blocking responses.
+
+Session rotation is not an ordinary request retry. These are two separate budgets:
+
+- `max_session_rotations` limits attempts that replace a blocked or otherwise bad identity.
+- `max_request_retries` limits ordinary retryable request failures.
+
+A response classified as a session error rotates or retires the current identity and consumes the session-rotation budget. It does **not** consume the ordinary request-retry budget. Keeping the budgets separate lets a crawler replace a blocked cookie or IP identity without spending the allowance intended for transient transport and server failures.
+
+## Cookies
+
+Every session owns a shared, authoritative <DocsRs crate="millipede-core">CookieJar</DocsRs>. A cookie records its name, value, domain, path, expiry, secure and HTTP-only flags, host-only state, and optional `SameSite` value. Supported `SameSite` variants are `Strict`, `Lax`, and `None`.
+
+The jar can construct the cookie header for a URL, store response cookies, import and export cookies, report its count, serialize to JSON, restore from JSON, and clear itself. `Session::set_cookies_from_response` stores response cookies in the same jar. This is the state reused when the next request checks out that session.
+
+## Proxy configuration modes
+
+<DocsRs crate="millipede-core">ProxyConfiguration</DocsRs> supports four selection shapes:
+
+- **Static (`round_robin`):** repeatedly cycles through a fixed URL list.
+- **Rotating:** `rotating(urls, strategy)` selects from a URL list with either round-robin or random rotation.
+- **Tiered:** `tiered(tiers)` begins at a lower tier and escalates a target domain after blocking.
+- **Custom:** `custom(resolver)` delegates selection to an asynchronous <DocsRs crate="millipede-core">ProxyResolver</DocsRs>.
+
+`new_url(context).await` returns a selected proxy URL or `None` for a direct request. `new_proxy_info(context).await` returns parsed <DocsRs crate="millipede-core">ProxyInfo</DocsRs>, including tier and session metadata. Build the resolution context with <DocsRs crate="millipede-core">ProxyResolveContext</DocsRs> and optionally add the request, session ID, and attempt number.
+
+For a tiered configuration, `report_blocked(target_url)` escalates that domain unless the failed request was a recovery probe. `report_success(target_url)` accepts a successful lower-tier recovery probe. Both calls are harmless no-ops for non-tiered configurations.
+
+## Buckets and proxy retry routing
+
+<DocsRs crate="millipede-core">ProxyBuckets</DocsRs> associates proxy kinds with configurations. It can hold a default fallback, a media route, and named custom routes. Install a single configuration with `HttpKindBuilder::proxy`, install buckets with `proxy_buckets`, and install a <DocsRs crate="millipede-core">ProxyStrategy</DocsRs> with `proxy_strategy` to select a proxy kind from each route context. When a proxy is selected, its metadata reaches the handler through `ctx.proxy_info`.
+
+The runnable example demonstrates round-robin proxy resolution both directly and across an offline crawl:
+
+<include>../../../snippets/examples/proxy_switcher.mdx</include>
+
+Run it with `cargo run -p millipede --example proxy_switcher`.
+
+## Next steps
+
+- Continue with [fingerprinting](/docs/guides/fingerprinting) to keep headers coherent with a stable session seed.
+- See [error handling](/docs/guides/error-handling) for session failures, anti-bot detection, and rotation limits.

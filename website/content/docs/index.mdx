@@ -1,0 +1,49 @@
+---
+title: Millipede documentation
+description: Build concurrent web crawlers in Rust with HTTP, HTML, browser, and adaptive smart execution.
+---
+
+# Millipede
+
+Millipede is an idiomatic Rust library for crawling and scraping the web. A shared, generic engine handles scheduling, retries, storage, sessions, proxies, and operational limits, while a crawler kind determines how each request is fetched and what typed context reaches your handler. The minimum supported Rust version is 1.85.
+
+Most projects should install the `millipede` umbrella crate. Its default features are `http`, `html`, and `storage-memory`; `storage-fs`, `browser`, `browser-chromiumoxide`, and `fingerprint` are opt-in. Enabling `browser-chromiumoxide` also enables `browser`, so Chromium users need only select the provider feature.
+
+```console
+cargo add millipede
+```
+
+## Four ways to crawl
+
+**HTTP** uses `HttpKind` when the response body, status, and headers are enough. It avoids DOM parsing and browser startup, making it the leanest path for APIs, feeds, files, and custom byte processing.
+
+**HTML** uses `HtmlKind` to add a synchronized parsed document and selector-driven link discovery to the HTTP path. Choose it for server-rendered pages whose useful content is already present in the response.
+
+**Browser** uses `BrowserKind<ChromiumoxideProvider>` to drive Chrome or Chromium. It is intended for pages that require JavaScript execution, browser navigation, or access to a live page.
+
+**Smart** uses `SmartKind<ChromiumoxideProvider>` to try the efficient HTTP-and-HTML path first, then promote responses identified as browser-only to Chromium. It fits mixed sites where most pages are static but a smaller set needs JavaScript.
+
+## A complete starting point
+
+This doc-tested excerpt comes from the umbrella crate's own README. It supplies memory storage explicitly, handles parsed HTML, records a dataset row, discovers same-host links, and reads the final crawl statistics. To run it in a new project after adding `millipede`, also add the two crates used by the example harness:
+
+```console
+cargo add tokio --features full
+cargo add serde_json
+```
+
+<include>../../snippets/readme/millipede.mdx</include>
+
+## Explore the documentation
+
+- [Quick start](/docs/quick-start) — choose a crawler kind and learn the common build-and-run lifecycle.
+- [Introduction](/docs/introduction) — follow the course spine from a first crawl into a structured scraper.
+- [Guides](/docs/guides) — configure storage, sessions, proxies, retries, autoscaling, browsers, and other controls.
+- [Examples](/docs/examples) — find runnable programs organized by use case.
+- [API reference](/docs/api) — jump from Millipede concepts to the relevant crate documentation.
+
+## Next steps
+
+- [Choose a crawler](/docs/quick-start)
+- [Begin the introduction](/docs/introduction)
+- [Browse runnable examples](/docs/examples)

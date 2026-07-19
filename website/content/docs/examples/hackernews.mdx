@@ -1,0 +1,26 @@
+---
+title: Hacker News crawler
+description: Parse live front pages, stories, and nested comments into typed records.
+---
+
+This live `HtmlCrawler` uses labeled routes to store typed story records from front pages and typed comment records from item pages, including comment indentation depth. Front-page handlers follow pagination and enqueue at most three item links per page; after the crawl, the example reads the in-memory dataset to summarize stories, comments, and maximum nesting depth.
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+<Callout type="warn">
+  This example visits live Hacker News politely: it is capped at 30 total requests and waits at least 500 ms between same-domain requests. `HACKERNEWS_START_URL` can retarget the crawl, and `HACKERNEWS_MAX_REQUESTS` can lower the request cap.
+</Callout>
+
+```console
+cargo run -p millipede --example hackernews --all-features
+```
+
+<include>../../../snippets/examples/hackernews.mdx</include>
+
+## Next steps
+
+- [Scrape a structured book catalog](/docs/examples/scrape-books)
+- [Handle crawler failures](/docs/examples/error-handling)
+- [Build routing handlers](/docs/guides/router)
+
+[View source on GitHub](https://github.com/satvik007/millipede/blob/main/millipede/examples/hackernews.rs)

@@ -1,0 +1,106 @@
+---
+title: Autoscaling
+description: Tune fixed or dynamic concurrency, observe load-driven convergence, and apply global and per-domain politeness limits.
+---
+
+## Autoscaling
+
+Millipede uses one dispatch actor. At the beginning of each dispatch pass, it reads the desired concurrency and starts work only while in-flight attempts remain below that target. Retry backoff, host-politeness waits, and global start-budget waits stay in the dispatcher's deferred heap; deferred work does not consume an in-flight slot.
+
+### Fixed and dynamic concurrency
+
+The crawler builder begins with fixed concurrency of 10. Calling `max_concurrency(n)` pins the crawler to `n`. Calling `autoscale_mode(...)` afterward clears that fixed pin while retaining `n` as the dynamic ceiling. Reversing the order matters: a later `max_concurrency` call pins the crawler again.
+
+Fixed concurrency is useful for hard container budgets, paid-per-minute proxy plans, reproducible benchmarks, and debugging runs. A fixed value is normalized to at least one, becomes the desired, minimum, and maximum concurrency, ignores the configured scaling mode, and does not start the snapshotter or system-status loop.
+
+### AIMD convergence
+
+Once dynamic autoscaling is enabled, additive-increase/multiplicative-decrease (AIMD) is the default. Successful attempts extend a streak. After `increase_after_successes` successes, desired concurrency increases by one. A failed or retryable attempt clears the streak and changes the target to `round(desired * decrease_factor)`.
+
+The success threshold is normalized to at least one. A decrease factor must be in `(0, 1]`; an invalid value falls back to `0.5`. Every change is clamped to the normalized minimum and maximum concurrency.
+
+For a live sampler that polls the crawler handle while a mock target fails transiently, see the [autoscale demo](/docs/examples/autoscale-demo). The example is intentionally not embedded here so the convergence walkthrough remains in one place.
+
+### Load-signal mode
+
+In load-signal mode, the pool evaluates registered signals every `autoscale_interval` over `snapshotter.window`.
+
+- If any signal's latest snapshot is overloaded, concurrency falls by `ceil(current * scale_down_step_ratio)`, with a minimum change of one.
+- Otherwise, signals with at least `system_status.min_samples.max(1)` observations contribute their healthy-sample ratios. If the mean reaches `desired_utilization_ratio`, concurrency rises by `ceil(current * scale_up_step_ratio)`, again by at least one.
+- Insufficient history or a healthy mean below the utilization target holds concurrency steady.
+
+Built-in signals cover aggregate system CPU, used-memory ratio, Tokio timer scheduling lag, and downstream client health. `ClientLoadSignal::instrument_storage(storage)` wraps storage so successful operations are recorded as healthy and storage rate-limit errors as overloaded. For another downstream client, obtain `ClientLoadSignal::handle()` and call `record_healthy()` or `record_rate_limited()`. Selecting load-signal mode with no signals emits a warning and falls back to AIMD with a 10-success increase threshold and a `0.5` decrease factor.
+
+| Signal | Observation | Default overload boundary |
+|---|---|---|
+| `cpu` | Aggregate system CPU-used fraction, sampled every second. | `0.95` used ratio. |
+| `memory` | Used memory divided by a configured byte budget, or total system memory when no budget is supplied; sampled every second. | `0.9` used ratio. |
+| `tokio-runtime` | Tokio timer scheduling lag, probed every 250 milliseconds with stable timer APIs. | 50 milliseconds. |
+| `client` | Healthy and rate-limited downstream-client observations. | `1.0` from `overload_threshold()`. |
+
+Each signal decides whether a snapshot is overloaded when it records that snapshot; system status consumes the resulting boolean. The Tokio signal does not require `tokio_unstable`.
+
+### Bounds and controls
+
+The pool defaults and builder behavior expose these important controls:
+
+| Control | Pool default | Meaning |
+|---|---:|---|
+| `fixed_concurrency` | `None` | A value pins desired, minimum, and maximum concurrency and disables scaling. |
+| `min_concurrency` | `1` | Dynamic lower bound, normalized to at least one. |
+| `max_concurrency` | `200` | Dynamic upper bound, normalized to at least the minimum. |
+| `desired_concurrency` | `None` | Initial dynamic target; absent means the minimum, and an explicit value is clamped. |
+| `scale_up_step_ratio` | `0.05` | Proportional load-signal increase, rounded up. |
+| `scale_down_step_ratio` | `0.05` | Proportional load-signal decrease, rounded up. |
+| `desired_utilization_ratio` | `0.9` | Healthy-history threshold for load-signal growth. |
+| `maybe_run_interval` | `500ms` | Missed-wakeup safety tick; zero is rejected. |
+| `autoscale_interval` | `10s` | Time between load-signal decisions. |
+| `snapshotter.window` | `30s` | Recent signal-history window. |
+| `system_status.min_samples` | `0` | Configured history requirement; evaluation still requires at least one sample. |
+| `task_timeout` | `None` | Optional shared deadline across preparation, execution, and handler work for one attempt. |
+
+The task timeout is one attempt-wide deadline, not a fresh timeout for each stage. During handler work, the engine uses the earlier of this deadline and the request-handler timeout. Cleanup and post-success work are outside it.
+
+### Observing and debugging convergence
+
+`Crawler::autoscaler_snapshot()` and `CrawlerHandle::autoscaler_snapshot()` expose desired, minimum, and maximum concurrency plus whether the target is fixed. The handle returns no snapshot after the crawler is gone. When the dispatcher observes a changed target, it emits a debug event on the `millipede::concurrency` tracing target with desired, current, minimum, and maximum values.
+
+Use `RUST_LOG=millipede_core=debug` for crate-wide diagnostics or `RUST_LOG=millipede::concurrency=debug` for the concurrency target. Snapshots and tracing are the shipped observation paths and do not require a metrics exporter.
+
+Common runaway or stalled patterns have direct checks:
+
+| Symptom | Check |
+|---|---|
+| AIMD stays at maximum | Increase the success threshold, lower the ceiling, and confirm failed attempt work returns an error. |
+| Load signals stay at maximum | Inspect signal histories and thresholds; attempt failures do not drive this mode. |
+| AIMD collapses to minimum | Inspect the setback rate and move the decrease factor toward `1.0` for gentler reductions. |
+| Load signals collapse to minimum | Inspect each latest sample; one overloaded latest value can trigger repeated decreases. |
+| AIMD oscillates | Require a longer success streak and use a decrease factor closer to `1.0`. |
+| Load signals never grow | Verify signals exist, have enough retained observations, and meet the healthy-ratio target. |
+| One domain is hammered | Set a nonzero same-domain delay and verify the URLs contain the expected host. |
+| The global start budget is too high | Lower `max_tasks_per_minute`; the cap includes retry starts. |
+
+## Rate limiting & politeness
+
+### Per-domain delay and retry pressure
+
+`same_domain_delay` spaces start reservations independently by URL host. A `429` adds an exponential per-host penalty with a one-second minimum base and a five-minute cap per penalty; a later non-429 HTTP response clears that penalty. A retry error carrying a `Retry-After` duration can extend the same host's next-allowed time.
+
+The HTTP layer accepts `Retry-After` as delta seconds or an HTTP date and caps the trusted parsed duration at ten minutes. An external policy can provide a persistent host floor with `AutoscaledPool::set_domain_delay_floor`.
+
+Politeness-delayed requests are parked by the dispatcher, so they do not occupy concurrency slots. Deferred leases are bounded to `max(max_concurrency, 32)`. Once that buffer is full, the current queue order can still leave later hosts behind a flood from one host.
+
+### Global caps and jitter
+
+`max_tasks_per_minute` creates a global token bucket for actual starts, including retries. Its capacity is at least one, it starts with one token, and it refills at `capacity / 60` tokens per second. Because the dispatcher checks the bucket immediately before starting work, deferred entries do not consume tokens.
+
+Millipede's built-in knobs provide the domain delay and global cap. Random jitter in the example below is implemented in a pre-navigation hook and is example-level policy, not a built-in limiter feature.
+
+<include>../../../snippets/examples/rate_limit.mdx</include>
+
+Run it with `cargo run -p millipede --example rate_limit`.
+
+## Next steps
+
+- Follow AIMD changes in the [autoscale demo](/docs/examples/autoscale-demo).
+- Combine politeness with identity controls in [sessions and proxies](/docs/guides/sessions-and-proxies).

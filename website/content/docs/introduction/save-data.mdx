@@ -1,0 +1,66 @@
+---
+title: Save and resume data
+description: Persist datasets and crawler state safely with Millipede storage backends.
+---
+
+The books crawler has used storage throughout the course. Now it is worth separating the three
+roles behind `ctx.storage`: the dataset holds collected rows, the key-value store holds named
+values, and the request queue owns the crawl frontier and its deduplication state.
+
+## Datasets and key-value state
+
+`ctx.storage.dataset().push(...)` is the typed dataset write used by the book-detail handler. The
+method comes from <DocsRs crate="millipede-core">DatasetExt</DocsRs>, which serializes the supplied
+record and appends it to the default dataset. Datasets suit a growing collection of similarly
+shaped results, such as one row per book.
+
+Key-value stores fit singleton values and configuration instead: a checkpoint, a cursor, or a
+small settings object can live under a stable key. <DocsRs crate="millipede-core">AutoSaved</DocsRs>
+is an `AutoSaved<T>` wrapper backed by a key-value-store entry. It loads a typed value or a supplied
+default, lets the crawler update that state, and can persist it so a later process can resume from
+the same application-level checkpoint. Choose durability points deliberately; updates are written
+when the wrapper is persisted.
+
+## Memory or disk
+
+`MemoryStorageClient` comes from the default `storage-memory` feature. Its datasets, queues, and
+key-value stores live only for the current process, which makes it convenient for examples and
+tests but unsuitable for state that must survive an exit.
+
+`FsStorageClient` requires the opt-in `storage-fs` feature. It persists datasets, key-value stores,
+and request queues beneath a Crawlee-compatible `./storage` layout. This is the backend used by the
+finished books example, and it makes both collected rows and pending frontier state available on
+disk.
+
+> **WARNING — persistent data can be purged at startup**
+>
+> <DocsRs crate="millipede-core">Configuration</DocsRs>`::purge_on_start` defaults to ON. When a
+> crawler starts with `FsStorageClient`, that default purges managed datasets, request queues, and
+> every non-`INPUT` key-value-store record. This is a data-loss hazard if `./storage` contains a
+> crawl you intend to resume.
+>
+> Back up the storage directory first. Then construct the crawler with
+> `Configuration::builder().purge_on_start(false)` when the intent is to continue from existing
+> on-disk state. Do not rely on merely reopening the same directory to preserve it.
+
+The file-system storage README snippet shows the backend's dataset interface and persisted layout:
+
+This is a lower-level, crate-direct example rather than an umbrella-only example. Its
+`millipede_core` and `millipede_storage_fs` paths require the `millipede-core` and
+`millipede-storage-fs` packages as direct dependencies; `serde_json` and `tempfile` are direct
+dependencies too:
+
+```console
+cargo add millipede-core millipede-storage-fs serde_json tempfile
+```
+
+<include>../../../snippets/readme/millipede-storage-fs.mdx</include>
+
+You have now followed one crawler from its first request to a routed, structured dataset, with a
+bounded frontier and an explicit persistence policy.
+
+## Next steps
+
+- Read [Storages](/docs/guides/storages) for the storage interfaces and common operations.
+- Compare [storage backends](/docs/guides/storage-backends) before choosing persistence for a project.
+- Explore more complete programs in [Examples](/docs/examples).

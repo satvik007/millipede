@@ -1,0 +1,20 @@
+---
+title: Fingerprint crawl
+description: Exercise deterministic headers, challenge recovery, error grouping, and snapshots offline.
+---
+
+A custom offline HTTP client verifies that header generation and session tokens are enabled, then returns a challenge body on the first visit to one route and a recovered body after session rotation. The recovered handler deliberately fails non-retryably so the crawler persists its HTML response snapshot; the example then checks one success, one failure, one anti-bot retry, normalized error groups, and stable user agents for the same session token.
+
+```console
+cargo run -p millipede --features http,fingerprint,storage-memory --example fingerprint_crawl
+```
+
+<include>../../../snippets/examples/fingerprint_crawl.mdx</include>
+
+## Next steps
+
+- [Inspect typed error handling](/docs/examples/error-handling)
+- [Rotate crawl proxies](/docs/examples/proxy-switcher)
+- [Configure fingerprinting](/docs/guides/fingerprinting)
+
+[View source on GitHub](https://github.com/satvik007/millipede/blob/main/millipede/examples/fingerprint_crawl.rs)

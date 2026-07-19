@@ -1,0 +1,26 @@
+---
+title: Browser crawl
+description: Drive a local catalog through headless Chromium and store page titles.
+---
+
+This crawler launches Chromium against a local catalog containing a home page, three categories, and six products. Up to three handlers evaluate `document.title`, save URL-title records in an in-memory dataset, and enqueue same-hostname links, while the browser pool permits four open pages per browser.
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+<Callout type="info">
+  A local Chrome or Chromium installation is required. Set `MILLIPEDE_CHROME` to the browser executable to override automatic discovery.
+</Callout>
+
+```console
+cargo run -p millipede --features browser-chromiumoxide,storage-memory --example browser_crawl
+```
+
+<include>../../../snippets/examples/browser_crawl.mdx</include>
+
+## Next steps
+
+- [Promote only JavaScript shells](/docs/examples/smart-crawl)
+- [Compare HTML crawling](/docs/examples/basic)
+- [Configure browser crawling](/docs/guides/browser-pools)
+
+[View source on GitHub](https://github.com/satvik007/millipede/blob/main/millipede/examples/browser_crawl.rs)

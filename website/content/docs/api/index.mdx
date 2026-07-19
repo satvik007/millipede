@@ -1,0 +1,42 @@
+---
+title: API reference
+description: Find rustdoc for every Millipede workspace crate and review the umbrella crate's feature flags.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Use the crate roots below to move from this task-oriented site to the complete Rust API documentation.
+
+<Callout type="info">
+  These docs.rs links will resolve once Millipede 0.1.0 is published to crates.io; the release is not live at the time of writing.
+</Callout>
+
+## Workspace crates
+
+| Crate | Description | Rustdoc |
+| --- | --- | --- |
+| `millipede` | An idiomatic Rust web-crawling library inspired by Crawlee. Umbrella crate re-exporting the Millipede workspace. | [docs.rs](https://docs.rs/millipede) |
+| `millipede-core` | Core primitives for the Millipede web crawler: request model, storage traits, events, errors, configuration. | [docs.rs](https://docs.rs/millipede-core) |
+| `millipede-http` | HttpCrawler for the Millipede web crawler: reqwest-based HTTP fetching. | [docs.rs](https://docs.rs/millipede-http) |
+| `millipede-html` | HtmlCrawler for the Millipede web crawler: HTML parsing via scraper. | [docs.rs](https://docs.rs/millipede-html) |
+| `millipede-browser` | BrowserCrawler core, BrowserProvider trait, and BrowserPool for the Millipede web crawler. | [docs.rs](https://docs.rs/millipede-browser) |
+| `millipede-browser-chromiumoxide` | Chromium CDP browser provider for the Millipede web crawler, via chromiumoxide. | [docs.rs](https://docs.rs/millipede-browser-chromiumoxide) |
+| `millipede-fingerprint` | Browser-like header generation and fingerprint hooks for the Millipede web crawler. | [docs.rs](https://docs.rs/millipede-fingerprint) |
+| `millipede-storage-memory` | In-memory StorageClient implementation for the Millipede web crawler. | [docs.rs](https://docs.rs/millipede-storage-memory) |
+| `millipede-storage-fs` | File-system StorageClient implementation for the Millipede web crawler. | [docs.rs](https://docs.rs/millipede-storage-fs) |
+
+## Feature flags
+
+The core API is always available. The umbrella crate enables HTTP, HTML, and in-memory storage by default; other integrations are opt-in.
+
+| Feature | Enables | Default |
+| --- | --- | :---: |
+| `http` | Reqwest-based HTTP fetching and `HttpCrawler` | Yes |
+| `html` | HTML parsing and `HtmlCrawler` | Yes |
+| `storage-memory` | In-memory datasets, key-value stores, and request queues | Yes |
+| `storage-fs` | File-system-backed storage | No |
+| `browser` | Browser crawler abstractions and smart crawling | No |
+| `browser-chromiumoxide` | The chromiumoxide CDP provider; also enables `browser` | No |
+| `fingerprint` | Browser-like header generation and fingerprint hooks | No |
+
+This site intentionally does not duplicate rustdoc content. It links to docs.rs, which remains the single source of truth for API-level detail.

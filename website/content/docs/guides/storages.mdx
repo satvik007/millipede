@@ -1,0 +1,54 @@
+---
+title: Storages
+description: Use Millipede request queues, datasets, key-value stores, and typed saved state.
+---
+
+A `StorageClient` opens the three objects a crawl uses: a request queue for pending work, a dataset for output records, and a key-value store for arbitrary durable values. Fetching contexts expose the default objects through `ctx.storage` and can open named datasets or key-value stores through the same backend.
+
+<DocsRs crate="millipede-core">StorageClient, RequestQueue, Dataset, KeyValueStore, and AutoSaved</DocsRs>
+
+## Request queues
+
+`RequestQueue` is both the crawl frontier and its deduplication authority. `add` inserts one `Request` with `AddOptions`; its `QueueOpInfo` reports whether that work was already present or already handled. `add_batch` accepts several request sources and returns a `BatchAddHandle`: inspect work accepted synchronously through `added`, then await `wait()` for the complete `AddRequestsBatchedResult`.
+
+Deduplication uses the request's `unique_key`, so repeatedly adding the same logical work does not schedule another crawl.
+
+Workers temporarily own work through a `Lease` returned by `fetch_next()`. A lease contains the request, a lease ID, and an expiry deadline. Finish exactly one of these paths:
+
+- `mark_handled(lease)` records success;
+- `reclaim(lease, options)` returns work to the queue and increments its retry count by default;
+- `abandon(lease)` returns work without incrementing the retry count.
+
+`renew()` extends an active lease without consuming it. `is_empty()`, `is_finished()`, `handled_count()`, and `pending_count()` expose frontier state; use `is_finished()` when leased work must count as unfinished.
+
+See the [phase 1 queue demo](/docs/examples/phase1-queue-demo) for a compiled walkthrough of the lease mechanics.
+
+## Datasets
+
+`Dataset` is an append-oriented sequence of JSON values. Use `push_json` and `push_json_batch` for `serde_json::Value` data, or import `DatasetExt` for typed `push` and `push_batch` operations on serializable values.
+
+Listing accepts `ListOptions` with an offset, optional limit, and descending-order flag. The typed extension returns a `Page<T>` containing deserialized items plus total, offset, and limit metadata. Both raw and typed streams are available for incremental reads. A dataset can export all records to JSON or CSV and return backend information through `info()`.
+
+The default dataset is available as `ctx.storage.dataset()`. `ctx.storage.dataset_named("archive")` opens another dataset through the configured client.
+
+## Key-value stores
+
+`KeyValueStore` works with bytes and content types through `get_bytes` and `set_bytes`; it can also delete values and list keys. `KeyValueStoreExt` adds typed JSON `get` and `set` helpers.
+
+Use `ctx.storage.key_value_store()` for the default store and `ctx.storage.kvs_named("cache")` for a named one. Names isolate logical stores while keeping them under the same backend.
+
+## Saved state
+
+`AutoSaved<T>` pairs a typed in-memory value with one key-value-store key. `open()` restores the stored JSON value or uses the supplied default. `get()` clones the current value, `set()` replaces it, and `update()` mutates it through a synchronous closure.
+
+Despite its name, `set()` and `update()` change memory only. Call `persist()` at explicit durability points; the wrapper does not subscribe itself to crawler persistence events.
+
+## In-memory example
+
+<include>../../../snippets/readme/millipede-storage-memory.mdx</include>
+
+## Next steps
+
+- [Choose memory or filesystem storage](/docs/guides/storage-backends)
+- [Feed the queue from a sitemap](/docs/guides/sitemap-crawling)
+- [Configure startup purging](/docs/guides/configuration)

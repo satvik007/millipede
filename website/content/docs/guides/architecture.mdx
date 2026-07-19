@@ -1,0 +1,75 @@
+---
+title: Architecture
+description: How Millipede's generic crawl engine, typed crawler kinds, storage, and operations fit together.
+---
+
+Millipede separates the scheduling machinery that every crawl needs from the transport and document model that differ between HTTP, parsed HTML, and a browser. The result is one engine with typed edges: application handlers know exactly which context they receive, while storage and operational controls remain shared.
+
+## The engine and its kind
+
+`Crawler<K>` owns the queue-driven engine. Its type parameter implements `CrawlerKind`, the lifecycle contract that prepares a request, executes one attempt, creates the kind's handler context, observes the result, performs success work and cleanup, and starts or stops kind-level resources.
+
+This boundary lets a kind specialize fetching without reimplementing concurrency, retries, lease management, events, or statistics. HTTP work uses `HttpContext`, parsed documents use `HtmlContext`, browser navigation uses `BrowserContext`, and smart crawling supplies a `SmartContext` variant describing whether HTTP or Chromium handled that request. A no-fetch `BasicContext` is also available for queue-driven jobs.
+
+## Handlers and routers
+
+The engine calls one `RequestHandler` with the context produced by `K`. A closure is enough for a single behavior; a `Router<C>` is itself a handler and dispatches that same typed context by request label and, when configured, HTTP method. This keeps scheduling outside application logic while allowing a crawl to divide listing, detail, pagination, and other work into named routes.
+
+The failed-request handler is a separate terminal path. It receives request and error information after the relevant retry or session-rotation budget is exhausted; it is not a router fallback and does not replace a missing route.
+
+## Request lifecycle
+
+For each unit of work, the engine:
+
+1. leases the next request from the request queue;
+2. asks the crawler kind to prepare and execute an attempt;
+3. passes the resulting typed context to the handler or router;
+4. marks the lease handled after successful kind and handler completion; or
+5. reclaims retryable work so another attempt can return to the frontier.
+
+The lease prevents two workers from owning the same queued request at once, while reclaiming preserves the frontier entry for another attempt. Queue completion, not an empty moment between requests, determines when a run has drained.
+
+## Storage contracts
+
+Storage is accessed through four object-safe contracts:
+
+- `StorageClient` opens named or default objects and can purge the backend.
+- `RequestQueue` owns frontier ordering, `unique_key` deduplication, and temporary leases.
+- `Dataset` appends JSON records and supports listing, streaming, and export.
+- `KeyValueStore` stores bytes and provides the base for typed JSON helpers and saved state.
+
+Handlers for fetching kinds receive a `StorageHandle` so result writes and newly opened named stores use the same configured client as the crawler. See [Storages](/docs/guides/storages) for the user-facing operations.
+
+## Identity and network paths
+
+Sessions carry a crawling identity across attempts, including cookie state and health. Proxy configuration chooses the network route associated with an attempt, and retry decisions can rotate or retire identity state when a response indicates blocking. These facilities belong to concrete fetching kinds while the generic engine enforces the shared retry and rotation budgets.
+
+## Events and statistics
+
+The crawler's event stream broadcasts control-plane changes such as persistence requests, terminal request events, aborting, and exiting. A separate result stream carries terminal `HandledRequest` snapshots. Live statistics track successes, terminal failures, retries, rates, durations, status codes, retry counts, and grouped errors; `run()` returns their final snapshot as `FinalStatistics`.
+
+## Crate map
+
+| Crate | Responsibility |
+|---|---|
+| <DocsRs crate="millipede">millipede</DocsRs> | Umbrella crate that re-exports the public workspace API behind feature flags. |
+| <DocsRs crate="millipede-core">millipede-core</DocsRs> | Generic crawler, requests, routing, storage traits, events, errors, and configuration. |
+| <DocsRs crate="millipede-http">millipede-http</DocsRs> | Reqwest-backed HTTP fetching and `HttpCrawler`. |
+| <DocsRs crate="millipede-html">millipede-html</DocsRs> | Parsed HTML contexts, selectors, and `HtmlCrawler`. |
+| <DocsRs crate="millipede-browser">millipede-browser</DocsRs> | Browser crawler abstractions, the provider contract, and browser pooling. |
+| <DocsRs crate="millipede-browser-chromiumoxide">millipede-browser-chromiumoxide</DocsRs> | Chromium CDP provider implemented with chromiumoxide. |
+| <DocsRs crate="millipede-fingerprint">millipede-fingerprint</DocsRs> | Browser-like header generation and fingerprint integration hooks. |
+| <DocsRs crate="millipede-storage-memory">millipede-storage-memory</DocsRs> | Process-local implementations of the storage contracts. |
+| <DocsRs crate="millipede-storage-fs">millipede-storage-fs</DocsRs> | Persistent storage using a Crawlee-compatible filesystem layout. |
+
+## Minimal engine example
+
+This core-crate example shows the generic engine boundary with a basic kind and memory-backed queue.
+
+<include>../../../snippets/readme/millipede-core.mdx</include>
+
+## Next steps
+
+- [Route typed contexts](/docs/guides/router)
+- [Follow the enqueue pipeline](/docs/guides/enqueue-links)
+- [Choose a storage backend](/docs/guides/storage-backends)

@@ -1,0 +1,67 @@
+---
+title: Browser pools
+description: Understand provider-neutral browser pooling, page cleanup, lifecycle hooks, Chromium discovery, and smart promotion.
+---
+
+The browser layer separates provider-neutral crawling from a concrete browser process implementation. <DocsRs crate="millipede-browser">BrowserPool</DocsRs> owns browser and page capacity, while a provider crate supplies the native browser lifecycle.
+
+## Providers and erasure
+
+<DocsRs crate="millipede-browser">BrowserProvider</DocsRs> defines three associated types: a provider-native browser handle, a cloneable page adapter implementing the provider-neutral browser-page interface, and provider-specific launch options. A provider launches and closes browsers and creates and closes pages.
+
+The pool remains generic over its provider, but handlers do not receive the provider's native page type. <DocsRs crate="millipede-browser">PageHandle</DocsRs> stores an `Arc<dyn BrowserPage>` and dereferences to that interface. Hooks also operate on `dyn BrowserPage`. This erasure keeps provider generics out of handler and router signatures while preserving provider-specific launch behavior inside `BrowserPool<P>`.
+
+## Pool options
+
+<DocsRs crate="millipede-browser">BrowserPoolOptions</DocsRs> controls browser and page capacity. The options used most often are:
+
+- `max_open_pages_per_browser`, the simultaneous page limit for one browser.
+- `retire_browser_after_page_count`, the total created-page count after which that browser stops accepting new pages.
+- `max_browsers`, an optional limit across live and launching browser processes.
+- `page_acquire_timeout`, covering capacity waits, browser launch, and hook work.
+- provider-specific launch options, a process-level proxy configuration, and lifecycle hooks.
+
+The pool defaults allow 20 open pages per browser and retire a browser after 100 created pages. The crate README demonstrates preparing provider-independent limits and hooks:
+
+<include>../../../snippets/readme/millipede-browser.mdx</include>
+
+## Hooks and launch arguments
+
+<DocsRs crate="millipede-browser">BrowserHooks</DocsRs> has synchronous pre-launch and page-preparation hooks, asynchronous post-create and pre-close page hooks, and a synchronous post-close notification. `BrowserHooks::defaults()` is intentionally different from a plain default: it installs bidirectional session-cookie synchronization.
+
+With those standard hooks, session cookies are copied into a newly created page, extra page headers are applied, and cookies are read back into the session before the page closes. `with_launch_args(...)` adds a pre-launch hook that appends command-line arguments to the launch context in registration order. Providers must apply both the resolved process proxy and those extra launch arguments.
+
+## Page and browser lifecycle
+
+The pool is empty at construction and launches browsers lazily when page acquisition requires one. It reuses a non-retired browser while that browser is under both its open-page limit and its created-page retirement threshold. If no eligible browser exists, the pool launches another when the optional browser cap permits it; otherwise acquisition waits for capacity until its timeout.
+
+Page acquisition prepares page options, asks the provider to create a page, runs post-create hooks, registers the page, and returns a provider-erased handle. Failed or cancelled acquisition rolls back the capacity reservation and closes a page that was already created.
+
+`PageHandle` is cloneable because crawler contexts are cloneable. All clones share one atomic close state. Calling `close().await` is idempotent across the clones and runs pre-close hooks, asks the provider to close the page, updates pool capacity, then sends post-close notifications. Explicit close is preferred. If the final clone is dropped without a successful explicit close, the handle logs a warning and queues background cleanup because Rust drop cannot await asynchronous provider work.
+
+Once a browser reaches its created-page retirement threshold, it accepts no new pages. The pool closes that retired browser after its remaining open pages have closed. `shutdown().await` rejects future page acquisition and closes pooled pages and browsers; repeated shutdown calls are safe.
+
+## Chromiumoxide provider and browser discovery
+
+<DocsRs crate="millipede-browser-chromiumoxide">ChromiumoxideProvider</DocsRs> is the concrete Chrome DevTools Protocol provider. Its <DocsRs crate="millipede-browser-chromiumoxide">ChromiumLaunchOptions</DocsRs> configure the executable, headless mode, extra arguments, profile directory, window size, CDP request timeout, and launch timeout. `ChromiumLaunchOptions::with_executable(...)` selects an explicit binary and bypasses automatic discovery.
+
+Without an explicit executable, <DocsRs crate="millipede-browser-chromiumoxide">find_browser</DocsRs> checks in this order:
+
+1. `MILLIPEDE_CHROME`.
+2. `CHROME`.
+3. Conventional Chrome and Chromium installation paths for the current platform.
+
+An environment-configured path is returned even if it does not exist, after a warning, so launch fails on the requested path instead of silently choosing a different browser. If no configured or conventional binary is found, discovery returns `None`.
+
+The [browser crawl example](/docs/examples/browser-crawl) resolves a binary, passes it through `with_executable`, limits pages per browser, evaluates document titles, and crawls an offline local site.
+
+## Smart HTTP-first promotion
+
+<DocsRs crate="millipede-browser">SmartKind</DocsRs> starts through the HTTP/HTML path and lets a promotion detector decide when browser rendering is needed. In the shipped [smart crawl example](/docs/examples/smart-crawl), `DefaultPromotionDetector` is configured with a minimum visible-text threshold of 120 and sticky promotion disabled. The contentful root and static pages remain on HTTP, while the empty JavaScript application shell at `/app` is promoted and handled as a browser context after its script renders `#ready`.
+
+## Next steps
+
+- Run the [browser crawl example](/docs/examples/browser-crawl) for direct browser crawling.
+- Compare HTTP and promoted requests in the [smart crawl example](/docs/examples/smart-crawl).
+- Add coherent browser headers with [fingerprinting](/docs/guides/fingerprinting).
+

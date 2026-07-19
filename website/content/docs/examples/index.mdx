@@ -1,0 +1,19 @@
+---
+title: Examples
+description: Explore complete, runnable Millipede crawlers for HTTP, HTML, browsers, resilience, and engine internals.
+---
+
+Every example page embeds the real Cargo-compiled source from `millipede/examples/*.rs`. A CI staleness gate keeps each embedded copy synchronized with the compiled file, so the gallery never relies on hand-pasted snippets.
+
+Run an example from the repository root with `cargo run -p millipede --example <name>`. Some examples require feature flags; each page provides its exact command.
+
+Most examples are fully offline and crawl local wiremock servers. The exceptions are **Scrape books**, which visits the real `books.toscrape.com` practice site, and **Hacker News**, which politely visits the live Hacker News site.
+
+**Browser crawl** and **Smart crawl** require a local Chrome or Chromium installation. Browser discovery checks common locations, and the `MILLIPEDE_CHROME` environment variable can point directly to the browser executable.
+
+## Choose an example
+
+- Start with [Basic](/docs/examples/basic) for HTML selection and same-hostname link discovery.
+- Use [HTTP crawl](/docs/examples/http-crawl) to see concurrent queue deduplication at larger scale.
+- Compare [Browser crawl](/docs/examples/browser-crawl) with [Smart crawl](/docs/examples/smart-crawl) for JavaScript-rendered pages.
+- Explore retries, throttling, proxies, autoscaling, and fingerprints in the resilience examples.
