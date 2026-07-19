@@ -6,7 +6,12 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
-publish = false
+readme = "README.md"
+keywords = ["crawler", "http", "reqwest", "scraper"]
+categories = ["web-programming", "asynchronous"]
+
+[package.metadata.docs.rs]
+all-features = true
 
 [lints]
 workspace = true
