@@ -1,0 +1,105 @@
+name: website
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'website/**'
+      - 'millipede/examples/**'
+      - 'millipede/README.md'
+      - 'crates/*/README.md'
+      - 'scripts/sync-snippets.mjs'
+      - '.github/workflows/website.yml'
+  pull_request:
+    paths:
+      - 'website/**'
+      - 'millipede/examples/**'
+      - 'millipede/README.md'
+      - 'crates/*/README.md'
+      - 'scripts/sync-snippets.mjs'
+      - '.github/workflows/website.yml'
+permissions:
+  contents: read
+concurrency:
+  group: website-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+    defaults:
+      run:
+        working-directory: website
+    steps:
+      - uses: actions/checkout@v4
+      # Version comes from website/package.json "packageManager" (pnpm@10.x);
+      # an explicit `version` input here would conflict with that pin.
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: website/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: website/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - name: Snippet staleness check (both directions, never writes)
+        run: node ../scripts/sync-snippets.mjs --check
+      - run: pnpm build
+      - name: Internal link check (blocking)
+        run: pnpm run check:links
+      - name: External link check (non-blocking until 0.1.0 is on crates.io)
+        run: pnpm run check:links:external
+        continue-on-error: true
+
+  # Deployment target per ADR-0008 section 7: GitHub Pages.
+  # Runs only on push to main, after the build/link/snippet gates pass.
+  # Rebuilds with NEXT_PUBLIC_BASE_PATH=/millipede because the gate build
+  # above exports with an empty basePath.
+  deploy-pages:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    # Never cancel an in-flight Pages deployment; queue instead.
+    concurrency:
+      group: website-deploy-pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+    defaults:
+      run:
+        working-directory: website
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: website/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: website/pnpm-lock.yaml
+      # enablement: true creates the Pages site on first run so no manual
+      # repository-settings toggle is required before the first deploy.
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+        env:
+          NEXT_PUBLIC_BASE_PATH: /millipede
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: website/out
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
